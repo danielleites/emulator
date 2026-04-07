@@ -23,7 +23,9 @@
     "cap:prepare": "node scripts/cap-prepare.mjs",
     "cap:sync": "npm run cap:prepare && cap sync android",
     "cap:open": "cap open android",
-    "cap:run": "npm run cap:sync && cap run android"
+    "cap:run": "npm run cap:sync && cap run android",
+    "pack:new": "node scripts/pack-new.mjs",
+    "pack:add-symbol": "node scripts/pack-add-symbol.mjs"
   },
   "devDependencies": {
     "@playwright/test": "^1.48.0",
