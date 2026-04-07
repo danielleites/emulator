@@ -1438,6 +1438,18 @@
         var symInfo = SYMBOL_LIST.filter(function (s) { return s.name === symName; })[0];
         if (symInfo) type = symInfo.type;
 
+        // Stage 8.3: Symbol Packs dispatch. See the canonical
+        // comment in www-src/emulator/js/app.js.
+        if (type === 'pack' && typeof window !== 'undefined' && window.PIV_PACKS &&
+            typeof window.PIV_PACKS.loadSymbol === 'function') {
+            return window.PIV_PACKS.loadSymbol(symName).then(function (result) {
+                var def = result ? result.def : null;
+                var template = result ? result.template : '';
+                if (typeof onLoaded === 'function') onLoaded(def, template);
+                return { def: def, template: template };
+            });
+        }
+
         // MM20 virtual symbols — already registered inline, no external files needed
         if (type === 'mm20') {
             var def = window.PIVisualization.symbolCatalog.getSymbol(symName);
@@ -2891,6 +2903,45 @@
             console.log('[EMU] MM20 registered: ' + sym.name);
         });
 
+        // Stage 8.3: Initialize Symbol Packs BEFORE the preload
+        // walk. See www-src/emulator/js/app.js for the full
+        // comment. No-op if PIV_PACKS is absent.
+        function _maybeInitPacks() {
+            if (typeof window === 'undefined' || !window.PIV_PACKS ||
+                typeof window.PIV_PACKS.init !== 'function') {
+                return Promise.resolve();
+            }
+            return window.PIV_PACKS.init().then(function (result) {
+                if (!result) return;
+                if (result.errors && result.errors.length) {
+                    console.warn('[EMU] pack errors:', result.errors);
+                }
+                var packSymbols = window.PIV_PACKS.getSymbols();
+                for (var pi = 0; pi < packSymbols.length; pi++) {
+                    var ps = packSymbols[pi];
+                    var exists = false;
+                    for (var si = 0; si < SYMBOL_LIST.length; si++) {
+                        if (SYMBOL_LIST[si].name === ps.name) { exists = true; break; }
+                    }
+                    if (exists) {
+                        console.warn('[EMU] pack symbol name conflicts with built-in, skipping: ' + ps.name);
+                        continue;
+                    }
+                    SYMBOL_LIST.push({
+                        name: ps.name,
+                        type: 'pack',
+                        category: ps.category,
+                        dataShape: ps.dataShape
+                    });
+                }
+                if (packSymbols.length) {
+                    console.log('[EMU] Registered ' + packSymbols.length + ' pack symbols');
+                }
+            }).catch(function (err) {
+                console.warn('[EMU] pack init failed:', err && err.message);
+            });
+        }
+
         // Pre-load all symbol JS files in background to populate catalog
         var _preloadIdx = 0;
         function _preloadNext() {
@@ -2900,6 +2951,12 @@
                 return;
             }
             var sym = SYMBOL_LIST[_preloadIdx++];
+            // Pack symbols — delegate to PIV_PACKS.loadSymbol
+            if (sym.type === 'pack' && window.PIV_PACKS && window.PIV_PACKS.loadSymbol) {
+                window.PIV_PACKS.loadSymbol(sym.name).catch(function () {})
+                    .then(function () { setTimeout(_preloadNext, 20); });
+                return;
+            }
             // Skip MM20 symbols — already registered above
             if (sym.type === 'mm20') { setTimeout(_preloadNext, 5); return; }
             var base = SYMBOLS_BASE + 'sym-' + sym.name;
@@ -2919,10 +2976,10 @@
             });
         }
 
-        // Load piv20-ultra first
-        _loadScript(SYMBOLS_BASE + 'piv20-ultra.js').then(function () {
-            setTimeout(_preloadNext, 100);
-        });
+        // Load piv20-ultra first, then initialize packs, then preload.
+        _loadScript(SYMBOLS_BASE + 'piv20-ultra.js')
+            .then(_maybeInitPacks)
+            .then(function () { setTimeout(_preloadNext, 100); });
 
         // Default size
         $('#btn-size-m').trigger('click');

@@ -229,6 +229,10 @@ body { background: #0A0F1E; color: #E2EAF4; }
 <!-- Visual fallback renderer for symbols without jQuery widget plugins -->
 <script src="js/emu-visual-fallback.js?v=R300j"></script>
 
+<!-- Stage 8: Symbol Packs registry (must load BEFORE app.js so
+     the _maybeInitPacks call during boot finds window.PIV_PACKS). -->
+<script src="js/emu-packs.js?v=R300"></script>
+
 <!-- Main emulator application -->
 <script src="js/app.js?v=R300u"></script>
 
