@@ -26,7 +26,8 @@
     "cap:run": "npm run cap:sync && cap run android",
     "pack:new": "node scripts/pack-new.mjs",
     "pack:add-symbol": "node scripts/pack-add-symbol.mjs",
-    "pack:dev": "node scripts/pack-dev.mjs"
+    "pack:dev": "node scripts/pack-dev.mjs",
+    "pack:lint": "node scripts/pack-lint.mjs"
   },
   "devDependencies": {
     "@playwright/test": "^1.48.0",
