@@ -51,10 +51,19 @@ const config: PlaywrightTestConfig = {
     },
   ],
 
+  // The smoke suite tests the *raw* `www-src/` tree (the same files
+  // that ship inside the standalone APK), not the Vite-bundled output
+  // under `dist/`. The Vite build is validated separately by the
+  // build job; bundling exposes legacy load-order issues that aren't
+  // relevant to the security/UX scaffolding the smoke tests target.
+  //
+  // python3 ships on every GitHub Actions ubuntu runner and on most
+  // dev machines, and its http.server serves .js with the correct
+  // application/javascript MIME type so ES module imports work.
   webServer: process.env.BASE_URL
     ? undefined
     : {
-        command: `npm run preview -- --port ${PORT} --strictPort`,
+        command: `python3 -m http.server ${PORT} --bind 127.0.0.1 --directory www-src`,
         url: BASE_URL,
         reuseExistingServer: !IS_CI,
         timeout: 60_000,
