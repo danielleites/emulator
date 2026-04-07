@@ -34,6 +34,37 @@ const MM20_ENABLED = true;
 const TOTAL_SYMBOL_COUNT = 569;
 const MM20_SYMBOL_COUNT = 499;
 
+// ─── Stage 7 round 4: SafeDOM helpers for innerHTML migration ───
+// `setSafeInner` routes through window.SafeDOM (loaded as a module
+// from js/security/safe-dom.js) when available so user-controlled
+// data — alert messages, profile names, KPI values, changelog
+// entries — can never inject script tags or event handlers via
+// the mobile shell. The legacy raw-innerHTML path is the
+// unconditional fallback for runtimes that strip the SafeDOM
+// script tag — production entry HTMLs always include it.
+function setSafeInner(el, html) {
+  if (!el) return;
+  if (window.SafeDOM && typeof window.SafeDOM.setSafeHTML === 'function') {
+    window.SafeDOM.setSafeHTML(el, html);
+    return;
+  }
+  // eslint-disable-next-line no-restricted-properties
+  el.innerHTML = html;
+}
+
+// Inline escape — used by template literals that interpolate
+// user data. Mirrors window.SafeDOM.escape but is available
+// synchronously even before the SafeDOM module finishes loading.
+function escapeHtml(str) {
+  if (str === null || str === undefined) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 // ─── State ───────────────────────────────────────────────────
 let currentPage = 'dashboard';
 let currentMode = 'demo'; // demo | simulation | live
@@ -308,7 +339,7 @@ async function checkLiveConnectionHealth() {
     const badge = document.getElementById('mode-badge');
     if (badge && currentMode === 'live') {
       badge.className = 'mode-badge mode-badge--live';
-      badge.innerHTML = '<span class="dot" aria-hidden="true"></span>LIVE';
+      setSafeInner(badge, '<span class="dot" aria-hidden="true"></span>LIVE');
     }
   } catch (err) {
     lastConnectionCheck = { status: 'error', timestamp: Date.now(), error: err.message };
@@ -317,7 +348,7 @@ async function checkLiveConnectionHealth() {
     const badge = document.getElementById('mode-badge');
     if (badge && currentMode === 'live') {
       badge.className = 'mode-badge mode-badge--live mode-badge--degraded';
-      badge.innerHTML = '<span class="dot" aria-hidden="true"></span>LIVE ⚠';
+      setSafeInner(badge, '<span class="dot" aria-hidden="true"></span>LIVE ⚠');
     }
   }
 }
@@ -697,10 +728,10 @@ function showSkeletons() {
   const activityContainer = document.getElementById('recent-activity');
   const symbolGrid = document.getElementById('symbol-grid');
 
-  if (kpiContainer) kpiContainer.innerHTML = Skeletons.kpi();
-  if (qlContainer) qlContainer.innerHTML = Skeletons.quickLaunch();
-  if (activityContainer) activityContainer.innerHTML = Skeletons.activity();
-  if (symbolGrid) symbolGrid.innerHTML = Skeletons.symbolGrid();
+  if (kpiContainer) setSafeInner(kpiContainer, Skeletons.kpi());
+  if (qlContainer) setSafeInner(qlContainer, Skeletons.quickLaunch());
+  if (activityContainer) setSafeInner(activityContainer, Skeletons.activity());
+  if (symbolGrid) setSafeInner(symbolGrid, Skeletons.symbolGrid());
 }
 
 // ─── Pull to Refresh ─────────────────────────────────────────
@@ -873,17 +904,17 @@ function renderOnboardingStep() {
     `;
   }
 
-  content.innerHTML = `
+  setSafeInner(content, `
     <div class="onboarding-illustration">${step.icon}</div>
     <div class="onboarding-title">${step.title}</div>
     <div class="onboarding-desc">${step.desc}</div>
     ${formHTML}
-  `;
+  `);
 
   // Step indicators
-  dots.innerHTML = ONBOARDING_STEPS.map((_, i) =>
+  setSafeInner(dots, ONBOARDING_STEPS.map((_, i) =>
     `<div class="onboarding-dot ${i === onboardingStep ? 'active' : ''} ${i < onboardingStep ? 'completed' : ''}"></div>`
-  ).join('');
+  ).join(''));
 
   // Progress text
   const progressText = `${onboardingStep + 1} / ${ONBOARDING_STEPS.length}`;
@@ -900,7 +931,7 @@ function renderOnboardingStep() {
       btns += `<button class="onboarding-btn-secondary" onclick="skipOnboarding()">${step.secondaryBtn}</button>`;
     }
   }
-  actions.innerHTML = `<div class="onboarding-progress-text">${progressText}</div>${btns}`;
+  setSafeInner(actions, `<div class="onboarding-progress-text">${progressText}</div>${btns}`);
 }
 
 function saveOnboardingProfile() {
@@ -1017,8 +1048,8 @@ function setDataMode(mode, meta = {}) {
   if (!cfg) { console.warn('[Mode] Invalid mode:', mode); return; }
   if (badge) {
     badge.className = 'mode-badge ' + cfg.cls;
-    // cfg.text is from hardcoded modeConfig — safe for innerHTML
-    badge.innerHTML = '<span class="dot"></span> ' + cfg.text;
+    // cfg.text is from hardcoded modeConfig — sanitized as defense in depth
+    setSafeInner(badge, '<span class="dot"></span> ' + cfg.text);
   }
 
   const modeTexts = {
@@ -1085,25 +1116,25 @@ function renderKPIs() {
   if (!container) return;
   const data = KPI_DATA[currentMode] || KPI_DATA.demo;
 
-  container.innerHTML = data.map((kpi, i) => {
+  setSafeInner(container, data.map((kpi, i) => {
     const sparkline = generateSparklineSVG(kpi.history, kpi.color);
     const changeIcon = kpi.up
       ? '<span class="change-icon">▲</span>'
       : '<span class="change-icon">▼</span>';
-    
+
     return `
       <div class="kpi-card kpi-card--${kpi.color} animate-in" style="animation-delay: ${i * 0.06}s" data-testid="kpi-card-${i}">
-        <div class="kpi-label">${kpi.label}</div>
+        <div class="kpi-label">${escapeHtml(kpi.label)}</div>
         <div class="kpi-value">
-          ${kpi.value}<span class="kpi-unit">${kpi.unit}</span>
+          ${escapeHtml(kpi.value)}<span class="kpi-unit">${escapeHtml(kpi.unit)}</span>
         </div>
         <div class="kpi-change ${kpi.up ? 'up' : 'down'}">
-          ${changeIcon} ${kpi.change}
+          ${changeIcon} ${escapeHtml(kpi.change)}
         </div>
         ${sparkline}
       </div>
     `;
-  }).join('');
+  }).join(''));
 }
 
 function renderQuickLaunch() {
@@ -1117,18 +1148,18 @@ function renderQuickLaunch() {
     { id: 'builder', title: 'עורך ויזואלי', desc: 'צור סמלים חדשים עם עורך גרפי', iconClass: 'card-icon--builder', icon: '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>' },
   ];
 
-  container.innerHTML = modes.map((mode, i) => `
+  setSafeInner(container, modes.map((mode, i) => `
     <div class="mode-card-mobile animate-in" style="animation-delay: ${i * 0.04}s" onclick="openMode('${mode.id}')" role="listitem" data-testid="quick-launch-${mode.id}">
       <div class="card-icon ${mode.iconClass}">
         ${mode.icon}
       </div>
       <div class="card-content">
-        <div class="card-title">${mode.title}</div>
-        <div class="card-desc">${mode.desc}</div>
+        <div class="card-title">${escapeHtml(mode.title)}</div>
+        <div class="card-desc">${escapeHtml(mode.desc)}</div>
       </div>
       <svg class="card-arrow" viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M10 4l-4 4 4 4"/></svg>
     </div>
-  `).join('');
+  `).join(''));
 }
 
 function renderRecentActivity() {
@@ -1139,18 +1170,18 @@ function renderRecentActivity() {
   const countEl = document.getElementById('recent-count');
   if (countEl) countEl.textContent = `(${DEMO_ALERTS.length} סה"כ)`;
   
-  container.innerHTML = recent.map((alert, i) => `
-    <div class="alert-item animate-in" style="animation-delay: ${i * 0.04}s" data-severity="${alert.severity}" onclick="showAlertDetail(${alert.id})" role="listitem">
-      <div class="alert-severity alert-severity--${alert.severity}">
+  setSafeInner(container, recent.map((alert, i) => `
+    <div class="alert-item animate-in" style="animation-delay: ${i * 0.04}s" data-severity="${escapeHtml(alert.severity)}" onclick="showAlertDetail(${alert.id})" role="listitem">
+      <div class="alert-severity alert-severity--${escapeHtml(alert.severity)}">
         ${getSeverityIcon(alert.severity)}
       </div>
       <div class="alert-content">
-        <div class="alert-title">${alert.title}</div>
-        <div class="alert-source">${alert.source}</div>
+        <div class="alert-title">${escapeHtml(alert.title)}</div>
+        <div class="alert-source">${escapeHtml(alert.source)}</div>
       </div>
-      <div class="alert-time">${alert.time}</div>
+      <div class="alert-time">${escapeHtml(alert.time)}</div>
     </div>
-  `).join('');
+  `).join(''));
 }
 
 function renderSymbols(filter = '', category = 'all') {
@@ -1176,7 +1207,7 @@ function renderSymbols(filter = '', category = 'all') {
   if (countEl) countEl.textContent = `(${symbols.length})`;
 
   if (symbols.length === 0) {
-    container.innerHTML = `
+    setSafeInner(container, `
       <div class="empty-state" style="grid-column: 1 / -1;">
         <div class="empty-state-icon">
           <svg viewBox="0 0 64 64" fill="none" stroke="var(--text-dim)" stroke-width="1.5" stroke-linecap="round">
@@ -1188,17 +1219,17 @@ function renderSymbols(filter = '', category = 'all') {
         <h3>לא נמצאו סמלים</h3>
         <p>נסה חיפוש אחר או שנה קטגוריה</p>
       </div>
-    `;
+    `);
     return;
   }
 
-  container.innerHTML = symbols.map((sym, i) => `
-    <div class="symbol-card animate-in" style="animation-delay: ${Math.min(i * 0.02, 0.4)}s" onclick="openSymbol('${sym.id}')" role="gridcell" data-testid="symbol-${sym.id}">
+  setSafeInner(container, symbols.map((sym, i) => `
+    <div class="symbol-card animate-in" style="animation-delay: ${Math.min(i * 0.02, 0.4)}s" onclick="openSymbol('${escapeHtml(sym.id)}')" role="gridcell" data-testid="symbol-${escapeHtml(sym.id)}">
       <div class="sym-icon">${sym.icon}</div>
-      <div class="sym-name">${sym.nameHe}</div>
-      <div class="sym-type">${sym.type}</div>
+      <div class="sym-name">${escapeHtml(sym.nameHe)}</div>
+      <div class="sym-type">${escapeHtml(sym.type)}</div>
     </div>
-  `).join('');
+  `).join(''));
 }
 
 function renderCategoryFilters() {
@@ -1226,18 +1257,18 @@ function renderCategoryFilters() {
     MM20: 'MM20',
   };
 
-  container.innerHTML = types.map(type => {
+  setSafeInner(container, types.map(type => {
     const count = type === 'all' ? SYMBOLS.length : SYMBOLS.filter(s => s.type === type).length;
     return `
-      <button class="category-pill ${type === symbolCategory ? 'active' : ''}" 
-              data-category="${type}" 
-              onclick="filterByCategory('${type}')"
+      <button class="category-pill ${type === symbolCategory ? 'active' : ''}"
+              data-category="${escapeHtml(type)}"
+              onclick="filterByCategory('${escapeHtml(type)}')"
               role="tab"
               aria-selected="${type === symbolCategory}">
-        ${typeLabels[type] || type} (${count})
+        ${escapeHtml(typeLabels[type] || type)} (${count})
       </button>
     `;
-  }).join('');
+  }).join(''));
 }
 
 function filterByCategory(category, meta = {}) {
@@ -1264,7 +1295,7 @@ function renderAlertSummary() {
     ok: DEMO_ALERTS.filter(a => a.severity === 'ok').length,
   };
 
-  container.innerHTML = `
+  setSafeInner(container, `
     <div class="alert-stat">
       <div class="alert-stat-value alert-stat-value--critical">${counts.critical}</div>
       <div class="alert-stat-label">קריטי</div>
@@ -1281,7 +1312,7 @@ function renderAlertSummary() {
       <div class="alert-stat-value alert-stat-value--ok">${counts.ok}</div>
       <div class="alert-stat-label">תקין</div>
     </div>
-  `;
+  `);
 }
 
 function renderAlertFilters() {
@@ -1295,16 +1326,16 @@ function renderAlertFilters() {
   };
   const labels = { all: 'הכל', critical: 'קריטי', warning: 'אזהרה', info: 'מידע', ok: 'תקין' };
 
-  container.innerHTML = Object.entries(labels).map(([key, label]) => `
-    <button class="filter-chip ${key === alertFilter ? 'active' : ''}" 
-            data-filter="${key}" 
-            onclick="filterAlerts('${key}')"
+  setSafeInner(container, Object.entries(labels).map(([key, label]) => `
+    <button class="filter-chip ${key === alertFilter ? 'active' : ''}"
+            data-filter="${escapeHtml(key)}"
+            onclick="filterAlerts('${escapeHtml(key)}')"
             role="tab"
             aria-selected="${key === alertFilter}">
-      ${label}
+      ${escapeHtml(label)}
       <span class="chip-count">${counts[key]}</span>
     </button>
-  `).join('');
+  `).join(''));
 }
 
 function filterAlerts(filter) {
@@ -1325,7 +1356,7 @@ function renderAlerts(filter) {
   }
 
   if (alerts.length === 0) {
-    container.innerHTML = `
+    setSafeInner(container, `
       <div class="empty-state">
         <div class="empty-state-icon">
           <svg viewBox="0 0 64 64" fill="none" stroke="var(--success)" stroke-width="1.5" stroke-linecap="round">
@@ -1336,26 +1367,26 @@ function renderAlerts(filter) {
         <h3>אין התראות</h3>
         <p>המערכת תקינה — אין התראות מסוג זה</p>
       </div>
-    `;
+    `);
     return;
   }
 
-  container.innerHTML = alerts.map((alert, i) => `
-    <div class="alert-item animate-in" style="animation-delay: ${i * 0.03}s" data-severity="${alert.severity}" onclick="showAlertDetail(${alert.id})" role="listitem" data-testid="alert-${alert.id}">
-      <div class="alert-severity alert-severity--${alert.severity}">
+  setSafeInner(container, alerts.map((alert, i) => `
+    <div class="alert-item animate-in" style="animation-delay: ${i * 0.03}s" data-severity="${escapeHtml(alert.severity)}" onclick="showAlertDetail(${alert.id})" role="listitem" data-testid="alert-${alert.id}">
+      <div class="alert-severity alert-severity--${escapeHtml(alert.severity)}">
         ${getSeverityIcon(alert.severity)}
       </div>
       <div class="alert-content">
-        <div class="alert-title">${alert.title}</div>
-        <div class="alert-source">${alert.source}</div>
-        <span class="alert-tag">${alert.tag}</span>
+        <div class="alert-title">${escapeHtml(alert.title)}</div>
+        <div class="alert-source">${escapeHtml(alert.source)}</div>
+        <span class="alert-tag">${escapeHtml(alert.tag)}</span>
       </div>
       <div class="alert-meta">
-        <div class="alert-time">${alert.time}</div>
+        <div class="alert-time">${escapeHtml(alert.time)}</div>
         ${alert.acknowledged ? '<span style="font-size:10px; color: var(--success);">✓ אושר</span>' : ''}
       </div>
     </div>
-  `).join('');
+  `).join(''));
 }
 
 function getSeverityIcon(severity) {
@@ -1378,28 +1409,28 @@ function showAlertDetail(alertId) {
   const severityColors = { critical: 'danger', warning: 'warning', info: 'accent', ok: 'success' };
 
   const content = document.getElementById('alert-detail-content');
-  content.innerHTML = `
+  setSafeInner(content, `
     <div class="alert-detail-header">
-      <div class="alert-detail-severity alert-severity--${alert.severity}">
+      <div class="alert-detail-severity alert-severity--${escapeHtml(alert.severity)}">
         ${getSeverityIcon(alert.severity)}
       </div>
-      <div class="alert-detail-title">${alert.title}</div>
+      <div class="alert-detail-title">${escapeHtml(alert.title)}</div>
     </div>
     <div class="alert-detail-field">
       <span class="alert-detail-label">רמת חומרה</span>
-      <span class="alert-detail-value" style="color: var(--${severityColors[alert.severity]})">${severityLabels[alert.severity]}</span>
+      <span class="alert-detail-value" style="color: var(--${escapeHtml(severityColors[alert.severity])})">${escapeHtml(severityLabels[alert.severity])}</span>
     </div>
     <div class="alert-detail-field">
       <span class="alert-detail-label">מקור</span>
-      <span class="alert-detail-value">${alert.source}</span>
+      <span class="alert-detail-value">${escapeHtml(alert.source)}</span>
     </div>
     <div class="alert-detail-field">
       <span class="alert-detail-label">תג PI</span>
-      <span class="alert-detail-value" style="font-family: monospace; font-size: 12px;">${alert.tag}</span>
+      <span class="alert-detail-value" style="font-family: monospace; font-size: 12px;">${escapeHtml(alert.tag)}</span>
     </div>
     <div class="alert-detail-field">
       <span class="alert-detail-label">זמן</span>
-      <span class="alert-detail-value">${alert.time} לפני</span>
+      <span class="alert-detail-value">${escapeHtml(alert.time)} לפני</span>
     </div>
     <div class="alert-detail-field">
       <span class="alert-detail-label">סטטוס</span>
@@ -1409,7 +1440,7 @@ function showAlertDetail(alertId) {
       <button class="alert-dismiss-btn" onclick="closeAlertDetail()">סגור</button>
       ${!alert.acknowledged ? `<button class="alert-ack-btn" onclick="acknowledgeAlert(${alert.id})">אשר התראה</button>` : ''}
     </div>
-  `;
+  `);
 
   document.getElementById('alert-detail').classList.add('visible');
   triggerHaptic('LIGHT');
@@ -1541,28 +1572,30 @@ function renderProfilesList() {
   const container = document.getElementById('profiles-list');
   if (!container) return;
 
-  container.innerHTML = connectionProfiles.map(profile => {
+  setSafeInner(container, connectionProfiles.map(profile => {
     const isActive = profile.id === activeProfileId;
     const typeLabel = { demo: 'הדגמה', live: 'LIVE', simulation: 'סימולציה' }[profile.type] || profile.type;
     const typeColor = { demo: 'accent', live: 'success', simulation: 'purple' }[profile.type] || 'accent';
-    
+    // profile.id, profile.name, profile.url are user-typed in the
+    // onboarding/edit form. Escape every interpolation.
+    const idEsc = escapeHtml(profile.id);
     return `
-      <div class="profile-item ${isActive ? 'profile-item--active' : ''}" onclick="switchProfile('${profile.id}')" role="button" tabindex="0">
-        <div class="profile-indicator" style="background: var(--${typeColor});"></div>
+      <div class="profile-item ${isActive ? 'profile-item--active' : ''}" onclick="switchProfile('${idEsc}')" role="button" tabindex="0">
+        <div class="profile-indicator" style="background: var(--${escapeHtml(typeColor)});"></div>
         <div class="profile-info">
-          <div class="profile-name">${profile.name}</div>
-          <div class="profile-url">${profile.url || typeLabel}</div>
+          <div class="profile-name">${escapeHtml(profile.name)}</div>
+          <div class="profile-url">${escapeHtml(profile.url || typeLabel)}</div>
           ${profile.lastUsed ? `<div class="profile-last-used">שימוש אחרון: ${new Date(profile.lastUsed).toLocaleDateString('he-IL')}</div>` : ''}
         </div>
         <div class="profile-actions-inline">
           ${isActive ? '<span class="profile-active-badge">פעיל</span>' : ''}
-          ${!profile.isDefault ? `<button class="profile-delete-btn" onclick="event.stopPropagation(); deleteProfile('${profile.id}')" aria-label="מחק פרופיל">
+          ${!profile.isDefault ? `<button class="profile-delete-btn" onclick="event.stopPropagation(); deleteProfile('${idEsc}')" aria-label="מחק פרופיל">
             <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
           </button>` : ''}
         </div>
       </div>
     `;
-  }).join('');
+  }).join(''));
 }
 
 async function switchProfile(profileId) {
@@ -1726,7 +1759,9 @@ function showWizardStatus(type, message) {
     error: '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>',
   };
   
-  el.innerHTML = `${icons[type] || ''}<span>${message}</span>`;
+  // Toast `message` is passed by callers (often built from runtime
+  // state); escape it before injection.
+  setSafeInner(el, `${icons[type] || ''}<span>${escapeHtml(message)}</span>`);
 }
 
 // ─── Changelog & Diagnostics ─────────────────────────────────
@@ -1737,18 +1772,18 @@ function showChangelog() {
 
   const container = document.getElementById('changelog-content');
   if (container) {
-    container.innerHTML = CHANGELOG.map(release => `
+    setSafeInner(container, CHANGELOG.map(release => `
       <div class="changelog-release">
         <div class="changelog-version-header">
-          <span class="changelog-version-badge">v${release.version}</span>
-          <span class="changelog-date">${release.date}</span>
+          <span class="changelog-version-badge">v${escapeHtml(release.version)}</span>
+          <span class="changelog-date">${escapeHtml(release.date)}</span>
         </div>
-        <div class="changelog-title">${release.title}</div>
+        <div class="changelog-title">${escapeHtml(release.title)}</div>
         <ul class="changelog-list">
-          ${release.changes.map(c => `<li>${c}</li>`).join('')}
+          ${release.changes.map(c => `<li>${escapeHtml(c)}</li>`).join('')}
         </ul>
       </div>
-    `).join('');
+    `).join(''));
   }
 
   overlay.classList.add('visible');
@@ -1778,30 +1813,30 @@ function showDiagnostics() {
     const cores = navigator.hardwareConcurrency || 'לא זמין';
     const activeProfile = connectionProfiles.find(p => p.id === activeProfileId);
 
-    container.innerHTML = `
+    setSafeInner(container, `
       <div class="diag-section">
         <div class="diag-section-title">אפליקציה</div>
-        <div class="diag-row"><span class="diag-label">גרסה</span><span class="diag-value">PIVISION Mobile v${APP_VERSION}</span></div>
-        <div class="diag-row"><span class="diag-label">PIV Core</span><span class="diag-value">v${PIV_VERSION}</span></div>
-        <div class="diag-row"><span class="diag-label">Build</span><span class="diag-value">${BUILD_DATE}</span></div>
-        <div class="diag-row"><span class="diag-label">מצב</span><span class="diag-value">${currentMode.toUpperCase()}</span></div>
+        <div class="diag-row"><span class="diag-label">גרסה</span><span class="diag-value">PIVISION Mobile v${escapeHtml(APP_VERSION)}</span></div>
+        <div class="diag-row"><span class="diag-label">PIV Core</span><span class="diag-value">v${escapeHtml(PIV_VERSION)}</span></div>
+        <div class="diag-row"><span class="diag-label">Build</span><span class="diag-value">${escapeHtml(BUILD_DATE)}</span></div>
+        <div class="diag-row"><span class="diag-label">מצב</span><span class="diag-value">${escapeHtml(currentMode.toUpperCase())}</span></div>
         <div class="diag-row"><span class="diag-label">Capacitor</span><span class="diag-value">${isCapacitor ? 'פעיל (Native)' : 'לא (Web)'}</span></div>
       </div>
       <div class="diag-section">
         <div class="diag-section-title">חיבור</div>
         <div class="diag-row"><span class="diag-label">רשת</span><span class="diag-value">${networkInfo}</span></div>
-        <div class="diag-row"><span class="diag-label">פרופיל פעיל</span><span class="diag-value">${activeProfile?.name || '—'}</span></div>
-        <div class="diag-row"><span class="diag-label">PI Web API</span><span class="diag-value" style="direction:ltr;text-align:left;">${piWebApiUrl || '—'}</span></div>
+        <div class="diag-row"><span class="diag-label">פרופיל פעיל</span><span class="diag-value">${escapeHtml(activeProfile?.name || '—')}</span></div>
+        <div class="diag-row"><span class="diag-label">PI Web API</span><span class="diag-value" style="direction:ltr;text-align:left;">${escapeHtml(piWebApiUrl || '—')}</span></div>
         <div class="diag-row"><span class="diag-label">פרופילים</span><span class="diag-value">${connectionProfiles.length}</span></div>
         <div class="diag-row"><span class="diag-label">קצב רענון</span><span class="diag-value">${REFRESH_RATES[refreshRateIndex]}s</span></div>
       </div>
       <div class="diag-section">
         <div class="diag-section-title">מכשיר</div>
         <div class="diag-row"><span class="diag-label">מסך</span><span class="diag-value">${screenW}x${screenH} @${dpr}x</span></div>
-        <div class="diag-row"><span class="diag-label">שפה</span><span class="diag-value">${lang}</span></div>
-        <div class="diag-row"><span class="diag-label">פלטפורמה</span><span class="diag-value">${platform}</span></div>
-        <div class="diag-row"><span class="diag-label">זיכרון</span><span class="diag-value">${memory}</span></div>
-        <div class="diag-row"><span class="diag-label">ליבות</span><span class="diag-value">${cores}</span></div>
+        <div class="diag-row"><span class="diag-label">שפה</span><span class="diag-value">${escapeHtml(lang)}</span></div>
+        <div class="diag-row"><span class="diag-label">פלטפורמה</span><span class="diag-value">${escapeHtml(platform)}</span></div>
+        <div class="diag-row"><span class="diag-label">זיכרון</span><span class="diag-value">${escapeHtml(memory)}</span></div>
+        <div class="diag-row"><span class="diag-label">ליבות</span><span class="diag-value">${escapeHtml(cores)}</span></div>
       </div>
       <div class="diag-section">
         <div class="diag-section-title">סמלים</div>
@@ -1809,8 +1844,8 @@ function showDiagnostics() {
         <div class="diag-row"><span class="diag-label">התראות</span><span class="diag-value">${DEMO_ALERTS.length}</span></div>
         <div class="diag-row"><span class="diag-label">ערכת נושא</span><span class="diag-value">${isDarkTheme ? 'כהה' : 'בהיר'}</span></div>
       </div>
-      <div class="diag-ua" style="direction:ltr; text-align:left;">${ua}</div>
-    `;
+      <div class="diag-ua" style="direction:ltr; text-align:left;">${escapeHtml(ua)}</div>
+    `);
   }
 
   overlay.classList.add('visible');
@@ -1981,11 +2016,11 @@ function showToast(message, type = 'info') {
   
   const iconSvg = toast.querySelector('.toast-icon');
   if (type === 'success') {
-    iconSvg.innerHTML = '<path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>';
+    setSafeInner(iconSvg, '<path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>');
   } else if (type === 'error') {
-    iconSvg.innerHTML = '<circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>';
+    setSafeInner(iconSvg, '<circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/>');
   } else {
-    iconSvg.innerHTML = '<circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>';
+    setSafeInner(iconSvg, '<circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/>');
   }
 
   requestAnimationFrame(() => {
