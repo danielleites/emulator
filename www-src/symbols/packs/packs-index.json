@@ -1,0 +1,4 @@
+{
+  "$comment": "List of enabled symbol packs. Each id must match a subdirectory name under www-src/symbols/packs/ that contains a pack.json manifest. Empty array = no packs installed; emulator falls back to its built-in SYMBOL_LIST only.",
+  "packs": []
+}
