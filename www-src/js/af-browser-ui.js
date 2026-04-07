@@ -23,6 +23,24 @@ const AFBrowserUI = (() => {
   let _breadcrumbs = [];
   let _activeTab = 'tree'; // tree | attributes | tags | history | events
 
+  // ─── Stage 7 round 3: SafeDOM helper for innerHTML migration ───
+  // Routes through window.SafeDOM (loaded as a module from
+  // js/security/safe-dom.js) when available so any AF tag name,
+  // attribute value, or event-frame description that contains
+  // markup can never inject script tags or event handlers via
+  // the AF browser panel. The legacy raw-innerHTML path is the
+  // unconditional fallback for runtimes that strip the SafeDOM
+  // script tag — production entry HTMLs always include it.
+  function _setSafeInner(el, html) {
+    if (!el) return;
+    if (window.SafeDOM && typeof window.SafeDOM.setSafeHTML === 'function') {
+      window.SafeDOM.setSafeHTML(el, html);
+      return;
+    }
+    // eslint-disable-next-line no-restricted-properties
+    el.innerHTML = html;
+  }
+
   // ═══════════════════════════════════════════════════════════════
   //  INITIALIZATION
   // ═══════════════════════════════════════════════════════════════
@@ -45,7 +63,7 @@ const AFBrowserUI = (() => {
     _panel = document.createElement('div');
     _panel.id = 'af-browser-panel';
     _panel.className = 'af-panel';
-    _panel.innerHTML = `
+    _setSafeInner(_panel, `
       <div class="af-panel-header">
         <div class="af-panel-title">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -78,7 +96,7 @@ const AFBrowserUI = (() => {
         <div class="af-tab-content" id="af-content-history"></div>
         <div class="af-tab-content" id="af-content-events"></div>
       </div>
-    `;
+    `);
 
     document.body.appendChild(_panel);
 
@@ -152,7 +170,7 @@ const AFBrowserUI = (() => {
     const container = _panel.querySelector('#af-breadcrumbs');
     if (!element) {
       _breadcrumbs = [];
-      container.innerHTML = '<span class="af-bc-item af-bc-root" data-wid="">🏠 IEC-PowerGrid</span>';
+      _setSafeInner(container, '<span class="af-bc-item af-bc-root" data-wid="">🏠 IEC-PowerGrid</span>');
       container.querySelector('.af-bc-root').addEventListener('click', () => {
         _currentElement = null;
         _breadcrumbs = [];
@@ -172,7 +190,7 @@ const AFBrowserUI = (() => {
       html += '<span class="af-bc-item' + (isLast ? ' af-bc-current' : '') + '">' + _escHtml(part) + '</span>';
     });
 
-    container.innerHTML = html;
+    _setSafeInner(container, html);
 
     // Wire root click
     container.querySelector('.af-bc-root').addEventListener('click', () => {
@@ -192,12 +210,12 @@ const AFBrowserUI = (() => {
     if (!_currentElement) {
       // Show root elements (sites)
       const roots = _af.getRootElements();
-      container.innerHTML = `
+      _setSafeInner(container, `
         <div class="af-search-box">
           <input type="text" id="af-tree-search" placeholder="🔍 חיפוש אלמנט..." />
         </div>
         <div class="af-tree-list" id="af-tree-items"></div>
-      `;
+      `);
 
       const list = container.querySelector('#af-tree-items');
       roots.Items.forEach(el => {
@@ -208,14 +226,14 @@ const AFBrowserUI = (() => {
       container.querySelector('#af-tree-search').addEventListener('input', (e) => {
         const q = e.target.value;
         if (q.length < 2) {
-          list.innerHTML = '';
+          list.replaceChildren();
           roots.Items.forEach(el => list.appendChild(_createTreeNode(el, 0)));
           return;
         }
         const results = _af.searchElements(q, 30);
-        list.innerHTML = '';
+        list.replaceChildren();
         if (results.Items.length === 0) {
-          list.innerHTML = '<div class="af-empty">לא נמצאו תוצאות</div>';
+          _setSafeInner(list, '<div class="af-empty">לא נמצאו תוצאות</div>');
         } else {
           results.Items.forEach(el => list.appendChild(_createTreeNode(el, 0, true)));
         }
@@ -227,7 +245,7 @@ const AFBrowserUI = (() => {
       const el = _af.getElement(_currentElement);
       const children = _af.getChildElements(_currentElement);
       
-      container.innerHTML = `
+      _setSafeInner(container, `
         <div class="af-element-header">
           <button class="af-btn-back" id="af-btn-back">← חזור</button>
           <div class="af-element-info">
@@ -244,10 +262,10 @@ const AFBrowserUI = (() => {
           </div>
         </div>
         <div class="af-tree-list" id="af-tree-items"></div>
-      `;
+      `);
 
       if (children.Items.length === 0) {
-        container.querySelector('#af-tree-items').innerHTML = '<div class="af-empty">אין אלמנטים ילדים — עבור ללשונית אטריביוטים</div>';
+        _setSafeInner(container.querySelector('#af-tree-items'), '<div class="af-empty">אין אלמנטים ילדים — עבור ללשונית אטריביוטים</div>');
       } else {
         const list = container.querySelector('#af-tree-items');
         children.Items.forEach(child => {
@@ -289,7 +307,7 @@ const AFBrowserUI = (() => {
     const icon = _getIcon(el);
     const expandable = el.HasChildren;
 
-    node.innerHTML = `
+    _setSafeInner(node, `
       <span class="af-tree-expand">${expandable ? '▸' : '　'}</span>
       <span class="af-tree-icon">${icon}</span>
       <span class="af-tree-name">${_escHtml(el.Name)}</span>
@@ -298,7 +316,7 @@ const AFBrowserUI = (() => {
         ${el.TemplateName ? '<span class="af-badge-sm">' + _escHtml(el.TemplateName) + '</span>' : ''}
         ${el.AttributeCount ? '<span class="af-badge-sm af-badge-num">' + el.AttributeCount + '</span>' : ''}
       </span>
-    `;
+    `);
 
     // Click → navigate into
     node.addEventListener('click', () => {
@@ -326,7 +344,7 @@ const AFBrowserUI = (() => {
     const container = _panel.querySelector('#af-content-attributes');
     
     if (!_currentElement) {
-      container.innerHTML = '<div class="af-empty">בחר אלמנט מהעץ כדי לראות אטריביוטים</div>';
+      _setSafeInner(container, '<div class="af-empty">בחר אלמנט מהעץ כדי לראות אטריביוטים</div>');
       return;
     }
 
@@ -334,7 +352,7 @@ const AFBrowserUI = (() => {
     const attrs = _af.getAttributes(_currentElement);
 
     if (!attrs.Items.length) {
-      container.innerHTML = '<div class="af-empty">אין אטריביוטים לאלמנט זה</div>';
+      _setSafeInner(container, '<div class="af-empty">אין אטריביוטים לאלמנט זה</div>');
       return;
     }
 
@@ -385,7 +403,7 @@ const AFBrowserUI = (() => {
       html += '</div></div>';
     }
 
-    container.innerHTML = html;
+    _setSafeInner(container, html);
 
     // Wire attribute clicks
     container.querySelectorAll('.af-attr-item').forEach(item => {
@@ -420,7 +438,7 @@ const AFBrowserUI = (() => {
     const categories = _af.getTagCategories();
     const catNames = Object.keys(categories);
 
-    container.innerHTML = `
+    _setSafeInner(container, `
       <div class="af-search-box">
         <input type="text" id="af-tag-search" placeholder="🔍 חיפוש תג PI... (שם, אתר, קטגוריה)" />
       </div>
@@ -434,7 +452,7 @@ const AFBrowserUI = (() => {
       <div class="af-tag-stats">
         סה"כ: ${_af.getStats().totalTags} תגים ב-${catNames.length} קטגוריות
       </div>
-    `;
+    `);
 
     // Wire search
     const searchInput = container.querySelector('#af-tag-search');
@@ -466,7 +484,7 @@ const AFBrowserUI = (() => {
       }
       html += '</div>';
     }
-    resultsEl.innerHTML = html;
+    _setSafeInner(resultsEl, html);
     _wireTagClicks(resultsEl);
   }
 
@@ -487,7 +505,7 @@ const AFBrowserUI = (() => {
     }
 
     if (results.Items.length === 0) {
-      resultsEl.innerHTML = '<div class="af-empty">לא נמצאו תגים</div>';
+      _setSafeInner(resultsEl, '<div class="af-empty">לא נמצאו תגים</div>');
       return;
     }
 
@@ -495,7 +513,7 @@ const AFBrowserUI = (() => {
     results.Items.forEach(tag => {
       html += _createTagRow(tag);
     });
-    resultsEl.innerHTML = html;
+    _setSafeInner(resultsEl, html);
     _wireTagClicks(resultsEl);
   }
 
@@ -526,7 +544,7 @@ const AFBrowserUI = (() => {
 
   function _renderHistoryTab() {
     const container = _panel.querySelector('#af-content-history');
-    container.innerHTML = `
+    _setSafeInner(container, `
       <div class="af-history-controls">
         <div class="af-history-tag" id="af-history-tag-name">בחר תג מלשונית חיפוש או אטריביוטים</div>
         <div class="af-history-range">
@@ -556,7 +574,7 @@ const AFBrowserUI = (() => {
       </div>
       <div class="af-history-summary" id="af-history-summary"></div>
       <div class="af-history-table" id="af-history-table"></div>
-    `;
+    `);
 
     container.querySelector('#af-history-load').addEventListener('click', () => {
       const tagWid = container.dataset.currentTag;
@@ -576,9 +594,11 @@ const AFBrowserUI = (() => {
 
     const attr = _af.getAttribute(tagWebId);
     if (attr) {
-      _panel.querySelector('#af-history-tag-name').innerHTML = 
+      _setSafeInner(
+        _panel.querySelector('#af-history-tag-name'),
         '<strong>' + _escHtml(attr.TagName || attr.Name) + '</strong>' +
-        (attr.DefaultUnitsOfMeasure ? ' <span class="af-attr-uom">' + _escHtml(attr.DefaultUnitsOfMeasure) + '</span>' : '');
+        (attr.DefaultUnitsOfMeasure ? ' <span class="af-attr-uom">' + _escHtml(attr.DefaultUnitsOfMeasure) + '</span>' : '')
+      );
     }
 
     _loadHistory(tagWebId);
@@ -605,7 +625,7 @@ const AFBrowserUI = (() => {
     // Show summary
     if (summary.Items.length > 0) {
       const s = summary.Items[0].Value;
-      container.querySelector('#af-history-summary').innerHTML = `
+      _setSafeInner(container.querySelector('#af-history-summary'), `
         <div class="af-summary-grid">
           <div class="af-summary-card">
             <div class="af-summary-label">מינימום</div>
@@ -632,7 +652,7 @@ const AFBrowserUI = (() => {
             <div class="af-summary-value">${s.Count.Value}</div>
           </div>
         </div>
-      `;
+      `);
     }
 
     // Show table (last 50 values)
@@ -649,18 +669,18 @@ const AFBrowserUI = (() => {
       </tr>`;
     });
     tableHtml += '</tbody></table>';
-    container.querySelector('#af-history-table').innerHTML = tableHtml;
+    _setSafeInner(container.querySelector('#af-history-table'), tableHtml);
   }
 
   function _drawMiniChart(items, container) {
     if (!items || items.length === 0) {
-      container.innerHTML = '<div class="af-empty">אין נתונים</div>';
+      _setSafeInner(container, '<div class="af-empty">אין נתונים</div>');
       return;
     }
 
     const numericItems = items.filter(i => typeof i.Value === 'number' && i.Good);
     if (numericItems.length < 2) {
-      container.innerHTML = '<div class="af-empty">אין מספיק נתונים מספריים</div>';
+      _setSafeInner(container, '<div class="af-empty">אין מספיק נתונים מספריים</div>');
       return;
     }
 
@@ -714,7 +734,7 @@ const AFBrowserUI = (() => {
       xLabels += `<text x="${x}" y="${height - 5}" text-anchor="middle" fill="#8899aa" font-size="9">${label}</text>`;
     }
 
-    container.innerHTML = `
+    _setSafeInner(container, `
       <svg width="100%" viewBox="0 0 ${width} ${height}" preserveAspectRatio="xMidYMid meet" xmlns="http://www.w3.org/2000/svg">
         <defs>
           <linearGradient id="af-chart-grad" x1="0" y1="0" x2="0" y2="1">
@@ -727,7 +747,7 @@ const AFBrowserUI = (() => {
         <path d="${areaD}" fill="url(#af-chart-grad)"/>
         <path d="${pathD}" fill="none" stroke="#00b4d8" stroke-width="1.5" stroke-linejoin="round"/>
       </svg>
-    `;
+    `);
   }
 
   // ═══════════════════════════════════════════════════════════════
@@ -737,7 +757,7 @@ const AFBrowserUI = (() => {
   function _renderEvents() {
     const container = _panel.querySelector('#af-content-events');
     
-    container.innerHTML = `
+    _setSafeInner(container, `
       <div class="af-events-controls">
         <select id="af-events-site">
           <option value="">כל האתרים</option>
@@ -752,7 +772,7 @@ const AFBrowserUI = (() => {
         <button class="af-btn" id="af-events-load">🔄 טען</button>
       </div>
       <div class="af-events-list" id="af-events-list"></div>
-    `;
+    `);
 
     const loadEvents = () => {
       const site = container.querySelector('#af-events-site').value;
@@ -761,7 +781,7 @@ const AFBrowserUI = (() => {
       
       const list = container.querySelector('#af-events-list');
       if (events.Items.length === 0) {
-        list.innerHTML = '<div class="af-empty">לא נמצאו אירועים</div>';
+        _setSafeInner(list, '<div class="af-empty">לא נמצאו אירועים</div>');
         return;
       }
 
@@ -791,7 +811,7 @@ const AFBrowserUI = (() => {
         `;
       });
       html += '<div class="af-tag-stats">סה"כ: ' + events.TotalCount + ' אירועים</div>';
-      list.innerHTML = html;
+      _setSafeInner(list, html);
     };
 
     container.querySelector('#af-events-load').addEventListener('click', loadEvents);
@@ -812,7 +832,7 @@ const AFBrowserUI = (() => {
 
     const detail = document.createElement('div');
     detail.className = 'af-detail-overlay';
-    detail.innerHTML = `
+    _setSafeInner(detail, `
       <div class="af-detail-card">
         <div class="af-detail-header">
           <h3>${_escHtml(attr.Name)}</h3>
@@ -829,7 +849,7 @@ const AFBrowserUI = (() => {
           <div class="af-detail-row"><label>קונפיגורציה:</label><span>${attr.IsConfigurationItem ? 'כן' : 'לא'}</span></div>
         </div>
       </div>
-    `;
+    `);
 
     _panel.appendChild(detail);
     detail.querySelector('.af-detail-close').addEventListener('click', () => detail.remove());
@@ -840,7 +860,7 @@ const AFBrowserUI = (() => {
     const stats = _af.getStats();
     const detail = document.createElement('div');
     detail.className = 'af-detail-overlay';
-    detail.innerHTML = `
+    _setSafeInner(detail, `
       <div class="af-detail-card">
         <div class="af-detail-header">
           <h3>סטטיסטיקות AF</h3>
@@ -861,7 +881,7 @@ const AFBrowserUI = (() => {
           <ul>${stats.enumSets.map(e => '<li>' + _escHtml(e) + '</li>').join('')}</ul>
         </div>
       </div>
-    `;
+    `);
 
     _panel.appendChild(detail);
     detail.querySelector('.af-detail-close').addEventListener('click', () => detail.remove());
@@ -1425,14 +1445,14 @@ const AFBrowserUI = (() => {
     const toggleBtn = document.createElement('button');
     toggleBtn.id = 'af-browser-toggle';
     toggleBtn.title = 'דפדפן AF (F9)';
-    toggleBtn.innerHTML = `
+    _setSafeInner(toggleBtn, `
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
         <path d="M12 2L2 7l10 5 10-5-10-5z"/>
         <path d="M2 17l10 5 10-5"/>
         <path d="M2 12l10 5 10-5"/>
       </svg>
       <span class="af-toggle-badge">AF</span>
-    `;
+    `);
     toggleBtn.addEventListener('click', toggle);
     document.body.appendChild(toggleBtn);
   }
