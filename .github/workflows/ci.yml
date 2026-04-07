@@ -31,10 +31,23 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
+          # `cache: 'npm'` requires a package-lock.json. The repo
+          # ships none yet (legacy APK extraction lives next to the
+          # new tooling), so we cache the global npm cache directory
+          # manually instead.
+
+      - name: Cache npm
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-npm-${{ hashFiles('package.json') }}
+          restore-keys: |
+            ${{ runner.os }}-npm-
 
       - name: Install dependencies
-        run: npm ci
+        # `npm ci` requires a lockfile; use `npm install` until one
+        # is committed (tracked as stage-5 follow-up).
+        run: npm install --no-audit --no-fund
 
       - name: Format check
         run: npm run format:check
@@ -76,10 +89,23 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
+          # `cache: 'npm'` requires a package-lock.json. The repo
+          # ships none yet (legacy APK extraction lives next to the
+          # new tooling), so we cache the global npm cache directory
+          # manually instead.
+
+      - name: Cache npm
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-npm-${{ hashFiles('package.json') }}
+          restore-keys: |
+            ${{ runner.os }}-npm-
 
       - name: Install dependencies
-        run: npm ci
+        # `npm ci` requires a lockfile; use `npm install` until one
+        # is committed (tracked as stage-5 follow-up).
+        run: npm install --no-audit --no-fund
 
       - name: Download build artifact
         uses: actions/download-artifact@v4
@@ -116,10 +142,23 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
+          # `cache: 'npm'` requires a package-lock.json. The repo
+          # ships none yet (legacy APK extraction lives next to the
+          # new tooling), so we cache the global npm cache directory
+          # manually instead.
+
+      - name: Cache npm
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-npm-${{ hashFiles('package.json') }}
+          restore-keys: |
+            ${{ runner.os }}-npm-
 
       - name: Install dependencies
-        run: npm ci
+        # `npm ci` requires a lockfile; use `npm install` until one
+        # is committed (tracked as stage-5 follow-up).
+        run: npm install --no-audit --no-fund
 
       - name: npm audit (high severity only)
         run: npm audit --audit-level=high

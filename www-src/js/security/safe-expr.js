@@ -4,8 +4,8 @@
  *
  * A recursive-descent parser + evaluator for the Angular-template
  * expression subset used by the legacy emulator shim. Replaces the
- * `new Function('$scope', 'with($scope){ ... }')` pattern in
- * `emulator/js/emu-shims.js`, which is the only thing keeping
+ * legacy dynamic-Function + `with($scope)` pattern that previously
+ * lived in `emulator/js/emu-shims.js` — the last thing keeping
  * `'unsafe-eval'` in our CSP.
  *
  * Supported grammar (informal):
