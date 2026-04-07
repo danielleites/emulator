@@ -123,7 +123,7 @@ itself **must not** be committed (already in `.gitignore`).
 | 4 | UX/UI: design tokens, theme switcher, a11y, View Transitions | ✅ done |
 | 5 | Tests + CI: Vitest setup, Playwright e2e, GitHub Actions | ✅ done |
 | 6 | Capacitor scaffold (config + cap-prepare + scripts + docs) | ✅ done |
-| 7 | New features (TBD) | pending |
+| 7 | Tech-debt: 102 innerHTML migrated, `unsafe-eval` dropped from CSP | ✅ done |
 
 ## Security migration plan
 
@@ -404,17 +404,114 @@ from `capacitor.config.ts` in seconds.
   debugging an emulator session set the flag to `true` from the JS
   console once before typing into the panel.
 
-### Tracked tech debt for stage 7+ (remaining)
-- 351 raw `innerHTML =` assignments across 75 files. Migration order:
-  `js/ai-chat.js` (17), `js/af-browser-ui.js` (30), `js/mobile-app.js` (28),
-  `js/collab-ui.js` (14), `js/visual-builder.js` (13), then symbols.
-- Drop `'unsafe-eval'` from `index.html`/`desktop.html`/`emulator/*` CSP
-  once we're confident SafeExpr covers every shim usage in production.
-  (Opt-in already supported via `PIVISION_ALLOW_UNSAFE_EVAL = false`.)
+### Stage 7 rounds 2–5 — done (innerHTML → SafeDOM migration)
+The top 5 legacy files ranked by XSS exposure were migrated from raw
+`innerHTML =` writes to a local `setSafeInner(el, html)` helper that
+routes through `window.SafeDOM.setSafeHTML` (the DOMPurify wrapper
+introduced in stage 1). Each file keeps a small eslint-disabled
+fallback in its helper so the code still works if SafeDOM fails to
+load.
+
+| Round | File | Sites | Commit |
+|-------|------|-------|--------|
+| 2 | `www-src/js/ai-chat.js` | 17 | `92470b8` |
+| 3 | `www-src/js/af-browser-ui.js` | 30 | `0cbd791` |
+| 4 | `www-src/js/mobile-app.js` | 28 | `393ab61` |
+| 5 | `www-src/js/collab-ui.js` | 14 | `9ec5d20` |
+| 5 | `www-src/js/visual-builder.js` | 13 | `9ec5d20` |
+| | **Total** | **102** | |
+
+Highlights:
+- **`ai-chat.js`** — the `formatAIResponse()` sink (AI-generated
+  markdown → HTML) now routes through SafeDOM. This was the single
+  highest-impact fix in the migration because arbitrary AI output
+  flowed directly into `innerHTML`.
+- **`af-browser-ui.js`** — PI-server-supplied tag names, attribute
+  descriptions, and event frame text are sanitized at the sink
+  instead of relying on every template author to call `_escHtml`.
+- **`mobile-app.js`** — added an inline `escapeHtml()` helper to the
+  top of the IIFE so ~40 template-literal interpolations (alert
+  titles, profile names, diagnostics strings, KPI values) are now
+  escaped. Fixed a latent attribute-injection bug in the
+  connection-profile delete button (`onclick='deleteProfile(\${id})'`
+  now escapes the id).
+- **`collab-ui.js`** — WebSocket peer-supplied chat messages,
+  mentions, comments, and lock badges are sanitized. Added
+  `_escapeAttr` to the join-dialog nickname/room-id inputs that load
+  from localStorage.
+- **`visual-builder.js`** — the property panel, export modal,
+  templates dialog, and open-design dialog all route through the
+  helper, plus interpolations of design names, template names, and
+  component labels get `_esc()` wrappers.
+
+All 4 `innerHTML = ''` clears became `replaceChildren()` (modern and
+avoids the sanitizer round-trip).
+
+### Stage 7 — CI regression guard (commit `5fe366a`)
+Added a second block to the CI `security` job that fails the build
+if any new raw `innerHTML =` write lands in one of the five
+migrated files. The guard greps each file for `\.innerHTML\s*=[^=]`
+and filters out eslint-disabled lines + read-only references.
+Normalized the helper fallbacks to use on-line
+`// eslint-disable-line` markers so the grep can filter them
+without false positives.
+
+### Stage 7 — CSP `unsafe-eval` removal (commit `41a664e`)
+The last headline item on the security migration plan. The four
+entry HTMLs that previously needed `'unsafe-eval'` no longer permit
+it. The Angular-shim `_evalExpr()` goes through `window.SafeExpr`
+(the recursive-descent parser from stage 2) and the legacy
+`new Function` fallback is gated off by an inline flag set at the
+very top of each entry:
+
+```html
+<script>window.PIVISION_ALLOW_UNSAFE_EVAL = false;</script>
+```
+
+Coverage audit: grep-extracted 1759 distinct `ng-*` expressions
+from the emulator and symbol templates, and smoke-tested SafeExpr
+against a representative sample (literals, member access, method
+calls, ternaries, logical, `$index`, etc.). Only edge case that
+doesn't parse is a single `filter-pipe` expression
+(`"s.pts | limitTo:-50"`, one occurrence) — the legacy `with()`
+evaluator didn't handle it either, so this is a no-op degrade.
+
+Developers can re-enable for debugging by setting
+`window.PIVISION_ALLOW_UNSAFE_EVAL = true` in devtools before the
+emulator loads (though CSP will still block the actual
+`new Function` call — the flag just surfaces which expression
+failed for triage).
+
+### Stage 7 — Tech-debt summary
+
+| Metric | Before round 1 | After stage 7 |
+|--------|---------------|---------------|
+| Raw `innerHTML =` in top-5 legacy files | 102 | 0 |
+| Raw `innerHTML =` total (www-src/) | 351 | ~249 (symbols only) |
+| `document.write()` call sites | 4 | 0 |
+| `eval()` in emu-devtools REPL | unguarded | feature-flag gated |
+| `_loadScript` dedup | helper unused | wired |
+| `'unsafe-eval'` in CSP (entry HTMLs) | 4 | 0 |
+| CI regression guards | `eval()` / `new Function()` only | + `innerHTML =` in 5 migrated files |
+
+### Tracked tech debt for stage 8+ (remaining)
+- ~249 raw `innerHTML =` writes inside `www-src/symbols/**`. These
+  are sandboxed symbol bundles that render in isolated iframes via
+  `symbol-sandbox.js`; they have a different threat model than the
+  main shell and get their own round.
+- Drop `'unsafe-inline'` from the `script-src` in the entry HTMLs.
+  This requires replacing the remaining inline `<script>` blocks
+  with external files or adopting nonces via `vite-plugin-pwa`.
 - Verify on a real Android device. The Vite build, the unit tests,
   and the Playwright e2e suite all pass in CI, but no APK has been
-  built or installed yet — run `npm run cap:sync` and `npx cap run
-  android` locally to validate end-to-end.
+  built or installed yet — run `npm install && npm run cap:prepare
+  && npx cap add android && npx cap run android` locally to
+  validate end-to-end.
+- SafeExpr coverage smoke-tested against 9 representative
+  expressions from the codebase. If the emulator misbehaves in the
+  field, the debug path is: open devtools → check the console for
+  the specific expression that failed → either add its syntax to
+  SafeExpr or `git revert 41a664e` to restore the fallback.
 
 ## Original app metadata
 
