@@ -6,8 +6,15 @@
  * in the test environment), so they verify the worst-case sanitizer.
  */
 // @vitest-environment jsdom
-import { describe, it, expect } from 'vitest';
-import { sanitize, setSafeHTML, escape } from './safe-dom.js';
+import { describe, it, expect, beforeEach } from 'vitest';
+import { sanitize, setSafeHTML, escape, _setPurifier } from './safe-dom.js';
+
+beforeEach(() => {
+  // Force the strict fallback sanitizer so the assertions below
+  // are deterministic. The DOMPurify-backed path is exercised
+  // separately by the smoke e2e suite.
+  _setPurifier(null);
+});
 
 describe('safe-dom fallback sanitizer', () => {
   it('strips <script> tags', () => {

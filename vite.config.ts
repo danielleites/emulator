@@ -38,10 +38,12 @@ const plugins: PluginOption[] = [
     manifestFilename: 'manifest-mobile.json',
     includeAssets: ['icons/icon-192.png', 'icons/icon-512.png', 'fonts/*.{woff2,ttf}'],
     workbox: {
-      globPatterns: [
-        '**/*.{html,js,css,svg,png,ttf,woff2}',
-        '!symbols/**', // symbols precached on-demand at runtime
-      ],
+      globPatterns: ['**/*.{html,js,css,svg,png,ttf,woff2}'],
+      // Workbox uses globIgnores (not negation in globPatterns) to
+      // exclude paths from precaching. Symbols are loaded on demand
+      // by the legacy `_loadSymbol` and the runtimeCaching CacheFirst
+      // strategy below, so they don't need to be precached.
+      globIgnores: ['**/node_modules/**/*', 'sw.js', 'workbox-*.js', 'symbols/**'],
       runtimeCaching: [
         {
           urlPattern: ({ url }) => url.pathname.includes('/symbols/'),
@@ -138,10 +140,14 @@ export default defineConfig({
   },
   test: {
     environment: 'jsdom',
-    include: ['www-src/**/*.{test,spec}.{js,ts}'],
-    exclude: ['**/node_modules/**', '**/dist/**', 'tests/e2e/**'],
+    // The Vite `root` above is `www-src/`, so vitest's globs are
+    // already scoped there. Using a leading `www-src/` here would
+    // double up to `www-src/www-src/**` and find zero files.
+    include: ['**/*.{test,spec}.{js,ts}'],
+    exclude: ['**/node_modules/**', '**/dist/**', '../tests/e2e/**'],
     globals: false,
-    setupFiles: ['./tests/vitest.setup.ts'],
+    // Setup file path is resolved relative to the Vite root.
+    setupFiles: ['../tests/vitest.setup.ts'],
     coverage: {
       provider: 'v8',
       reporter: ['text', 'html', 'lcov'],

@@ -62,6 +62,20 @@ if (typeof window !== 'undefined') {
   });
 }
 
+/**
+ * Test-only escape hatch: force the fallback sanitizer (or any other
+ * implementation) for the rest of the process. Used by safe-dom.test.js
+ * to deterministically exercise the strict fallback path; production
+ * code should never call this.
+ *
+ * @internal
+ * @param {object | null} purifier
+ */
+export function _setPurifier(purifier) {
+  _purifier = purifier;
+  _purifierResolved = true;
+}
+
 // ──────────────────────────────────────────────────────────────────────────
 // 2. Fallback sanitizer (used until DOMPurify resolves)
 // ──────────────────────────────────────────────────────────────────────────
@@ -85,15 +99,23 @@ const FORBIDDEN_ATTR_PREFIXES = ['on']; // onclick, onerror, onload, ...
 /** URL-bearing attributes that need protocol checks. */
 const URL_ATTRS = new Set(['href', 'src', 'xlink:href', 'action', 'formaction', 'srcset']);
 
-/** Allowed URL protocols (everything else is stripped). */
-const SAFE_PROTOCOLS = /^(?:https?:|mailto:|tel:|data:image\/|blob:|#|\/|\.\/|\.\.\/)/i;
+/** Protocols that may appear before the path component. */
+const SAFE_PROTOCOLS = /^(?:https?:|mailto:|tel:|data:image\/|blob:)/i;
 
 function isSafeUrl(url) {
   if (typeof url !== 'string') return false;
   const trimmed = url.trim();
   if (trimmed === '') return true;
-  // Reject control chars and obfuscated javascript:
+  // Reject control characters (smuggling vector for `javascript:`).
   if (/[\u0000-\u001f]/.test(trimmed)) return false;
+  // A URL is path-relative when it has no protocol delimiter, or
+  // when the first '/' precedes the first ':'. Path-relative URLs
+  // are always safe; we never need to check a protocol allowlist.
+  const colon = trimmed.indexOf(':');
+  if (colon === -1) return true; // bare path / fragment / query
+  const slash = trimmed.indexOf('/');
+  if (slash !== -1 && slash < colon) return true; // path-relative
+  // It's a protocol URL — must be in the allowlist.
   return SAFE_PROTOCOLS.test(trimmed);
 }
 

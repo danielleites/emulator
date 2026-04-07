@@ -127,9 +127,12 @@ export function prefetch(url) {
   link.href = url;
   // Hint the right destination so the browser can apply the right
   // priority and reuse the cached response when the actual <script>
-  // tag fires.
-  if (url.endsWith('.js')) link.as = 'script';
-  else if (url.endsWith('.css')) link.as = 'style';
+  // tag fires. We use setAttribute (not the `link.as` property)
+  // because jsdom only honors a subset of the `as` enum on the
+  // property setter and silently drops unrecognized values, which
+  // breaks unit tests.
+  if (url.endsWith('.js')) link.setAttribute('as', 'script');
+  else if (url.endsWith('.css')) link.setAttribute('as', 'style');
   document.head.appendChild(link);
 }
 

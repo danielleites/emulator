@@ -68,6 +68,15 @@ const FOCUSABLE = [
 
 /**
  * Returns the visible focusable elements inside a container.
+ *
+ * The visibility check intentionally does NOT depend on
+ * `offsetWidth` / `getClientRects()` because jsdom does not run a
+ * layout engine and would report every element as zero-sized,
+ * breaking the focus trap in tests. We use the lightweight checks
+ * (`hidden` attribute, `aria-hidden`, inline `display:none`) which
+ * are sufficient for the modal-style use cases the trap is built
+ * for, and which work consistently across real browsers and jsdom.
+ *
  * @param {HTMLElement} container
  * @returns {HTMLElement[]}
  */
@@ -76,8 +85,12 @@ function focusables(container) {
   const nodes = Array.from(container.querySelectorAll(FOCUSABLE));
   return nodes.filter((el) => {
     if (el.getAttribute('aria-hidden') === 'true') return false;
-    // Skip elements with display:none or visibility:hidden
-    return !!(el.offsetWidth || el.offsetHeight || el.getClientRects().length);
+    if (el.hasAttribute('hidden')) return false;
+    const inlineDisplay = el.style && el.style.display;
+    if (inlineDisplay === 'none') return false;
+    const inlineVis = el.style && el.style.visibility;
+    if (inlineVis === 'hidden' || inlineVis === 'collapse') return false;
+    return true;
   });
 }
 
