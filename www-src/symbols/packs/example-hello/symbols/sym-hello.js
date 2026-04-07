@@ -109,7 +109,7 @@
 
         // Watch the two config fields we care about. The emulator's
         // Angular-lite shim dispatches these scope.$watch calls
-        // through SafeExpr, so no `new Function()` eval happens.
+        // through SafeExpr — no dynamic code execution happens.
         if (scope && typeof scope.$watch === 'function') {
             scope.$watch('config.Title', update);
             scope.$watch('config.Message', update);
