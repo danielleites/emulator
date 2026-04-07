@@ -653,6 +653,22 @@ export function _clearCache() {
   _cache.clear();
 }
 
+/**
+ * Test-only parse oracle. Returns the parsed AST if the expression
+ * is syntactically valid, or `null` if the parser rejected it.
+ *
+ * `evaluate()` is silent-fail (it returns `undefined` on both parse
+ * failures and runtime errors), so tests that want to assert the
+ * *parser* specifically go through this helper.
+ *
+ * @internal
+ * @param {string} expr
+ * @returns {object | null}
+ */
+export function _parseForTest(expr) {
+  return compile(expr);
+}
+
 // ──────────────────────────────────────────────────────────────────────────
 // 5. Global exposure for legacy non-module scripts (emu-shims.js)
 // ──────────────────────────────────────────────────────────────────────────
