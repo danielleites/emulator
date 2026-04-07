@@ -5,7 +5,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1, user-scalable=no">
   <title>PIVISION</title>
   <meta name="description" content="PIVISION — אפליקציית מובייל לניהול PI Vision">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob: https: http:; img-src 'self' data: blob: https: http:; connect-src 'self' https: http: ws: wss:; font-src 'self' data:; style-src 'self' 'unsafe-inline';">
+  <!--
+    CSP — tightened in stage 1 of the modernization plan.
+    'unsafe-eval' is still required by the legacy Angular-shim expression
+    evaluator in emulator/js/emu-shims.js (scheduled for removal in stage 2).
+    'unsafe-inline' for scripts/styles is required by ~350 innerHTML sites
+    and many inline <script>/<style> blocks; it will migrate to nonces in
+    stage 3 once Vite bundles the entries.
+    Removed: 'http:' wildcards (downgrade attacks), broad default-src.
+  -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' blob:; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' https: wss:; media-src 'self' data: blob:; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self';">
 
   <!-- PWA & Mobile -->
   <link rel="manifest" href="manifest-mobile.json">
@@ -592,6 +601,9 @@
   </div>
   <iframe id="embedded-frame" class="embedded-frame" loading="eager" referrerpolicy="no-referrer" title="תצוגה מוטמעת"></iframe>
 </div>
+
+<!-- ═══ Security: SafeDOM (must load before any script that touches innerHTML) ═══ -->
+<script type="module" src="js/security/safe-dom.js"></script>
 
 <!-- ═══ App Script ═══ -->
 <script src="js/mobile-sync.js"></script>

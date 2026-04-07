@@ -1,3 +1,4 @@
+/// <reference types="vitest" />
 import { defineConfig } from 'vite';
 import { resolve } from 'path';
 
@@ -40,5 +41,10 @@ export default defineConfig({
   preview: {
     port: 4173,
     host: true,
+  },
+  test: {
+    environment: 'jsdom',
+    include: ['www-src/**/*.{test,spec}.{js,ts}'],
+    globals: false,
   },
 });

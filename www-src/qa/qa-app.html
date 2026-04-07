@@ -22,9 +22,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>PI Vision QA — בדיקת סמלים מותאמים</title>
   <meta name="description" content="כלי QA אוטומטי לסמלים מותאמים של PI Vision — ניתוח JS, HTML, CSS ובדיקות צלב-קובץ">
+  <!-- CSP — added in stage 1. QA tool reads symbol files locally and runs analysis workers. -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' blob:; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' https:; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self';">
   
   <!-- Fonts (local bundle for offline use; no CDN required) -->
   <link rel="stylesheet" href="../fonts/heebo.css">
+
+  <!-- Security: SafeDOM (must load before any script that touches innerHTML) -->
+  <script type="module" src="../js/security/safe-dom.js"></script>
 
   <!-- JSZip (local vendor bundle for offline use) -->
   <script src="../vendor/jszip.min.js"></script>

@@ -21,6 +21,14 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>PI Vision — לוח בקרה ראשי</title>
+
+  <!--
+    CSP — added in stage 1. Desktop loads the QA, emulator, AF browser and
+    guide as iframes (frame-src 'self'), and the emulator legitimately needs
+    'unsafe-eval' for its Angular-shim expression evaluator.
+  -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' blob:; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' https: wss:; media-src 'self' data: blob:; worker-src 'self' blob:; frame-src 'self'; child-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self';">
+
   <meta name="description" content="חבילה מאוחדת — אמולטור PI Vision, בדיקות QA, דפדפן AF, ו-63 סמלים מותאמים">
 
   <!-- PWA manifest & mobile meta -->
@@ -360,6 +368,9 @@
   </div>
   <div class="af-standalone-wrap" id="af-standalone-panel"></div>
 </div>
+
+<!-- ─── Security: SafeDOM (must load before any script that touches innerHTML) ─── -->
+<script type="module" src="js/security/safe-dom.js"></script>
 
 <!-- ─── PI Web API Connector — טוען לפני שכבת AF ─── -->
 <script src="js/pi-connector.js"></script>

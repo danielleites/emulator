@@ -72,13 +72,47 @@ below.
 | Stage | Goal | Status |
 |-------|------|--------|
 | 0 | Extract sources, scaffold Vite/TS/ESLint/Prettier/Vitest | ✅ done |
-| 1 | Security: tighten CSP, replace `eval`, sanitize `innerHTML` | pending |
+| 1 | Security: tighten CSP, SafeDOM helper, eslint rules | ✅ done |
 | 2 | Architecture: TS migration, modularize 100KB+ files | pending |
 | 3 | Performance: code splitting, lazy symbols, Workbox SW | pending |
 | 4 | UX/UI: theming, View Transitions, a11y, responsive | pending |
 | 5 | Tests + CI: Vitest, Playwright, GitHub Actions | pending |
 | 6 | Capacitor migration | pending |
 | 7 | New features (TBD) | pending |
+
+## Security migration plan
+
+### Stage 1 — done
+- **CSP** added to `desktop.html`, `guide.html`, `qa/qa-app.html` (had none).
+- **CSP** tightened on `index.html`: removed `http:` wildcards, removed
+  broad `default-src`, scoped `connect-src` to `self https: wss:`, added
+  `object-src 'none'`, `base-uri 'self'`, `form-action 'self'`,
+  `frame-ancestors 'self'`. `unsafe-eval` is still required by the
+  Angular-shim expression evaluator in `emulator/js/emu-shims.js`
+  (scheduled for removal in stage 2).
+- **SafeDOM helper** at `www-src/js/security/safe-dom.js` —
+  `setSafeHTML / appendSafeHTML / safeFragment / sanitize / escape`.
+  Resolves DOMPurify when bundled, falls back to a strict allow-list
+  sanitizer otherwise. Loaded as the first script in every entry HTML.
+- **ESLint rules**: `no-eval`, `no-implied-eval`, `no-new-func`,
+  `no-script-url` set to `error`; `no-restricted-properties` warns on
+  any direct `innerHTML` / `outerHTML` assignment with a hint to use
+  SafeDOM. Legacy emulator devtools and the Angular shim are
+  whitelisted.
+- **Tests**: `safe-dom.test.js` exercises the fallback sanitizer
+  (jsdom environment via Vitest).
+
+### Tracked tech debt for stages 2–3
+- 351 raw `innerHTML =` assignments across 75 files. Migration order:
+  `js/ai-chat.js` (17), `js/af-browser-ui.js` (30), `js/mobile-app.js` (28),
+  `js/collab-ui.js` (14), `js/visual-builder.js` (13), then symbols.
+- 1 `new Function()` in `emulator/js/emu-shims.js:1411` (Angular shim).
+  Replace with a safe expression evaluator (recursive descent) so we can
+  drop `unsafe-eval` from CSP.
+- 1 `eval()` in `emulator/js/emu-devtools.js:147` — intentional dev REPL,
+  guarded by a feature flag in stage 2.
+- 4 `document.write()` calls in `qa/js/qa-advanced.js` and the mu20/mm20
+  reports plugins (used for opening print-preview windows).
 
 ## Original app metadata
 

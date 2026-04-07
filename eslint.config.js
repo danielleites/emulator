@@ -59,8 +59,53 @@ export default [
       'no-empty': ['warn', { allowEmptyCatch: true }],
       'no-prototype-builtins': 'off',
       'no-cond-assign': ['error', 'except-parens'],
-      'no-eval': 'warn',
-      'no-implied-eval': 'warn',
+      // ── Security (stage 1) ─────────────────────────────────────────────
+      // eval() is forbidden in new code. Existing eval sites are tagged
+      // with `// eslint-disable-next-line no-eval` and tracked in
+      // README.md → "Security migration plan".
+      'no-eval': 'error',
+      'no-implied-eval': 'error',
+      'no-new-func': 'error',
+      'no-script-url': 'error',
+      // Direct innerHTML / outerHTML assignment is discouraged. Use
+      // SafeDOM.setSafeHTML() from js/security/safe-dom.js instead.
+      // Currently a warning only — flipped to `error` after stage 2.
+      'no-restricted-properties': [
+        'warn',
+        {
+          property: 'innerHTML',
+          message:
+            'Use SafeDOM.setSafeHTML(el, html) from js/security/safe-dom.js — direct innerHTML assignment is unsafe.',
+        },
+        {
+          property: 'outerHTML',
+          message:
+            'Use SafeDOM helpers from js/security/safe-dom.js — direct outerHTML assignment is unsafe.',
+        },
+      ],
+    },
+  },
+  {
+    // Legacy emulator devtools REPL legitimately needs eval()
+    files: [
+      'www-src/emulator/js/emu-devtools.js',
+      'www-src/emulator/emulator/js/emu-devtools.js',
+      'www-src/emulator/js/emu-shims.js',
+      'www-src/emulator/emulator/js/emu-shims.js',
+      'www-src/cordova.js',
+    ],
+    rules: {
+      'no-eval': 'off',
+      'no-new-func': 'off',
+      'no-implied-eval': 'off',
+    },
+  },
+  {
+    // Symbols and worker scripts use innerHTML extensively for sandboxed
+    // chart rendering — they will be migrated in stage 2.
+    files: ['www-src/symbols/**/*.js', 'www-src/js/qa-worker.js'],
+    rules: {
+      'no-restricted-properties': 'off',
     },
   },
   {
