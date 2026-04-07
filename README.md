@@ -124,6 +124,164 @@ itself **must not** be committed (already in `.gitignore`).
 | 5 | Tests + CI: Vitest setup, Playwright e2e, GitHub Actions | ✅ done |
 | 6 | Capacitor scaffold (config + cap-prepare + scripts + docs) | ✅ done |
 | 7 | Tech-debt: 102 innerHTML migrated, `unsafe-eval` dropped from CSP | ✅ done |
+| 8 | Symbol Packs: make the emulator a general-purpose symbol tester | ✅ done |
+
+## Authoring a Symbol Pack (stage 8)
+
+The emulator learned to load **external symbol libraries** without
+editing `app.js`. A *pack* is a drop-in directory under
+`www-src/symbols/packs/<pack-id>/` containing a `pack.json` manifest
+and the symbol files. The 113 built-in symbols continue to load
+through their existing code paths unchanged — packs are additive.
+
+### Quickstart
+
+1. **Create the directory**:
+   ```
+   www-src/symbols/packs/my-pack/
+   ├── pack.json
+   └── symbols/
+       ├── sym-foo.js
+       ├── sym-foo-template.html
+       └── sym-foo-config.html
+   ```
+
+2. **Write the manifest** (`pack.json`):
+   ```jsonc
+   {
+     "id": "my-pack",                 // kebab-case, must match directory name
+     "displayName": "My Pack",
+     "version": "1.0.0",              // MAJOR.MINOR.PATCH (semver)
+     "core": [                         // optional; loaded once per pack
+       "core/base.js"
+     ],
+     "symbols": [
+       {
+         "name": "foo",                // unique across all packs
+         "displayName": "Foo Symbol",
+         "category": "Examples",
+         "dataShape": "Value",         // None|Value|Table|Gauge|Trend|TimeSeries|XYPlot
+         "requires": [                 // optional; loaded per symbol on demand
+           "libs/chart.js"
+         ],
+         "files": {
+           "js":       "symbols/sym-foo.js",
+           "template": "symbols/sym-foo-template.html",
+           "config":   "symbols/sym-foo-config.html"
+         }
+       }
+     ]
+   }
+   ```
+
+3. **Enable the pack** by adding its id to
+   `www-src/symbols/packs/packs-index.json`:
+   ```json
+   { "packs": ["example-hello", "my-pack"] }
+   ```
+
+4. **Reload the emulator.** Your symbol appears in the picker under
+   its declared category, loads lazily when selected, and renders
+   inside the standard emulator canvas.
+
+### Symbol file contract (`sym-foo.js`)
+
+A symbol is a classic IIFE that registers itself with
+`window.PIVisualization.symbolCatalog.register({...})`. The shape
+mirrors the built-in symbols exactly (see
+`www-src/symbols/sym-afbrowser20.js` for a real example, or
+`www-src/symbols/packs/example-hello/symbols/sym-hello.js` for a
+dependency-free minimal one):
+
+```js
+(function (PV) {
+  'use strict';
+  if (!PV || !PV.symbolCatalog) return;
+
+  function symbolVis() {}
+  symbolVis.prototype.init = function (scope, elem) {
+    // Build DOM via createElement + textContent. Do NOT use
+    // innerHTML — the stage-7 regression guard in CI will fail.
+    // If you need HTML composition, use window.SafeDOM.setSafeHTML.
+    var el = elem.get ? elem.get(0) : elem;
+    var div = document.createElement('div');
+    div.textContent = scope.config.Title || 'Hello';
+    el.appendChild(div);
+
+    // scope.$watch goes through SafeExpr — no `eval`, no CSP violation.
+    if (scope && typeof scope.$watch === 'function') {
+      scope.$watch('config.Title', function () {
+        div.textContent = scope.config.Title || 'Hello';
+      });
+    }
+  };
+
+  PV.symbolCatalog.register({
+    typeName: 'foo',
+    displayName: 'Foo',
+    datasourceBehavior:
+      (PV.Extensibility && PV.Extensibility.Enums && PV.Extensibility.Enums.DatasourceBehaviors)
+        ? PV.Extensibility.Enums.DatasourceBehaviors.None : 0,
+    visObjectType: symbolVis,
+    getDefaultConfig: function () {
+      return { Title: 'Foo', Height: 180, Width: 360 };
+    }
+  });
+})(typeof window !== 'undefined' ? window.PIVisualization : undefined);
+```
+
+### Rules enforced by the validator
+
+The manifest is checked at load time by
+`window.PIV_PACKS.validateManifest()`. Any violation fails the pack
+load loudly (pack is skipped, error logged to console). Rules:
+
+- `id` must be lowercase kebab-case and must match the directory name
+- `version` must be `MAJOR.MINOR.PATCH` (optional `-prerelease` tail)
+- `symbols[]` is required (empty array is accepted)
+- Every path in `core[]`, `files.{js,template,config}`, and
+  `requires[]` must be a **safe relative path**:
+  - non-empty string
+  - no `..` segments (no path traversal out of the pack directory)
+  - not absolute (no leading `/`)
+  - no URL scheme prefix (no `http://`, `data:`, `blob:`, `javascript:`, etc.)
+- Symbol `name`s are unique across all enabled packs; on collision
+  the first pack wins and the later one logs a warning.
+- Built-in symbol names always win over pack names.
+
+### Guarantees
+
+| Property | What it means |
+|----------|---------------|
+| **Non-breaking** | Removing the pack id from `packs-index.json` returns the emulator to its pre-stage-8 behavior byte-for-byte. |
+| **Additive** | Built-in `SYMBOL_LIST` entries in `app.js` are never mutated; pack entries are pushed at boot time. |
+| **Lazy** | `core/` files load once per pack on first symbol pick. `requires[]` files load once per file on first use. `files.js` + template fetch only when the user selects the symbol. |
+| **Idempotent** | `PIV_PACKS.init()` resolves to the same promise on re-entry; reloading the page is safe. |
+| **Sandboxed validation** | Path traversal, absolute paths, and URL schemes in manifest fields are rejected by the validator. |
+
+### CI guards
+
+Pack code is covered by the same CI regression guards as the rest of
+the emulator:
+
+- `eval()` / `new Function()` outside the allow-list fails the
+  `Security audit` job.
+- New raw `innerHTML = ...` in the stage-7 migrated files fails the
+  same job. Pack symbols should use `createElement` or
+  `window.SafeDOM.setSafeHTML`.
+- `securitypolicyviolation` events during emulator boot fail the
+  `E2E (Playwright)` job.
+- `PIV_PACKS.validateManifest()` is covered by 58 Vitest unit tests
+  in `www-src/emulator/js/emu-packs.test.js`.
+- The reference `example-hello` pack has 5 end-to-end tests in
+  `tests/e2e/smoke.spec.ts` that exercise discovery → validation →
+  load → registration → CSP clean.
+
+### Reference implementation
+
+`www-src/symbols/packs/example-hello/` is a complete, dependency-free
+pack that ships enabled in `packs-index.json`. It's the minimal
+working example; start there, copy it, and rename.
 
 ## Security migration plan
 
