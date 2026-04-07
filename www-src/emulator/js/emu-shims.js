@@ -1396,18 +1396,45 @@
             this.$$parent = null;
         };
 
-        /* ── Expression evaluator ── */
+        /* ── Expression evaluator ──
+         *
+         * Stage 2 of the security plan: route through the safe
+         * recursive-descent evaluator at js/security/safe-expr.js when
+         * available, falling back to the legacy `new Function` path
+         * only if SafeExpr was not loaded for some reason. The fallback
+         * is gated by `window.PIVISION_ALLOW_UNSAFE_EVAL` so it can be
+         * disabled entirely for hardened deployments.
+         *
+         * Removing the fallback (and dropping `unsafe-eval` from CSP)
+         * is tracked for stage 3.
+         */
         function _evalExpr(expr, scope) {
             if (typeof expr !== 'string') return undefined;
             expr = expr.trim();
-            if (expr === '' || expr === 'true') return true;
+            if (expr === '') return undefined;
+
+            // Preferred path — safe recursive-descent evaluator.
+            if (typeof window !== 'undefined' && window.SafeExpr && typeof window.SafeExpr.evaluate === 'function') {
+                return window.SafeExpr.evaluate(expr, scope);
+            }
+
+            // Legacy fast-path literals (kept so the shim works even if
+            // safe-expr.js failed to load).
+            if (expr === 'true') return true;
             if (expr === 'false') return false;
             if (expr === 'null') return null;
             if (expr === 'undefined') return undefined;
             if (/^-?\d+(\.\d+)?$/.test(expr)) return parseFloat(expr);
             if (/^(['"]).*\1$/.test(expr)) return expr.slice(1, -1);
-            // Handle method calls and property access on scope
+
+            // Hardened deployments can disable the unsafe fallback entirely.
+            if (typeof window !== 'undefined' && window.PIVISION_ALLOW_UNSAFE_EVAL === false) {
+                return undefined;
+            }
+
+            // Legacy fallback — only reached when safe-expr.js is missing.
             try {
+                // eslint-disable-next-line no-new-func
                 var fn = new Function('$scope', 'with($scope){ try{ return (' + expr + '); }catch(e){ return undefined; } }');
                 return fn(scope);
             } catch (e) {

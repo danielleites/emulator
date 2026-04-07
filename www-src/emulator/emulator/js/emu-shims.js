@@ -1396,18 +1396,34 @@
             this.$$parent = null;
         };
 
-        /* ── Expression evaluator ── */
+        /* ── Expression evaluator ──
+         * See www-src/emulator/js/emu-shims.js for the canonical comment.
+         * Stage 2 routes through window.SafeExpr (safe recursive-descent
+         * evaluator) when available, with the legacy `new Function` path
+         * gated behind PIVISION_ALLOW_UNSAFE_EVAL.
+         */
         function _evalExpr(expr, scope) {
             if (typeof expr !== 'string') return undefined;
             expr = expr.trim();
-            if (expr === '' || expr === 'true') return true;
+            if (expr === '') return undefined;
+
+            if (typeof window !== 'undefined' && window.SafeExpr && typeof window.SafeExpr.evaluate === 'function') {
+                return window.SafeExpr.evaluate(expr, scope);
+            }
+
+            if (expr === 'true') return true;
             if (expr === 'false') return false;
             if (expr === 'null') return null;
             if (expr === 'undefined') return undefined;
             if (/^-?\d+(\.\d+)?$/.test(expr)) return parseFloat(expr);
             if (/^(['"]).*\1$/.test(expr)) return expr.slice(1, -1);
-            // Handle method calls and property access on scope
+
+            if (typeof window !== 'undefined' && window.PIVISION_ALLOW_UNSAFE_EVAL === false) {
+                return undefined;
+            }
+
             try {
+                // eslint-disable-next-line no-new-func
                 var fn = new Function('$scope', 'with($scope){ try{ return (' + expr + '); }catch(e){ return undefined; } }');
                 return fn(scope);
             } catch (e) {

@@ -73,7 +73,7 @@ below.
 |-------|------|--------|
 | 0 | Extract sources, scaffold Vite/TS/ESLint/Prettier/Vitest | ✅ done |
 | 1 | Security: tighten CSP, SafeDOM helper, eslint rules | ✅ done |
-| 2 | Architecture: TS migration, modularize 100KB+ files | pending |
+| 2 | Architecture: SafeExpr evaluator, ambient types, ESM facades | ✅ done |
 | 3 | Performance: code splitting, lazy symbols, Workbox SW | pending |
 | 4 | UX/UI: theming, View Transitions, a11y, responsive | pending |
 | 5 | Tests + CI: Vitest, Playwright, GitHub Actions | pending |
@@ -102,17 +102,56 @@ below.
 - **Tests**: `safe-dom.test.js` exercises the fallback sanitizer
   (jsdom environment via Vitest).
 
-### Tracked tech debt for stages 2–3
+### Stage 2 — done
+- **SafeExpr** at `www-src/js/security/safe-expr.js` — a 600-line
+  recursive-descent parser + evaluator covering the Angular template
+  expression subset (literals, member access, computed access, method
+  calls with correct `this` binding, arithmetic, comparisons, logical,
+  ternary, object/array literals, unary). Blocks `__proto__`,
+  `constructor`, `prototype`, the `Function` constructor, and any
+  property starting with the Angular `$$` sigil.
+  - Parse cache (1024 entries, LRU-cleared).
+  - Public exports: `evaluate(expr, scope)` and `assign(expr, scope, v)`
+    (the latter for `ng-model`).
+  - Exposed as `window.SafeExpr` for legacy non-module scripts.
+  - 43 unit tests in `safe-expr.test.js`, all passing under raw Node.
+- **emu-shims.js** patched (both copies — `emulator/js/` and
+  `emulator/emulator/js/`). The `_evalExpr()` helper now routes through
+  `window.SafeExpr.evaluate` first; the legacy `new Function` fallback
+  is kept only for the case where SafeExpr failed to load, and is
+  itself gated by `window.PIVISION_ALLOW_UNSAFE_EVAL` (defaults to
+  permissive — set to `false` for hardened deployments).
+- **safe-expr.js wired** into both `emulator/index.html` and
+  `emulator/emulator/index.html` *before* the `<script>` tag for
+  emu-shims, so the global is populated by the time the Angular shim
+  initializes.
+- **Ambient TypeScript types** at `www-src/types/globals.d.ts` —
+  declares `window.SafeDOM`, `window.SafeExpr`, `window.PIVision`,
+  `window.PIVISION_ALLOW_UNSAFE_EVAL`. Editor IntelliSense and
+  `npm run typecheck` now understand the runtime globals without
+  touching any legacy JS file.
+- **ESM facades** at `www-src/js/main-mobile.ts` and
+  `www-src/js/main-desktop.ts`. These are the *new* entry points for
+  Vite: they statically import the security helpers, then dynamically
+  import the legacy bundles in their original load order. The dynamic
+  imports become per-route chunks under Vite, which is the foundation
+  for stage-3 code splitting. The legacy `<script>` tags in the HTML
+  files are kept for the standalone-APK code path.
+
+### Tracked tech debt for stage 3+
 - 351 raw `innerHTML =` assignments across 75 files. Migration order:
   `js/ai-chat.js` (17), `js/af-browser-ui.js` (30), `js/mobile-app.js` (28),
   `js/collab-ui.js` (14), `js/visual-builder.js` (13), then symbols.
-- 1 `new Function()` in `emulator/js/emu-shims.js:1411` (Angular shim).
-  Replace with a safe expression evaluator (recursive descent) so we can
-  drop `unsafe-eval` from CSP.
-- 1 `eval()` in `emulator/js/emu-devtools.js:147` — intentional dev REPL,
-  guarded by a feature flag in stage 2.
-- 4 `document.write()` calls in `qa/js/qa-advanced.js` and the mu20/mm20
-  reports plugins (used for opening print-preview windows).
+- Drop `'unsafe-eval'` from `index.html`/`desktop.html`/`emulator/*` CSP
+  once we're confident SafeExpr covers every shim usage in production.
+  (Opt-in already supported via `PIVISION_ALLOW_UNSAFE_EVAL = false`.)
+- 1 `eval()` in `emulator/js/emu-devtools.js:147` — intentional dev
+  REPL. Move behind a build-time flag in stage 5.
+- 4 `document.write()` calls in `qa/js/qa-advanced.js` and the
+  mu20/mm20 reports plugins (used for opening print-preview windows) —
+  replaceable with `window.open` + `document.body.appendChild`.
+- Vite/HMR build is still untested in this environment (no npm).
+  Run `npm install && npm run build` locally to validate.
 
 ## Original app metadata
 

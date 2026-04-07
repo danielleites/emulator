@@ -21,6 +21,17 @@
       "@/*": ["www-src/*"]
     }
   },
-  "include": ["www-src/**/*.ts", "www-src/**/*.js", "vite.config.ts"],
-  "exclude": ["node_modules", "dist", "www-src/vendor/**", "www-src/emulator/js/jquery-*.js"]
+  "include": [
+    "www-src/**/*.ts",
+    "www-src/**/*.d.ts",
+    "www-src/**/*.js",
+    "vite.config.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "www-src/vendor/**",
+    "www-src/emulator/**/jquery-*.js",
+    "www-src/symbols/**"
+  ]
 }

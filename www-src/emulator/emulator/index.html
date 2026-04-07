@@ -198,6 +198,9 @@ body { background: #0A0F1E; color: #E2EAF4; }
 <!-- Symbol iframe sandboxing -->
 <script src="../js/symbol-sandbox.js"></script>
 
+<!-- Security: Safe expression evaluator (must load before emu-shims). -->
+<script type="module" src="../../js/security/safe-expr.js"></script>
+
 <!-- Shim layers: PIVisualization, PIV20, MU20, MM20, Angular mini, widget factory, PI Web API mock -->
 <script src="js/emu-shims.js?v=R300n"></script>
 
