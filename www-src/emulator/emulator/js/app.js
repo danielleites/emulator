@@ -1395,8 +1395,21 @@
     function _loadScript(src) {
         if (_loadedPlugins[src]) return Promise.resolve();
         _loadedPlugins[src] = true;
-        // Use <script> tag injection — works reliably with file:// protocol
-        // in Cordova Android WebView (XHR and fetch do NOT work with file://).
+        // Stage 7 tech-debt cleanup: route through window.SymbolLoader.loadScript
+        // when available so two symbols that share a plugin only produce one
+        // <script> tag in the DOM. The legacy script-injection fallback below
+        // covers older runtimes that never loaded js/perf/symbol-loader.js.
+        if (typeof window !== 'undefined' && window.SymbolLoader && typeof window.SymbolLoader.loadScript === 'function') {
+            return window.SymbolLoader.loadScript(src).then(function () {
+                console.log('[EMU] Loaded (via SymbolLoader):', src.split('/').pop());
+            }).catch(function () {
+                console.warn('[EMU] Could not load', src);
+                _loadedPlugins[src] = false;
+            });
+        }
+        // Legacy fallback — direct <script> tag injection. Works reliably
+        // with file:// protocol in Cordova Android WebView (XHR and fetch
+        // do NOT work with file://).
         return new Promise(function (resolve, reject) {
             var script = document.createElement('script');
             script.src = src;

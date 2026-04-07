@@ -202,6 +202,10 @@ body { background: #0A0F1E; color: #E2EAF4; }
      Angular shim's $watch/ng-* directives bypass `new Function`). -->
 <script type="module" src="../js/security/safe-expr.js"></script>
 
+<!-- Performance: Symbol loader (must load before app.js so _loadScript
+     can route through the dedup helper). -->
+<script type="module" src="../js/perf/symbol-loader.js"></script>
+
 <!-- Shim layers: PIVisualization, PIV20, MU20, MM20, Angular mini, widget factory, PI Web API mock -->
 <script src="js/emu-shims.js?v=R300n"></script>
 

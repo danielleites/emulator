@@ -64,6 +64,12 @@ declare global {
      * missing. Defaults to `true` for compatibility.
      */
     PIVISION_ALLOW_UNSAFE_EVAL?: boolean;
+    /**
+     * Dev REPL escape hatch — set to `true` from the JS console to
+     * enable `eval()` inside the emulator devtools panel. Off by
+     * default in production builds.
+     */
+    PIVISION_DEVTOOLS_EVAL?: boolean;
     /** Cordova bootstrap object (only present on mobile). */
     cordova?: unknown;
   }

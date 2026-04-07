@@ -143,18 +143,31 @@
     function _execCommand(cmd) {
         var result;
         var level = 'log';
-        try {
-            result = eval(cmd); // eslint-disable-line
-            if (result === undefined) result = 'undefined';
-        } catch (e) {
-            result = String(e);
-            level = 'error';
+        // Stage 7 tech-debt cleanup: the dev-REPL eval is gated behind
+        // an explicit opt-in flag (`window.PIVISION_DEVTOOLS_EVAL`).
+        // Production builds leave it false; developers debugging an
+        // emulator session set it to `true` from the JS console once
+        // before typing into this REPL. This way `eval()` simply does
+        // not execute on a freshly-installed APK, even if an attacker
+        // somehow reaches the devtools UI.
+        if (window.PIVISION_DEVTOOLS_EVAL !== true) {
+            result = '[devtools] eval disabled. Set window.PIVISION_DEVTOOLS_EVAL = true to enable.';
+            level = 'warn';
+        } else {
+            try {
+                // eslint-disable-next-line no-eval
+                result = eval(cmd);
+                if (result === undefined) result = 'undefined';
+            } catch (e) {
+                result = String(e);
+                level = 'error';
+            }
         }
         // Add to console log
         var logs = window.__consoleLogs || [];
         logs.push({ level: level, msg: '> ' + cmd, ts: Date.now(), count: 1, isCmd: true });
         if (result !== undefined && result !== null) {
-            logs.push({ level: 'log', msg: String(typeof result === 'object' ? JSON.stringify(result, null, 2) : result), ts: Date.now(), count: 1 });
+            logs.push({ level: level, msg: String(typeof result === 'object' ? JSON.stringify(result, null, 2) : result), ts: Date.now(), count: 1 });
         }
         _renderConsole();
     }

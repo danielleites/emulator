@@ -793,8 +793,11 @@
         var printWin = window.open('', '_blank', 'width=800,height=600');
         if (!printWin) return;
 
+        // Stage 7 tech-debt cleanup: replaced `printWin.document.write(...)`
+        // with a Blob URL navigation. document.write is SPA-unsafe and was
+        // one of the four call sites flagged in the security migration plan.
         var content = self._previewEl.innerHTML;
-        printWin.document.write(
+        var html =
             '<!DOCTYPE html><html dir="rtl"><head><meta charset="UTF-8">' +
             '<title>\u05D3\u05D5\u05D7 \u05DE\u05D5\u05D2\u05D1\u05DC\u05D5\u05EA</title>' +
             '<style>' +
@@ -803,11 +806,15 @@
             'table { width: 100%; border-collapse: collapse; }' +
             'th, td { border: 1px solid #ccc; padding: 4px 8px; text-align: right; }' +
             'th { background: #f0f0f0; font-weight: 600; }' +
-            '</style></head><body>' + content + '</body></html>'
-        );
-        printWin.document.close();
-        printWin.focus();
-        setTimeout(function () { printWin.print(); }, 300);
+            '</style></head><body>' + content + '</body></html>';
+        var blob = new Blob([html], { type: 'text/html' });
+        var url = URL.createObjectURL(blob);
+        printWin.location.href = url;
+        // Print after the new document has parsed.
+        printWin.addEventListener('load', function () {
+            try { printWin.focus(); printWin.print(); } catch (e) {}
+            setTimeout(function () { try { URL.revokeObjectURL(url); } catch (e) {} }, 5000);
+        });
     };
 
 

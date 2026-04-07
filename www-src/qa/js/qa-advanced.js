@@ -478,7 +478,11 @@
 
       const win = window.open('', '_blank');
       if (!win) { toast('לא ניתן לפתוח חלון הדפסה', 'error'); return; }
-      win.document.write(`<!DOCTYPE html>
+      // Stage 7 tech-debt cleanup: replaced `win.document.write(...)` with
+      // a Blob URL navigation. document.write is SPA-unsafe (can clobber
+      // the parent document under some flow timings) and one of the four
+      // remaining call sites flagged in the security migration plan.
+      const reportHTML = `<!DOCTYPE html>
 <html lang="he" dir="rtl">
 <head>
 <meta charset="UTF-8">
@@ -518,8 +522,9 @@
   <thead><tr><th>שם סמל</th><th>סטטוס</th><th>שגיאות</th><th>אזהרות</th><th>ביצועים</th></tr></thead>
   <tbody>${rows}</tbody>
 </table>
-</body></html>`);
-      win.document.close();
+</body></html>`;
+      const blob = new Blob([reportHTML], { type: 'text/html' });
+      win.location.href = URL.createObjectURL(blob);
     }
 
     return { exportCSV, exportPDF };

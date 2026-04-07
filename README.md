@@ -377,24 +377,44 @@ the repo, conflict on every Capacitor upgrade, and expose
 contributors to merge hell. `npx cap add android` regenerates it
 from `capacitor.config.ts` in seconds.
 
-### Tracked tech debt for stages 7+
+### Stage 7 round 1 — done (tech-debt quick wins)
+- **`_loadScript` → `SymbolLoader.loadScript`** wired in both
+  `emulator/js/app.js` and `emulator/emulator/js/app.js`. The legacy
+  inline script-injection path is preserved as a fallback for
+  runtimes that never loaded `js/perf/symbol-loader.js`. Two symbols
+  that share a plugin (e.g. the `mug*` family) now produce a single
+  `<script>` tag in the DOM instead of duplicates.
+- **`symbol-loader.js` wired** into both `emulator/index.html` and
+  `emulator/emulator/index.html` as a `<script type="module">` tag,
+  loaded *after* `safe-expr.js` and *before* `emu-shims.js`/`app.js`.
+- **All four `document.write()` callers replaced** with
+  `Blob` URL navigation:
+  - `qa/js/qa-advanced.js` (PDF report popup)
+  - `symbols/mu20-plugins/mu20-reports.js` (`_exportPdf`)
+  - `symbols/mm20-plugins/mm20-reports.js` (`_exportPdf`)
+  - The print window opens via `URL.createObjectURL(blob)`, focuses,
+    prints, then revokes the URL after a timeout.
+  `document.write` is SPA-unsafe (it can clobber the parent document
+  under some flow timings) and was the last call site in the
+  security plan's tracked-debt list.
+- **`emu-devtools.js` REPL eval gated** behind
+  `window.PIVISION_DEVTOOLS_EVAL` (default `undefined` → off). The
+  flag is documented in `www-src/types/globals.d.ts`. Production
+  builds ship with the REPL refusing to evaluate; developers
+  debugging an emulator session set the flag to `true` from the JS
+  console once before typing into the panel.
+
+### Tracked tech debt for stage 7+ (remaining)
 - 351 raw `innerHTML =` assignments across 75 files. Migration order:
   `js/ai-chat.js` (17), `js/af-browser-ui.js` (30), `js/mobile-app.js` (28),
   `js/collab-ui.js` (14), `js/visual-builder.js` (13), then symbols.
 - Drop `'unsafe-eval'` from `index.html`/`desktop.html`/`emulator/*` CSP
   once we're confident SafeExpr covers every shim usage in production.
   (Opt-in already supported via `PIVISION_ALLOW_UNSAFE_EVAL = false`.)
-- 1 `eval()` in `emulator/js/emu-devtools.js:147` — intentional dev
-  REPL. Move behind a build-time flag in stage 5.
-- 4 `document.write()` calls in `qa/js/qa-advanced.js` and the
-  mu20/mm20 reports plugins (used for opening print-preview windows) —
-  replaceable with `window.open` + `document.body.appendChild`.
-- Wire the legacy `_loadScript` in `emulator/js/app.js` to
-  `window.SymbolLoader.loadScript` so the dedup actually applies in
-  production. (Currently the helper is loaded but the legacy code
-  doesn't call it yet.)
-- Vite/HMR build is still untested in this environment (no npm).
-  Run `npm install && npm run build` locally to validate.
+- Verify on a real Android device. The Vite build, the unit tests,
+  and the Playwright e2e suite all pass in CI, but no APK has been
+  built or installed yet — run `npm run cap:sync` and `npx cap run
+  android` locally to validate end-to-end.
 
 ## Original app metadata
 

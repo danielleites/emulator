@@ -143,18 +143,27 @@
     function _execCommand(cmd) {
         var result;
         var level = 'log';
-        try {
-            result = eval(cmd); // eslint-disable-line
-            if (result === undefined) result = 'undefined';
-        } catch (e) {
-            result = String(e);
-            level = 'error';
+        // Stage 7 tech-debt cleanup: dev-REPL eval gated behind
+        // window.PIVISION_DEVTOOLS_EVAL. See the canonical comment in
+        // www-src/emulator/js/emu-devtools.js.
+        if (window.PIVISION_DEVTOOLS_EVAL !== true) {
+            result = '[devtools] eval disabled. Set window.PIVISION_DEVTOOLS_EVAL = true to enable.';
+            level = 'warn';
+        } else {
+            try {
+                // eslint-disable-next-line no-eval
+                result = eval(cmd);
+                if (result === undefined) result = 'undefined';
+            } catch (e) {
+                result = String(e);
+                level = 'error';
+            }
         }
         // Add to console log
         var logs = window.__consoleLogs || [];
         logs.push({ level: level, msg: '> ' + cmd, ts: Date.now(), count: 1, isCmd: true });
         if (result !== undefined && result !== null) {
-            logs.push({ level: 'log', msg: String(typeof result === 'object' ? JSON.stringify(result, null, 2) : result), ts: Date.now(), count: 1 });
+            logs.push({ level: level, msg: String(typeof result === 'object' ? JSON.stringify(result, null, 2) : result), ts: Date.now(), count: 1 });
         }
         _renderConsole();
     }
