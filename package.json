@@ -19,7 +19,11 @@
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:install": "playwright install --with-deps chromium",
-    "ci": "npm run typecheck && npm run test && npm run build"
+    "ci": "npm run typecheck && npm run test && npm run build",
+    "cap:prepare": "node scripts/cap-prepare.mjs",
+    "cap:sync": "npm run cap:prepare && cap sync android",
+    "cap:open": "cap open android",
+    "cap:run": "npm run cap:sync && cap run android"
   },
   "devDependencies": {
     "@playwright/test": "^1.48.0",
@@ -38,6 +42,9 @@
     "workbox-window": "^7.3.0"
   },
   "dependencies": {
+    "@capacitor/android": "^6.2.0",
+    "@capacitor/cli": "^6.2.0",
+    "@capacitor/core": "^6.2.0",
     "dompurify": "^3.2.0"
   },
   "engines": {

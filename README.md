@@ -50,22 +50,67 @@ npm run test:e2e     # Playwright e2e tests
    to keep noise down.
 4. **Vitest** for unit tests, **Playwright** for e2e.
 
-## Native packaging
+## Native packaging (Capacitor)
 
-This repo only handles the web layer. To produce an installable APK you
-need to wrap `dist/` in a native shell — the planned migration is from
-the legacy Cordova shell to **Capacitor**:
+The repo ships a Capacitor scaffold (`capacitor.config.ts` +
+`scripts/cap-prepare.mjs` + the `cap:*` npm scripts). The native
+`android/` directory itself is **not** committed — it's regenerated
+on first use by `npx cap add android` and refreshed by `cap sync`.
+
+### One-time setup (per developer machine)
 
 ```bash
-npm install @capacitor/core @capacitor/cli @capacitor/android
-npx cap init pivision com.pivision.mobile --web-dir=dist
-npx cap add android
-npm run build && npx cap sync
-npx cap open android
+# Install deps (Capacitor packages are listed in dependencies).
+npm install
+
+# Generate the Android project. This pulls Capacitor's android
+# template, wires it to capacitor.config.ts, and writes ./android/.
+npm run cap:prepare       # populate ./www from ./www-src
+npx cap add android       # one-time scaffold of ./android
 ```
 
-Capacitor scaffolding is **not yet** in this repo — see the staged plan
-below.
+You also need a working Android development environment:
+- JDK 17+
+- Android Studio (or stand-alone Android SDK + cmdline-tools)
+- `ANDROID_HOME` exported
+
+### Daily build cycle
+
+```bash
+npm run cap:sync          # runs cap-prepare + `cap sync android`
+npm run cap:open          # opens android/ in Android Studio
+# or:
+npm run cap:run           # cap sync + adb install + adb run
+```
+
+`npm run cap:prepare` copies `www-src/` → `www/` (Capacitor's
+`webDir`), excluding TypeScript sources, ambient declarations, and
+test files. The raw web tree is what ships — **not** the Vite-built
+`dist/` — because the legacy classic `<script>` tags rely on
+in-order execution that Vite cannot losslessly bundle. Switching to
+the bundled output is a stage-7 task once the legacy modules become
+real ES modules. See `capacitor.config.ts` for the long version.
+
+### Package identity
+
+To preserve in-place upgrades from the original Cordova APK
+(`PIV-v4.2.0-R300u-tested.apk`), `capacitor.config.ts` mirrors the
+legacy `AndroidManifest.xml` identity:
+
+| Field | Value |
+|-------|-------|
+| `appId` | `com.pivision.qa` |
+| `appName` | `PIVISION QA` |
+| `versionName` | `4.2.0` (override in `android/app/build.gradle`) |
+| `allowMixedContent` | `true` (PI Web API on-prem HTTP) |
+
+### Signing
+
+Stage 6 produces a **debug-signed** APK by default. For Play Store
+release you need a real keystore — generate one with `keytool` and
+configure `signingConfigs.release` in
+`android/app/build.gradle` after `cap add android` runs. The keystore
+itself **must not** be committed (already in `.gitignore`).
 
 ## Staged modernization plan
 
@@ -77,7 +122,7 @@ below.
 | 3 | Performance: Workbox PWA, refined chunks, symbol loader | ✅ done |
 | 4 | UX/UI: design tokens, theme switcher, a11y, View Transitions | ✅ done |
 | 5 | Tests + CI: Vitest setup, Playwright e2e, GitHub Actions | ✅ done |
-| 6 | Capacitor migration | pending |
+| 6 | Capacitor scaffold (config + cap-prepare + scripts + docs) | ✅ done |
 | 7 | New features (TBD) | pending |
 
 ## Security migration plan
@@ -301,7 +346,38 @@ npm run test:e2e         # boots vite preview and runs Playwright
 npm run test:e2e:ui      # interactive Playwright UI mode
 ```
 
-### Tracked tech debt for stages 6+
+### Stage 6 — done
+- **`capacitor.config.ts`** at repo root. Mirrors the legacy
+  `AndroidManifest.xml` package identity (`com.pivision.qa`,
+  `PIVISION QA`) so an upgrade install from the original APK is
+  in-place rather than a fresh app. Includes `allowMixedContent`
+  for on-prem HTTP PI Web API endpoints and
+  `webContentsDebuggingEnabled` for stage-6/7 troubleshooting.
+- **`scripts/cap-prepare.mjs`** — copies `www-src/` → `www/`
+  (Capacitor's `webDir`) with the right exclusions: TypeScript
+  sources, ambient declarations, test files, and the `types/`
+  directory are stripped. Idempotent — wipes `www/` first so a
+  removed source file can never linger in the runtime image.
+- **`cap:*` npm scripts**:
+  - `cap:prepare` — runs the prepare script standalone
+  - `cap:sync` — `cap:prepare` then `cap sync android`
+  - `cap:open` — `cap open android`
+  - `cap:run` — `cap:sync` then `cap run android`
+- **`@capacitor/{core,cli,android}` v6.2** added to `dependencies`.
+- **`.gitignore`** extended for the generated `www/`, `android/`,
+  and `ios/` trees so first-time `cap add android` doesn't
+  accidentally commit the entire native project.
+- **README.md** documents the one-time setup (Android Studio, JDK,
+  `ANDROID_HOME`), the daily build cycle, the package identity,
+  and the signing story.
+
+The `android/` directory itself is intentionally **not** in this
+repo. It's a regenerable native scaffold; committing it would bloat
+the repo, conflict on every Capacitor upgrade, and expose
+contributors to merge hell. `npx cap add android` regenerates it
+from `capacitor.config.ts` in seconds.
+
+### Tracked tech debt for stages 7+
 - 351 raw `innerHTML =` assignments across 75 files. Migration order:
   `js/ai-chat.js` (17), `js/af-browser-ui.js` (30), `js/mobile-app.js` (28),
   `js/collab-ui.js` (14), `js/visual-builder.js` (13), then symbols.
