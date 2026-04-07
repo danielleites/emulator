@@ -1,0 +1,1363 @@
+/* ═══════════════════════════════════════════════════════════════
+   Mugbalot Ultimate Monitor (MU20) — Shadow DOM Stylesheet
+   Version: ULT.1.4
+
+   Architecture:
+     - :host for Shadow DOM scoping
+     - --mu20-* CSS variables for theming
+     - BEM-style naming: .mu20-block__element--modifier
+     - RTL-first layout (dir:rtl on shell)
+     - GPU-composited animations only (transform/opacity)
+     - Print-safe overrides at bottom
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ─── CSS Variables (theme layer) ─── */
+:host {
+    --mu20-bg:           #0d1117;
+    --mu20-surface:      #161b22;
+    --mu20-surface-alt:  #1c2333;
+    --mu20-border:       #30363d;
+    --mu20-border-light: #21262d;
+    --mu20-text:         #e6edf3;
+    --mu20-text-dim:     #8b949e;
+    --mu20-text-muted:   #484f58;
+    --mu20-accent:       #58a6ff;
+    --mu20-accent-hover: #79c0ff;
+    --mu20-green:        #3fb950;
+    --mu20-yellow:       #d29922;
+    --mu20-orange:       #db6d28;
+    --mu20-red:          #f85149;
+    --mu20-red-dim:      rgba(248,81,73,.15);
+    --mu20-green-dim:    rgba(63,185,80,.15);
+    --mu20-yellow-dim:   rgba(210,153,34,.15);
+    --mu20-blue-dim:     rgba(88,166,255,.15);
+    --mu20-radius:       6px;
+    --mu20-radius-lg:    10px;
+    --mu20-shadow:       0 2px 8px rgba(0,0,0,.3);
+    --mu20-shadow-lg:    0 8px 24px rgba(0,0,0,.4);
+    --mu20-transition:   .2s ease;
+    --mu20-font:         'Segoe UI', Tahoma, Arial, sans-serif;
+    --mu20-font-mono:    'Consolas', 'Courier New', monospace;
+    --mu20-header-h:     42px;
+    --mu20-tab-h:        36px;
+    --mu20-footer-h:     24px;
+    --mu20-z-overlay:    1000;
+    --mu20-z-confirm:    1100;
+    --mu20-z-tooltip:    1200;
+
+    display: block;
+    width: 100%;
+    height: 100%;
+    font-family: var(--mu20-font);
+    font-size: 13px;
+    color: var(--mu20-text);
+    line-height: 1.4;
+    box-sizing: border-box;
+    -webkit-font-smoothing: antialiased;
+}
+
+/* ─── Reset inside Shadow DOM ─── */
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+/* ─── Shell (main container) ─── */
+.mu20-shell {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    background: var(--mu20-bg);
+    color: var(--mu20-text);
+    direction: rtl;
+    overflow: hidden;
+    position: relative;
+}
+
+/* ═══════════════════════════════════════════════
+   Header Bar
+   ═══════════════════════════════════════════════ */
+.mu20-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: var(--mu20-header-h);
+    min-height: var(--mu20-header-h);
+    padding: 0 12px;
+    background: var(--mu20-surface);
+    border-bottom: 1px solid var(--mu20-border);
+    gap: 8px;
+    flex-shrink: 0;
+}
+
+.mu20-header__logo {
+    max-height: 28px;
+    margin-inline-end: 8px;
+    vertical-align: middle;
+}
+
+.mu20-header__title {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--mu20-text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    flex: 1;
+    min-width: 0;
+}
+
+.mu20-clock {
+    font-family: var(--mu20-font-mono);
+    font-size: 12px;
+    color: var(--mu20-text-dim);
+    white-space: nowrap;
+    direction: ltr;
+    letter-spacing: .5px;
+}
+
+/* Connection indicator */
+.mu20-conn-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    transition: background var(--mu20-transition);
+}
+
+.mu20-conn-dot--online {
+    background: var(--mu20-green);
+    box-shadow: 0 0 6px var(--mu20-green);
+}
+
+.mu20-conn-dot--offline {
+    background: var(--mu20-red);
+    animation: mu20-pulse-dot 2s ease-in-out infinite;
+}
+
+@keyframes mu20-pulse-dot {
+    0%, 100% { opacity: 1; }
+    50%      { opacity: .4; }
+}
+
+/* Demo badge */
+.mu20-demo-badge {
+    display: none;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--mu20-yellow);
+    background: var(--mu20-yellow-dim);
+    padding: 2px 8px;
+    border-radius: 3px;
+    white-space: nowrap;
+}
+.mu20-demo-badge[style*="inline"] { display: inline-block; }
+
+/* Fullscreen button */
+.mu20-fullscreen-btn {
+    background: none;
+    border: 1px solid var(--mu20-border);
+    border-radius: var(--mu20-radius);
+    color: var(--mu20-text-dim);
+    font-size: 16px;
+    width: 30px;
+    height: 28px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--mu20-transition);
+    flex-shrink: 0;
+}
+.mu20-fullscreen-btn:hover {
+    color: var(--mu20-text);
+    border-color: var(--mu20-accent);
+    background: var(--mu20-blue-dim);
+}
+
+/* ═══════════════════════════════════════════════
+   Tab Bar
+   ═══════════════════════════════════════════════ */
+.mu20-tab-bar {
+    display: flex;
+    align-items: center;
+    height: var(--mu20-tab-h);
+    min-height: var(--mu20-tab-h);
+    padding: 0 8px;
+    background: var(--mu20-surface);
+    border-bottom: 1px solid var(--mu20-border);
+    gap: 2px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    flex-shrink: 0;
+    scrollbar-width: none;
+}
+.mu20-tab-bar::-webkit-scrollbar { display: none; }
+
+.mu20-tab {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 0 12px;
+    height: 28px;
+    background: none;
+    border: 1px solid transparent;
+    border-radius: var(--mu20-radius);
+    color: var(--mu20-text-dim);
+    font-family: var(--mu20-font);
+    font-size: 12px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all var(--mu20-transition);
+    flex-shrink: 0;
+}
+.mu20-tab:hover {
+    color: var(--mu20-text);
+    background: var(--mu20-surface-alt);
+    border-color: var(--mu20-border);
+}
+.mu20-tab--active {
+    color: var(--mu20-accent);
+    background: var(--mu20-blue-dim);
+    border-color: var(--mu20-accent);
+    font-weight: 600;
+}
+
+.mu20-tab__icon {
+    font-size: 14px;
+    line-height: 1;
+}
+
+.mu20-tab__label {
+    font-size: 12px;
+}
+
+/* Alert badge on tab */
+.mu20-tab .mu20-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 16px;
+    height: 16px;
+    padding: 0 4px;
+    font-size: 10px;
+    font-weight: 700;
+    color: #fff;
+    background: var(--mu20-red);
+    border-radius: 8px;
+    margin-inline-start: 4px;
+}
+
+/* ═══════════════════════════════════════════════
+   Content Area
+   ═══════════════════════════════════════════════ */
+.mu20-content {
+    flex: 1;
+    overflow: hidden;
+    position: relative;
+    min-height: 0;
+}
+
+.mu20-tab-content {
+    display: none;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+}
+.mu20-tab-content[style*="block"] {
+    display: block;
+}
+
+/* Plugin container (children of tab-content) */
+.mu20-widget-container {
+    width: 100%;
+    height: 100%;
+    position: relative;
+}
+
+/* ═══════════════════════════════════════════════
+   Footer
+   ═══════════════════════════════════════════════ */
+.mu20-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: var(--mu20-footer-h);
+    min-height: var(--mu20-footer-h);
+    padding: 0 12px;
+    background: var(--mu20-surface);
+    border-top: 1px solid var(--mu20-border);
+    font-size: 10px;
+    color: var(--mu20-text-muted);
+    flex-shrink: 0;
+}
+
+.mu20-footer__version {
+    direction: ltr;
+    font-family: var(--mu20-font-mono);
+    letter-spacing: .5px;
+}
+
+/* ═══════════════════════════════════════════════
+   Error Fallback (from Shield)
+   ═══════════════════════════════════════════════ */
+.mu20-error-fallback {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    padding: 24px;
+    text-align: center;
+    color: var(--mu20-text-dim);
+    gap: 8px;
+}
+.mu20-error-fallback::before {
+    content: '\26A0';
+    font-size: 32px;
+    color: var(--mu20-yellow);
+}
+
+/* ═══════════════════════════════════════════════
+   Confirm Dialog (vanilla DOM)
+   ═══════════════════════════════════════════════ */
+.mu20-confirm-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,.6);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: var(--mu20-z-confirm);
+    animation: mu20-fade-in .15s ease;
+}
+
+.mu20-confirm-box {
+    background: var(--mu20-surface);
+    border: 1px solid var(--mu20-border);
+    border-radius: var(--mu20-radius-lg);
+    padding: 24px;
+    min-width: 280px;
+    max-width: 400px;
+    box-shadow: var(--mu20-shadow-lg);
+    direction: rtl;
+}
+
+.mu20-confirm-msg {
+    font-size: 14px;
+    color: var(--mu20-text);
+    margin-bottom: 20px;
+    line-height: 1.6;
+}
+
+.mu20-confirm-btns {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-start;
+}
+
+/* ─── Buttons ─── */
+.mu20-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 32px;
+    padding: 0 16px;
+    font-family: var(--mu20-font);
+    font-size: 13px;
+    font-weight: 500;
+    border: 1px solid var(--mu20-border);
+    border-radius: var(--mu20-radius);
+    cursor: pointer;
+    transition: all var(--mu20-transition);
+    white-space: nowrap;
+    background: var(--mu20-surface-alt);
+    color: var(--mu20-text);
+}
+.mu20-btn:hover {
+    border-color: var(--mu20-accent);
+    background: var(--mu20-blue-dim);
+}
+.mu20-btn--ok {
+    background: var(--mu20-accent);
+    border-color: var(--mu20-accent);
+    color: #fff;
+}
+.mu20-btn--ok:hover {
+    background: var(--mu20-accent-hover);
+    border-color: var(--mu20-accent-hover);
+}
+.mu20-btn--cancel {
+    background: transparent;
+    color: var(--mu20-text-dim);
+}
+.mu20-btn--cancel:hover {
+    color: var(--mu20-text);
+    background: var(--mu20-surface-alt);
+}
+.mu20-btn--danger {
+    background: var(--mu20-red);
+    border-color: var(--mu20-red);
+    color: #fff;
+}
+.mu20-btn--danger:hover {
+    opacity: .85;
+}
+
+/* ═══════════════════════════════════════════════
+   Shared Plugin Styles — Site Grid
+   ═══════════════════════════════════════════════ */
+
+/* Search bar */
+.mu20-search-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    background: var(--mu20-surface);
+    border-bottom: 1px solid var(--mu20-border);
+}
+.mu20-search-input {
+    flex: 1;
+    height: 28px;
+    padding: 0 10px;
+    background: var(--mu20-bg);
+    border: 1px solid var(--mu20-border);
+    border-radius: var(--mu20-radius);
+    color: var(--mu20-text);
+    font-family: var(--mu20-font);
+    font-size: 12px;
+    outline: none;
+    transition: border-color var(--mu20-transition);
+    direction: rtl;
+}
+.mu20-search-input:focus {
+    border-color: var(--mu20-accent);
+}
+.mu20-search-input::placeholder {
+    color: var(--mu20-text-muted);
+}
+
+/* Grid layout */
+.mu20-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 10px;
+    padding: 12px;
+    overflow-y: auto;
+    height: 100%;
+}
+
+/* Site card */
+.mu20-card {
+    background: var(--mu20-surface);
+    border: 1px solid var(--mu20-border);
+    border-radius: var(--mu20-radius-lg);
+    padding: 12px;
+    transition: border-color var(--mu20-transition), box-shadow var(--mu20-transition);
+}
+.mu20-card:hover {
+    border-color: var(--mu20-accent);
+    box-shadow: var(--mu20-shadow);
+}
+.mu20-card__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+}
+.mu20-card__name {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--mu20-text);
+}
+.mu20-card__status {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 3px;
+    text-transform: uppercase;
+}
+
+/* Status colors */
+.mu20-status--ok       { color: var(--mu20-green);  background: var(--mu20-green-dim); }
+.mu20-status--warn     { color: var(--mu20-yellow); background: var(--mu20-yellow-dim); }
+.mu20-status--critical { color: var(--mu20-red);    background: var(--mu20-red-dim); }
+.mu20-status--off      { color: var(--mu20-text-muted); background: rgba(72,79,88,.2); }
+
+/* Unit row inside card */
+.mu20-unit {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 0;
+    border-bottom: 1px solid var(--mu20-border-light);
+    font-size: 12px;
+}
+.mu20-unit:last-child { border-bottom: none; }
+
+.mu20-unit__name {
+    flex: 0 0 80px;
+    font-weight: 500;
+    color: var(--mu20-text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Quota progress bar */
+.mu20-quota-bar {
+    flex: 1;
+    height: 6px;
+    background: var(--mu20-border);
+    border-radius: 3px;
+    overflow: hidden;
+    position: relative;
+}
+.mu20-quota-bar__fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width .5s ease, background .3s ease;
+    will-change: width;
+}
+.mu20-quota-bar__fill--ok       { background: var(--mu20-green); }
+.mu20-quota-bar__fill--warn     { background: var(--mu20-yellow); }
+.mu20-quota-bar__fill--critical { background: var(--mu20-red); }
+
+/* Over-quota highlight (configurable via HighlightOverQuota) */
+.mu20-unit--over-quota {
+    box-shadow: inset 0 0 0 1px var(--mu20-red);
+    animation: mu20-over-quota-pulse 2s ease-in-out infinite;
+}
+@keyframes mu20-over-quota-pulse {
+    0%, 100% { opacity: 1; }
+    50%      { opacity: 0.85; }
+}
+
+.mu20-unit__pct {
+    flex: 0 0 36px;
+    text-align: left;
+    font-family: var(--mu20-font-mono);
+    font-size: 11px;
+    color: var(--mu20-text-dim);
+    direction: ltr;
+}
+
+/* Sparkline canvas */
+.mu20-sparkline {
+    display: block;
+    width: 100%;
+    height: 28px;
+    margin-top: 4px;
+}
+
+/* ═══════════════════════════════════════════════
+   Shared Plugin Styles — Tables
+   (used by log, alerts, tags, reports)
+   ═══════════════════════════════════════════════ */
+.mu20-table-wrap {
+    overflow: auto;
+    height: 100%;
+    padding: 8px;
+}
+
+.mu20-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+    direction: rtl;
+}
+.mu20-table th {
+    position: sticky;
+    top: 0;
+    background: var(--mu20-surface);
+    padding: 8px 10px;
+    text-align: right;
+    font-weight: 600;
+    color: var(--mu20-text-dim);
+    border-bottom: 2px solid var(--mu20-border);
+    white-space: nowrap;
+    z-index: 2;
+    cursor: pointer;
+    user-select: none;
+}
+.mu20-table th:hover {
+    color: var(--mu20-accent);
+}
+.mu20-table th .mu20-sort-arrow {
+    margin-inline-start: 4px;
+    font-size: 10px;
+}
+.mu20-table td {
+    padding: 6px 10px;
+    border-bottom: 1px solid var(--mu20-border-light);
+    color: var(--mu20-text);
+    vertical-align: middle;
+}
+.mu20-table tr:hover td {
+    background: var(--mu20-surface-alt);
+}
+
+/* Striped rows */
+.mu20-table--striped tr:nth-child(even) td {
+    background: rgba(255,255,255,.02);
+}
+
+/* ═══════════════════════════════════════════════
+   Shared Plugin Styles — Heatmap
+   ═══════════════════════════════════════════════ */
+.mu20-heatmap-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding: 12px;
+    gap: 12px;
+}
+
+.mu20-heatmap-canvas {
+    flex: 1;
+    min-height: 200px;
+    border-radius: var(--mu20-radius);
+    background: var(--mu20-surface);
+}
+
+.mu20-heatmap-legend {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    font-size: 11px;
+    color: var(--mu20-text-dim);
+}
+.mu20-heatmap-legend__block {
+    width: 16px;
+    height: 12px;
+    border-radius: 2px;
+}
+
+/* ═══════════════════════════════════════════════
+   Shared Plugin Styles — Reports
+   ═══════════════════════════════════════════════ */
+.mu20-reports-layout {
+    display: flex;
+    height: 100%;
+    direction: rtl;
+}
+
+.mu20-reports-sidebar {
+    width: 200px;
+    min-width: 160px;
+    background: var(--mu20-surface);
+    border-left: 1px solid var(--mu20-border);
+    overflow-y: auto;
+    padding: 8px 0;
+    flex-shrink: 0;
+}
+.mu20-reports-sidebar__item {
+    display: block;
+    width: 100%;
+    padding: 8px 14px;
+    background: none;
+    border: none;
+    border-right: 3px solid transparent;
+    color: var(--mu20-text-dim);
+    font-family: var(--mu20-font);
+    font-size: 12px;
+    text-align: right;
+    cursor: pointer;
+    transition: all var(--mu20-transition);
+}
+.mu20-reports-sidebar__item:hover {
+    color: var(--mu20-text);
+    background: var(--mu20-surface-alt);
+}
+.mu20-reports-sidebar__item--active {
+    color: var(--mu20-accent);
+    border-right-color: var(--mu20-accent);
+    background: var(--mu20-blue-dim);
+}
+
+.mu20-reports-main {
+    flex: 1;
+    overflow: auto;
+    padding: 16px;
+    min-width: 0;
+}
+
+/* Burndown chart canvas */
+.mu20-burndown-canvas {
+    width: 100%;
+    height: 200px;
+    border-radius: var(--mu20-radius);
+    background: var(--mu20-surface);
+    margin-bottom: 12px;
+}
+
+/* ═══════════════════════════════════════════════
+   Shared Plugin Styles — Alerts
+   ═══════════════════════════════════════════════ */
+.mu20-alert-row--critical td:first-child {
+    border-right: 3px solid var(--mu20-red);
+}
+.mu20-alert-row--warn td:first-child {
+    border-right: 3px solid var(--mu20-yellow);
+}
+.mu20-alert-row--info td:first-child {
+    border-right: 3px solid var(--mu20-accent);
+}
+.mu20-alert-row--acked {
+    opacity: .6;
+}
+
+.mu20-alert-ack-btn {
+    padding: 2px 8px;
+    font-size: 11px;
+    background: var(--mu20-surface-alt);
+    border: 1px solid var(--mu20-border);
+    border-radius: 3px;
+    color: var(--mu20-text-dim);
+    cursor: pointer;
+    transition: all var(--mu20-transition);
+}
+.mu20-alert-ack-btn:hover {
+    border-color: var(--mu20-green);
+    color: var(--mu20-green);
+}
+
+/* ═══════════════════════════════════════════════
+   Shared Plugin Styles — Tags
+   QA17-FIX5: Enhanced tags UI
+   ═══════════════════════════════════════════════ */
+
+/* Tags root layout */
+.mu20-tags-root {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+}
+
+/* Controls bar */
+.mu20-tags-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    background: var(--mu20-surface);
+    border-bottom: 1px solid var(--mu20-border);
+    flex-wrap: wrap;
+    flex-shrink: 0;
+}
+
+.mu20-tags-count {
+    font-size: 11px;
+    color: var(--mu20-text-dim);
+    white-space: nowrap;
+    padding: 0 8px;
+}
+
+/* Tags table */
+.mu20-tags-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+    direction: rtl;
+}
+
+.mu20-tags-table th {
+    position: sticky;
+    top: 0;
+    background: var(--mu20-surface);
+    padding: 8px 10px;
+    text-align: right;
+    font-weight: 600;
+    color: var(--mu20-text-dim);
+    border-bottom: 2px solid var(--mu20-border);
+    white-space: nowrap;
+    z-index: 2;
+    cursor: pointer;
+    user-select: none;
+    font-size: 11px;
+}
+.mu20-tags-table th:hover {
+    color: var(--mu20-accent);
+}
+
+.mu20-tags-table td {
+    padding: 5px 10px;
+    border-bottom: 1px solid var(--mu20-border-light);
+    color: var(--mu20-text);
+    vertical-align: middle;
+    font-size: 12px;
+}
+
+.mu20-tags-table tr:hover td {
+    background: var(--mu20-surface-alt);
+}
+
+/* Selected row */
+.mu20-tag-selected td {
+    background: var(--mu20-blue-dim) !important;
+    border-color: var(--mu20-accent);
+}
+
+/* Status badges */
+.mu20-tag-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    font-size: 11px;
+    border-radius: 3px;
+}
+.mu20-tag-status--good  { color: var(--mu20-green);  background: var(--mu20-green-dim); }
+.mu20-tag-status--bad   { color: var(--mu20-red);    background: var(--mu20-red-dim); }
+.mu20-tag-status--stale { color: var(--mu20-yellow); background: var(--mu20-yellow-dim); }
+
+.mu20-tag-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    font-size: 10px;
+    font-weight: 600;
+    border-radius: 3px;
+    text-transform: uppercase;
+}
+.mu20-tag-good  { color: var(--mu20-green);  background: var(--mu20-green-dim); }
+.mu20-tag-bad   { color: var(--mu20-red);    background: var(--mu20-red-dim); }
+.mu20-tag-stale { color: var(--mu20-yellow); background: var(--mu20-yellow-dim); }
+
+/* AF path cell */
+.mu20-tag-path {
+    font-family: var(--mu20-font-mono);
+    font-size: 10px;
+    color: var(--mu20-text-dim);
+    direction: ltr;
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* WebId cell */
+.mu20-tag-webid {
+    font-family: var(--mu20-font-mono);
+}
+
+/* Empty state */
+.mu20-tags-placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 120px;
+    color: var(--mu20-text-muted);
+    font-size: 13px;
+}
+
+/* Pin filter button active state */
+.mu20-tags-pin-filter {
+    transition: all var(--mu20-transition);
+}
+
+/* ═══════════════════════════════════════════════
+   Shared Plugin Styles — AF Build
+   ═══════════════════════════════════════════════ */
+.mu20-aftree {
+    padding: 12px;
+    overflow: auto;
+    height: 100%;
+}
+.mu20-aftree__node {
+    padding: 4px 0 4px 16px;
+    border-right: 1px solid var(--mu20-border-light);
+    margin-right: 8px;
+}
+.mu20-aftree__toggle {
+    cursor: pointer;
+    color: var(--mu20-accent);
+    margin-left: 4px;
+    user-select: none;
+}
+.mu20-aftree__label {
+    font-size: 12px;
+    color: var(--mu20-text);
+}
+.mu20-aftree__label--element {
+    font-weight: 600;
+}
+.mu20-aftree__label--attribute {
+    color: var(--mu20-text-dim);
+    font-style: italic;
+}
+
+/* ═══════════════════════════════════════════════
+   Shared Plugin Styles — Forecast
+   ═══════════════════════════════════════════════ */
+.mu20-forecast-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding: 12px;
+    gap: 12px;
+}
+
+.mu20-forecast-chart {
+    flex: 1;
+    min-height: 200px;
+    background: var(--mu20-surface);
+    border-radius: var(--mu20-radius);
+}
+
+.mu20-forecast-tier-bar {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+.mu20-forecast-tier {
+    padding: 6px 12px;
+    background: var(--mu20-surface);
+    border: 1px solid var(--mu20-border);
+    border-radius: var(--mu20-radius);
+    font-size: 12px;
+}
+.mu20-forecast-tier__label {
+    color: var(--mu20-text-dim);
+    font-size: 11px;
+}
+.mu20-forecast-tier__value {
+    font-weight: 600;
+    font-family: var(--mu20-font-mono);
+    direction: ltr;
+}
+
+/* TTE countdown */
+.mu20-tte-countdown {
+    font-family: var(--mu20-font-mono);
+    font-size: 20px;
+    font-weight: 700;
+    text-align: center;
+    padding: 8px;
+    direction: ltr;
+}
+.mu20-tte-countdown--warn    { color: var(--mu20-yellow); }
+.mu20-tte-countdown--critical { color: var(--mu20-red); animation: mu20-pulse-text 1s ease-in-out infinite; }
+
+@keyframes mu20-pulse-text {
+    0%, 100% { opacity: 1; }
+    50%      { opacity: .5; }
+}
+
+/* ═══════════════════════════════════════════════
+   Shared Plugin Styles — Dispatch
+   ═══════════════════════════════════════════════ */
+.mu20-dispatch-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    padding: 12px;
+    gap: 12px;
+}
+
+.mu20-gantt-canvas {
+    flex: 1;
+    min-height: 200px;
+    background: var(--mu20-surface);
+    border-radius: var(--mu20-radius);
+}
+
+.mu20-dispatch-summary {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+.mu20-dispatch-kpi {
+    padding: 8px 14px;
+    background: var(--mu20-surface);
+    border: 1px solid var(--mu20-border);
+    border-radius: var(--mu20-radius);
+    min-width: 120px;
+}
+.mu20-dispatch-kpi__label {
+    font-size: 11px;
+    color: var(--mu20-text-dim);
+}
+.mu20-dispatch-kpi__value {
+    font-size: 18px;
+    font-weight: 700;
+    font-family: var(--mu20-font-mono);
+    direction: ltr;
+}
+
+/* ═══════════════════════════════════════════════
+   Search Overlay (Ctrl+K)
+   ═══════════════════════════════════════════════ */
+.mu20-sg-search-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,.5);
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding-top: 80px;
+    z-index: var(--mu20-z-overlay);
+    animation: mu20-fade-in .12s ease;
+}
+
+.mu20-search-modal {
+    background: var(--mu20-surface);
+    border: 1px solid var(--mu20-border);
+    border-radius: var(--mu20-radius-lg);
+    width: 420px;
+    max-width: 90%;
+    box-shadow: var(--mu20-shadow-lg);
+    overflow: hidden;
+}
+
+.mu20-search-modal__input {
+    width: 100%;
+    height: 44px;
+    padding: 0 16px;
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid var(--mu20-border);
+    color: var(--mu20-text);
+    font-family: var(--mu20-font);
+    font-size: 15px;
+    outline: none;
+    direction: rtl;
+}
+.mu20-search-modal__input::placeholder {
+    color: var(--mu20-text-muted);
+}
+
+.mu20-search-modal__hint {
+    padding: 8px 16px;
+    font-size: 11px;
+    color: var(--mu20-text-muted);
+}
+
+/* ═══════════════════════════════════════════════
+   Tooltip
+   ═══════════════════════════════════════════════ */
+.mu20-tooltip {
+    position: absolute;
+    background: var(--mu20-surface);
+    border: 1px solid var(--mu20-border);
+    border-radius: var(--mu20-radius);
+    padding: 8px 12px;
+    font-size: 12px;
+    color: var(--mu20-text);
+    box-shadow: var(--mu20-shadow-lg);
+    z-index: var(--mu20-z-tooltip);
+    pointer-events: none;
+    max-width: 280px;
+    direction: rtl;
+    animation: mu20-fade-in .1s ease;
+}
+.mu20-tooltip__title {
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+.mu20-tooltip__row {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    font-size: 11px;
+}
+.mu20-tooltip__label {
+    color: var(--mu20-text-dim);
+}
+.mu20-tooltip__value {
+    font-family: var(--mu20-font-mono);
+    direction: ltr;
+}
+
+/* ═══════════════════════════════════════════════
+   Skeleton Loading
+   ═══════════════════════════════════════════════ */
+.mu20-skeleton {
+    background: linear-gradient(90deg,
+        var(--mu20-surface) 25%,
+        var(--mu20-surface-alt) 50%,
+        var(--mu20-surface) 75%);
+    background-size: 200% 100%;
+    animation: mu20-shimmer 1.5s ease-in-out infinite;
+    border-radius: var(--mu20-radius);
+}
+.mu20-skeleton--text {
+    height: 14px;
+    margin-bottom: 8px;
+    width: 80%;
+}
+.mu20-skeleton--card {
+    height: 120px;
+}
+
+@keyframes mu20-shimmer {
+    0%   { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+/* ═══════════════════════════════════════════════
+   Global Animations
+   ═══════════════════════════════════════════════ */
+@keyframes mu20-fade-in {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+@keyframes mu20-slide-up {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes mu20-count-up {
+    from { opacity: 0; transform: translateY(4px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ═══════════════════════════════════════════════
+   Scrollbar Styling
+   ═══════════════════════════════════════════════ */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+::-webkit-scrollbar-thumb {
+    background: var(--mu20-border);
+    border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: var(--mu20-text-muted);
+}
+
+/* Firefox */
+* {
+    scrollbar-width: thin;
+    scrollbar-color: var(--mu20-border) transparent;
+}
+
+/* ═══════════════════════════════════════════════
+   Responsive Breakpoints
+   ═══════════════════════════════════════════════ */
+
+/* Narrow: hide tab labels, show icons only */
+@media (max-width: 600px) {
+    .mu20-tab__label { display: none; }
+    .mu20-tab { padding: 0 8px; }
+    .mu20-header__title { font-size: 13px; }
+    .mu20-clock { display: none; }
+    .mu20-grid {
+        grid-template-columns: 1fr;
+        padding: 8px;
+        gap: 8px;
+    }
+    .mu20-reports-sidebar { width: 140px; min-width: 120px; }
+}
+
+/* Very narrow: stack header */
+@media (max-width: 400px) {
+    .mu20-header {
+        flex-wrap: wrap;
+        height: auto;
+        padding: 6px 8px;
+        gap: 4px;
+    }
+    .mu20-tab-bar { gap: 1px; padding: 0 4px; }
+}
+
+/* ═══════════════════════════════════════════════
+   Fullscreen Mode
+   ═══════════════════════════════════════════════ */
+:host(.mu20-fullscreen) {
+    position: fixed !important;
+    inset: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important;
+    z-index: 99999 !important;
+}
+
+/* ═══════════════════════════════════════════════
+   Light Theme Override
+   ═══════════════════════════════════════════════ */
+:host(.mu20-theme-light) {
+    --mu20-bg:           #ffffff;
+    --mu20-surface:      #f6f8fa;
+    --mu20-surface-alt:  #eaeef2;
+    --mu20-border:       #d0d7de;
+    --mu20-border-light: #e1e4e8;
+    --mu20-text:         #1f2328;
+    --mu20-text-dim:     #656d76;
+    --mu20-text-muted:   #8c959f;
+    --mu20-accent:       #0969da;
+    --mu20-accent-hover: #0550ae;
+    --mu20-shadow:       0 2px 8px rgba(0,0,0,.1);
+    --mu20-shadow-lg:    0 8px 24px rgba(0,0,0,.15);
+}
+
+/* ═══════════════════════════════════════════════
+   Print Styles
+   ═══════════════════════════════════════════════ */
+@media print {
+    :host {
+        --mu20-bg:      #fff;
+        --mu20-surface: #fff;
+        --mu20-text:    #000;
+        --mu20-border:  #ccc;
+    }
+    .mu20-shell {
+        height: auto;
+        overflow: visible;
+    }
+    .mu20-tab-bar,
+    .mu20-fullscreen-btn,
+    .mu20-demo-badge,
+    .mu20-search-overlay,
+    .mu20-confirm-overlay { display: none !important; }
+
+    .mu20-tab-content {
+        display: block !important;
+        position: static !important;
+        overflow: visible !important;
+        page-break-inside: avoid;
+    }
+    .mu20-content {
+        overflow: visible;
+        height: auto;
+    }
+    .mu20-card {
+        box-shadow: none;
+        border: 1px solid #ccc;
+        break-inside: avoid;
+    }
+}
+
+/* ── Event Frames Tab ── */
+.mu20-ef-root { display: flex; flex-direction: column; height: 100%; }
+.mu20-ef-toggle-bar { display: flex; gap: 8px; padding: 8px 12px; border-bottom: 1px solid var(--mu20-border); }
+.mu20-ef-content { flex: 1; overflow-y: auto; padding: 12px; }
+.mu20-ef-empty { text-align: center; color: var(--mu20-text-secondary); padding: 48px 0; font-size: 14px; }
+.mu20-ef-timeline-row { display: flex; align-items: center; margin-bottom: 4px; }
+.mu20-ef-timeline-label {
+    width: 120px; flex-shrink: 0; font-size: 11px;
+    color: var(--mu20-text); text-align: start; padding-inline-end: 8px;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.mu20-ef-timeline-track {
+    flex: 1; height: 16px; position: relative;
+    background: rgba(255,255,255,0.04); border-radius: 3px;
+}
+.mu20-ef-bar {
+    position: absolute; top: 2px; height: 12px; border-radius: 2px;
+    background: var(--mu20-ok); opacity: 0.7; transition: opacity 0.2s;
+}
+.mu20-ef-bar:hover { opacity: 1; }
+.mu20-ef-bar--active {
+    background: var(--mu20-accent);
+    animation: mu20-ef-pulse 2s infinite;
+}
+@keyframes mu20-ef-pulse { 0%, 100% { opacity: 0.7; } 50% { opacity: 1; } }
+.mu20-ef-table { width: 100%; }
+.mu20-ef-row--active { background: rgba(46, 204, 113, 0.08); }
+
+/* ═══════════════════════════════════════════════
+   Owner Filter Chips & Card Enrichment
+   (Task 6: Owner Grouping + Card Enrichment)
+   ═══════════════════════════════════════════════ */
+
+/* ── Owner Filter Chips ── */
+.mu20-owner-filter {
+    display: flex; gap: 8px; padding: 8px 12px;
+    border-bottom: 1px solid var(--mu20-border);
+}
+.mu20-chip {
+    padding: 4px 12px; border-radius: 16px; border: 1px solid var(--mu20-border);
+    background: transparent; color: var(--mu20-text-dim);
+    font-family: var(--mu20-font); font-size: 12px; cursor: pointer; transition: all 0.2s;
+}
+.mu20-chip--active { background: var(--mu20-accent); color: #fff; border-color: var(--mu20-accent); }
+.mu20-chip-count { font-weight: 700; }
+
+/* ── Owner Badge ── */
+.mu20-owner-badge {
+    display: inline-block; padding: 1px 6px; border-radius: 3px;
+    font-size: 10px; font-weight: 600; margin-inline-start: 6px; vertical-align: middle;
+}
+.mu20-owner-badge--hhi { background: #1f3a5f; color: #7eb8ff; }
+.mu20-owner-badge--private { background: #3f1f5f; color: #c89eff; }
+.mu20-owner-badge--unknown { background: #333; color: #888; }
+
+/* ── Designation Badge ── */
+.mu20-designation {
+    display: inline-block; padding: 1px 5px; border-radius: 3px;
+    font-size: 10px; font-family: monospace; background: rgba(255,255,255,0.07);
+    color: var(--mu20-text-dim); margin-inline-end: 6px;
+}
+
+/* ── Hours Left ── */
+.mu20-hours-left {
+    font-size: 11px; color: var(--mu20-text-dim); padding: 2px 0 0 0; text-align: end;
+}
+
+/* ── No-Quota Styling ── */
+.mu20-card.mu20-no-quota { opacity: 0.6; }
+.mu20-card.mu20-no-quota .mu20-quota-bar__fill { background: #555; }
+
+/* ── Stale Styling ── */
+.mu20-card.mu20-stale { border-style: dashed; }
+.mu20-stale-icon { color: #f0ad4e; margin-inline-start: 4px; font-size: 14px; }
+
+/* ── Active Month Dot ── */
+.mu20-active-month-dot {
+    display: inline-block; width: 6px; height: 6px; border-radius: 50%;
+    margin-inline-start: 4px; vertical-align: middle;
+}
+.mu20-active-month-dot--current { background: var(--mu20-green); }
+.mu20-active-month-dot--old { background: var(--mu20-text-dim); }
+
+/* ── EF Active Indicator ── */
+.mu20-ef-active {
+    display: inline-block; width: 8px; height: 8px; border-radius: 50%;
+    background: var(--mu20-green); box-shadow: 0 0 4px var(--mu20-green);
+    margin-inline-start: 4px; vertical-align: middle;
+}
+
+/* ── Global Search (orchestrator overlay) ── */
+.mu20-search-overlay {
+    display:none; position:absolute; top:0; left:0; right:0; bottom:0;
+    background:rgba(0,0,0,0.7); z-index:var(--mu20-z-overlay);
+    justify-content:center; align-items:flex-start; padding-top:80px;
+}
+.mu20-search-overlay .mu20-search-input {
+    width:360px; padding:10px 14px; font-size:14px; border:1px solid #30363d;
+    background:#161b22; color:#c9d1d9; border-radius:8px 8px 0 0;
+    outline:none; direction:rtl;
+}
+.mu20-search-overlay .mu20-search-input:focus { border-color:#58a6ff; }
+.mu20-search-results {
+    width:360px; max-height:300px; overflow-y:auto;
+    background:#161b22; border:1px solid #30363d; border-top:none;
+    border-radius:0 0 8px 8px;
+}
+.mu20-search-item {
+    padding:8px 14px; cursor:pointer; font-size:13px; color:#c9d1d9;
+    border-bottom:1px solid #21262d; direction:rtl;
+}
+.mu20-search-item:hover { background:#21262d; }
+.mu20-search-item:last-child { border-bottom:none; }
+
+/* ── Highlight flash ── */
+@keyframes mu20-flash { 0%,100% { box-shadow:none; } 50% { box-shadow:0 0 0 3px #58a6ff; } }
+.mu20-highlight-flash { animation: mu20-flash 0.5s ease 3; }

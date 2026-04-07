@@ -1,0 +1,2619 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<!--
+   ______                            __
+  / ____/___  ____ ___  ____  __  __/ /____  _____
+ / /   / __ \/ __ `__ \/ __ \/ / / / __/ _ \/ ___/
+/ /___/ /_/ / / / / / / /_/ / /_/ / /_/  __/ /
+\____/\____/_/ /_/ /_/ .___/\__,_/\__/\___/_/
+                    /_/
+        Created with Perplexity Computer
+        https://www.perplexity.ai/computer
+-->
+<meta name="generator" content="Perplexity Computer">
+<meta name="author" content="Perplexity Computer">
+<meta property="og:see_also" content="https://www.perplexity.ai/computer">
+<link rel="author" href="https://www.perplexity.ai/computer">
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>מדריך שימוש — PI Vision QA v4.2.0-R300</title>
+<meta name="description" content="מדריך שימוש מלא ואינטראקטיבי לאפליקציית PI Vision QA גרסה 2.4.0">
+<!-- Fonts (local bundle for offline use; no CDN required) -->
+<link rel="stylesheet" href="fonts/heebo.css">
+
+<style>
+/* ============================================
+   CSS CUSTOM PROPERTIES
+   ============================================ */
+:root {
+  --bg-primary: #0a0f1e;
+  --bg-card: #0d1b2a;
+  --bg-elevated: #1a2744;
+  --bg-hover: #223355;
+  --accent-teal: #00d4ff;
+  --accent-purple: #a855f7;
+  --accent-green: #10b981;
+  --accent-amber: #f59e0b;
+  --accent-red: #ef4444;
+  --text-primary: #e8edf5;
+  --text-secondary: #8899b4;
+  --text-muted: #5a6a85;
+  --border-color: #1e3050;
+  --border-glow: rgba(0, 212, 255, 0.15);
+  --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.3);
+  --shadow-glow: 0 0 30px rgba(0, 212, 255, 0.08);
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --font-family: 'Heebo', sans-serif;
+  --transition-fast: 0.2s ease;
+  --transition-normal: 0.35s ease;
+  --transition-slow: 0.6s ease;
+  --sidebar-width: 280px;
+  --topbar-height: 4px;
+}
+
+/* ============================================
+   RESET & BASE
+   ============================================ */
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 80px;
+  font-size: 16px;
+}
+
+body {
+  font-family: var(--font-family);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  line-height: 1.7;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+::selection {
+  background: rgba(0, 212, 255, 0.3);
+  color: #fff;
+}
+
+a {
+  color: var(--accent-teal);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+a:hover {
+  color: #33e0ff;
+}
+
+img { max-width: 100%; }
+
+/* ============================================
+   SCROLL PROGRESS BAR
+   ============================================ */
+#progress-bar {
+  position: fixed;
+  top: 0;
+  right: 0;
+  height: var(--topbar-height);
+  background: linear-gradient(90deg, var(--accent-teal), var(--accent-purple));
+  width: 0%;
+  z-index: 10000;
+  transition: width 0.1s linear;
+  border-radius: 0 0 0 2px;
+}
+
+/* ============================================
+   SIDEBAR NAVIGATION
+   ============================================ */
+.sidebar {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: var(--sidebar-width);
+  height: 100vh;
+  background: var(--bg-card);
+  border-left: 1px solid var(--border-color);
+  z-index: 1000;
+  overflow-y: auto;
+  padding: 24px 0;
+  transition: transform var(--transition-normal);
+  scrollbar-width: thin;
+  scrollbar-color: var(--bg-elevated) transparent;
+}
+
+.sidebar::-webkit-scrollbar {
+  width: 4px;
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+  background: var(--bg-elevated);
+  border-radius: 2px;
+}
+
+.sidebar-header {
+  padding: 0 20px 20px;
+  border-bottom: 1px solid var(--border-color);
+  margin-bottom: 12px;
+}
+
+.sidebar-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.sidebar-logo svg {
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+}
+
+.sidebar-logo span {
+  font-weight: 700;
+  font-size: 1rem;
+  color: var(--accent-teal);
+}
+
+.sidebar-search {
+  position: relative;
+}
+
+.sidebar-search input {
+  width: 100%;
+  padding: 8px 12px 8px 32px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-family: var(--font-family);
+  font-size: 0.85rem;
+  outline: none;
+  transition: border-color var(--transition-fast);
+}
+
+.sidebar-search input:focus {
+  border-color: var(--accent-teal);
+}
+
+.sidebar-search .search-icon {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+.nav-list {
+  list-style: none;
+  padding: 0 8px;
+}
+
+.nav-item {
+  margin-bottom: 2px;
+}
+
+.nav-link {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  font-size: 0.88rem;
+  font-weight: 400;
+  transition: all var(--transition-fast);
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.nav-link:hover {
+  background: var(--bg-elevated);
+  color: var(--text-primary);
+}
+
+.nav-link.active {
+  background: rgba(0, 212, 255, 0.1);
+  color: var(--accent-teal);
+  font-weight: 500;
+}
+
+.nav-link .nav-icon {
+  font-size: 1rem;
+  width: 22px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.nav-link .nav-number {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  margin-right: auto;
+  font-weight: 300;
+}
+
+/* ============================================
+   HAMBURGER MENU (MOBILE)
+   ============================================ */
+.hamburger {
+  display: none;
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  z-index: 2000;
+  width: 44px;
+  height: 44px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  transition: background var(--transition-fast);
+}
+
+.hamburger:hover {
+  background: var(--bg-elevated);
+}
+
+.hamburger span {
+  display: block;
+  width: 20px;
+  height: 2px;
+  background: var(--text-primary);
+  border-radius: 1px;
+  transition: all var(--transition-fast);
+}
+
+.hamburger.open span:nth-child(1) {
+  transform: rotate(45deg) translate(5px, 5px);
+}
+
+.hamburger.open span:nth-child(2) {
+  opacity: 0;
+}
+
+.hamburger.open span:nth-child(3) {
+  transform: rotate(-45deg) translate(5px, -5px);
+}
+
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  z-index: 999;
+  backdrop-filter: blur(4px);
+}
+
+/* ============================================
+   MAIN CONTENT
+   ============================================ */
+.main-content {
+  margin-right: var(--sidebar-width);
+  padding: 0 40px 80px;
+  max-width: 1000px;
+}
+
+/* ============================================
+   HERO SECTION
+   ============================================ */
+.hero {
+  min-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 100px 20px 60px;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  right: -30%;
+  width: 800px;
+  height: 800px;
+  background: radial-gradient(circle, rgba(0, 212, 255, 0.06) 0%, transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.hero::after {
+  content: '';
+  position: absolute;
+  bottom: -30%;
+  left: -20%;
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(circle, rgba(168, 85, 247, 0.04) 0%, transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.hero-logo {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  margin-bottom: 32px;
+}
+
+.hero-shield {
+  width: 120px;
+  height: 120px;
+  position: relative;
+}
+
+.shield-outer {
+  position: absolute;
+  inset: 0;
+  border: 3px solid var(--accent-teal);
+  border-radius: 50% 50% 50% 50% / 40% 40% 60% 60%;
+  animation: shieldPulse 3s ease-in-out infinite;
+}
+
+.shield-inner {
+  position: absolute;
+  inset: 12px;
+  background: linear-gradient(135deg, rgba(0, 212, 255, 0.15), rgba(168, 85, 247, 0.1));
+  border-radius: 50% 50% 50% 50% / 40% 40% 60% 60%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.shield-check {
+  width: 40px;
+  height: 40px;
+  position: relative;
+}
+
+.shield-check::before {
+  content: '';
+  position: absolute;
+  bottom: 12px;
+  right: 20px;
+  width: 16px;
+  height: 2.5px;
+  background: var(--accent-green);
+  transform: rotate(45deg);
+  border-radius: 2px;
+  animation: checkDraw 1.5s ease-out 0.5s both;
+}
+
+.shield-check::after {
+  content: '';
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  width: 28px;
+  height: 2.5px;
+  background: var(--accent-green);
+  transform: rotate(-45deg);
+  border-radius: 2px;
+  animation: checkDraw 1.5s ease-out 0.8s both;
+}
+
+@keyframes shieldPulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(0, 212, 255, 0.2); }
+  50% { box-shadow: 0 0 20px 4px rgba(0, 212, 255, 0.1); }
+}
+
+@keyframes checkDraw {
+  0% { width: 0; opacity: 0; }
+  50% { opacity: 1; }
+  100% { opacity: 1; }
+}
+
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 16px;
+  background: rgba(0, 212, 255, 0.1);
+  border: 1px solid rgba(0, 212, 255, 0.25);
+  border-radius: 999px;
+  font-size: 0.8rem;
+  color: var(--accent-teal);
+  font-weight: 500;
+  margin-bottom: 24px;
+}
+
+.hero-badge .dot {
+  width: 6px;
+  height: 6px;
+  background: var(--accent-green);
+  border-radius: 50%;
+  animation: blink 2s infinite;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+.hero h1 {
+  font-size: clamp(2rem, 5vw, 3.2rem);
+  font-weight: 800;
+  background: linear-gradient(135deg, var(--text-primary) 0%, var(--accent-teal) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 16px;
+  line-height: 1.3;
+}
+
+.hero-subtitle {
+  font-size: clamp(1rem, 2vw, 1.2rem);
+  color: var(--text-secondary);
+  font-weight: 300;
+  max-width: 600px;
+  margin-bottom: 40px;
+}
+
+.hero-stats {
+  display: flex;
+  gap: 32px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.stat-item {
+  text-align: center;
+  padding: 16px 24px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  min-width: 130px;
+  transition: transform var(--transition-fast), border-color var(--transition-fast);
+}
+
+.stat-item:hover {
+  transform: translateY(-2px);
+  border-color: var(--accent-teal);
+}
+
+.stat-number {
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--accent-teal);
+  line-height: 1.2;
+}
+
+.stat-number.purple { color: var(--accent-purple); }
+.stat-number.green { color: var(--accent-green); }
+.stat-number.amber { color: var(--accent-amber); }
+
+.stat-label {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  font-weight: 400;
+  margin-top: 4px;
+}
+
+/* ============================================
+   SECTION STYLES
+   ============================================ */
+.section {
+  padding: 80px 0;
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+
+.section.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.section-header {
+  margin-bottom: 40px;
+}
+
+.section-number {
+  font-size: 0.75rem;
+  color: var(--accent-teal);
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.section-number::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(to left, transparent, var(--border-color));
+  max-width: 200px;
+}
+
+.section h2 {
+  font-size: clamp(1.6rem, 3vw, 2.2rem);
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 12px;
+}
+
+.section-desc {
+  color: var(--text-secondary);
+  font-size: 1rem;
+  max-width: 700px;
+}
+
+/* ============================================
+   CARDS
+   ============================================ */
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: 28px;
+  margin-bottom: 16px;
+  transition: all var(--transition-fast);
+}
+
+.card:hover {
+  border-color: rgba(0, 212, 255, 0.2);
+  box-shadow: var(--shadow-glow);
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.card-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+
+.card-icon.teal { background: rgba(0, 212, 255, 0.12); }
+.card-icon.purple { background: rgba(168, 85, 247, 0.12); }
+.card-icon.green { background: rgba(16, 185, 129, 0.12); }
+.card-icon.amber { background: rgba(245, 158, 11, 0.12); }
+
+.card h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.card p, .card li {
+  color: var(--text-secondary);
+  font-size: 0.92rem;
+  line-height: 1.8;
+}
+
+/* ============================================
+   NUMBERED STEPS
+   ============================================ */
+.steps {
+  counter-reset: step;
+}
+
+.step-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: 24px 28px;
+  margin-bottom: 16px;
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+  transition: all var(--transition-fast);
+}
+
+.step-card:hover {
+  border-color: rgba(0, 212, 255, 0.2);
+}
+
+.step-number {
+  counter-increment: step;
+  width: 36px;
+  height: 36px;
+  background: linear-gradient(135deg, var(--accent-teal), var(--accent-purple));
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: #fff;
+  flex-shrink: 0;
+}
+
+.step-content h4 {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.step-content p {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+/* ============================================
+   CODE BLOCKS
+   ============================================ */
+.code-block {
+  position: relative;
+  background: #050a15;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 16px 20px;
+  margin: 12px 0;
+  overflow-x: auto;
+  font-family: 'Courier New', monospace;
+  font-size: 0.85rem;
+  line-height: 1.7;
+  direction: ltr;
+  text-align: left;
+}
+
+.code-block code {
+  color: #b8c9e0;
+}
+
+.code-block .cmd { color: var(--accent-teal); }
+.code-block .flag { color: var(--accent-purple); }
+.code-block .str { color: var(--accent-green); }
+.code-block .comment { color: var(--text-muted); font-style: italic; }
+.code-block .keyword { color: var(--accent-amber); }
+
+.copy-btn {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  padding: 4px 10px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  cursor: pointer;
+  font-family: var(--font-family);
+  transition: all var(--transition-fast);
+}
+
+.copy-btn:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.copy-btn.copied {
+  color: var(--accent-green);
+  border-color: var(--accent-green);
+}
+
+/* inline code */
+code.inline {
+  background: var(--bg-elevated);
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.85em;
+  font-family: 'Courier New', monospace;
+  color: var(--accent-teal);
+  direction: ltr;
+  unicode-bidi: embed;
+}
+
+/* ============================================
+   TABS
+   ============================================ */
+.tabs-container {
+  margin: 24px 0;
+}
+
+.tab-buttons {
+  display: flex;
+  gap: 4px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 4px;
+  overflow-x: auto;
+  margin-bottom: 20px;
+}
+
+.tab-btn {
+  padding: 10px 20px;
+  background: transparent;
+  border: none;
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  font-family: var(--font-family);
+  font-size: 0.88rem;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all var(--transition-fast);
+}
+
+.tab-btn:hover {
+  color: var(--text-primary);
+  background: var(--bg-elevated);
+}
+
+.tab-btn.active {
+  background: var(--accent-teal);
+  color: var(--bg-primary);
+  font-weight: 600;
+}
+
+.tab-panel {
+  display: none;
+  animation: fadeIn 0.4s ease;
+}
+
+.tab-panel.active {
+  display: block;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ============================================
+   EXPANDABLE / ACCORDION
+   ============================================ */
+.expandable {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  margin-bottom: 8px;
+  overflow: hidden;
+  transition: border-color var(--transition-fast);
+}
+
+.expandable:hover {
+  border-color: rgba(0, 212, 255, 0.15);
+}
+
+.expandable-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  cursor: pointer;
+  user-select: none;
+  transition: background var(--transition-fast);
+}
+
+.expandable-header:hover {
+  background: rgba(0, 212, 255, 0.03);
+}
+
+.expandable-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 500;
+  font-size: 0.95rem;
+}
+
+.expandable-arrow {
+  transition: transform var(--transition-fast);
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+.expandable.open .expandable-arrow {
+  transform: rotate(180deg);
+}
+
+.expandable-body {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.4s ease;
+}
+
+.expandable.open .expandable-body {
+  max-height: 2000px;
+}
+
+.expandable-content {
+  padding: 0 20px 20px;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  line-height: 1.8;
+}
+
+/* ============================================
+   TABLES
+   ============================================ */
+.table-wrapper {
+  overflow-x: auto;
+  margin: 16px 0;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-color);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+thead {
+  background: var(--bg-elevated);
+}
+
+th {
+  padding: 12px 16px;
+  text-align: right;
+  font-weight: 600;
+  color: var(--text-primary);
+  border-bottom: 1px solid var(--border-color);
+  white-space: nowrap;
+}
+
+td {
+  padding: 10px 16px;
+  border-bottom: 1px solid rgba(30, 48, 80, 0.5);
+  color: var(--text-secondary);
+}
+
+tr:last-child td {
+  border-bottom: none;
+}
+
+tr:hover td {
+  background: rgba(0, 212, 255, 0.02);
+}
+
+.method-badge {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  font-family: 'Courier New', monospace;
+  direction: ltr;
+}
+
+.method-badge.get { background: rgba(16, 185, 129, 0.15); color: var(--accent-green); }
+.method-badge.post { background: rgba(0, 212, 255, 0.15); color: var(--accent-teal); }
+
+td code {
+  background: var(--bg-card);
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-size: 0.82rem;
+  font-family: 'Courier New', monospace;
+  color: var(--accent-purple);
+  direction: ltr;
+  unicode-bidi: embed;
+}
+
+/* ============================================
+   TIMELINE (CHANGELOG)
+   ============================================ */
+.timeline {
+  position: relative;
+  padding-right: 32px;
+}
+
+.timeline::before {
+  content: '';
+  position: absolute;
+  right: 8px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: linear-gradient(to bottom, var(--accent-teal), var(--accent-purple), transparent);
+}
+
+.timeline-item {
+  position: relative;
+  margin-bottom: 32px;
+  padding-right: 24px;
+}
+
+.timeline-dot {
+  position: absolute;
+  right: -30px;
+  top: 6px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--accent-teal);
+  border: 3px solid var(--bg-primary);
+  z-index: 1;
+}
+
+.timeline-item:nth-child(2) .timeline-dot { background: var(--accent-purple); }
+.timeline-item:nth-child(3) .timeline-dot { background: var(--accent-green); }
+.timeline-item:nth-child(4) .timeline-dot { background: var(--accent-amber); }
+.timeline-item:nth-child(5) .timeline-dot { background: var(--accent-teal); }
+.timeline-item:nth-child(6) .timeline-dot { background: var(--accent-purple); }
+.timeline-item:nth-child(7) .timeline-dot { background: var(--accent-green); }
+
+.version-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 12px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--accent-teal);
+  margin-bottom: 8px;
+  direction: ltr;
+}
+
+.version-date {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  font-weight: 400;
+}
+
+.timeline-content {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 20px;
+}
+
+.timeline-content ul {
+  list-style: none;
+  padding: 0;
+}
+
+.timeline-content li {
+  padding: 4px 0;
+  color: var(--text-secondary);
+  font-size: 0.88rem;
+  position: relative;
+  padding-right: 18px;
+}
+
+.timeline-content li::before {
+  content: '→';
+  position: absolute;
+  right: 0;
+  color: var(--accent-teal);
+}
+
+/* ============================================
+   ARCHITECTURE DIAGRAM
+   ============================================ */
+.arch-diagram {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  margin: 24px 0;
+}
+
+.arch-box {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  text-align: center;
+  transition: all var(--transition-fast);
+  position: relative;
+}
+
+.arch-box:hover {
+  border-color: var(--accent-teal);
+  transform: translateY(-2px);
+}
+
+.arch-box-icon {
+  width: 48px;
+  height: 48px;
+  margin: 0 auto 12px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+}
+
+.arch-box h4 {
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.arch-box p {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.arch-box.teal { border-top: 3px solid var(--accent-teal); }
+.arch-box.purple { border-top: 3px solid var(--accent-purple); }
+.arch-box.green { border-top: 3px solid var(--accent-green); }
+.arch-box.amber { border-top: 3px solid var(--accent-amber); }
+
+.arch-connector {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  padding: 8px;
+}
+
+.arch-connector .arrow-line {
+  width: 60px;
+  height: 2px;
+  background: linear-gradient(to left, var(--accent-teal), var(--accent-purple));
+  border-radius: 1px;
+}
+
+/* FILE TREE */
+.file-tree {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 20px 24px;
+  font-family: 'Courier New', monospace;
+  font-size: 0.85rem;
+  direction: ltr;
+  text-align: left;
+  line-height: 1.9;
+  color: var(--text-secondary);
+}
+
+.file-tree .folder { color: var(--accent-amber); cursor: pointer; }
+.file-tree .file { color: var(--text-secondary); }
+.file-tree .highlight { color: var(--accent-teal); }
+.file-tree .sub { display: none; }
+.file-tree .folder.open + .sub { display: block; }
+
+/* ============================================
+   FEATURE LIST
+   ============================================ */
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+  margin: 24px 0;
+}
+
+.feature-item {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 20px;
+  transition: all var(--transition-fast);
+}
+
+.feature-item:hover {
+  border-color: rgba(0, 212, 255, 0.2);
+  transform: translateY(-2px);
+}
+
+.feature-icon {
+  font-size: 1.5rem;
+  margin-bottom: 10px;
+}
+
+.feature-item h4 {
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.feature-item p {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+
+/* SHORTCUT KEY STYLING */
+.kbd {
+  display: inline-block;
+  padding: 2px 8px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  font-family: 'Courier New', monospace;
+  font-size: 0.8rem;
+  color: var(--text-primary);
+  direction: ltr;
+  unicode-bidi: embed;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+}
+
+/* ============================================
+   TOOLTIP
+   ============================================ */
+.tooltip-trigger {
+  position: relative;
+  border-bottom: 1px dashed var(--text-muted);
+  cursor: help;
+}
+
+.tooltip-trigger .tooltip-text {
+  visibility: hidden;
+  opacity: 0;
+  position: absolute;
+  bottom: 120%;
+  right: 50%;
+  transform: translateX(50%);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  padding: 8px 14px;
+  font-size: 0.8rem;
+  color: var(--text-primary);
+  white-space: nowrap;
+  z-index: 100;
+  transition: opacity var(--transition-fast);
+  pointer-events: none;
+  box-shadow: var(--shadow-card);
+}
+
+.tooltip-trigger:hover .tooltip-text {
+  visibility: visible;
+  opacity: 1;
+}
+
+/* ============================================
+   BACK TO TOP
+   ============================================ */
+.back-to-top {
+  position: fixed;
+  bottom: 32px;
+  left: 32px;
+  width: 44px;
+  height: 44px;
+  background: var(--accent-teal);
+  border: none;
+  border-radius: 50%;
+  color: var(--bg-primary);
+  font-size: 1.2rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(16px);
+  transition: all var(--transition-normal);
+  z-index: 500;
+  box-shadow: 0 4px 20px rgba(0, 212, 255, 0.3);
+}
+
+.back-to-top.visible {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.back-to-top:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 28px rgba(0, 212, 255, 0.4);
+}
+
+/* ============================================
+   FOOTER
+   ============================================ */
+.footer {
+  margin-right: var(--sidebar-width);
+  padding: 40px;
+  border-top: 1px solid var(--border-color);
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+.footer-links {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.footer a {
+  color: var(--text-secondary);
+  transition: color var(--transition-fast);
+}
+
+.footer a:hover {
+  color: var(--accent-teal);
+}
+
+/* ============================================
+   BADGE STYLES
+   ============================================ */
+.badge {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+.badge.teal { background: rgba(0, 212, 255, 0.12); color: var(--accent-teal); }
+.badge.purple { background: rgba(168, 85, 247, 0.12); color: var(--accent-purple); }
+.badge.green { background: rgba(16, 185, 129, 0.12); color: var(--accent-green); }
+.badge.amber { background: rgba(245, 158, 11, 0.12); color: var(--accent-amber); }
+.badge.red { background: rgba(239, 68, 68, 0.12); color: var(--accent-red); }
+
+/* ============================================
+   LIST STYLES
+   ============================================ */
+.styled-list {
+  list-style: none;
+  padding: 0;
+}
+
+.styled-list li {
+  padding: 6px 0 6px 24px;
+  position: relative;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+.styled-list li::before {
+  content: '◆';
+  position: absolute;
+  right: 0;
+  color: var(--accent-teal);
+  font-size: 0.6rem;
+  top: 10px;
+}
+
+.styled-list.purple li::before { color: var(--accent-purple); }
+.styled-list.green li::before { color: var(--accent-green); }
+.styled-list.amber li::before { color: var(--accent-amber); }
+
+/* QUICK ACTIONS GRID */
+.quick-actions {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 10px;
+  margin: 16px 0;
+}
+
+.quick-action {
+  padding: 12px 16px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.quick-action .qa-num {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--bg-elevated);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  color: var(--accent-teal);
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+/* AGENT ACTIONS */
+.agent-actions {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+  margin: 20px 0;
+}
+
+.agent-action {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 20px;
+  transition: all var(--transition-fast);
+}
+
+.agent-action:hover {
+  border-color: rgba(168, 85, 247, 0.3);
+}
+
+.agent-action-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.agent-action-icon {
+  font-size: 1.3rem;
+}
+
+.agent-action h4 {
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.agent-action p {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+@media (max-width: 900px) {
+  .sidebar {
+    transform: translateX(100%);
+  }
+
+  .sidebar.open {
+    transform: translateX(0);
+  }
+
+  .sidebar-overlay.active {
+    display: block;
+  }
+
+  .hamburger {
+    display: flex;
+  }
+
+  .main-content {
+    margin-right: 0;
+    padding: 0 20px 60px;
+  }
+
+  .footer {
+    margin-right: 0;
+    padding: 32px 20px;
+  }
+
+  .hero {
+    padding: 80px 16px 40px;
+    min-height: 70vh;
+  }
+
+  .hero-stats {
+    gap: 16px;
+  }
+
+  .stat-item {
+    min-width: 100px;
+    padding: 12px 16px;
+  }
+
+  .arch-diagram {
+    grid-template-columns: 1fr;
+  }
+
+  .features-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .tab-buttons {
+    flex-wrap: nowrap;
+  }
+
+  .step-card {
+    flex-direction: column;
+    gap: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero h1 {
+    font-size: 1.6rem;
+  }
+
+  .hero-stats {
+    gap: 8px;
+  }
+
+  .stat-item {
+    min-width: 80px;
+    padding: 10px 12px;
+  }
+
+  .stat-number {
+    font-size: 1.4rem;
+  }
+
+  .quick-actions {
+    grid-template-columns: 1fr;
+  }
+
+  .agent-actions {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ============================================
+   PRINT STYLES
+   ============================================ */
+@media print {
+  .sidebar, .hamburger, .back-to-top, #progress-bar, .sidebar-overlay, .copy-btn {
+    display: none !important;
+  }
+
+  .main-content {
+    margin-right: 0;
+  }
+
+  .footer {
+    margin-right: 0;
+  }
+
+  body {
+    background: #fff;
+    color: #1a1a1a;
+  }
+
+  .section {
+    opacity: 1 !important;
+    transform: none !important;
+    break-inside: avoid;
+  }
+
+  .card, .step-card, .expandable, .feature-item, .agent-action {
+    background: #f9f9f9;
+    border-color: #ddd;
+    break-inside: avoid;
+  }
+
+  .code-block {
+    background: #f0f0f0;
+    border-color: #ccc;
+    color: #333;
+  }
+
+  a { color: #0066cc; }
+
+  .hero h1 {
+    -webkit-text-fill-color: initial;
+    background: none;
+    color: #111;
+  }
+
+  .hero {
+    min-height: auto;
+    padding: 40px 0;
+  }
+}
+</style>
+</head>
+<body>
+
+<!-- Progress Bar -->
+<div id="progress-bar"></div>
+
+<!-- Hamburger (mobile) -->
+<button class="hamburger" id="hamburger" aria-label="תפריט ניווט">
+  <span></span><span></span><span></span>
+</button>
+
+<!-- Sidebar Overlay -->
+<div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+<!-- Sidebar Navigation -->
+<nav class="sidebar" id="sidebar" role="navigation" aria-label="ניווט ראשי">
+  <div class="sidebar-header">
+    <div class="sidebar-logo">
+      <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="PI Vision Logo">
+        <path d="M16 2L28 8V20L16 30L4 20V8L16 2Z" stroke="currentColor" stroke-width="1.5" fill="none" style="color: var(--accent-teal)"/>
+        <path d="M10 16L14 20L22 12" stroke="var(--accent-green)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="16" cy="14" r="6" stroke="var(--accent-teal)" stroke-width="1" opacity="0.3"/>
+      </svg>
+      <span>PI Vision QA</span>
+    </div>
+    <div class="sidebar-search">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="toc-search" placeholder="חיפוש..." aria-label="חיפוש בתוכן העניינים">
+    </div>
+  </div>
+  <ul class="nav-list" id="nav-list">
+    <li class="nav-item"><a class="nav-link" href="#hero"><span class="nav-icon">🏠</span> דף ראשי</a></li>
+    <li class="nav-item"><a class="nav-link" href="#installation"><span class="nav-icon">⚙️</span> התקנה והפעלה <span class="nav-number">01</span></a></li>
+    <li class="nav-item"><a class="nav-link" href="#work-modes"><span class="nav-icon">🔧</span> מצבי עבודה <span class="nav-number">02</span></a></li>
+    <li class="nav-item"><a class="nav-link" href="#ai-assistant"><span class="nav-icon">🤖</span> עוזר AI <span class="nav-number">03</span></a></li>
+    <li class="nav-item"><a class="nav-link" href="#ai-agent"><span class="nav-icon">🧠</span> סוכן AI אוטונומי <span class="nav-number">04</span></a></li>
+    <li class="nav-item"><a class="nav-link" href="#windows-agent"><span class="nav-icon">🖥️</span> סוכן Windows <span class="nav-number">05</span></a></li>
+    <li class="nav-item"><a class="nav-link" href="#ux-features"><span class="nav-icon">✨</span> תכונות UX <span class="nav-number">06</span></a></li>
+    <li class="nav-item"><a class="nav-link" href="#shortcuts"><span class="nav-icon">⌨️</span> קיצורי מקלדת <span class="nav-number">07</span></a></li>
+    <li class="nav-item"><a class="nav-link" href="#architecture"><span class="nav-icon">🏗️</span> ארכיטקטורה טכנית <span class="nav-number">08</span></a></li>
+    <li class="nav-item"><a class="nav-link" href="#changelog"><span class="nav-icon">📋</span> מה חדש? <span class="nav-number">09</span></a></li>
+  </ul>
+</nav>
+
+<!-- Main Content -->
+<main class="main-content">
+
+  <!-- ============== HERO SECTION ============== -->
+  <section class="hero" id="hero">
+    <div class="hero-logo">
+      <div class="hero-shield">
+        <div class="shield-outer"></div>
+        <div class="shield-inner">
+          <div class="shield-check"></div>
+        </div>
+      </div>
+    </div>
+    <div class="hero-badge">
+      <span class="dot"></span>
+      v4.2.0-R300 — מרץ 2026
+    </div>
+    <h1>מדריך שימוש — PI Vision QA</h1>
+    <p class="hero-subtitle">חבילה מאוחדת לפיתוח ובדיקות סמלים מותאמים עבור PI Vision</p>
+    <div class="hero-stats">
+      <div class="stat-item">
+        <div class="stat-number" data-target="63">0</div>
+        <div class="stat-label">סמלים</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-number purple" data-target="4">0</div>
+        <div class="stat-label">מצבי עבודה</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-number green">AI</div>
+        <div class="stat-label">סוכן AI</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-number amber">Win</div>
+        <div class="stat-label">Windows Agent</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============== INSTALLATION SECTION ============== -->
+  <section class="section" id="installation">
+    <div class="section-header">
+      <div class="section-number">01 — התקנה והפעלה</div>
+      <h2>התקנה והפעלה</h2>
+      <p class="section-desc">שלבי ההתקנה וההפעלה של כל רכיבי המערכת — Frontend, Backend AI, סוכן Windows וסוכן Desktop.</p>
+    </div>
+
+    <!-- Prerequisites -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon teal">📦</div>
+        <h3>דרישות מקדימות</h3>
+      </div>
+      <ul class="styled-list">
+        <li><strong>Node.js</strong> — גרסה 16 ומעלה (לשרת הקבצים הסטטי)</li>
+        <li><strong>Python 3.9+</strong> — להפעלת שרת ה-AI והסוכנים</li>
+        <li><strong>pip</strong> — מנהל חבילות Python</li>
+        <li><strong>Git</strong> — לשכפול הפרויקט מ-GitHub</li>
+        <li><strong>ANTHROPIC_API_KEY</strong> — מפתח API של Claude (לפיצ׳רים של AI)</li>
+      </ul>
+    </div>
+
+    <!-- Steps -->
+    <div class="steps">
+      <div class="step-card">
+        <div class="step-number">1</div>
+        <div class="step-content">
+          <h4>שכפול הפרויקט מ-GitHub</h4>
+          <p>שכפלו את המאגר לתיקיה מקומית:</p>
+          <div class="code-block">
+            <button class="copy-btn" onclick="copyCode(this)">העתק</button>
+            <code><span class="cmd">git</span> <span class="flag">clone</span> https://github.com/danielleites/Symbols-for-copy-28.02.git
+<span class="cmd">cd</span> Symbols-for-copy-28.02</code>
+          </div>
+        </div>
+      </div>
+
+      <div class="step-card">
+        <div class="step-number">2</div>
+        <div class="step-content">
+          <h4>הפעלת Frontend</h4>
+          <p>הרצת שרת סטטי לאפליקציה. אם אין לכם <code class="inline">serve</code>, התקינו אותו:</p>
+          <div class="code-block">
+            <button class="copy-btn" onclick="copyCode(this)">העתק</button>
+            <code><span class="cmd">npm</span> <span class="flag">install</span> -g serve
+<span class="cmd">serve</span> . <span class="flag">-l</span> <span class="str">8080</span> <span class="flag">--no-clipboard</span></code>
+          </div>
+          <p>האפליקציה תהיה זמינה בכתובת <code class="inline">http://localhost:8080</code></p>
+        </div>
+      </div>
+
+      <div class="step-card">
+        <div class="step-number">3</div>
+        <div class="step-content">
+          <h4>הפעלת שרת AI Backend</h4>
+          <p>התקנת תלויות Python והפעלת שרת FastAPI:</p>
+          <div class="code-block">
+            <button class="copy-btn" onclick="copyCode(this)">העתק</button>
+            <code><span class="cmd">pip</span> <span class="flag">install</span> fastapi uvicorn anthropic
+<span class="cmd">python</span> ai-server.py</code>
+          </div>
+          <p>השרת יעלה על פורט <code class="inline">8000</code> כברירת מחדל.</p>
+        </div>
+      </div>
+
+      <div class="step-card">
+        <div class="step-number">4</div>
+        <div class="step-content">
+          <h4>הפעלת סוכן Windows</h4>
+          <p>אפליקציית System Tray שמנטרת שינויים בקבצים:</p>
+          <div class="code-block">
+            <button class="copy-btn" onclick="copyCode(this)">העתק</button>
+            <code><span class="cmd">cd</span> windows-agent
+<span class="cmd">pip</span> <span class="flag">install</span> -r requirements.txt
+<span class="cmd">python</span> piv_agent.py</code>
+          </div>
+        </div>
+      </div>
+
+      <div class="step-card">
+        <div class="step-number">5</div>
+        <div class="step-content">
+          <h4>הפעלת סוכן Desktop</h4>
+          <p>ממשק גרפי מלא (Tkinter) עם חיבור ישיר ל-Claude API:</p>
+          <div class="code-block">
+            <button class="copy-btn" onclick="copyCode(this)">העתק</button>
+            <code><span class="comment"># הגדרת משתנה סביבה</span>
+<span class="keyword">export</span> ANTHROPIC_API_KEY=<span class="str">"sk-ant-..."</span>
+<span class="cmd">python</span> desktop_agent.py</code>
+          </div>
+          <p>דורש את משתנה הסביבה <code class="inline">ANTHROPIC_API_KEY</code>.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============== WORK MODES SECTION ============== -->
+  <section class="section" id="work-modes">
+    <div class="section-header">
+      <div class="section-number">02 — מצבי עבודה</div>
+      <h2>מצבי עבודה</h2>
+      <p class="section-desc">ארבעה מצבי עבודה ייחודיים המאפשרים פיתוח, בדיקות, ניתוח וניווט בנתוני AF.</p>
+    </div>
+
+    <div class="tabs-container">
+      <div class="tab-buttons" role="tablist">
+        <button class="tab-btn active" data-tab="emulator" role="tab" aria-selected="true">אמולטור</button>
+        <button class="tab-btn" data-tab="qa" role="tab" aria-selected="false">בדיקת QA</button>
+        <button class="tab-btn" data-tab="combined" role="tab" aria-selected="false">אמולטור + QA</button>
+        <button class="tab-btn" data-tab="af-browser" role="tab" aria-selected="false">דפדפן AF</button>
+      </div>
+
+      <!-- Emulator Tab -->
+      <div class="tab-panel active" id="tab-emulator" role="tabpanel">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-icon teal">🖥️</div>
+            <h3>מצב אמולטור</h3>
+            <span class="badge teal">Ctrl+1</span>
+          </div>
+          <p>הרצת 63 סמלי PI Vision בסביבת אמולציה בדפדפן. הסמלים נטענים ב-iframe עם תמיכה מלאה ב-DevTools וכלים נוספים.</p>
+
+          <h4 style="margin-top: 20px; margin-bottom: 10px; font-size: 0.95rem;">תכונות עיקריות</h4>
+          <ul class="styled-list">
+            <li>DevTools מובנה — <span class="kbd">F12</span> לפתיחה/סגירה</li>
+            <li>דפדפן AF — <span class="kbd">F9</span> לגישה מהירה לנתוני AF</li>
+            <li>חיפוש סמלים — סינון מהיר לפי שם</li>
+            <li>בקרת גודל — S / M / L / Full</li>
+            <li>רענון iframe — <span class="kbd">Ctrl+R</span></li>
+          </ul>
+
+          <h4 style="margin-top: 20px; margin-bottom: 10px; font-size: 0.95rem;">קטגוריות סמלים</h4>
+          <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px;">
+            <span class="badge teal">מוגבלות</span>
+            <span class="badge purple">גרפים</span>
+            <span class="badge green">מדדים</span>
+            <span class="badge amber">ניטור</span>
+            <span class="badge red">נתונים</span>
+            <span class="badge teal">ניווט</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- QA Tab -->
+      <div class="tab-panel" id="tab-qa" role="tabpanel">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-icon purple">🔍</div>
+            <h3>מצב בדיקת QA</h3>
+            <span class="badge purple">Ctrl+2</span>
+          </div>
+          <p>ניתוח קוד אוטומטי וזיהוי בעיות בסמלים. כולל ניתוח סטטי (HTML/JS/CSS), זיהוי שגיאות Runtime, ומעקב רגרסיה.</p>
+
+          <h4 style="margin-top: 20px; margin-bottom: 10px; font-size: 0.95rem;">יכולות</h4>
+          <ul class="styled-list purple">
+            <li>ניתוח קוד אוטומטי — HTML, JavaScript, CSS</li>
+            <li>זיהוי שגיאות Runtime</li>
+            <li>צ׳קליסט בדיקות ידניות</li>
+            <li>אינטגרציה עם GitHub — טעינת סמלים מהמאגר</li>
+            <li>ייצוא תוצאות — PDF / CSV</li>
+            <li>מעקב רגרסיה — השוואה לבדיקות קודמות</li>
+            <li>גרף תלויות רשת — ניתוח קשרים בין רכיבים</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Combined Tab -->
+      <div class="tab-panel" id="tab-combined" role="tabpanel">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-icon green">🔗</div>
+            <h3>מצב משולב — אמולטור + QA</h3>
+            <span class="badge green">Ctrl+3 — מומלץ</span>
+          </div>
+          <p>המצב המומלץ לעבודה יומיומית. האמולטור מוצג במסך הראשי ובדיקות QA רצות ברקע. תפיסת שגיאות בזמן אמת.</p>
+
+          <h4 style="margin-top: 20px; margin-bottom: 10px; font-size: 0.95rem;">כיצד זה עובד</h4>
+          <ul class="styled-list green">
+            <li>האמולטור מוצג בחלק הראשי של המסך</li>
+            <li>בדיקות QA רצות ברקע באופן אוטומטי</li>
+            <li><span class="kbd">F10</span> — פתיחה/סגירה של פאנל ה-QA</li>
+            <li>גשר postMessage — תפיסת שגיאות בזמן אמת מה-iframe</li>
+            <li>זיהוי דינמי של שגיאות בסמלים רצים</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- AF Browser Tab -->
+      <div class="tab-panel" id="tab-af-browser" role="tabpanel">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-icon amber">🌐</div>
+            <h3>דפדפן AF</h3>
+            <span class="badge amber">Ctrl+4</span>
+          </div>
+          <p>דפדפן עץ מלא לנתוני PI AF עם חיפוש, ניווט היררכי ופאנל פרטי Attribute.</p>
+
+          <h4 style="margin-top: 20px; margin-bottom: 10px; font-size: 0.95rem;">נתונים זמינים</h4>
+          <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; margin: 12px 0;">
+            <div style="background: var(--bg-elevated); padding: 14px; border-radius: var(--radius-md); text-align: center;">
+              <div style="font-size: 1.4rem; font-weight: 700; color: var(--accent-teal);">853</div>
+              <div style="font-size: 0.78rem; color: var(--text-muted);">אלמנטים</div>
+            </div>
+            <div style="background: var(--bg-elevated); padding: 14px; border-radius: var(--radius-md); text-align: center;">
+              <div style="font-size: 1.4rem; font-weight: 700; color: var(--accent-purple);">8,656</div>
+              <div style="font-size: 0.78rem; color: var(--text-muted);">תכונות</div>
+            </div>
+            <div style="background: var(--bg-elevated); padding: 14px; border-radius: var(--radius-md); text-align: center;">
+              <div style="font-size: 1.4rem; font-weight: 700; color: var(--accent-green);">2,670</div>
+              <div style="font-size: 0.78rem; color: var(--text-muted);">PI Tags</div>
+            </div>
+            <div style="background: var(--bg-elevated); padding: 14px; border-radius: var(--radius-md); text-align: center;">
+              <div style="font-size: 1.4rem; font-weight: 700; color: var(--accent-amber);">840</div>
+              <div style="font-size: 0.78rem; color: var(--text-muted);">Event Frames</div>
+            </div>
+          </div>
+
+          <h4 style="margin-top: 20px; margin-bottom: 10px; font-size: 0.95rem;">5 אתרים</h4>
+          <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px;">
+            <span class="badge teal">אשקלון</span>
+            <span class="badge purple">חדרה</span>
+            <span class="badge green">אורות רבין</span>
+            <span class="badge amber">רוטנברג</span>
+            <span class="badge red">רדינג</span>
+          </div>
+
+          <ul class="styled-list amber" style="margin-top: 16px;">
+            <li>ניווט עץ היררכי עם חיפוש</li>
+            <li>פאנל פרטי Attribute לכל אלמנט</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============== AI ASSISTANT SECTION ============== -->
+  <section class="section" id="ai-assistant">
+    <div class="section-header">
+      <div class="section-number">03 — עוזר AI</div>
+      <h2>עוזר AI</h2>
+      <p class="section-desc">צ׳אט AI מבוסס Claude עם תמיכה ב-Streaming, ניתוח קוד סמלים, ופעולות מהירות.</p>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon purple">💬</div>
+        <h3>פתיחת הצ׳אט</h3>
+      </div>
+      <p>לפתיחת חלון הצ׳אט, השתמשו ב-<span class="kbd">Ctrl+Shift+I</span> או לחצו על אייקון הבועה בפינה. התשובות מוזרמות בזמן אמת (Streaming) משרת Claude.</p>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon teal">⚡</div>
+        <h3>10 פעולות מהירות</h3>
+      </div>
+      <div class="quick-actions">
+        <div class="quick-action"><span class="qa-num">1</span> נתח את הסמל הנוכחי</div>
+        <div class="quick-action"><span class="qa-num">2</span> מצא באגים בקוד</div>
+        <div class="quick-action"><span class="qa-num">3</span> הסבר את הקוד</div>
+        <div class="quick-action"><span class="qa-num">4</span> שפר ביצועים</div>
+        <div class="quick-action"><span class="qa-num">5</span> בדוק נגישות</div>
+        <div class="quick-action"><span class="qa-num">6</span> צור Unit Test</div>
+        <div class="quick-action"><span class="qa-num">7</span> המר ל-TypeScript</div>
+        <div class="quick-action"><span class="qa-num">8</span> בדוק תאימות PI Vision</div>
+        <div class="quick-action"><span class="qa-num">9</span> הצע שיפורי UI</div>
+        <div class="quick-action"><span class="qa-num">10</span> צור תיעוד לסמל</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon green">🗂️</div>
+        <h3>ניהול שיחות</h3>
+      </div>
+      <ul class="styled-list green">
+        <li><strong>ריבוי לשוניות</strong> — עד 4 שיחות במקביל</li>
+        <li><strong>ניתוח קוד סמל</strong> — שליחת HTML/JS/CSS של הסמל הנוכחי ל-AI</li>
+        <li><strong>העתקת קוד</strong> — כפתור העתקה על בלוקי קוד</li>
+        <li><strong>ייצוא שיחה</strong> — שמירה כקובץ טקסט</li>
+        <li><strong>התחברות אוטומטית</strong> — עד 3 ניסיונות חיבור מחדש בשגיאה</li>
+        <li><strong>היסטוריה</strong> — שמירת עד 50 הודעות אחרונות</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ============== AI AGENT SECTION ============== -->
+  <section class="section" id="ai-agent">
+    <div class="section-header">
+      <div class="section-number">04 — סוכן AI אוטונומי</div>
+      <h2>סוכן AI אוטונומי</h2>
+      <p class="section-desc">מערכת סוכנית שמבצעת משימות QA באופן אוטונומי — סריקה, תיקון, יצירת סמלים ואופטימיזציה.</p>
+    </div>
+
+    <div class="card" style="margin-bottom: 24px;">
+      <div class="card-header">
+        <div class="card-icon purple">🤖</div>
+        <h3>פתיחת הסוכן</h3>
+      </div>
+      <p>לחצו על אייקון הרובוט (🤖) בפינה השמאלית העליונה. הסוכן כולל 3 לשוניות: <strong>Dashboard</strong> (סטטיסטיקות משימות, כפתור סריקה כוללת), <strong>Actions</strong> (6 פעולות), ו-<strong>Results</strong> (תוצאות, ציונים, תצוגת קוד).</p>
+    </div>
+
+    <h3 style="margin-bottom: 16px; font-size: 1.1rem;">6 פעולות הסוכן</h3>
+    <div class="agent-actions">
+      <div class="agent-action">
+        <div class="agent-action-header">
+          <span class="agent-action-icon">🔍</span>
+          <h4>סרוק הכל</h4>
+        </div>
+        <p>סריקת QA אצוותית לכל 63 הסמלים. הסוכן עובר סמל-סמל ומדווח על ממצאים.</p>
+      </div>
+      <div class="agent-action">
+        <div class="agent-action-header">
+          <span class="agent-action-icon">🎯</span>
+          <h4>סרוק סמל</h4>
+        </div>
+        <p>סריקה מעמיקה לסמל ספציפי — ניתוח קוד, בדיקות תקינות, וזיהוי חולשות.</p>
+      </div>
+      <div class="agent-action">
+        <div class="agent-action-header">
+          <span class="agent-action-icon">🔧</span>
+          <h4>תקן קוד</h4>
+        </div>
+        <p>תיקון אוטומטי עם Claude — כולל גיבוי אוטומטי של הקוד המקורי לפני כל שינוי.</p>
+      </div>
+      <div class="agent-action">
+        <div class="agent-action-header">
+          <span class="agent-action-icon">🆕</span>
+          <h4>צור סמל</h4>
+        </div>
+        <p>יצירת סמל חדש מתיאור טקסטואלי — הסוכן מייצר קוד HTML/JS/CSS מלא.</p>
+      </div>
+      <div class="agent-action">
+        <div class="agent-action-header">
+          <span class="agent-action-icon">⚡</span>
+          <h4>אופטימיזציה</h4>
+        </div>
+        <p>שיפור ביצועים, הקטנת גודל קוד, ושיפור נגישות של סמל קיים.</p>
+      </div>
+      <div class="agent-action">
+        <div class="agent-action-header">
+          <span class="agent-action-icon">🧠</span>
+          <h4>משימה חופשית</h4>
+        </div>
+        <p>מצב אוטונומי מלא — Claude מחליט אילו כלים להפעיל בהתאם לתיאור המשימה.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============== WINDOWS AGENT SECTION ============== -->
+  <section class="section" id="windows-agent">
+    <div class="section-header">
+      <div class="section-number">05 — סוכן Windows</div>
+      <h2>סוכן Windows</h2>
+      <p class="section-desc">אפליקציית System Tray שמנטרת שינויים בקבצי סמלים ומפעילה סריקות אוטומטיות.</p>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon amber">🖥️</div>
+        <h3>סוכן System Tray — <code class="inline">piv_agent.py</code></h3>
+      </div>
+      <ul class="styled-list amber">
+        <li><strong>File Watcher</strong> — מנטר שינויים בתיקיית הסמלים</li>
+        <li><strong>סריקה אוטומטית</strong> — מפעיל סריקת QA בכל שינוי קובץ</li>
+        <li><strong>דיווח</strong> — שליחת דו״חות לשרת API</li>
+        <li>יושב ב-System Tray — לא תופס מקום במסך</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div class="card-icon green">🖱️</div>
+        <h3>סוכן Desktop — <code class="inline">desktop_agent.py</code></h3>
+      </div>
+      <p>ממשק גרפי מלא עם Tkinter. חיבור ישיר ל-Claude API — ללא צורך בשרת.</p>
+      <ul class="styled-list green" style="margin-top: 12px;">
+        <li>ממשק GUI מלא עם Tkinter</li>
+        <li>5 פעולות + מצב Auto-Scan</li>
+        <li>חיבור ישיר לקלוד (דורש <code class="inline">ANTHROPIC_API_KEY</code>)</li>
+        <li>יצירת דו״חות HTML</li>
+      </ul>
+    </div>
+
+    <!-- Config expandable -->
+    <div class="expandable">
+      <div class="expandable-header" onclick="toggleExpand(this)">
+        <span class="expandable-title">⚙️ הגדרות תצורה (Configuration)</span>
+        <span class="expandable-arrow">▼</span>
+      </div>
+      <div class="expandable-body">
+        <div class="expandable-content">
+          <p>ניתן להגדיר את הסוכנים באמצעות קבצי תצורה:</p>
+          <ul class="styled-list" style="margin-top: 8px;">
+            <li><code class="inline">config.yaml</code> — הגדרות כלליות לסוכן System Tray</li>
+            <li><code class="inline">agent_config.yaml</code> — הגדרות ספציפיות לסוכן Desktop</li>
+            <li>כתובת שרת, תיקיית סמלים, רמת Logging, מרווחי סריקה</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============== UX FEATURES SECTION ============== -->
+  <section class="section" id="ux-features">
+    <div class="section-header">
+      <div class="section-number">06 — תכונות UX</div>
+      <h2>תכונות UX</h2>
+      <p class="section-desc">פיצ׳רים שמשפרים את חוויית השימוש — ניווט מהיר, ניהול ערכות נושא, התראות ועוד.</p>
+    </div>
+
+    <div class="features-grid">
+      <div class="feature-item">
+        <div class="feature-icon">🎯</div>
+        <h4>Command Palette</h4>
+        <p><span class="kbd">Ctrl+K</span> — חיפוש מצבים, סמלים ופקודות. גישה מהירה לכל פונקציונליות.</p>
+      </div>
+      <div class="feature-item">
+        <div class="feature-icon">🎨</div>
+        <h4>ערכות נושא</h4>
+        <p><span class="kbd">Ctrl+Shift+T</span> — מעבר בין ערכת נושא כהה לבהירה.</p>
+      </div>
+      <div class="feature-item">
+        <div class="feature-icon">🧭</div>
+        <h4>Breadcrumbs</h4>
+        <p>סרגל ניווט עליון — תמיד יודעים היכן נמצאים בהיררכיה.</p>
+      </div>
+      <div class="feature-item">
+        <div class="feature-icon">💀</div>
+        <h4>Skeleton Loading</h4>
+        <p>אנימציות טעינה חכמות — ממשק נשאר מגיב בזמן טעינת נתונים.</p>
+      </div>
+      <div class="feature-item">
+        <div class="feature-icon">📊</div>
+        <h4>Dashboard</h4>
+        <p>סטטיסטיקות ב-Launcher — מבט כולל על מצב הסמלים והבדיקות.</p>
+      </div>
+      <div class="feature-item">
+        <div class="feature-icon">🎓</div>
+        <h4>Onboarding Tour</h4>
+        <p>סיור הדרכה למשתמשים חדשים — צעד אחר צעד דרך הממשק.</p>
+      </div>
+      <div class="feature-item">
+        <div class="feature-icon">🛡️</div>
+        <h4>Error Boundary</h4>
+        <p>לכידת שגיאות — הממשק לא קורס גם אם סמל גורם לשגיאה.</p>
+      </div>
+      <div class="feature-item">
+        <div class="feature-icon">📎</div>
+        <h4>Drag & Drop</h4>
+        <p>גרירת קבצים ישירות ל-QA — טעינה מהירה לבדיקה.</p>
+      </div>
+      <div class="feature-item">
+        <div class="feature-icon">⭐</div>
+        <h4>מועדפים</h4>
+        <p>סימון סמלים כמועדפים — גישה מהירה לסמלים בשימוש תדיר.</p>
+      </div>
+      <div class="feature-item">
+        <div class="feature-icon">↔️</div>
+        <h4>היסטוריית ניווט</h4>
+        <p><span class="kbd">Ctrl+[</span> חזרה, <span class="kbd">Ctrl+]</span> קדימה — כמו בדפדפן.</p>
+      </div>
+      <div class="feature-item">
+        <div class="feature-icon">🔔</div>
+        <h4>התראות Toast</h4>
+        <p>הודעות success/error/info/warning — משוב מיידי על כל פעולה.</p>
+      </div>
+      <div class="feature-item">
+        <div class="feature-icon">📢</div>
+        <h4>Browser Notifications</h4>
+        <p>התראות דפדפן לשגיאות ברקע — גם כשהחלון לא בפוקוס.</p>
+      </div>
+      <div class="feature-item">
+        <div class="feature-icon">🔀</div>
+        <h4>Visual Diff</h4>
+        <p>מציג הבדלים ויזואליים בין גרסאות קוד — לפני ואחרי שינויים.</p>
+      </div>
+      <div class="feature-item">
+        <div class="feature-icon">🌐</div>
+        <h4>i18n — דו-לשוני</h4>
+        <p>מעבר בין עברית לאנגלית — ממשק מלא בשתי שפות.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============== KEYBOARD SHORTCUTS SECTION ============== -->
+  <section class="section" id="shortcuts">
+    <div class="section-header">
+      <div class="section-number">07 — קיצורי מקלדת</div>
+      <h2>קיצורי מקלדת</h2>
+      <p class="section-desc">כל קיצורי המקלדת הזמינים באפליקציה. ניתן לפתוח דיאלוג קיצורים עם <span class="kbd">Ctrl+Shift+K</span>.</p>
+    </div>
+
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>קיצור</th>
+            <th>פעולה</th>
+            <th>הקשר</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td><span class="kbd">Ctrl+1</span></td><td>מעבר למצב אמולטור</td><td>גלובלי</td></tr>
+          <tr><td><span class="kbd">Ctrl+2</span></td><td>מעבר למצב QA</td><td>גלובלי</td></tr>
+          <tr><td><span class="kbd">Ctrl+3</span></td><td>מעבר למצב משולב</td><td>גלובלי</td></tr>
+          <tr><td><span class="kbd">Ctrl+4</span></td><td>מעבר לדפדפן AF</td><td>גלובלי</td></tr>
+          <tr><td><span class="kbd">Ctrl+K</span></td><td>פתיחת Command Palette</td><td>גלובלי</td></tr>
+          <tr><td><span class="kbd">Ctrl+Shift+I</span></td><td>פתיחת צ׳אט AI</td><td>גלובלי</td></tr>
+          <tr><td><span class="kbd">Ctrl+Shift+T</span></td><td>החלפת ערכת נושא</td><td>גלובלי</td></tr>
+          <tr><td><span class="kbd">Ctrl+Shift+K</span></td><td>דיאלוג קיצורי מקלדת</td><td>גלובלי</td></tr>
+          <tr><td><span class="kbd">Ctrl+R</span></td><td>רענון iframe</td><td>אמולטור</td></tr>
+          <tr><td><span class="kbd">Ctrl+[</span></td><td>ניווט אחורה</td><td>גלובלי</td></tr>
+          <tr><td><span class="kbd">Ctrl+]</span></td><td>ניווט קדימה</td><td>גלובלי</td></tr>
+          <tr><td><span class="kbd">F9</span></td><td>דפדפן AF</td><td>אמולטור</td></tr>
+          <tr><td><span class="kbd">F10</span></td><td>פאנל QA (במצב משולב)</td><td>משולב</td></tr>
+          <tr><td><span class="kbd">F12</span></td><td>DevTools</td><td>אמולטור</td></tr>
+          <tr><td><span class="kbd">Escape</span></td><td>חזרה ל-Launcher</td><td>גלובלי</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ============== ARCHITECTURE SECTION ============== -->
+  <section class="section" id="architecture">
+    <div class="section-header">
+      <div class="section-number">08 — ארכיטקטורה טכנית</div>
+      <h2>ארכיטקטורה טכנית</h2>
+      <p class="section-desc">תרשים הרכיבים, מבנה הקבצים ונקודות ה-API של המערכת.</p>
+    </div>
+
+    <!-- Architecture Diagram -->
+    <h3 style="margin-bottom: 16px; font-size: 1.05rem;">תרשים רכיבים</h3>
+    <div class="arch-diagram">
+      <div class="arch-box teal">
+        <div class="arch-box-icon" style="background: rgba(0,212,255,0.12);">🖥️</div>
+        <h4>Frontend</h4>
+        <p>index.html → launcher.js → Modes</p>
+        <p style="font-size: 0.75rem; margin-top: 6px;">HTML/CSS/JS • Port 8080</p>
+      </div>
+      <div class="arch-box purple">
+        <div class="arch-box-icon" style="background: rgba(168,85,247,0.12);">🧠</div>
+        <h4>AI Server</h4>
+        <p>FastAPI → Claude API</p>
+        <p style="font-size: 0.75rem; margin-top: 6px;">Python • Port 8000</p>
+      </div>
+
+      <div class="arch-connector">
+        <div class="arrow-line"></div>
+        <span>HTTP / WebSocket</span>
+        <div class="arrow-line"></div>
+      </div>
+
+      <div class="arch-box green">
+        <div class="arch-box-icon" style="background: rgba(16,185,129,0.12);">⚙️</div>
+        <h4>Agent Engine</h4>
+        <p>Tools → Task Queue</p>
+        <p style="font-size: 0.75rem; margin-top: 6px;">Python • Async Tasks</p>
+      </div>
+      <div class="arch-box amber">
+        <div class="arch-box-icon" style="background: rgba(245,158,11,0.12);">🖥️</div>
+        <h4>Windows Agent</h4>
+        <p>File Watcher → Scanner → API</p>
+        <p style="font-size: 0.75rem; margin-top: 6px;">Python • System Tray</p>
+      </div>
+    </div>
+
+    <!-- File Structure -->
+    <h3 style="margin: 32px 0 16px; font-size: 1.05rem;">מבנה קבצים</h3>
+    <div class="expandable">
+      <div class="expandable-header" onclick="toggleExpand(this)">
+        <span class="expandable-title">📁 Symbols-for-copy-28.02/</span>
+        <span class="expandable-arrow">▼</span>
+      </div>
+      <div class="expandable-body">
+        <div class="expandable-content">
+          <div class="file-tree">
+<span class="folder" onclick="this.classList.toggle('open')">📁 /</span>
+<div class="sub">
+├── <span class="highlight">index.html</span>          — נקודת כניסה ראשית
+├── <span class="highlight">launcher.js</span>         — מנהל Launcher ומצבי עבודה
+├── <span class="highlight">ai-server.py</span>        — שרת FastAPI + Claude
+├── styles/
+│   ├── main.css
+│   └── themes.css
+├── scripts/
+│   ├── emulator.js
+│   ├── qa-engine.js
+│   ├── af-browser.js
+│   ├── ai-chat.js
+│   └── agent.js
+├── symbols/               — 63 סמלי PI Vision
+│   ├── sym-001/
+│   │   ├── index.html
+│   │   ├── script.js
+│   │   └── style.css
+│   └── ...
+├── windows-agent/
+│   ├── <span class="highlight">piv_agent.py</span>     — סוכן System Tray
+│   ├── requirements.txt
+│   └── config.yaml
+├── <span class="highlight">desktop_agent.py</span>    — סוכן Desktop (Tkinter)
+└── agent_config.yaml
+</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- API Endpoints -->
+    <h3 style="margin: 32px 0 16px; font-size: 1.05rem;">נקודות API</h3>
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>Method</th>
+            <th>Endpoint</th>
+            <th>תיאור</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="method-badge post">POST</span></td>
+            <td><code>/api/chat/stream</code></td>
+            <td>צ׳אט AI עם Streaming</td>
+          </tr>
+          <tr>
+            <td><span class="method-badge post">POST</span></td>
+            <td><code>/api/analyze-symbol</code></td>
+            <td>ניתוח מעמיק של סמל</td>
+          </tr>
+          <tr>
+            <td><span class="method-badge post">POST</span></td>
+            <td><code>/api/agent/task</code></td>
+            <td>יצירת משימת סוכן</td>
+          </tr>
+          <tr>
+            <td><span class="method-badge get">GET</span></td>
+            <td><code>/api/agent/tasks</code></td>
+            <td>רשימת משימות</td>
+          </tr>
+          <tr>
+            <td><span class="method-badge post">POST</span></td>
+            <td><code>/api/agent/scan-all</code></td>
+            <td>סריקה אצוותית</td>
+          </tr>
+          <tr>
+            <td><span class="method-badge get">GET</span></td>
+            <td><code>/api/admin/dashboard</code></td>
+            <td>מדדי בריאות מערכת</td>
+          </tr>
+          <tr>
+            <td><span class="method-badge post">POST</span></td>
+            <td><code>/api/agent/report</code></td>
+            <td>דו״ח סוכן Windows</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ============== CHANGELOG SECTION ============== -->
+  <section class="section" id="changelog">
+    <div class="section-header">
+      <div class="section-number">09 — מה חדש?</div>
+      <h2>יומן שינויים</h2>
+      <p class="section-desc">היסטוריית הגרסאות והשינויים העיקריים.</p>
+    </div>
+
+    <div class="timeline">
+      <div class="timeline-item">
+        <div class="timeline-dot"></div>
+        <div class="version-badge">v4.2.0-R300 <span class="version-date">מרץ 2026</span></div>
+        <div class="timeline-content">
+          <ul>
+            <li>סוכן AI אוטונומי — 6 פעולות כולל משימה חופשית</li>
+            <li>סוכן Desktop עם GUI מלא (Tkinter)</li>
+            <li>Command Palette — <span class="kbd">Ctrl+K</span></li>
+            <li>Visual Diff viewer</li>
+            <li>שיפורי ביצועים וייעול קוד</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="timeline-item">
+        <div class="timeline-dot"></div>
+        <div class="version-badge">v2.3.0 <span class="version-date">ינואר 2026</span></div>
+        <div class="timeline-content">
+          <ul>
+            <li>סוכן Windows — File Watcher ו-Auto-Scan</li>
+            <li>Drag & Drop לטעינת קבצים</li>
+            <li>Browser Notifications</li>
+            <li>שיפורי נגישות</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="timeline-item">
+        <div class="timeline-dot"></div>
+        <div class="version-badge">v2.2.0 <span class="version-date">נובמבר 2025</span></div>
+        <div class="timeline-content">
+          <ul>
+            <li>עוזר AI — Streaming Chat עם Claude</li>
+            <li>10 פעולות מהירות</li>
+            <li>ריבוי לשוניות לשיחות</li>
+            <li>ניתוח קוד סמל</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="timeline-item">
+        <div class="timeline-dot"></div>
+        <div class="version-badge">v2.1.0 <span class="version-date">ספטמבר 2025</span></div>
+        <div class="timeline-content">
+          <ul>
+            <li>דפדפן AF — 853 אלמנטים, 5 אתרים</li>
+            <li>מעקב רגרסיה ב-QA</li>
+            <li>גרף תלויות רשת</li>
+            <li>ייצוא PDF/CSV</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="timeline-item">
+        <div class="timeline-dot"></div>
+        <div class="version-badge">v2.0.0 <span class="version-date">יוני 2025</span></div>
+        <div class="timeline-content">
+          <ul>
+            <li>שכתוב מלא — ארכיטקטורה מודולרית</li>
+            <li>מצב משולב (אמולטור + QA)</li>
+            <li>Onboarding Tour למשתמשים חדשים</li>
+            <li>Error Boundary</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="timeline-item">
+        <div class="timeline-dot"></div>
+        <div class="version-badge">v1.5.0 <span class="version-date">מרץ 2025</span></div>
+        <div class="timeline-content">
+          <ul>
+            <li>מצב QA מתקדם — ניתוח סטטי</li>
+            <li>אינטגרציה עם GitHub</li>
+            <li>ערכות נושא — כהה ובהיר</li>
+            <li>i18n — עברית ואנגלית</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="timeline-item">
+        <div class="timeline-dot"></div>
+        <div class="version-badge">v1.0.0 <span class="version-date">דצמבר 2024</span></div>
+        <div class="timeline-content">
+          <ul>
+            <li>גרסה ראשונה — אמולטור בסיסי</li>
+            <li>תמיכה ב-63 סמלים</li>
+            <li>DevTools מובנה</li>
+            <li>חיפוש וסינון</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- Back to Top Button -->
+<button class="back-to-top" id="back-to-top" aria-label="חזרה למעלה" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</button>
+
+<!-- Footer -->
+<footer class="footer">
+  <div class="footer-links">
+    <a href="https://www.perplexity.ai/computer" target="_blank" rel="noopener noreferrer">Created with Perplexity Computer</a>
+    <a href="https://github.com/danielleites/Symbols-for-copy-28.02" target="_blank" rel="noopener noreferrer">GitHub Repository</a>
+  </div>
+  <p>PI Vision QA v4.2.0-R300 — Build 2026.03.29 | כל הזכויות שמורות</p>
+</footer>
+
+<!-- ============================================
+     JAVASCRIPT
+     ============================================ -->
+<script>
+(function() {
+  'use strict';
+
+  // ===== Progress Bar =====
+  const progressBar = document.getElementById('progress-bar');
+  function updateProgress() {
+    const scrollHeight = document.documentElement.scrollHeight - window.innerHeight;
+    const scrolled = (window.scrollY / scrollHeight) * 100;
+    progressBar.style.width = Math.min(scrolled, 100) + '%';
+  }
+
+  // ===== Back to Top =====
+  const backToTop = document.getElementById('back-to-top');
+  function updateBackToTop() {
+    if (window.scrollY > 400) {
+      backToTop.classList.add('visible');
+    } else {
+      backToTop.classList.remove('visible');
+    }
+  }
+
+  // ===== Scroll Spy =====
+  const sections = document.querySelectorAll('.section, .hero');
+  const navLinks = document.querySelectorAll('.nav-link');
+
+  function updateScrollSpy() {
+    let current = '';
+    const scrollPos = window.scrollY + 120;
+
+    sections.forEach(section => {
+      const top = section.offsetTop;
+      const height = section.offsetHeight;
+      if (scrollPos >= top && scrollPos < top + height) {
+        current = section.getAttribute('id');
+      }
+    });
+
+    navLinks.forEach(link => {
+      link.classList.remove('active');
+      if (link.getAttribute('href') === '#' + current) {
+        link.classList.add('active');
+      }
+    });
+  }
+
+  // ===== Fade-in on Scroll =====
+  function handleScrollAnimations() {
+    const sectionEls = document.querySelectorAll('.section');
+    const threshold = window.innerHeight * 0.85;
+
+    sectionEls.forEach(section => {
+      const rect = section.getBoundingClientRect();
+      if (rect.top < threshold) {
+        section.classList.add('visible');
+      }
+    });
+  }
+
+  // ===== Passive Scroll Listener =====
+  let ticking = false;
+  window.addEventListener('scroll', function() {
+    if (!ticking) {
+      requestAnimationFrame(function() {
+        updateProgress();
+        updateBackToTop();
+        updateScrollSpy();
+        handleScrollAnimations();
+        ticking = false;
+      });
+      ticking = true;
+    }
+  }, { passive: true });
+
+  // Initial calls
+  updateProgress();
+  handleScrollAnimations();
+
+  // ===== Animated Counters =====
+  function animateCounters() {
+    const counters = document.querySelectorAll('.stat-number[data-target]');
+    counters.forEach(counter => {
+      const target = parseInt(counter.getAttribute('data-target'));
+      if (isNaN(target)) return;
+
+      const duration = 1500;
+      const start = performance.now();
+
+      function update(now) {
+        const elapsed = now - start;
+        const progress = Math.min(elapsed / duration, 1);
+        const eased = 1 - Math.pow(1 - progress, 3);
+        counter.textContent = Math.round(target * eased);
+        if (progress < 1) {
+          requestAnimationFrame(update);
+        }
+      }
+      requestAnimationFrame(update);
+    });
+  }
+
+  // Trigger counters when hero is visible
+  const heroObserver = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        animateCounters();
+        heroObserver.disconnect();
+      }
+    });
+  }, { threshold: 0.3 });
+  heroObserver.observe(document.querySelector('.hero'));
+
+  // ===== Tabs =====
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const container = this.closest('.tabs-container');
+      const tabId = this.getAttribute('data-tab');
+
+      // Update buttons
+      container.querySelectorAll('.tab-btn').forEach(b => {
+        b.classList.remove('active');
+        b.setAttribute('aria-selected', 'false');
+      });
+      this.classList.add('active');
+      this.setAttribute('aria-selected', 'true');
+
+      // Update panels
+      container.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+      const panel = document.getElementById('tab-' + tabId);
+      if (panel) panel.classList.add('active');
+    });
+  });
+
+  // ===== Hamburger Menu =====
+  const hamburger = document.getElementById('hamburger');
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('sidebar-overlay');
+
+  function toggleMenu() {
+    hamburger.classList.toggle('open');
+    sidebar.classList.toggle('open');
+    overlay.classList.toggle('active');
+    document.body.style.overflow = sidebar.classList.contains('open') ? 'hidden' : '';
+  }
+
+  hamburger.addEventListener('click', toggleMenu);
+  overlay.addEventListener('click', toggleMenu);
+
+  // Close sidebar on link click (mobile)
+  navLinks.forEach(link => {
+    link.addEventListener('click', function() {
+      if (window.innerWidth <= 900) {
+        toggleMenu();
+      }
+    });
+  });
+
+  // ===== TOC Search =====
+  const tocSearch = document.getElementById('toc-search');
+  tocSearch.addEventListener('input', function() {
+    const query = this.value.trim().toLowerCase();
+    const items = document.querySelectorAll('.nav-item');
+    items.forEach(item => {
+      const text = item.textContent.toLowerCase();
+      item.style.display = text.includes(query) ? '' : 'none';
+    });
+  });
+
+  // ===== Copy Code =====
+  window.copyCode = function(btn) {
+    const codeBlock = btn.closest('.code-block');
+    const code = codeBlock.querySelector('code').textContent;
+    navigator.clipboard.writeText(code).then(() => {
+      btn.textContent = '✓ הועתק';
+      btn.classList.add('copied');
+      setTimeout(() => {
+        btn.textContent = 'העתק';
+        btn.classList.remove('copied');
+      }, 2000);
+    }).catch(() => {
+      // Fallback
+      const textarea = document.createElement('textarea');
+      textarea.value = code;
+      document.body.appendChild(textarea);
+      textarea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textarea);
+      btn.textContent = '✓ הועתק';
+      btn.classList.add('copied');
+      setTimeout(() => {
+        btn.textContent = 'העתק';
+        btn.classList.remove('copied');
+      }, 2000);
+    });
+  };
+
+  // ===== Expandable Sections =====
+  window.toggleExpand = function(header) {
+    const expandable = header.closest('.expandable');
+    expandable.classList.toggle('open');
+  };
+
+  // ===== Smooth Scroll for Nav Links =====
+  navLinks.forEach(link => {
+    link.addEventListener('click', function(e) {
+      e.preventDefault();
+      const target = document.querySelector(this.getAttribute('href'));
+      if (target) {
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    });
+  });
+
+  // ===== Keyboard Navigation =====
+  document.addEventListener('keydown', function(e) {
+    // Escape to close mobile menu
+    if (e.key === 'Escape' && sidebar.classList.contains('open')) {
+      toggleMenu();
+    }
+  });
+
+  // ===== Handle Resize =====
+  let resizeTimeout;
+  window.addEventListener('resize', function() {
+    clearTimeout(resizeTimeout);
+    resizeTimeout = setTimeout(function() {
+      if (window.innerWidth > 900 && sidebar.classList.contains('open')) {
+        hamburger.classList.remove('open');
+        sidebar.classList.remove('open');
+        overlay.classList.remove('active');
+        document.body.style.overflow = '';
+      }
+    }, 250);
+  });
+
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,178 @@
+<!-- ═══════════════════════════════════════════════════════
+     Executive Triage Alert Panel — Config Panel
+     WOW Triage Panel v100 — wc20 Pattern + Collapsible <details>
+     ═══════════════════════════════════════════════════════ -->
+
+<div class="wc20-config-panel" style="direction:rtl; font-family:'Segoe UI',Arial,sans-serif;">
+
+    <!-- ── General (open by default) ── -->
+    <details class="wc20-section" open>
+        <summary class="wc20-section-title">כללי</summary>
+
+        <div class="wc20-field">
+            <label class="wc20-label">כותרת</label>
+            <input type="text" class="wc20-input"
+                   ng-model="config.Title"
+                   placeholder="Executive Triage Panel">
+        </div>
+
+        <div class="wc20-field">
+            <label class="wc20-label">מצב הדגמה (Demo)</label>
+            <input type="checkbox" class="wc20-checkbox"
+                   ng-model="config.DemoMode">
+            <span class="wc20-hint">סימולציה: התראות קריטיות, מבול אזעקות, קיבוץ אוטומטי</span>
+        </div>
+    </details>
+
+    <!-- ── Thresholds (open by default) ── -->
+    <details class="wc20-section" open>
+        <summary class="wc20-section-title">ספי סיכון</summary>
+
+        <div class="wc20-field">
+            <label class="wc20-label">סף קריטי (Critical Limit)</label>
+            <input type="number" class="wc20-input wc20-input-sm"
+                   ng-model="config.CriticalLimit"
+                   ng-model-options="{ debounce: 500 }"
+                   min="0" max="100" step="1"
+                   placeholder="90">
+            <span class="wc20-hint">ערך ≥ סף קריטי → כרטיס אדום + Pulse of Death</span>
+        </div>
+
+        <div class="wc20-field">
+            <label class="wc20-label">סף אזהרה (Warning Limit)</label>
+            <input type="number" class="wc20-input wc20-input-sm"
+                   ng-model="config.WarningLimit"
+                   ng-model-options="{ debounce: 500 }"
+                   min="0" max="100" step="1"
+                   placeholder="70">
+            <span class="wc20-hint">ערך ≥ סף אזהרה → כרטיס כתום</span>
+        </div>
+    </details>
+
+    <!-- ── Auto-Grouping ── -->
+    <details class="wc20-section">
+        <summary class="wc20-section-title">קיבוץ אוטומטי</summary>
+
+        <div class="wc20-field">
+            <label class="wc20-label">הפעל קיבוץ (Auto-Group)</label>
+            <input type="checkbox" class="wc20-checkbox"
+                   ng-model="config.AutoGroup">
+            <span class="wc20-hint">צמצום 30 אזהרות דומות → כרטיס סיכום אחד</span>
+        </div>
+
+        <div class="wc20-field">
+            <label class="wc20-label">סף קיבוץ (Group Threshold)</label>
+            <input type="number" class="wc20-input wc20-input-sm"
+                   ng-model="config.GroupThreshold"
+                   ng-model-options="{ debounce: 500 }"
+                   min="2" max="50" step="1"
+                   placeholder="5">
+            <span class="wc20-hint">מעל כמות זו — התראות מאותו סוג יקובצו</span>
+        </div>
+    </details>
+
+    <!-- ── Notifications ── -->
+    <details class="wc20-section">
+        <summary class="wc20-section-title">התראות חיצוניות</summary>
+
+        <div class="wc20-field">
+            <label class="wc20-label">צליל התראה (Web Audio)</label>
+            <input type="checkbox" class="wc20-checkbox"
+                   ng-model="config.EnableSound">
+            <span class="wc20-hint">צליל תעשייתי (880Hz) בהתראה קריטית חדשה</span>
+        </div>
+
+        <div class="wc20-field">
+            <label class="wc20-label">הודעת מערכת (Notification API)</label>
+            <input type="checkbox" class="wc20-checkbox"
+                   ng-model="config.EnableNotifications">
+            <span class="wc20-hint">Toast של מערכת ההפעלה כשהטאב מוסתר</span>
+        </div>
+    </details>
+
+    <!-- ── Display ── -->
+    <details class="wc20-section">
+        <summary class="wc20-section-title">תצוגה</summary>
+
+        <div class="wc20-field">
+            <label class="wc20-label">עשרוניות</label>
+            <select class="wc20-select" ng-model="config.Decimals"
+                    ng-options="v as v for v in [0, 1, 2, 3]">
+            </select>
+        </div>
+    </details>
+
+    <!-- ── Theme ── -->
+    <details class="wc20-section">
+        <summary class="wc20-section-title">ערכת נושא</summary>
+
+        <div class="wc20-field">
+            <label class="wc20-label">גופן</label>
+            <select class="wc20-select" ng-model="config.fontFamily">
+                <option value="Segoe UI">Segoe UI</option>
+                <option value="Arial">Arial</option>
+                <option value="Tahoma">Tahoma</option>
+                <option value="Consolas">Consolas (Mono)</option>
+            </select>
+        </div>
+
+        <div class="wc20-field">
+            <label class="wc20-label">גודל גופן (px)</label>
+            <input type="number" class="wc20-input wc20-input-sm"
+                   ng-model="config.fontSize"
+                   ng-model-options="{ debounce: 500 }"
+                   min="8" max="16" step="1">
+        </div>
+    </details>
+
+    <!-- ── Info ── -->
+    <details class="wc20-section">
+        <summary class="wc20-section-title">מידע טכני</summary>
+
+        <div class="wc20-field wc20-readonly">
+            <span class="wc20-badge wc20-badge-blue">DataShape</span>
+            <span>Table (Multiple Datasources)</span>
+        </div>
+
+        <div class="wc20-field wc20-readonly">
+            <span class="wc20-badge wc20-badge-green">Rendering</span>
+            <span>DocumentFragment — Single Atomic DOM Update</span>
+        </div>
+
+        <div class="wc20-field wc20-readonly">
+            <span class="wc20-badge wc20-badge-green">Animation</span>
+            <span>FLIP (First/Last/Invert/Play) — GPU transform</span>
+        </div>
+
+        <div class="wc20-field wc20-readonly">
+            <span class="wc20-badge wc20-badge-orange">Triage</span>
+            <span>Filter Normal → Classify → Sort → Group → Render</span>
+        </div>
+
+        <div class="wc20-field wc20-readonly">
+            <span class="wc20-badge wc20-badge-blue">Auto-Group</span>
+            <span>30 Warnings → 1 Summary Card (Alarm Flood Prevention)</span>
+        </div>
+
+        <div class="wc20-field wc20-readonly">
+            <span class="wc20-badge wc20-badge-purple">Sound</span>
+            <span>Web Audio API — Synthesized Industrial Chime</span>
+        </div>
+
+        <div class="wc20-field wc20-readonly">
+            <span class="wc20-badge wc20-badge-purple">Notification</span>
+            <span>OS Toast via Notification API (Background Tab)</span>
+        </div>
+
+        <div class="wc20-field wc20-readonly">
+            <span class="wc20-badge wc20-badge-orange">Pulse of Death</span>
+            <span>box-shadow GPU Composite — Subtle Urgency Cue</span>
+        </div>
+
+        <div class="wc20-field wc20-readonly" style="margin-top:8px;">
+            <span class="wc20-badge">WOW Triage Panel v100</span>
+            <span style="color:#8899AA;">Executive Triage Alert Panel</span>
+        </div>
+    </details>
+
+</div>

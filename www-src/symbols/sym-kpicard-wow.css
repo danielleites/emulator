@@ -1,0 +1,464 @@
+/**
+ * ═══════════════════════════════════════════════════════
+ *  sym-kpicard-wow.css — Executive KPI Card Dashboard
+ * ═══════════════════════════════════════════════════════
+ *  Shadow DOM styles for KPI card grid.
+ *  DOM-based card layout with Canvas sparklines.
+ *  Prefix: wow-kpi-
+ *
+ *  Version : WOW KPI v100
+ * ═══════════════════════════════════════════════════════
+ */
+
+
+/* ═══ CSS Custom Properties ═══ */
+
+:host {
+    --wow-kpi-bg-start:     #060C18;
+    --wow-kpi-bg-end:       #0D1F35;
+    --wow-kpi-surface:      #0F2940;
+    --wow-kpi-surface-hover:#153858;
+    --wow-kpi-accent:       #5BC0EB;
+    --wow-kpi-accent-glow:  rgba(91, 192, 235, 0.3);
+    --wow-kpi-ok:           #00F5D4;
+    --wow-kpi-ok-dim:       rgba(0, 245, 212, 0.12);
+    --wow-kpi-warn:         #FFCC00;
+    --wow-kpi-warn-dim:     rgba(255, 204, 0, 0.12);
+    --wow-kpi-crit:         #FF3B30;
+    --wow-kpi-crit-dim:     rgba(255, 59, 48, 0.12);
+    --wow-kpi-text:         #ECF0F1;
+    --wow-kpi-text-muted:   #8899AA;
+    --wow-kpi-text-dim:     #556677;
+    --wow-kpi-border:       #1A3A5C;
+    --wow-kpi-glass-bg:     rgba(15, 41, 64, 0.92);
+    --wow-kpi-glass-border: rgba(91, 192, 235, 0.15);
+    --wow-kpi-font:         'Segoe UI', Arial, sans-serif;
+    --wow-kpi-font-size:    12px;
+    --wow-kpi-radius:       10px;
+    --wow-kpi-radius-sm:    6px;
+    --wow-kpi-transition:   0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+
+/* ═══ Safe Reset ═══ */
+
+.wow-kpi-root { box-sizing: border-box; }
+.wow-kpi-root *, .wow-kpi-root *::before, .wow-kpi-root *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+
+/* ═══ Root Layout ═══ */
+
+.wow-kpi-root {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    background: linear-gradient(160deg, var(--wow-kpi-bg-start), var(--wow-kpi-bg-end));
+    font-family: var(--wow-kpi-font);
+    font-size: var(--wow-kpi-font-size);
+    color: var(--wow-kpi-text);
+    direction: rtl;
+    overflow: hidden;
+    border-radius: var(--wow-kpi-radius);
+}
+
+
+/* ═══ Toolbar ═══ */
+
+.wow-kpi-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 14px;
+    min-height: 40px;
+    flex-shrink: 0;
+    border-bottom: 1px solid var(--wow-kpi-border);
+    background: rgba(6, 12, 24, 0.6);
+}
+
+.wow-kpi-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--wow-kpi-text);
+    letter-spacing: 0.3px;
+    text-shadow: 0 0 12px var(--wow-kpi-accent-glow);
+}
+
+.wow-kpi-toolbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    direction: ltr;
+}
+
+.wow-kpi-btn {
+    padding: 5px 12px;
+    border: 1px solid var(--wow-kpi-border);
+    border-radius: var(--wow-kpi-radius-sm);
+    background: rgba(91, 192, 235, 0.08);
+    color: var(--wow-kpi-accent);
+    font-size: 11px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all var(--wow-kpi-transition);
+    white-space: nowrap;
+}
+
+.wow-kpi-btn:hover {
+    background: rgba(91, 192, 235, 0.18);
+    border-color: var(--wow-kpi-accent);
+}
+
+.wow-kpi-btn.active {
+    background: var(--wow-kpi-accent);
+    color: var(--wow-kpi-bg-start);
+}
+
+
+/* ═══ Live Indicator ═══ */
+
+.wow-kpi-live {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 10px;
+    color: var(--wow-kpi-text-dim);
+}
+
+.wow-kpi-live-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--wow-kpi-ok);
+    box-shadow: 0 0 6px var(--wow-kpi-ok);
+    animation: wowKpiPulse 2s infinite;
+}
+
+@keyframes wowKpiPulse {
+    0%, 100% { opacity: 1; }
+    50%      { opacity: 0.35; }
+}
+
+
+/* ═══ Summary Bar ═══ */
+
+.wow-kpi-summary {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 5px 14px;
+    flex-shrink: 0;
+    font-size: 11px;
+    border-bottom: 1px solid rgba(26, 58, 92, 0.5);
+    direction: rtl;
+}
+
+.wow-kpi-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 10px;
+    border-radius: 12px;
+    font-size: 10px;
+    font-weight: 600;
+}
+
+.wow-kpi-badge-ok   { background: var(--wow-kpi-ok-dim);   color: var(--wow-kpi-ok); }
+.wow-kpi-badge-warn { background: var(--wow-kpi-warn-dim); color: var(--wow-kpi-warn); }
+.wow-kpi-badge-crit { background: var(--wow-kpi-crit-dim); color: var(--wow-kpi-crit); }
+
+.wow-kpi-summary-msg {
+    flex: 1;
+    color: var(--wow-kpi-text-muted);
+    font-size: 10px;
+}
+
+
+/* ═══ Card Grid ═══ */
+
+.wow-kpi-body {
+    flex: 1;
+    overflow: auto;
+    padding: 10px;
+}
+
+.wow-kpi-body::-webkit-scrollbar { width: 5px; }
+.wow-kpi-body::-webkit-scrollbar-track { background: transparent; }
+.wow-kpi-body::-webkit-scrollbar-thumb { background: var(--wow-kpi-border); border-radius: 3px; }
+
+.wow-kpi-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+
+/* ═══ KPI Card ═══ */
+
+.wow-kpi-card {
+    background: var(--wow-kpi-surface);
+    border: 1px solid var(--wow-kpi-border);
+    border-radius: var(--wow-kpi-radius);
+    padding: 14px;
+    transition: all var(--wow-kpi-transition);
+    position: relative;
+    overflow: hidden;
+    min-width: 160px;
+    flex: 1 1 200px;
+    max-width: 100%;
+}
+
+.wow-kpi-card:hover {
+    border-color: rgba(91, 192, 235, 0.35);
+    background: var(--wow-kpi-surface-hover);
+}
+
+.wow-kpi-card.size-small  { flex: 1 1 160px; padding: 10px; }
+.wow-kpi-card.size-large  { flex: 1 1 280px; padding: 16px; }
+
+/* ── Status Bar at Top ── */
+.wow-kpi-status-bar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    border-radius: var(--wow-kpi-radius) var(--wow-kpi-radius) 0 0;
+    transition: background 0.3s ease;
+}
+
+/* ── Critical Glow ── */
+.wow-kpi-card.status-crit {
+    border-color: var(--wow-kpi-crit);
+    animation: wowKpiGlow 2s ease-in-out infinite;
+}
+
+@keyframes wowKpiGlow {
+    0%, 100% { box-shadow: 0 0 8px rgba(255, 59, 48, 0.25); }
+    50%      { box-shadow: 0 0 18px rgba(255, 59, 48, 0.5); }
+}
+
+/* ── Card Label ── */
+.wow-kpi-card-label {
+    font-size: 11px;
+    color: var(--wow-kpi-text-muted);
+    margin-bottom: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* ── Value Row ── */
+.wow-kpi-val-row {
+    display: flex;
+    align-items: baseline;
+    gap: 5px;
+    margin: 2px 0 4px;
+}
+
+.wow-kpi-val {
+    font-weight: 800;
+    font-size: 32px;
+    line-height: 1;
+    color: var(--wow-kpi-accent);
+    transition: color 0.3s ease;
+    font-variant-numeric: tabular-nums;
+}
+
+.wow-kpi-unit {
+    color: var(--wow-kpi-text-dim);
+    font-size: 13px;
+    font-weight: 400;
+}
+
+.wow-kpi-card.size-small .wow-kpi-val  { font-size: 24px; }
+.wow-kpi-card.size-small .wow-kpi-unit { font-size: 11px; }
+.wow-kpi-card.size-large .wow-kpi-val  { font-size: 42px; }
+.wow-kpi-card.size-large .wow-kpi-unit { font-size: 15px; }
+
+/* ── Trend + Delta Row ── */
+.wow-kpi-meta {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 2px;
+    flex-wrap: wrap;
+}
+
+.wow-kpi-trend {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 1px 8px;
+    border-radius: 10px;
+}
+
+.wow-kpi-delta {
+    font-size: 10px;
+    font-weight: 600;
+    padding: 1px 6px;
+    border-radius: 8px;
+}
+
+.wow-kpi-outlier {
+    font-size: 8px;
+    color: var(--wow-kpi-crit);
+    font-weight: 700;
+    padding: 1px 5px;
+    border: 1px solid var(--wow-kpi-crit);
+    border-radius: 4px;
+}
+
+/* ── Min/Max ── */
+.wow-kpi-minmax {
+    display: flex;
+    gap: 10px;
+    margin-top: 3px;
+    font-size: 9px;
+    color: var(--wow-kpi-text-dim);
+}
+
+/* ── Sparkline ── */
+.wow-kpi-spark {
+    margin-top: 6px;
+    width: 100%;
+    overflow: hidden;
+}
+
+.wow-kpi-spark canvas {
+    width: 100%;
+    display: block;
+}
+
+.wow-kpi-card.size-small  .wow-kpi-spark canvas { height: 28px; }
+.wow-kpi-card.size-medium .wow-kpi-spark canvas { height: 36px; }
+.wow-kpi-card.size-large  .wow-kpi-spark canvas { height: 50px; }
+
+
+/* ═══ Empty State ═══ */
+
+.wow-kpi-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: var(--wow-kpi-text-muted);
+    font-size: 14px;
+    gap: 8px;
+    opacity: 0.6;
+}
+
+
+/* ═══ Skeleton / Ghost Loading ═══ */
+
+.wow-kpi-skeleton {
+    position: absolute;
+    inset: 0;
+    z-index: 50;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--wow-kpi-bg-start);
+}
+
+.wow-kpi-skeleton::after {
+    content: '';
+    width: 50%;
+    height: 3px;
+    border-radius: 2px;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        var(--wow-kpi-accent),
+        transparent
+    );
+    animation: wowKpiShimmer 1.5s ease-in-out infinite;
+}
+
+@keyframes wowKpiShimmer {
+    0%   { transform: translateX(-100%); opacity: 0.3; }
+    50%  { opacity: 1; }
+    100% { transform: translateX(100%); opacity: 0.3; }
+}
+
+
+/* ═══ Footer ═══ */
+
+.wow-kpi-footer {
+    flex-shrink: 0;
+    padding: 4px 14px;
+    font-size: 9px;
+    color: var(--wow-kpi-text-dim);
+    text-align: center;
+    border-top: 1px solid var(--wow-kpi-border);
+}
+
+
+/* ═══ Tooltip (Glassmorphism) ═══ */
+
+.wow-kpi-tooltip {
+    position: absolute;
+    z-index: 20;
+    padding: 10px 14px;
+    min-width: 180px;
+    max-width: 260px;
+    background: var(--wow-kpi-glass-bg);
+    border: 1px solid var(--wow-kpi-glass-border);
+    border-radius: 8px;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    pointer-events: none;
+    direction: rtl;
+    font-family: var(--wow-kpi-font);
+    font-size: 11px;
+    color: var(--wow-kpi-text-muted);
+}
+
+.wow-kpi-tt-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--wow-kpi-text);
+    margin-bottom: 6px;
+}
+
+.wow-kpi-tt-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 1px 0;
+}
+
+.wow-kpi-tt-row b {
+    color: var(--wow-kpi-text);
+    font-weight: 600;
+}
+
+
+/* ═══ Print Media ═══ */
+
+@media print {
+    .wow-kpi-root {
+        background: #FFF !important;
+        color: #333 !important;
+        border: 1px solid #DDD;
+    }
+    .wow-kpi-toolbar-actions { display: none !important; }
+    .wow-kpi-card {
+        background: #F9F9F9 !important;
+        border-color: #DDD !important;
+        break-inside: avoid;
+    }
+    .wow-kpi-title { color: #000 !important; text-shadow: none !important; }
+    .wow-kpi-val { color: #333 !important; }
+    .wow-kpi-tooltip { display: none !important; }
+    .wow-kpi-footer { color: #999 !important; border-color: #DDD !important; }
+}

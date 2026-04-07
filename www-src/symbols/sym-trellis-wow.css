@@ -1,0 +1,232 @@
+/**
+ * ═══════════════════════════════════════════════════════
+ *  sym-trellis-wow.css — Synchronized Trellis Styles
+ * ═══════════════════════════════════════════════════════
+ *  Minimal styling for a canvas-heavy symbol.  The canvas
+ *  handles all visual rendering (sparklines, crosshair,
+ *  dots, labels).  CSS is only needed for the DOM shell:
+ *  toolbar, canvas wrapper, footer, and the crosshair
+ *  info overlay.
+ *
+ *  Version : WOW Trellis v100
+ *  Prefix  : wow-tr-
+ * ═══════════════════════════════════════════════════════
+ */
+
+
+/* ═══ CSS Custom Properties ═══ */
+
+:host {
+    --wow-tr-bg-start:     #0A0F1C;
+    --wow-tr-bg-end:       #111B2E;
+    --wow-tr-surface:      #0F2940;
+    --wow-tr-accent:       #5BC0EB;
+    --wow-tr-accent-glow:  rgba(91, 192, 235, 0.3);
+    --wow-tr-text:         #ECF0F1;
+    --wow-tr-text-muted:   #8899AA;
+    --wow-tr-border:       #1A3A5C;
+    --wow-tr-font:         'Segoe UI', Arial, sans-serif;
+    --wow-tr-font-size:    12px;
+    --wow-tr-radius:       8px;
+}
+
+
+/* ═══ Safe Reset ═══ */
+
+.wow-tr-root { box-sizing: border-box; }
+.wow-tr-root *, .wow-tr-root *::before, .wow-tr-root *::after {
+    box-sizing: border-box;
+}
+
+
+/* ═══ Root Layout ═══ */
+
+.wow-tr-root {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    background: linear-gradient(180deg, var(--wow-tr-bg-start), var(--wow-tr-bg-end));
+    font-family: var(--wow-tr-font);
+    font-size: var(--wow-tr-font-size);
+    color: var(--wow-tr-text);
+    direction: rtl;
+    overflow: hidden;
+    border-radius: var(--wow-tr-radius);
+}
+
+
+/* ═══ Toolbar ═══ */
+
+.wow-tr-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 14px;
+    min-height: 36px;
+    flex-shrink: 0;
+    border-bottom: 1px solid var(--wow-tr-border);
+    background: rgba(10, 15, 28, 0.6);
+    gap: 10px;
+}
+
+.wow-tr-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--wow-tr-text);
+    letter-spacing: 0.3px;
+    text-shadow: 0 0 12px var(--wow-tr-accent-glow);
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.wow-tr-stats {
+    font-size: 10px;
+    color: var(--wow-tr-text-muted);
+    white-space: nowrap;
+    direction: ltr;
+}
+
+
+/* ═══ Canvas Wrapper ═══ */
+
+.wow-tr-canvas-wrap {
+    position: relative;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.wow-tr-canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+    cursor: crosshair;
+}
+
+
+/* ═══ Crosshair Info Overlay ═══ */
+
+.wow-tr-crosshair-info {
+    position: absolute;
+    bottom: 6px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 4px 10px;
+    background: rgba(11, 15, 25, 0.85);
+    backdrop-filter: blur(4px);
+    border: 1px solid rgba(26, 58, 92, 0.5);
+    border-radius: 6px;
+    font-size: 10px;
+    max-width: 95%;
+    pointer-events: none;
+    z-index: 10;
+    direction: ltr;
+}
+
+.wow-tr-info-item {
+    white-space: nowrap;
+}
+
+.wow-tr-info-item b {
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+
+
+/* ═══ Skeleton / Loading ═══ */
+
+.wow-tr-skeleton {
+    position: absolute;
+    inset: 0;
+    z-index: 50;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--wow-tr-bg-start);
+}
+
+.wow-tr-skeleton::after {
+    content: '';
+    width: 50%;
+    height: 3px;
+    border-radius: 2px;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        var(--wow-tr-accent),
+        transparent
+    );
+    animation: wowTrShimmer 1.5s ease-in-out infinite;
+}
+
+@keyframes wowTrShimmer {
+    0%   { transform: translateX(-100%); opacity: 0.3; }
+    50%  { opacity: 1; }
+    100% { transform: translateX(100%); opacity: 0.3; }
+}
+
+
+/* ═══ Footer ═══ */
+
+.wow-tr-footer {
+    flex-shrink: 0;
+    padding: 3px 14px;
+    font-size: 9px;
+    color: var(--wow-tr-text-muted);
+    text-align: center;
+    border-top: 1px solid var(--wow-tr-border);
+}
+
+
+/* ═══ Responsive ═══ */
+
+@container (max-width: 300px) {
+    .wow-tr-title {
+        font-size: 11px;
+    }
+
+    .wow-tr-stats {
+        display: none;
+    }
+
+    .wow-tr-crosshair-info {
+        font-size: 9px;
+    }
+}
+
+
+/* ═══ Print Media ═══ */
+
+@media print {
+    .wow-tr-root {
+        background: #FFFFFF !important;
+        color: #333 !important;
+        border: 1px solid #DDD;
+    }
+
+    .wow-tr-toolbar {
+        background: #F5F5F5 !important;
+        border-color: #DDD !important;
+    }
+
+    .wow-tr-title {
+        color: #000 !important;
+        text-shadow: none !important;
+    }
+
+    .wow-tr-crosshair-info {
+        background: rgba(255, 255, 255, 0.9) !important;
+        border-color: #CCC !important;
+        backdrop-filter: none !important;
+    }
+
+    .wow-tr-footer {
+        color: #666 !important;
+        border-color: #DDD !important;
+    }
+}

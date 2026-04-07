@@ -1,0 +1,111 @@
+<!-- ═══════════════════════════════════════════════════════
+     Executive Smart Sankey Flow — Config Panel
+     WOW SK v100 — wc20 Pattern + Collapsible <details>
+     ═══════════════════════════════════════════════════════ -->
+
+<div class="wc20-config-panel" style="direction:rtl; font-family:'Segoe UI',Arial,sans-serif;">
+
+    <!-- ── General (open by default) ── -->
+    <details class="wc20-section" open>
+        <summary class="wc20-section-title">כללי</summary>
+
+        <div class="wc20-field">
+            <label class="wc20-label">כותרת</label>
+            <input type="text" class="wc20-input"
+                   ng-model="config.Title">
+        </div>
+
+        <div class="wc20-field">
+            <label class="wc20-label">מצב הדגמה (Demo)</label>
+            <input type="checkbox" class="wc20-checkbox"
+                   ng-model="config.DemoMode">
+        </div>
+    </details>
+
+    <!-- ── Layout (open by default) ── -->
+    <details class="wc20-section" open>
+        <summary class="wc20-section-title">פריסה</summary>
+
+        <div class="wc20-field">
+            <label class="wc20-label">רוחב צומת (px)</label>
+            <input type="number" class="wc20-input wc20-input-sm"
+                   ng-model="config.NodeWidth"
+                   ng-model-options="{ debounce: 500 }"
+                   min="10" max="50" step="2">
+        </div>
+
+        <div class="wc20-field">
+            <label class="wc20-label">עשרוניות</label>
+            <input type="number" class="wc20-input wc20-input-sm"
+                   ng-model="config.Decimals"
+                   ng-model-options="{ debounce: 500 }"
+                   min="0" max="3" step="1">
+            <span class="wc20-hint">ה-Worker מבצע 32 איטרציות למזעור הצטלבויות</span>
+        </div>
+    </details>
+
+    <!-- ── Theme ── -->
+    <details class="wc20-section">
+        <summary class="wc20-section-title">ערכת נושא</summary>
+
+        <div class="wc20-field">
+            <label class="wc20-label">גופן</label>
+            <select class="wc20-select" ng-model="config.fontFamily">
+                <option value="Segoe UI">Segoe UI</option>
+                <option value="Arial">Arial</option>
+                <option value="Rubik">Rubik</option>
+                <option value="Heebo">Heebo</option>
+                <option value="Consolas">Consolas (Mono)</option>
+            </select>
+        </div>
+
+        <div class="wc20-field">
+            <label class="wc20-label">גודל גופן (px)</label>
+            <input type="number" class="wc20-input wc20-input-sm"
+                   ng-model="config.fontSize"
+                   ng-model-options="{ debounce: 500 }"
+                   min="8" max="20" step="1">
+        </div>
+    </details>
+
+    <!-- ── Info ── -->
+    <details class="wc20-section">
+        <summary class="wc20-section-title">מידע טכני</summary>
+
+        <div class="wc20-field wc20-readonly">
+            <span class="wc20-badge wc20-badge-blue">DataShape</span>
+            <span>Table (Source / Target / Value)</span>
+        </div>
+
+        <div class="wc20-field wc20-readonly">
+            <span class="wc20-badge wc20-badge-green">Rendering</span>
+            <span>Canvas Bezier Flow (GPU)</span>
+        </div>
+
+        <div class="wc20-field wc20-readonly">
+            <span class="wc20-badge wc20-badge-green">Architecture</span>
+            <span>Shadow DOM + Web Worker</span>
+        </div>
+
+        <div class="wc20-field wc20-readonly">
+            <span class="wc20-badge wc20-badge-blue">Layout Engine</span>
+            <span>Iterative Relaxation — Off-Thread</span>
+        </div>
+
+        <div class="wc20-field wc20-readonly">
+            <span class="wc20-badge wc20-badge-blue">Flow Animation</span>
+            <span>lineDashOffset Loop — 60fps</span>
+        </div>
+
+        <div class="wc20-field wc20-readonly">
+            <span class="wc20-badge wc20-badge-orange">UX</span>
+            <span>Dynamic Opacity + Interactive Dimming</span>
+        </div>
+
+        <div class="wc20-field wc20-readonly" style="margin-top:8px;">
+            <span class="wc20-badge">WOW SK v100</span>
+            <span style="color:#8899AA;">Executive Smart Sankey Flow</span>
+        </div>
+    </details>
+
+</div>

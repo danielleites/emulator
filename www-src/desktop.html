@@ -1,0 +1,445 @@
+<!--
+   ______                            __
+  / ____/___  ____ ___  ____  __  __/ /____  _____
+ / /   / __ \/ __ `__ \/ __ \/ / / / __/ _ \/ ___/
+/ /___/ /_/ / / / / / / /_/ / /_/ / /_/  __/ /
+\____/\____/_/ /_/ /_/ .___/\__,_/\__/\___/_/
+                    /_/
+        Created with Perplexity Computer
+        https://www.perplexity.ai/computer
+-->
+
+<!-- Perplexity Computer Attribution — SEO Meta Tags -->
+<meta name="generator" content="Perplexity Computer">
+<meta name="author" content="Perplexity Computer">
+<meta property="og:see_also" content="https://www.perplexity.ai/computer">
+<link rel="author" href="https://www.perplexity.ai/computer">
+
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PI Vision — לוח בקרה ראשי</title>
+  <meta name="description" content="חבילה מאוחדת — אמולטור PI Vision, בדיקות QA, דפדפן AF, ו-63 סמלים מותאמים">
+
+  <!-- PWA manifest & mobile meta -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#00d4ff">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+  <!-- Fonts (local bundle for offline use; no CDN required) -->
+  <link rel="stylesheet" href="fonts/heebo.css">
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="css/qa-app.css">
+  <link rel="stylesheet" href="css/launcher.css">
+  <link rel="stylesheet" href="css/ux-enhancements.css">
+  <link rel="stylesheet" href="css/ux-features.css">
+  <link rel="stylesheet" href="css/ai-chat.css">
+
+  <!-- Favicon SVG -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%230d1b2a'/><path d='M8 16 L13 21 L24 11' stroke='%2300d4ff' stroke-width='3' stroke-linecap='round' stroke-linejoin='round' fill='none'/></svg>">
+
+  <style>
+    /* ─── Frame wrappers ─── */
+    .frame-wrap {
+      flex: 1;
+      position: relative;
+    }
+    .frame-wrap iframe {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      border: none;
+      background: #0a0f1e;
+    }
+
+    /* ─── AF Standalone panel ─── */
+    #mode-af .af-standalone-wrap {
+      flex: 1;
+      overflow-y: auto;
+      background: var(--bg-primary, #0d1b2a);
+      padding: 0;
+    }
+
+    /* ─── Version badge in launcher ─── */
+    .launcher-version {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-top: 12px;
+    }
+    .launcher-version span {
+      background: rgba(0,212,255,0.08);
+      border: 1px solid rgba(0,212,255,0.15);
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      color: var(--text-dim, #6b7fa3);
+      font-weight: 500;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     LAUNCHER SCREEN — 5 Mode Cards
+═══════════════════════════════════════════════════════════════ -->
+<div id="launcher-screen" class="launcher-screen">
+
+  <!-- ─── כותרת עליונה עם כפתורי פעולה ─── -->
+  <div class="launcher-topbar slide-up" style="display:flex;justify-content:flex-start;padding:12px 24px 0;gap:8px;">
+    <button id="theme-toggle-btn" title="מעבר למצב בהיר" aria-label="מעבר למצב בהיר">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none"
+           stroke="currentColor" stroke-width="2" stroke-linecap="round">
+        <circle cx="12" cy="12" r="5"/>
+        <line x1="12" y1="1"  x2="12" y2="3"/>
+        <line x1="12" y1="21" x2="12" y2="23"/>
+        <line x1="4.22" y1="4.22"  x2="5.64" y2="5.64"/>
+        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+        <line x1="1"  y1="12" x2="3"  y2="12"/>
+        <line x1="21" y1="12" x2="23" y2="12"/>
+        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+      </svg>
+    </button>
+    <button onclick="(()=>{const e=document.getElementById('shortcuts-overlay');if(!e){const d=document.createElement('div');d.id='shortcuts-overlay-tmp';window.dispatchEvent(new KeyboardEvent('keydown',{ctrlKey:true,shiftKey:true,key:'K',bubbles:true}))}})()" title="קיצורי מקלדת (Ctrl+Shift+K)" aria-label="קיצורי מקלדת" style="display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border:1px solid rgba(0,212,255,0.12);border-radius:6px;background:transparent;color:#6b7fa3;cursor:pointer;">
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="2" y="4" width="20" height="16" rx="2"/>
+        <path d="M6 8h.01M10 8h.01M14 8h.01M18 8h.01M6 12h.01M10 12h.01M14 12h.01M18 12h.01M6 16h12"/>
+      </svg>
+    </button>
+
+    <!-- ─── כפתור PI Web API Connector ─── -->
+    <button id="launcher-pi-btn"
+            onclick="if(window.PIV_CONNECTOR){window.PIV_CONNECTOR.openConfigPanel()}else{alert('PI Connector לא טעון')}"
+            title="הגדרות PI Web API"
+            aria-label="חיבור PI Web API"
+            style="display:inline-flex;align-items:center;justify-content:center;gap:6px;height:34px;padding:0 12px;border:1px solid rgba(0,212,255,0.2);border-radius:6px;background:rgba(0,212,255,0.06);color:rgba(0,212,255,0.85);cursor:pointer;font-size:12px;font-family:inherit;transition:background 0.2s;"
+            onmouseover="this.style.background='rgba(0,212,255,0.14)'"
+            onmouseout="this.style.background='rgba(0,212,255,0.06)'">
+      <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+        <path d="M18 20V10M12 20V4M6 20v-6"/>
+      </svg>
+      PI API
+    </button>
+
+    <!-- ─── כפתור שיתוף פעולה ─── -->
+    <button id="launcher-collab-btn"
+            onclick="if(window.PIV_COLLAB){window.PIV_COLLAB.showJoinDialog()}else{alert('מודול שיתוף פעולה לא טעון')}" 
+            title="שיתוף פעולה בזמן אמת (Ctrl+Shift+A)"
+            aria-label="שיתוף פעולה"
+            style="display:inline-flex;align-items:center;justify-content:center;gap:6px;height:34px;padding:0 12px;border:1px solid rgba(0,212,255,0.2);border-radius:6px;background:rgba(0,212,255,0.06);color:rgba(0,212,255,0.85);cursor:pointer;font-size:12px;font-family:inherit;transition:background 0.2s;"
+            onmouseover="this.style.background='rgba(0,212,255,0.14)'"
+            onmouseout="this.style.background='rgba(0,212,255,0.06)'">
+      <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+        <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
+        <circle cx="9" cy="7" r="4"/>
+        <path d="M23 21v-2a4 4 0 00-3-3.87"/>
+        <path d="M16 3.13a4 4 0 010 7.75"/>
+      </svg>
+      שיתוף פעולה
+    </button>
+  </div>
+
+  <!-- Brand -->
+  <div class="launcher-brand slide-up">
+    <svg class="launcher-logo" width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="PI Vision">
+      <rect width="64" height="64" rx="14" fill="#0f3460"/>
+      <rect x="6" y="6" width="52" height="52" rx="10" fill="#1a2744"/>
+      <!-- Shield -->
+      <path d="M32 10 L52 18 L52 32 C52 44 32 54 32 54 C32 54 12 44 12 32 L12 18 Z"
+            stroke="#00d4ff" stroke-width="2" stroke-opacity="0.3" fill="none"/>
+      <!-- QA Check -->
+      <path d="M20 32 L28 40 L44 24" stroke="#00d4ff" stroke-width="3.5"
+            stroke-linecap="round" stroke-linejoin="round"/>
+      <!-- Pulse ring -->
+      <circle cx="32" cy="32" r="24" stroke="#00d4ff" stroke-width="1" stroke-opacity="0.15" fill="none"/>
+    </svg>
+    <h1>PI Vision</h1>
+    <p>חבילה מאוחדת — בחר מצב עבודה להפעלה</p>
+    <div class="launcher-version">
+      <span>63 סמלים</span>
+      <span>אמולטור</span>
+      <span>QA אוטומטי</span>
+      <span>דפדפן AF</span>
+    </div>
+  </div>
+
+  <!-- Mode Cards -->
+  <div class="mode-cards slide-up" style="animation-delay: 0.1s">
+
+    <!-- Card 1: Emulator -->
+    <div class="mode-card mode-card--emulator" data-mode="emulator" tabindex="0" role="button">
+      <div class="mode-card-icon">
+        <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.8">
+          <rect x="2" y="3" width="20" height="14" rx="2"/>
+          <path d="M8 21h8M12 17v4"/>
+        </svg>
+      </div>
+      <div class="mode-card-title">אמולטור</div>
+      <div class="mode-card-desc">הפעל את אמולטור PI Vision — 63 סמלים, DevTools, AF Panel</div>
+      <div class="mode-card-badge">מצב עצמאי</div>
+    </div>
+
+    <!-- Card 2: QA -->
+    <div class="mode-card mode-card--qa" data-mode="qa" tabindex="0" role="button">
+      <div class="mode-card-icon">
+        <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.8">
+          <path d="M9 11l3 3L22 4"/>
+          <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/>
+        </svg>
+      </div>
+      <div class="mode-card-title">בדיקת QA</div>
+      <div class="mode-card-desc">כלי בדיקת סמלים — ניתוח קוד, Runtime, בדיקות ידניות ו-GitHub</div>
+      <div class="mode-card-badge">בדיקות מלאות</div>
+    </div>
+
+    <!-- Card 3: Combined -->
+    <div class="mode-card mode-card--combined" data-mode="combined" tabindex="0" role="button">
+      <div class="mode-card-icon">
+        <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.8">
+          <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+          <path d="M2 17l10 5 10-5"/>
+          <path d="M2 12l10 5 10-5"/>
+        </svg>
+      </div>
+      <div class="mode-card-title">אמולטור + QA</div>
+      <div class="mode-card-desc">אמולטור עם QA ברקע — לכידת שגיאות דינמית, F10 לפאנל</div>
+      <div class="mode-card-badge">
+        <svg viewBox="0 0 12 12" width="10" height="10" fill="currentColor"><circle cx="6" cy="6" r="4"/></svg>
+        מצב מומלץ
+      </div>
+    </div>
+
+    <!-- Card 4: AF Browser -->
+    <div class="mode-card mode-card--af" data-mode="af" tabindex="0" role="button">
+      <div class="mode-card-icon">
+        <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.8">
+          <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
+          <polyline points="9 22 9 12 15 12 15 22"/>
+        </svg>
+      </div>
+      <div class="mode-card-title">דפדפן AF</div>
+      <div class="mode-card-desc">853 אלמנטים, 8,656 מאפיינים, 2,670 תגים — עץ PI AF מלא</div>
+      <div class="mode-card-badge">נתוני דמו</div>
+    </div>
+
+    <!-- Card 5: Visual Builder -->
+    <div class="mode-card mode-card--builder" data-mode="builder" tabindex="0" role="button">
+      <div class="mode-card-icon">
+        <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.8">
+          <path d="M12 20h9"/>
+          <path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/>
+        </svg>
+      </div>
+      <div class="mode-card-title">עורך ויזואלי</div>
+      <div class="mode-card-desc">צור סמלים חדשים עם עורך גרפי — גרור רכיבים, הגדר binding, ייצא ל-PI Vision</div>
+      <div class="mode-card-badge">
+        <svg viewBox="0 0 12 12" width="10" height="10" fill="currentColor"><polygon points="6,0 7.5,4 12,4 8.5,7 10,12 6,9 2,12 3.5,7 0,4 4.5,4"/></svg>
+        חדש!
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Version Info -->
+  <div id="version-info-area" class="version-info-area slide-up" style="animation-delay: 0.25s"></div>
+
+  <!-- Footer -->
+  <div class="launcher-footer slide-up" style="animation-delay: 0.3s">
+    <a href="https://www.perplexity.ai/computer" target="_blank" rel="noopener noreferrer">
+      Created with Perplexity Computer
+    </a>
+  </div>
+
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     MODE VIEW: Emulator Only
+═══════════════════════════════════════════════════════════════ -->
+<div id="mode-emulator" class="mode-view">
+  <div class="mode-topbar">
+    <div class="mode-topbar-right">
+      <button class="btn-back">
+        <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M6 12l4-4-4-4"/>
+        </svg>
+        חזרה
+      </button>
+      <span class="mode-topbar-title">אמולטור PI Vision</span>
+    </div>
+    <div class="mode-topbar-left">
+      <div class="mode-topbar-status">
+        <span class="status-dot" style="background: var(--teal, #00d4ff)"></span>
+        <span class="status-label">אמולטור פעיל — 63 סמלים</span>
+      </div>
+    </div>
+  </div>
+  <div class="frame-wrap"></div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     MODE VIEW: QA Only
+═══════════════════════════════════════════════════════════════ -->
+<div id="mode-qa" class="mode-view">
+  <div class="mode-topbar">
+    <div class="mode-topbar-right">
+      <button class="btn-back">
+        <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M6 12l4-4-4-4"/>
+        </svg>
+        חזרה
+      </button>
+      <span class="mode-topbar-title">בדיקת QA — סמלים מותאמים</span>
+    </div>
+    <div class="mode-topbar-left">
+      <div class="mode-topbar-status">
+        <span class="status-dot" style="background: var(--purple, #a855f7)"></span>
+        <span class="status-label">QA פעיל</span>
+      </div>
+    </div>
+  </div>
+  <div class="frame-wrap"></div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     MODE VIEW: Combined (Emulator + Background QA)
+═══════════════════════════════════════════════════════════════ -->
+<div id="mode-combined" class="mode-view">
+  <div class="mode-topbar">
+    <div class="mode-topbar-right">
+      <button class="btn-back">
+        <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M6 12l4-4-4-4"/>
+        </svg>
+        חזרה
+      </button>
+      <span class="mode-topbar-title">אמולטור + QA ברקע</span>
+    </div>
+    <div class="mode-topbar-left">
+      <div class="mode-topbar-status">
+        <span class="status-dot"></span>
+        <span class="status-label">QA ברקע פעיל — F10 לפאנל</span>
+      </div>
+    </div>
+  </div>
+  <div class="frame-wrap"></div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     MODE VIEW: Visual Builder
+═══════════════════════════════════════════════════════════════ -->
+<div id="mode-builder" class="mode-view">
+  <!-- Builder fills entire viewport, managed by visual-builder.js -->
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════
+     MODE VIEW: AF Browser (standalone)
+═══════════════════════════════════════════════════════════════ -->
+<div id="mode-af" class="mode-view">
+  <div class="mode-topbar">
+    <div class="mode-topbar-right">
+      <button class="btn-back">
+        <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M6 12l4-4-4-4"/>
+        </svg>
+        חזרה
+      </button>
+      <span class="mode-topbar-title">דפדפן AF — נתוני PI System</span>
+    </div>
+    <div class="mode-topbar-left">
+      <div class="mode-topbar-status">
+        <span class="status-dot" style="background: #00d4aa"></span>
+        <span class="status-label">853 אלמנטים | 8,656 מאפיינים | 2,670 תגים</span>
+      </div>
+    </div>
+  </div>
+  <div class="af-standalone-wrap" id="af-standalone-panel"></div>
+</div>
+
+<!-- ─── PI Web API Connector — טוען לפני שכבת AF ─── -->
+<script src="js/pi-connector.js"></script>
+
+<!-- ─── Visual Builder — עורך ויזואלי ─── -->
+<script src="js/visual-builder.js"></script>
+
+<!-- ─── AF Data Layer ────────────────────────────────── -->
+<script src="js/af-data-layer.js"></script>
+<script src="js/af-data-layer-extensions.js"></script>
+<script src="js/af-browser-ui.js"></script>
+
+<!-- ─── PI Full Simulation Layer (FULL_SIMULATION mode) ─── -->
+<script src="js/pi-webapi-mock.js"></script>
+<script src="js/pi-simulation-mode.js"></script>
+<script src="js/pi-simulation-validator.js"></script>
+
+<!-- ─── PI Simulation Enhancements — v1.0.0 ────────────── -->
+<!-- production-like scenarios: diurnal cycle, plant shutdown, stale data,
+     rate limiting, write audit trail, alarm storms                       -->
+<script src="js/pi-simulation-enhancements.js"></script>
+
+<!-- ─── PI Adapter Layer (DEMO / FULL_SIMULATION / LIVE) ── -->
+<!-- unified data access API — load after all PI modules     -->
+<script src="js/pi-adapter.js"></script>
+
+<!-- ─── PI Live Readiness Validator ──────────────────────── -->
+<!-- validates LIVE config without a real PI server           -->
+<script src="js/pi-live-readiness.js"></script>
+
+<!-- ─── Service Worker Registration ────────────────────── -->
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./sw.js')
+        .then(reg => console.log('[SW] נרשם בהצלחה — scope:', reg.scope))
+        .catch(err => console.warn('[SW] שגיאת רישום:', err));
+    });
+  }
+</script>
+
+<!-- ─── Main App Module ────────────────────────────────── -->
+<script type="module">
+  import Launcher from './js/launcher.js';
+  import initVersioning from './js/versioning.js';
+
+  // Initialize AF Browser after page load
+  window.addEventListener('DOMContentLoaded', () => {
+    try {
+      const af = AFBrowserUI.init();
+      window.__AF = af;
+      window.__AFBrowser = AFBrowserUI;
+      console.log('[AF] שכבת נתוני AF מוכנה — F9 לפתיחת דפדפן AF');
+    } catch(e) {
+      console.error('[AF] שגיאה באתחול:', e);
+    }
+
+    // אתחול מידע גרסה
+    initVersioning();
+  });
+</script>
+
+<!-- שיתוף פעולה בזמן אמת -->
+<script src="js/collab-ui.js"></script>
+
+<!-- UX מתקדם — Drag & Drop, Diff, מועדפים, היסטוריה, Toast, התראות -->
+<script src="js/ux-advanced.js"></script>
+
+<!-- i18n & Accessibility -->
+<script src="js/i18n.js"></script>
+<script src="js/accessibility.js"></script>
+
+<!-- AI Assistant -->
+<script>
+  // Set API base for AI chat — when running with backend
+  window.__AI_API_BASE = (location.port === '5001' || location.port === '8080') ? 'http://127.0.0.1:5001/api' : '/api';
+</script>
+<!-- AI Agent Panel — פאנל סוכן AI אוטונומי -->
+<script src="js/ai-agent-panel.js"></script>
+<script src="js/ai-chat.js"></script>
+
+</body>
+</html>

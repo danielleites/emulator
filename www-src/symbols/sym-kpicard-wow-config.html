@@ -1,0 +1,188 @@
+<!-- ═══════════════════════════════════════════════════════
+     Executive KPI Card Dashboard — Config Panel
+     WOW KPI v100 — wc20 Pattern + Collapsible <details>
+     ═══════════════════════════════════════════════════════ -->
+
+<div class="wc20-config-panel" style="direction:rtl; font-family:'Segoe UI',Arial,sans-serif;">
+
+    <!-- ── General (open by default) ── -->
+    <details class="wc20-section" open>
+        <summary class="wc20-section-title">כללי</summary>
+
+        <div class="wc20-field">
+            <label class="wc20-label">כותרת</label>
+            <input type="text" class="wc20-input"
+                   ng-model="config.Title"
+                   placeholder="Executive KPI Dashboard">
+        </div>
+
+        <div class="wc20-field">
+            <label class="wc20-label">יחידת מידה (כללי)</label>
+            <input type="text" class="wc20-input"
+                   ng-model="config.Unit"
+                   placeholder="MW, Hz, %, ...">
+        </div>
+
+        <div class="wc20-field">
+            <label class="wc20-label">מצב הדגמה (Demo)</label>
+            <input type="checkbox" class="wc20-checkbox"
+                   ng-model="config.DemoMode">
+            <span class="wc20-hint">6 כרטיסים סינתטיים עם אוסצילציה חיה</span>
+        </div>
+    </details>
+
+    <!-- ── Display (open by default) ── -->
+    <details class="wc20-section" open>
+        <summary class="wc20-section-title">תצוגה</summary>
+
+        <div class="wc20-field">
+            <label class="wc20-label">גודל כרטיס</label>
+            <select class="wc20-select" ng-model="config.CardSize">
+                <option value="small">קטן</option>
+                <option value="medium">בינוני</option>
+                <option value="large">גדול</option>
+            </select>
+        </div>
+
+        <div class="wc20-field">
+            <label class="wc20-label">עשרוניות</label>
+            <select class="wc20-select" ng-model="config.Decimals"
+                    ng-options="v as v for v in [0, 1, 2, 3]">
+            </select>
+        </div>
+
+        <div class="wc20-field">
+            <label class="wc20-label">הצג ספרקליין</label>
+            <input type="checkbox" class="wc20-checkbox"
+                   ng-model="config.ShowSparkline">
+        </div>
+
+        <div class="wc20-field">
+            <label class="wc20-label">הצג מגמה</label>
+            <input type="checkbox" class="wc20-checkbox"
+                   ng-model="config.ShowTrend">
+        </div>
+
+        <div class="wc20-field">
+            <label class="wc20-label">הצג שינוי מערך קודם</label>
+            <input type="checkbox" class="wc20-checkbox"
+                   ng-model="config.ShowDelta">
+        </div>
+
+        <div class="wc20-field">
+            <label class="wc20-label">הצג מינ' / מקס'</label>
+            <input type="checkbox" class="wc20-checkbox"
+                   ng-model="config.ShowMinMax">
+        </div>
+
+        <div class="wc20-field">
+            <label class="wc20-label">נקודות ספרקליין</label>
+            <input type="number" class="wc20-input wc20-input-sm"
+                   ng-model="config.SparklinePoints"
+                   ng-model-options="{ debounce: 500 }"
+                   min="10" max="200" step="10">
+        </div>
+    </details>
+
+    <!-- ── Thresholds ── -->
+    <details class="wc20-section">
+        <summary class="wc20-section-title">ספי התראה</summary>
+
+        <div class="wc20-field">
+            <label class="wc20-label">סף אזהרה (0 = מבוטל)</label>
+            <input type="number" class="wc20-input wc20-input-sm"
+                   ng-model="config.WarnThreshold"
+                   ng-model-options="{ debounce: 500 }"
+                   step="any">
+        </div>
+
+        <div class="wc20-field">
+            <label class="wc20-label">סף קריטי (0 = מבוטל)</label>
+            <input type="number" class="wc20-input wc20-input-sm"
+                   ng-model="config.CritThreshold"
+                   ng-model-options="{ debounce: 500 }"
+                   step="any">
+        </div>
+
+        <div class="wc20-field">
+            <label class="wc20-label">מצב סף</label>
+            <select class="wc20-select" ng-model="config.ThresholdMode">
+                <option value="high">גבוה (ערך מעל הסף = אזהרה)</option>
+                <option value="low">נמוך (ערך מתחת לסף = אזהרה)</option>
+                <option value="dual">דו-כיווני (סטייה מ-0)</option>
+            </select>
+        </div>
+    </details>
+
+    <!-- ── Theme ── -->
+    <details class="wc20-section">
+        <summary class="wc20-section-title">ערכת נושא</summary>
+
+        <div class="wc20-field">
+            <label class="wc20-label">גופן</label>
+            <select class="wc20-select" ng-model="config.fontFamily">
+                <option value="Segoe UI">Segoe UI</option>
+                <option value="Arial">Arial</option>
+                <option value="Tahoma">Tahoma</option>
+                <option value="Consolas">Consolas (Mono)</option>
+            </select>
+        </div>
+
+        <div class="wc20-field">
+            <label class="wc20-label">גודל ערך (px)</label>
+            <input type="number" class="wc20-input wc20-input-sm"
+                   ng-model="config.valueFontSize"
+                   ng-model-options="{ debounce: 500 }"
+                   min="16" max="72" step="2">
+        </div>
+
+        <div class="wc20-field">
+            <label class="wc20-label">גודל גופן (px)</label>
+            <input type="number" class="wc20-input wc20-input-sm"
+                   ng-model="config.fontSize"
+                   ng-model-options="{ debounce: 500 }"
+                   min="8" max="16" step="1">
+        </div>
+    </details>
+
+    <!-- ── Info ── -->
+    <details class="wc20-section">
+        <summary class="wc20-section-title">מידע טכני</summary>
+
+        <div class="wc20-field wc20-readonly">
+            <span class="wc20-badge wc20-badge-blue">DataShape</span>
+            <span>Table (Multiple Attributes → Rows)</span>
+        </div>
+
+        <div class="wc20-field wc20-readonly">
+            <span class="wc20-badge wc20-badge-green">Rendering</span>
+            <span>DOM Cards + Canvas Sparklines — Shadow DOM</span>
+        </div>
+
+        <div class="wc20-field wc20-readonly">
+            <span class="wc20-badge wc20-badge-green">Worker</span>
+            <span>Off-thread Stats: Trend, EWMA, Percentiles, Z-Score</span>
+        </div>
+
+        <div class="wc20-field wc20-readonly">
+            <span class="wc20-badge wc20-badge-blue">Animation</span>
+            <span>rAF + Lerp — 60fps Value Morphing</span>
+        </div>
+
+        <div class="wc20-field wc20-readonly">
+            <span class="wc20-badge wc20-badge-orange">Theme</span>
+            <span>Executive Neon Glow — Dark Dashboard</span>
+        </div>
+
+        <div class="wc20-field wc20-readonly">
+            <span class="wc20-badge wc20-badge-purple">Performance</span>
+            <span>0 Dependencies — rAF idle sleep when converged</span>
+        </div>
+
+        <div class="wc20-field wc20-readonly" style="margin-top:8px;">
+            <span class="wc20-badge">WOW KPI v100</span>
+            <span style="color:#8899AA;">Executive KPI Card Dashboard</span>
+        </div>
+    </details>
+
+</div>

@@ -1,0 +1,91 @@
+<div class="c-config-content" dir="rtl" style="background:#0B1D33;color:#D0E4F5;font-family:'Segoe UI',sans-serif;padding:8px 12px;overflow-y:auto;max-height:100%;">
+<style>/* PIV20 Config Premium */.cr20{margin-bottom:10px;transition:opacity 0.2s}.cr20 label{color:#64748B!important;text-transform:uppercase;letter-spacing:0.3px;font-weight:500;font-size:10px!important;margin-bottom:4px}.cr20 input[type=text],.cr20 input[type=number],.cr20 select{background:rgba(6,12,24,0.6)!important;border:1px solid rgba(91,192,235,0.08)!important;border-radius:6px!important;padding:6px 10px;transition:all 0.25s cubic-bezier(0.4,0,0.2,1)}.cr20 input[type=text]:focus,.cr20 input[type=number]:focus,.cr20 select:focus{border-color:#3B82F6!important;box-shadow:0 0 0 3px rgba(59,130,246,0.12),0 0 12px rgba(59,130,246,0.1)!important}.cr20 input[type=color]{border-radius:6px!important;transition:border-color 0.2s}.cr20 input[type=color]:hover{border-color:rgba(59,130,246,0.3)}.cr20 input[type=checkbox]{accent-color:#3B82F6}.ch20{background:linear-gradient(135deg,#3B82F6,#22D3EE)!important;-webkit-background-clip:text!important;-webkit-text-fill-color:transparent!important;background-clip:text;font-weight:600!important;margin:14px 0 8px!important;padding-bottom:5px!important;border-bottom:1px solid rgba(59,130,246,0.15)!important;letter-spacing:-0.01em}.cb20{background:rgba(91,192,235,0.08);border:1px solid rgba(46,139,192,.2);color:#8BACC4;border-radius:4px;padding:5px 10px;font-size:11px;cursor:pointer;flex:1;transition:background 0.2s}.cb20:hover{background:rgba(91,192,235,0.2);color:#5BC0EB}</style>
+
+    <div class="ch20">ניטור אילוצים v20</div>
+
+    <div class="cr20" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+        <label style="color:#8BACC4;font-size:11px;">כותרת</label>
+        <input ng-model="config.Title" style="width:180px;background:rgba(91,192,235,.08);border:1px solid rgba(91,192,235,.15);color:#D0E4F5;border-radius:3px;padding:3px 6px;font-size:11px;text-align:right;">
+    </div>
+
+    <div class="ch20">מכסות ברירת מחדל</div>
+
+    <div class="cr20" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;">
+        <label style="color:#8BACC4;font-size:11px;">שעות/שנה</label>
+        <input type="number" ng-model="config.HoursPerYear" min="0" style="width:90px;background:rgba(91,192,235,.08);border:1px solid rgba(91,192,235,.15);color:#D0E4F5;border-radius:3px;padding:3px 6px;font-size:11px;text-align:center;">
+    </div>
+    <div class="cr20" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;">
+        <label style="color:#8BACC4;font-size:11px;">CO2 (טון/שנה)</label>
+        <input type="number" ng-model="config.Co2PerYear" min="0" style="width:90px;background:rgba(91,192,235,.08);border:1px solid rgba(91,192,235,.15);color:#D0E4F5;border-radius:3px;padding:3px 6px;font-size:11px;text-align:center;">
+    </div>
+    <div class="cr20" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;">
+        <label style="color:#8BACC4;font-size:11px;">דלק (טון/חודש)</label>
+        <input type="number" ng-model="config.FuelPerMonth" min="0" style="width:90px;background:rgba(91,192,235,.08);border:1px solid rgba(91,192,235,.15);color:#D0E4F5;border-radius:3px;padding:3px 6px;font-size:11px;text-align:center;">
+    </div>
+    <div class="cr20" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;">
+        <label style="color:#8BACC4;font-size:11px;">התנעות מקסימום/שנה</label>
+        <input type="number" ng-model="config.StartsPerYear" min="0" style="width:90px;background:rgba(91,192,235,.08);border:1px solid rgba(91,192,235,.15);color:#D0E4F5;border-radius:3px;padding:3px 6px;font-size:11px;text-align:center;">
+    </div>
+    <div class="cr20" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;">
+        <label style="color:#8BACC4;font-size:11px;">שעות תחזוקה/שנה</label>
+        <input type="number" ng-model="config.MaintPerYear" min="0" style="width:90px;background:rgba(91,192,235,.08);border:1px solid rgba(91,192,235,.15);color:#D0E4F5;border-radius:3px;padding:3px 6px;font-size:11px;text-align:center;">
+    </div>
+
+    <div class="ch20">סף התראות</div>
+    <div class="cr20" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;">
+        <label style="color:#8BACC4;font-size:11px;">אזהרה (%)</label>
+        <input type="number" ng-model="config.WarningPct" min="0" max="100" style="width:80px;background:rgba(91,192,235,.08);border:1px solid rgba(91,192,235,.15);color:#D0E4F5;border-radius:3px;padding:3px 6px;font-size:11px;text-align:center;">
+    </div>
+    <div class="cr20" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;">
+        <label style="color:#8BACC4;font-size:11px;">קריטי (%)</label>
+        <input type="number" ng-model="config.CriticalPct" min="0" max="100" style="width:80px;background:rgba(91,192,235,.08);border:1px solid rgba(91,192,235,.15);color:#D0E4F5;border-radius:3px;padding:3px 6px;font-size:11px;text-align:center;">
+    </div>
+
+    <div class="ch20">תצוגה</div>
+    <div class="cr20" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;">
+        <label style="color:#8BACC4;font-size:11px;">עשרוניות</label>
+        <input type="number" ng-model="config.Decimals" min="0" max="6" style="width:60px;background:rgba(91,192,235,.08);border:1px solid rgba(91,192,235,.15);color:#D0E4F5;border-radius:3px;padding:3px 6px;font-size:11px;text-align:center;">
+    </div>
+    <div class="cr20" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;">
+        <label style="color:#8BACC4;font-size:11px;">מקסימום התראות</label>
+        <input type="number" ng-model="config.MaxAlerts" min="0" max="200" style="width:80px;background:rgba(91,192,235,.08);border:1px solid rgba(91,192,235,.15);color:#D0E4F5;border-radius:3px;padding:3px 6px;font-size:11px;text-align:center;">
+    </div>
+    <div class="cr20" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;">
+        <label style="color:#8BACC4;font-size:11px;">סף ישנות (שניות)</label>
+        <input type="number" ng-model="config.StaleThreshold" min="0" style="width:80px;background:rgba(91,192,235,.08);border:1px solid rgba(91,192,235,.15);color:#D0E4F5;border-radius:3px;padding:3px 6px;font-size:11px;text-align:center;">
+    </div>
+    <div class="cr20" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;">
+        <label style="color:#8BACC4;font-size:11px;">משפחת גופן</label>
+        <select ng-model="config.fontFamily" style="width:110px;background:rgba(91,192,235,.08);border:1px solid rgba(91,192,235,.15);color:#D0E4F5;border-radius:3px;padding:3px 6px;font-size:11px;">
+            <option value="Segoe UI">Segoe UI</option><option value="Arial">Arial</option><option value="Tahoma">Tahoma</option><option value="Calibri">Calibri</option>
+        </select>
+    </div>
+    <div class="cr20" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;">
+        <label style="color:#8BACC4;font-size:11px;">גודל גופן (px)</label>
+        <input type="number" ng-model="config.fontSize" min="8" max="24" style="width:60px;background:rgba(91,192,235,.08);border:1px solid rgba(91,192,235,.15);color:#D0E4F5;border-radius:3px;padding:3px 6px;font-size:11px;text-align:center;">
+    </div>
+
+    <div class="ch20">צבעים</div>
+    <div class="cr20" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;">
+        <label style="color:#8BACC4;font-size:11px;">תקין</label>
+        <input type="color" ng-model="config.goodColor" style="width:40px;height:24px;border:none;background:transparent;cursor:pointer;">
+    </div>
+    <div class="cr20" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;">
+        <label style="color:#8BACC4;font-size:11px;">אזהרה</label>
+        <input type="color" ng-model="config.warningColor" style="width:40px;height:24px;border:none;background:transparent;cursor:pointer;">
+    </div>
+    <div class="cr20" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;">
+        <label style="color:#8BACC4;font-size:11px;">קריטי</label>
+        <input type="color" ng-model="config.criticalColor" style="width:40px;height:24px;border:none;background:transparent;cursor:pointer;">
+    </div>
+
+    <div class="ch20">מצב דמו</div>
+    <div class="cr20"><label style="color:#8BACC4;font-size:11px;"><input type="checkbox" ng-model="config.DemoMode"> הפעל מצב דמו</label></div>
+
+    <div class="ch20">גיבוי הגדרות</div>
+    <div class="cr20" style="display:flex;gap:6px;">
+        <button class="cb20" ng-click="exportConfig()">&#8681; ייצוא JSON</button>
+        <button class="cb20" ng-click="importConfig()">&#8679; ייבוא JSON</button>
+    </div>
+
+</div>

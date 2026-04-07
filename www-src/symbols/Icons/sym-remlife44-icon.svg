@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <rect width="32" height="32" rx="6" fill="#08090C"/>
+  <!-- Hourglass -->
+  <path d="M9 4 H23 L16 15 L23 28 H9 L16 15 Z" fill="none" stroke="#1ABC9C" stroke-width="1.6" stroke-linejoin="round"/>
+  <!-- Sand top -->
+  <path d="M10 6 H22 L16 14 Z" fill="rgba(26,188,156,0.25)"/>
+  <!-- Sand bottom — partial (70%) -->
+  <path d="M11 26 H21 L16 19.5 Z" fill="rgba(230,126,34,0.35)"/>
+  <!-- Time marks -->
+  <line x1="6" y1="15" x2="26" y2="15" stroke="#4E5F80" stroke-width="0.8"/>
+</svg>

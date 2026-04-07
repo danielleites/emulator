@@ -1,0 +1,223 @@
+/**
+ * ═══════════════════════════════════════════════════════
+ *  sym-envelope-wow.css — Dynamic Envelope Styles
+ * ═══════════════════════════════════════════════════════
+ *  Minimal styling for a canvas-heavy symbol.  The canvas
+ *  handles all visual rendering (polygon, comet tail,
+ *  proximity pulse, crosshair, axes).  CSS is only needed
+ *  for the DOM shell: toolbar, status badge, canvas
+ *  wrapper, skeleton, and footer.
+ *
+ *  Version : WOW Envelope v100
+ *  Prefix  : wow-ev-
+ * ═══════════════════════════════════════════════════════
+ */
+
+
+/* ═══ CSS Custom Properties ═══ */
+
+:host {
+    --wow-ev-bg-start:     #0A0F1C;
+    --wow-ev-bg-end:       #111B2E;
+    --wow-ev-surface:      #0F2940;
+    --wow-ev-accent:       #5BC0EB;
+    --wow-ev-accent-glow:  rgba(91, 192, 235, 0.3);
+    --wow-ev-text:         #ECF0F1;
+    --wow-ev-text-muted:   #8899AA;
+    --wow-ev-border:       #1A3A5C;
+    --wow-ev-font:         'Segoe UI', Arial, sans-serif;
+    --wow-ev-font-size:    12px;
+    --wow-ev-radius:       8px;
+}
+
+
+/* ═══ Safe Reset ═══ */
+
+.wow-ev-root { box-sizing: border-box; }
+.wow-ev-root *, .wow-ev-root *::before, .wow-ev-root *::after {
+    box-sizing: border-box;
+}
+
+
+/* ═══ Root Layout ═══ */
+
+.wow-ev-root {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    background: linear-gradient(180deg, var(--wow-ev-bg-start), var(--wow-ev-bg-end));
+    font-family: var(--wow-ev-font);
+    font-size: var(--wow-ev-font-size);
+    color: var(--wow-ev-text);
+    direction: rtl;
+    overflow: hidden;
+    border-radius: var(--wow-ev-radius);
+}
+
+
+/* ═══ Toolbar ═══ */
+
+.wow-ev-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 14px;
+    min-height: 36px;
+    flex-shrink: 0;
+    border-bottom: 1px solid var(--wow-ev-border);
+    background: rgba(10, 15, 28, 0.6);
+    gap: 10px;
+}
+
+.wow-ev-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--wow-ev-text);
+    letter-spacing: 0.3px;
+    text-shadow: 0 0 12px var(--wow-ev-accent-glow);
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+
+/* ═══ Status Badge ═══ */
+
+.wow-ev-status-badge {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 12px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    border: 1px solid var(--wow-ev-border);
+    color: var(--wow-ev-text);
+    background: var(--wow-ev-surface);
+    transition: background 0.3s ease, border-color 0.3s ease, color 0.3s ease;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+
+/* ═══ Stats ═══ */
+
+.wow-ev-stats {
+    font-size: 10px;
+    color: var(--wow-ev-text-muted);
+    white-space: nowrap;
+    direction: ltr;
+}
+
+
+/* ═══ Canvas Wrapper ═══ */
+
+.wow-ev-canvas-wrap {
+    position: relative;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.wow-ev-canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+    cursor: crosshair;
+}
+
+
+/* ═══ Skeleton / Loading ═══ */
+
+.wow-ev-skeleton {
+    position: absolute;
+    inset: 0;
+    z-index: 50;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--wow-ev-bg-start);
+}
+
+.wow-ev-skeleton::after {
+    content: '';
+    width: 50%;
+    height: 3px;
+    border-radius: 2px;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        var(--wow-ev-accent),
+        transparent
+    );
+    animation: wowEvShimmer 1.5s ease-in-out infinite;
+}
+
+@keyframes wowEvShimmer {
+    0%   { transform: translateX(-100%); opacity: 0.3; }
+    50%  { opacity: 1; }
+    100% { transform: translateX(100%); opacity: 0.3; }
+}
+
+
+/* ═══ Footer ═══ */
+
+.wow-ev-footer {
+    flex-shrink: 0;
+    padding: 3px 14px;
+    font-size: 9px;
+    color: var(--wow-ev-text-muted);
+    text-align: center;
+    border-top: 1px solid var(--wow-ev-border);
+}
+
+
+/* ═══ Responsive ═══ */
+
+@container (max-width: 300px) {
+    .wow-ev-title {
+        font-size: 11px;
+    }
+
+    .wow-ev-stats {
+        display: none;
+    }
+
+    .wow-ev-status-badge {
+        font-size: 8px;
+        padding: 1px 6px;
+    }
+}
+
+
+/* ═══ Print Media ═══ */
+
+@media print {
+    .wow-ev-root {
+        background: #FFFFFF !important;
+        color: #333 !important;
+        border: 1px solid #DDD;
+    }
+
+    .wow-ev-toolbar {
+        background: #F5F5F5 !important;
+        border-color: #DDD !important;
+    }
+
+    .wow-ev-title {
+        color: #000 !important;
+        text-shadow: none !important;
+    }
+
+    .wow-ev-status-badge {
+        border-color: #999 !important;
+        background: #EEE !important;
+        color: #333 !important;
+    }
+
+    .wow-ev-footer {
+        color: #666 !important;
+        border-color: #DDD !important;
+    }
+}

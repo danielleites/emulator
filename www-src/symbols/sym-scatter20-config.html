@@ -1,0 +1,40 @@
+<div dir="rtl" style="font-family:'Segoe UI',Arial,sans-serif;color:#c0d0e0;padding:12px;font-size:12px;">
+<style>.cr20{margin-bottom:8px}.cr20 label{display:block;font-size:11px;color:#8BACC4;margin-bottom:3px}.cr20 input[type=text],.cr20 input[type=number],.cr20 select{width:100%;background:#0B1D33;border:1px solid rgba(46,139,192,.2);border-radius:4px;padding:5px 8px;color:#fff;font-size:12px}.cr20 input:focus,.cr20 select:focus{border-color:#5BC0EB;outline:none}.cr20 input[type=color]{width:40px;height:26px;border:1px solid rgba(46,139,192,.2);border-radius:4px;cursor:pointer}.ch20{color:#5BC0EB;font-size:13px;margin:10px 0 6px;padding-bottom:4px;border-bottom:1px solid rgba(91,192,235,.2)}</style>
+<style>/* PIV20 Config Premium */.cr20{margin-bottom:10px;transition:opacity 0.2s}.cr20 label{color:#64748B!important;text-transform:uppercase;letter-spacing:0.3px;font-weight:500;font-size:10px!important;margin-bottom:4px}.cr20 input[type=text],.cr20 input[type=number],.cr20 select{background:rgba(6,12,24,0.6)!important;border:1px solid rgba(91,192,235,0.08)!important;border-radius:6px!important;padding:6px 10px;transition:all 0.25s cubic-bezier(0.4,0,0.2,1)}.cr20 input[type=text]:focus,.cr20 input[type=number]:focus,.cr20 select:focus{border-color:#3B82F6!important;box-shadow:0 0 0 3px rgba(59,130,246,0.12),0 0 12px rgba(59,130,246,0.1)!important}.cr20 input[type=color]{border-radius:6px!important;transition:border-color 0.2s}.cr20 input[type=color]:hover{border-color:rgba(59,130,246,0.3)}.cr20 input[type=checkbox]{accent-color:#3B82F6}.ch20{background:linear-gradient(135deg,#3B82F6,#22D3EE)!important;-webkit-background-clip:text!important;-webkit-text-fill-color:transparent!important;background-clip:text;font-weight:600!important;margin:14px 0 8px!important;padding-bottom:5px!important;border-bottom:1px solid rgba(59,130,246,0.15)!important;letter-spacing:-0.01em}</style>
+
+<div class="ch20">תרשים פיזור — מתאם v20</div>
+<div class="cr20"><label>כותרת</label><input type="text" ng-model="config.Title"></div>
+<div class="cr20"><label>ספרות עשרוניות</label><input type="number" ng-model="config.Decimals" min="0" max="6" step="1"></div>
+
+<div class="ch20">זיווג נתונים</div>
+<div class="cr20"><label>מצב זיווג</label>
+    <select ng-model="config.PairingMode">
+        <option value="shared_x">X משותף (תג ראשון = X, השאר = Y)</option>
+        <option value="paired">זוגות (תג 1=X, תג 2=Y, תג 3=X, ...)</option>
+    </select>
+</div>
+<div class="cr20"><label>היסטוריה מקסימלית (נקודות)</label><input type="number" ng-model="config.MaxHistory" min="20" max="1000" step="10"></div>
+
+<div class="ch20">תצוגה</div>
+<div class="cr20"><label>גודל נקודה (px)</label><input type="number" ng-model="config.PointSize" min="1" max="12" step="1"></div>
+<div class="cr20"><label><input type="checkbox" ng-model="config.ShowRegression"> הצג קו רגרסיה</label></div>
+<div class="cr20"><label><input type="checkbox" ng-model="config.ShowR2"> הצג R&sup2; ומשוואה</label></div>
+<div class="cr20"><label><input type="checkbox" ng-model="config.ShowOutliers"> סמן ערכים חריגים (IQR)</label></div>
+
+<div class="ch20">צירים</div>
+<div class="cr20"><label>תווית ציר X</label><input type="text" ng-model="config.XLabel" placeholder="אוטומטי מתג"></div>
+<div class="cr20"><label>תווית ציר Y</label><input type="text" ng-model="config.YLabel" placeholder="אוטומטי מתג"></div>
+
+<div class="ch20">צבעים</div>
+<div class="cr20" style="display:flex;gap:8px;align-items:center"><label style="margin:0;min-width:60px">מבטא</label><input type="color" ng-model="config.accentColor"></div>
+<div class="cr20" style="display:flex;gap:8px;align-items:center"><label style="margin:0;min-width:60px">חריגים</label><input type="color" ng-model="config.criticalColor"></div>
+
+<div class="ch20">גופנים</div>
+<div class="cr20"><label>משפחת גופן</label>
+    <select ng-model="config.fontFamily"><option value="Segoe UI">Segoe UI</option><option value="Arial">Arial</option><option value="Tahoma">Tahoma</option><option value="Calibri">Calibri</option></select>
+</div>
+<div class="cr20"><label>גודל גופן (px)</label><input type="number" ng-model="config.fontSize" min="8" max="24" step="1"></div>
+
+<div class="ch20">AF / חיבור</div>
+<div class="cr20"><label>סף ישנוּת (שניות)</label><input type="number" ng-model="config.StaleThreshold" placeholder="300" min="10" max="86400"></div>
+</div>

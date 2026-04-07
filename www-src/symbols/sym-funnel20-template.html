@@ -1,0 +1,195 @@
+<div class="piv20 fn20-root" dir="rtl"
+     ng-style="{'font-family': config.fontFamily, 'font-size': config.fontSize + 'px', 'font-weight': config.fontBold ? 'bold' : 'normal', 'font-style': config.fontItalic ? 'italic' : 'normal'}">
+
+<!-- ── External CSS ── -->
+<link rel="stylesheet" href="/PIVision/Scripts/app/editor/symbols/ext/sym-funnel20.css" />
+<link rel="stylesheet" href="/PIVision/Scripts/app/editor/symbols/ext/piv20-design-system.css">
+<link rel="stylesheet" href="/PIVision/Scripts/app/editor/symbols/ext/piv20-overrides.css">
+
+<!-- ── External JS ── -->
+<script type="text/javascript" src="/PIVision/Scripts/app/editor/symbols/ext/piv20-plugins/piv20-core.js"></script>
+<script type="text/javascript" src="/PIVision/Scripts/app/editor/symbols/ext/piv20-plugins/piv20-funnel.js"></script>
+
+<!-- ── Toast Container ── -->
+<div class="fn20-toast-container"></div>
+
+<!-- ══════════ HEADER ══════════ -->
+<div class="fn20-hdr" ng-style="{'background': config.headerBg}">
+    <!-- AF Connection Badge -->
+    <div class="fn20-af-badge"
+         ng-class="{'fn20-af-good': afConn.status==='connected', 'fn20-af-warn': afConn.status==='partial', 'fn20-af-bad': afConn.status==='disconnected'}"
+         ng-show="afConn"
+         title="{{afConn.good}}/{{afConn.total}} תקינים">
+        <span class="fn20-af-dot"></span>
+        {{afConn.status === 'connected' ? 'מחובר' : afConn.status === 'partial' ? 'חלקי' : 'מנותק'}}
+    </div>
+
+    <!-- Title -->
+    <div class="fn20-ttl" ng-style="{'font-size': config.headerFontSize + 'px'}">
+        {{config.Title || 'משפך הספק'}}
+        <span class="fn20-sub" style="margin-right:8px">{{summary.good||0}}/{{summary.total||0}} תקינים</span>
+    </div>
+
+    <!-- Toolbar -->
+    <div class="fn20-toolbar">
+        <button class="fn20-btn" ng-class="{'active': viewMode==='funnel'}" ng-click="setView('funnel')" title="תצוגת משפך">&#9660;</button>
+        <button class="fn20-btn" ng-class="{'active': viewMode==='table'}" ng-click="setView('table')" title="תצוגת טבלה">&#9776;</button>
+        <button class="fn20-btn" ng-class="{'active': viewMode==='efficiency'}" ng-click="setView('efficiency')" title="תצוגת נצילות">&#9881;</button>
+        <button class="fn20-btn" title="ייצוא CSV" ng-click="exportCSV()">&#128229;</button>
+        <button class="fn20-btn" title="הגדרות" ng-click="togglePanel()">&#9881;</button>
+        <div class="fn20-live"><span class="fn20-live-dot"></span>{{liveTime}}</div>
+    </div>
+</div>
+
+<!-- ══════════ SUMMARY BAR ══════════ -->
+<div class="fn20-summary" ng-show="stages.length">
+    <span class="fn20-sum-badge fn20-sum-ok" ng-show="summary.good">&#9679; {{summary.good}} תקין</span>
+    <span class="fn20-sum-badge fn20-sum-crit" ng-show="summary.bad">&#9650; {{summary.bad}} תקלה</span>
+    <span class="fn20-sum-badge"
+          ng-style="{'background': summary.overallEfficiencyNum >= (config.EfficiencyGoodPct||95) ? 'var(--fn20-ok-dim)' : summary.overallEfficiencyNum >= (config.EfficiencyWarnPct||90) ? 'var(--fn20-warn-dim)' : 'var(--fn20-crit-dim)', 'color': summary.overallEfficiencyNum >= (config.EfficiencyGoodPct||95) ? 'var(--fn20-ok)' : summary.overallEfficiencyNum >= (config.EfficiencyWarnPct||90) ? 'var(--fn20-warn)' : 'var(--fn20-crit)'}">
+        נצילות כוללת: {{summary.overallEfficiency}}%
+    </span>
+    <span style="font-size:11px;color:var(--fn20-text3);flex:1;text-align:left">הפסד כולל: {{summary.totalLoss}} MW</span>
+</div>
+
+<!-- ══════════ KPI TILES ══════════ -->
+<div class="fn20-kpi-row" ng-show="stages.length">
+    <div class="fn20-kpi-tile">
+        <div class="fn20-kpi-val" style="color:var(--fn20-cyan)">{{summary.total||0}}</div>
+        <div class="fn20-kpi-lbl">שלבים</div>
+    </div>
+    <div class="fn20-kpi-tile">
+        <div class="fn20-kpi-val" style="color:var(--fn20-ok)">{{summary.maxVal||'---'}}</div>
+        <div class="fn20-kpi-lbl">מקסימום MW</div>
+    </div>
+    <div class="fn20-kpi-tile">
+        <div class="fn20-kpi-val" style="color:var(--fn20-crit)">{{summary.minVal||'---'}}</div>
+        <div class="fn20-kpi-lbl">מינימום MW</div>
+    </div>
+    <div class="fn20-kpi-tile">
+        <div class="fn20-kpi-val" style="color:var(--fn20-text)">{{summary.avg||'---'}}</div>
+        <div class="fn20-kpi-lbl">ממוצע MW</div>
+    </div>
+    <div class="fn20-kpi-tile">
+        <div class="fn20-kpi-val" style="color:var(--fn20-warn)">{{summary.sum||'---'}}</div>
+        <div class="fn20-kpi-lbl">סה"כ MW</div>
+    </div>
+</div>
+
+<!-- ══════════ CUMULATIVE LOSSES ══════════ -->
+<div class="fn20-cum-losses" ng-show="stages.length > 1 && config.ShowLosses !== false && summary.cumulativeLosses.length">
+    <span style="font-size:10px;color:var(--fn20-text3);padding:2px 0">הפסדים מצטברים:</span>
+    <span class="fn20-cum-item" ng-repeat="cl in summary.cumulativeLosses track by $index">
+        {{cl.stage}} &#8592; {{cl.cumLoss | number:0}} MW
+    </span>
+</div>
+
+<!-- ══════════ EMPTY STATES ══════════ -->
+<div class="fn20-empty" ng-show="!stages.length">
+    <div style="font-size:40px;opacity:0.3">&#9661;</div>
+    <div>גרור תגים לסימבול כדי להציג משפך הספק</div>
+</div>
+
+<!-- ══════════ BODY ══════════ -->
+<div class="fn20-body" ng-show="stages.length">
+
+    <!-- ── View Area (widget renders SVG / table / efficiency here) ── -->
+    <div class="fn20-view fn20-svg-wrap"></div>
+
+    <!-- ── Hover Tooltip (shown below funnel when segment hovered) ── -->
+    <div class="fn20-tooltip" ng-show="hoverIdx >= 0 && stages[hoverIdx]">
+        <div class="fn20-tip-label">{{stages[hoverIdx].label}}</div>
+        <div class="fn20-tip-row"><span class="fn20-tip-k">ערך:</span><span class="fn20-tip-v">{{stages[hoverIdx].display}} MW</span></div>
+        <div class="fn20-tip-row"><span class="fn20-tip-k">% מראש:</span><span class="fn20-tip-v">{{stages[hoverIdx].pctOfTop | number:1}}%</span></div>
+        <div class="fn20-tip-row" ng-show="hoverIdx > 0">
+            <span class="fn20-tip-k">נצילות משלב קודם:</span>
+            <span class="fn20-tip-v" ng-style="{'color': getEffColor(stages[hoverIdx].efficiency)}">{{stages[hoverIdx].efficiency | number:1}}%</span>
+        </div>
+        <div class="fn20-tip-row" ng-show="hoverIdx > 0">
+            <span class="fn20-tip-k">הפסד:</span>
+            <span class="fn20-tip-v" style="color:var(--fn20-crit)">{{stages[hoverIdx].lossMW | number:1}} MW ({{stages[hoverIdx].lossPct | number:1}}%)</span>
+        </div>
+        <div class="fn20-tip-row"><span class="fn20-tip-k">סטטוס:</span><span class="fn20-tip-v" ng-class="stages[hoverIdx].statusCss">{{stages[hoverIdx].statusText}}</span></div>
+        <div class="fn20-tip-row"><span class="fn20-tip-k">זמן:</span><span class="fn20-tip-v">{{stages[hoverIdx].time}}</span></div>
+        <div class="fn20-tip-row" ng-show="stages[hoverIdx].trend">
+            <span class="fn20-tip-k">מגמה:</span>
+            <span class="fn20-tip-v" ng-class="{'fn20-trend-up':stages[hoverIdx].trend==='up','fn20-trend-down':stages[hoverIdx].trend==='down','fn20-trend-stable':stages[hoverIdx].trend==='stable'}">
+                {{stages[hoverIdx].trend === 'up' ? '&#9650; עלייה' : stages[hoverIdx].trend === 'down' ? '&#9660; ירידה' : '&#9670; יציב'}}
+            </span>
+        </div>
+    </div>
+
+    <!-- ── Statistics Grid ── -->
+    <div ng-show="stages.length" style="padding:8px 0;border-top:1px solid var(--fn20-border);margin-top:8px">
+        <div style="font-size:12px;font-weight:600;color:var(--fn20-text2);margin-bottom:6px">סטטיסטיקות</div>
+        <div class="fn20-stats">
+            <div class="fn20-stat-cell"><div class="fn20-stat-label">מינ'</div><div class="fn20-stat-val">{{summary.min||'---'}}</div></div>
+            <div class="fn20-stat-cell"><div class="fn20-stat-label">מקס'</div><div class="fn20-stat-val">{{summary.max||'---'}}</div></div>
+            <div class="fn20-stat-cell"><div class="fn20-stat-label">ממוצע</div><div class="fn20-stat-val">{{summary.avg||'---'}}</div></div>
+            <div class="fn20-stat-cell"><div class="fn20-stat-label">חציון</div><div class="fn20-stat-val">{{summary.median||'---'}}</div></div>
+            <div class="fn20-stat-cell"><div class="fn20-stat-label">סט"ת</div><div class="fn20-stat-val">{{summary.stddev||'---'}}</div></div>
+            <div class="fn20-stat-cell"><div class="fn20-stat-label">סה"כ</div><div class="fn20-stat-val">{{summary.sum||'---'}}</div></div>
+        </div>
+
+        <!-- Per-stage trend -->
+        <div style="margin-top:8px" ng-show="stages.length > 1">
+            <div style="font-size:11px;color:var(--fn20-text3);margin-bottom:4px">מגמות לפי שלב</div>
+            <div style="display:flex;flex-wrap:wrap;gap:6px">
+                <span ng-repeat="st in stages track by st.idx"
+                      style="display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:var(--fn20-radius-sm);background:var(--fn20-bg-card);border:1px solid var(--fn20-border);font-size:11px">
+                    <span ng-style="{'color': st.color}">{{st.label}}</span>
+                    <span ng-class="{'fn20-trend-up':st.trend==='up','fn20-trend-down':st.trend==='down','fn20-trend-stable':st.trend==='stable'}">
+                        {{st.trend === 'up' ? '&#9650;' : st.trend === 'down' ? '&#9660;' : '&#9670;'}}
+                    </span>
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ══════════ SIDE PANEL ══════════ -->
+<div class="fn20-panel" ng-class="{'open': panelOpen}">
+    <div class="fn20-phd"><h3>&#9881; הגדרות משפך</h3><button class="fn20-pcl" ng-click="togglePanel()">&#10005;</button></div>
+
+    <!-- General -->
+    <div class="fn20-ps" style="font-size:11px;color:var(--fn20-cyan);font-weight:600;border-bottom:1px solid rgba(91,192,235,.2)">כללי</div>
+    <div class="fn20-ps"><label>כותרת</label><input type="text" ng-model="config.Title" style="width:100%;background:var(--fn20-bg-input);border:1px solid var(--fn20-border);border-radius:4px;padding:5px 8px;color:#fff;font-size:12px"></div>
+    <div class="fn20-ps"><label>ספרות עשרוניות</label><input type="number" ng-model="config.Decimals" min="0" max="4" style="width:100%;background:var(--fn20-bg-input);border:1px solid var(--fn20-border);border-radius:4px;padding:5px 8px;color:#fff;font-size:12px"></div>
+
+    <!-- Efficiency -->
+    <div class="fn20-ps" style="font-size:11px;color:var(--fn20-cyan);font-weight:600;border-bottom:1px solid rgba(91,192,235,.2)">נצילות</div>
+    <div class="fn20-ps"><label><input type="checkbox" ng-model="config.ShowEfficiency"> הצג נצילות בין שלבים</label></div>
+    <div class="fn20-ps"><label><input type="checkbox" ng-model="config.ShowLosses"> הצג הפסדים</label></div>
+    <div class="fn20-ps"><label><input type="checkbox" ng-model="config.ShowPercentage"> הצג אחוזים</label></div>
+    <div class="fn20-ps"><label><input type="checkbox" ng-model="config.AutoSort"> מיון אוטומטי (יורד)</label></div>
+    <div class="fn20-ps"><label>סף נצילות תקין (%)</label><input type="number" ng-model="config.EfficiencyGoodPct" min="0" max="100" style="width:100%;background:var(--fn20-bg-input);border:1px solid var(--fn20-border);border-radius:4px;padding:5px 8px;color:#fff;font-size:12px"></div>
+    <div class="fn20-ps"><label>סף נצילות אזהרה (%)</label><input type="number" ng-model="config.EfficiencyWarnPct" min="0" max="100" style="width:100%;background:var(--fn20-bg-input);border:1px solid var(--fn20-border);border-radius:4px;padding:5px 8px;color:#fff;font-size:12px"></div>
+
+    <!-- AF -->
+    <div class="fn20-ps" style="font-size:11px;color:var(--fn20-cyan);font-weight:600;border-bottom:1px solid rgba(91,192,235,.2)">AF / חיבור</div>
+    <div class="fn20-ps">
+        <div style="font-size:11px;color:var(--fn20-text3);margin-bottom:4px">
+            סטטוס: <span ng-style="{'color': afConn.status==='connected' ? 'var(--fn20-ok)' : afConn.status==='partial' ? 'var(--fn20-warn)' : 'var(--fn20-crit)'}">
+                {{afConn.status === 'connected' ? 'מחובר' : afConn.status === 'partial' ? 'חלקי' : 'מנותק'}}
+            </span>
+            ({{afConn.good||0}}/{{afConn.total||0}})
+        </div>
+    </div>
+
+    <!-- Tag list -->
+    <div class="fn20-ps" ng-show="stages.length">
+        <div style="font-size:11px;color:var(--fn20-text3);margin-bottom:4px">תגים ({{stages.length}})</div>
+        <div ng-repeat="st in stages track by st.idx" style="padding:2px 0;font-size:11px;display:flex;justify-content:space-between">
+            <span ng-style="{'color': st.color}">{{st.label}}</span>
+            <span style="color:var(--fn20-text3)">{{st.display}} MW</span>
+        </div>
+    </div>
+</div>
+
+<!-- ══════════ FOOTER ══════════ -->
+<div class="fn20-ftr">
+    <span>נוגה — מנהל מערכת החשמל | PIV20 v20.1</span>
+    <span>{{stages.length}} שלבים | {{viewMode === 'funnel' ? 'משפך' : viewMode === 'table' ? 'טבלה' : 'נצילות'}}</span>
+</div>
+
+</div>

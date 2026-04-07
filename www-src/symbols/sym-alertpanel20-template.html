@@ -1,0 +1,239 @@
+<link rel="stylesheet" href="/PIVision/Scripts/app/editor/symbols/ext/sym-alertpanel20.css">
+<link rel="stylesheet" href="/PIVision/Scripts/app/editor/symbols/ext/piv20-design-system.css">
+<link rel="stylesheet" href="/PIVision/Scripts/app/editor/symbols/ext/piv20-overrides.css">
+<script type="text/javascript" src="/PIVision/Scripts/app/editor/symbols/ext/piv20-plugins/piv20-core.js"></script>
+<script type="text/javascript" src="/PIVision/Scripts/app/editor/symbols/ext/piv20-plugins/piv20-alertpanel.js"></script>
+
+<div class="piv20 ap20-root" role="region" aria-label="לוח התראות ISA-18.2">
+
+<!-- Widget container (jQuery widget attaches here) -->
+<div id="ap20-widget" style="display:none"></div>
+
+<!-- HEADER -->
+<div class="ap20-hdr" ng-class="{'ap20-pulse-crit': hasUnackCritical}">
+    <div>
+        <span class="ap20-ttl">{{config.Title || 'לוח התראות'}}</span>
+        <span class="ap20-sub" ng-show="afConn"> | {{afConn.connected}}/{{afConn.total}} חיבורים</span>
+    </div>
+    <div style="display:flex;gap:6px;align-items:center">
+        <!-- View toggles -->
+        <div class="ap20-views">
+            <button class="ap20-btn secondary" ng-class="{'active':viewMode==='panel'}" ng-click="setView('panel')" title="התראות">&#9888;</button>
+            <button class="ap20-btn secondary" ng-class="{'active':viewMode==='summary'}" ng-click="setView('summary')" title="סיכום">&#8801;</button>
+            <button class="ap20-btn secondary" ng-class="{'active':viewMode==='history'}" ng-click="setView('history')" title="היסטוריה">&#9203;</button>
+        </div>
+        <!-- ISA-18.2 badge -->
+        <span style="font-size:9px;color:var(--ap20-text3);padding:2px 6px;border:1px solid var(--ap20-border);border-radius:4px">ISA-18.2</span>
+        <div class="ap20-live"><span class="ap20-live-dot"></span>{{liveTime}}</div>
+        <button class="ap20-btn secondary" ng-click="exportData()" style="padding:4px 8px;font-size:11px" title="ייצוא CSV">&#128229;</button>
+        <button class="ap20-btn secondary" ng-click="showDocs()" style="padding:4px 8px;font-size:11px" title="מדריך">&#128214;</button>
+        <button class="ap20-btn secondary" ng-click="togglePanel()" style="padding:4px 8px;font-size:11px" title="הגדרות">&#9881;</button>
+    </div>
+</div>
+
+<!-- CRITICAL ALARM BANNER -->
+<div class="ap20-crit-banner" ng-show="hasUnackCritical">
+    &#9888; {{summary.critical}} התראות קריטיות לא מאושרות | ותיקה ביותר: {{summary.oldestUnackDuration}}
+</div>
+
+<!-- SUMMARY BAR -->
+<div class="ap20-summary" ng-show="summary.total > 0">
+    <span class="ap20-sum-badge ap20-sum-total">&#8721; {{summary.total}}</span>
+    <span class="ap20-sum-badge ap20-sum-crit" ng-show="summary.critical">&#9650; {{summary.critical}} קריטי</span>
+    <span class="ap20-sum-badge ap20-sum-warn" ng-show="summary.warning">&#9670; {{summary.warning}} אזהרה</span>
+    <span class="ap20-sum-badge ap20-sum-info" ng-show="summary.info">&#9679; {{summary.info}} מידע</span>
+    <span class="ap20-sum-badge ap20-sum-unack" ng-show="summary.unack">{{summary.unack}} לא מאושר</span>
+    <span class="ap20-sum-badge ap20-sum-shelved" ng-show="summary.shelved">{{summary.shelved}} מושהה</span>
+</div>
+
+<!-- FILTER BAR -->
+<div class="ap20-filter-bar" ng-show="summary.total > 0 || alarmHistory.length > 0">
+    <!-- Priority filter -->
+    <div class="ap20-filter-group">
+        <button class="ap20-filter-btn" ng-class="{'active':filterPriority==='all'}" ng-click="setFilterPriority('all')">הכל</button>
+        <button class="ap20-filter-btn ap20-f-crit" ng-class="{'active':filterPriority==='crit'}" ng-click="setFilterPriority('crit')">&#9650; קריטי</button>
+        <button class="ap20-filter-btn ap20-f-warn" ng-class="{'active':filterPriority==='warn'}" ng-click="setFilterPriority('warn')">&#9670; אזהרה</button>
+        <button class="ap20-filter-btn ap20-f-info" ng-class="{'active':filterPriority==='info'}" ng-click="setFilterPriority('info')">&#9679; מידע</button>
+    </div>
+    <!-- State filter -->
+    <div class="ap20-filter-group" ng-show="viewMode==='panel'">
+        <button class="ap20-filter-btn" ng-class="{'active':filterState==='all'}" ng-click="setFilterState('all')">הכל</button>
+        <button class="ap20-filter-btn" ng-class="{'active':filterState==='active'}" ng-click="setFilterState('active')">פעיל</button>
+        <button class="ap20-filter-btn" ng-class="{'active':filterState==='ack'}" ng-click="setFilterState('ack')">מאושר</button>
+        <button class="ap20-filter-btn" ng-class="{'active':filterState==='shelved'}" ng-click="setFilterState('shelved')">מושהה</button>
+    </div>
+    <!-- Text search -->
+    <input class="ap20-search" type="text" ng-model="filterText" ng-change="onFilterTextChange()" placeholder="&#128269; חיפוש...">
+</div>
+
+<!-- BULK ACTIONS -->
+<div class="ap20-actions" ng-show="viewMode==='panel' && summary.unack > 0">
+    <button class="ap20-btn secondary" ng-click="ackAll()" title="אשר הכל">&#10003; אשר הכל ({{summary.unack}})</button>
+    <button class="ap20-btn secondary" ng-click="clearResolved()" title="נקה פתורות">&#10005; נקה פתורות</button>
+</div>
+
+<!-- BODY -->
+<div class="ap20-body">
+
+    <!-- Empty state -->
+    <div class="ap20-empty" ng-show="!loading && summary.total === 0 && viewMode !== 'history'">
+        <div style="font-size:40px;opacity:0.3">&#9888;</div>
+        <div>אין התראות פעילות</div>
+        <div style="font-size:11px;color:var(--ap20-text3)">גרור תגים להגדרת ניטור</div>
+    </div>
+
+    <!-- ═══ PANEL VIEW (Alarm List) ═══ -->
+    <div ng-show="viewMode==='panel' && summary.total > 0">
+        <!-- List header -->
+        <div class="ap20-list-hdr">
+            <span class="ap20-priority-icon"></span>
+            <span class="ap20-tag">שם תג</span>
+            <span class="ap20-value" ng-show="config.ShowValue !== false">ערך</span>
+            <span class="ap20-state">סטטוס</span>
+            <span class="ap20-duration" ng-show="config.ShowDuration !== false">משך</span>
+            <span style="width:80px"></span>
+        </div>
+        <!-- Alarm rows -->
+        <div class="ap20-alarm-list">
+            <div class="ap20-alarm-row {{a.cssClass}}" ng-repeat="a in getFiltered() track by a.idx"
+                 title="{{a.label}} | {{a.stateLabel}} | {{a.triggerTimeStr}}">
+                <!-- Priority icon (ISA-101 shape) -->
+                <span class="ap20-priority-icon" ng-style="{'color': a.priority==='crit' ? config.criticalColor : a.priority==='warn' ? config.warningColor : 'var(--ap20-off)'}">{{a.priorityShape}}</span>
+                <!-- Tag name -->
+                <span class="ap20-tag">{{a.label}}</span>
+                <!-- Current value -->
+                <span class="ap20-value" ng-show="config.ShowValue !== false"
+                      ng-style="{'color': a.priority==='crit' ? config.criticalColor : a.priority==='warn' ? config.warningColor : config.accentColor}">{{a.display}}</span>
+                <!-- State badge -->
+                <span class="ap20-state"
+                      ng-class="{'ap20-state-unack': a.isUnack, 'ap20-state-ack': a.state==='ack_alarm', 'ap20-state-rtn': a.isRtn, 'ap20-state-shelved': a.isShelved}">{{a.stateLabel}}</span>
+                <!-- Duration -->
+                <span class="ap20-duration" ng-show="config.ShowDuration !== false">{{a.durationStr}}</span>
+                <!-- Per-alarm actions -->
+                <span class="ap20-alarm-actions">
+                    <button class="ap20-btn-ack" ng-show="a.isUnack" ng-click="ackAlarm(a.idx); $event.stopPropagation();">&#10003;</button>
+                    <button class="ap20-btn-shelve" ng-show="!a.isShelved && a.state!=='normal'" ng-click="shelveAlarm(a.idx); $event.stopPropagation();">&#9202;</button>
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══ SUMMARY VIEW ═══ -->
+    <div ng-show="viewMode==='summary'">
+        <!-- Big count cards -->
+        <div class="ap20-count-grid">
+            <div class="ap20-count-card">
+                <div class="ap20-count-val" style="color:var(--ap20-text)">{{summary.total}}</div>
+                <div class="ap20-count-label">סה"כ התראות</div>
+            </div>
+            <div class="ap20-count-card">
+                <div class="ap20-count-val" ng-style="{'color': config.criticalColor}">{{summary.critical}}</div>
+                <div class="ap20-count-label">&#9650; קריטי</div>
+            </div>
+            <div class="ap20-count-card">
+                <div class="ap20-count-val" ng-style="{'color': config.warningColor}">{{summary.warning}}</div>
+                <div class="ap20-count-label">&#9670; אזהרה</div>
+            </div>
+            <div class="ap20-count-card">
+                <div class="ap20-count-val" style="color:var(--ap20-off)">{{summary.info}}</div>
+                <div class="ap20-count-label">&#9679; מידע</div>
+            </div>
+            <div class="ap20-count-card">
+                <div class="ap20-count-val" style="color:#ff6b6b">{{summary.unack}}</div>
+                <div class="ap20-count-label">לא מאושר</div>
+            </div>
+            <div class="ap20-count-card">
+                <div class="ap20-count-val" style="color:var(--ap20-off)">{{summary.shelved}}</div>
+                <div class="ap20-count-label">מושהה</div>
+            </div>
+        </div>
+        <!-- Statistics cards -->
+        <div class="ap20-stats">
+            <div class="ap20-stat-card">
+                <div class="ap20-stat-label">קצב התראות / שעה</div>
+                <div class="ap20-stat-val" ng-style="{'color': config.accentColor}">{{stats.alarmRate}}</div>
+            </div>
+            <div class="ap20-stat-card">
+                <div class="ap20-stat-label">התראה שכיחה (Nuisance)</div>
+                <div class="ap20-stat-val" style="font-size:14px">{{stats.mostFrequent}}</div>
+            </div>
+            <div class="ap20-stat-card">
+                <div class="ap20-stat-label">זמן אישור ממוצע</div>
+                <div class="ap20-stat-val" ng-style="{'color': config.accentColor}">{{stats.avgAckTime}}</div>
+            </div>
+            <div class="ap20-stat-card">
+                <div class="ap20-stat-label">התראות עומדות</div>
+                <div class="ap20-stat-val" ng-style="{'color': stats.standing > 5 ? config.criticalColor : stats.standing > 0 ? config.warningColor : config.goodColor}">{{stats.standing}}</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══ HISTORY VIEW ═══ -->
+    <div ng-show="viewMode==='history'">
+        <!-- Stats summary above history -->
+        <div class="ap20-stats" style="margin-bottom:12px">
+            <div class="ap20-stat-card">
+                <div class="ap20-stat-label">קצב / שעה</div>
+                <div class="ap20-stat-val">{{stats.alarmRate}}</div>
+            </div>
+            <div class="ap20-stat-card">
+                <div class="ap20-stat-label">זמן אישור ממוצע</div>
+                <div class="ap20-stat-val">{{stats.avgAckTime}}</div>
+            </div>
+        </div>
+        <!-- History empty -->
+        <div class="ap20-empty" ng-show="alarmHistory.length === 0" style="padding:20px">
+            <div style="font-size:30px;opacity:0.3">&#9203;</div>
+            <div>אין רשומות היסטוריה</div>
+        </div>
+        <!-- History list -->
+        <div class="ap20-history-list" ng-show="alarmHistory.length > 0">
+            <!-- Header -->
+            <div class="ap20-history-row" style="font-weight:600;font-size:11px;color:var(--ap20-text3);border-bottom:2px solid var(--ap20-border)">
+                <span class="ap20-hist-time">זמן</span>
+                <span class="ap20-hist-priority"></span>
+                <span class="ap20-hist-action">פעולה</span>
+                <span class="ap20-hist-tag">תג</span>
+                <span class="ap20-hist-detail">פרטים</span>
+            </div>
+            <!-- Rows -->
+            <div class="ap20-history-row" ng-repeat="h in getFilteredHistory() track by $index">
+                <span class="ap20-hist-time">{{h.time}}</span>
+                <span class="ap20-hist-priority" ng-style="{'color': h.priority==='crit' ? config.criticalColor : h.priority==='warn' ? config.warningColor : 'var(--ap20-off)'}">
+                    {{h.priority==='crit' ? '&#9650;' : h.priority==='warn' ? '&#9670;' : '&#9679;'}}
+                </span>
+                <span class="ap20-hist-action ap20-hist-action-{{h.action}}">{{h.actionLabel}}</span>
+                <span class="ap20-hist-tag">{{h.label}}</span>
+                <span class="ap20-hist-detail" title="{{h.detail}}">{{h.detail}}</span>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- SIDE PANEL -->
+<div class="ap20-panel" ng-class="{'open':panelOpen}">
+    <div class="ap20-phd"><h3>&#9881; הגדרות התראות</h3><button class="ap20-pcl" ng-click="togglePanel()">&#10005;</button></div>
+    <div class="ap20-ps"><label>סף אזהרה</label><input type="number" ng-model="config.DefaultWarnThreshold" step="any"></div>
+    <div class="ap20-ps"><label>סף קריטי</label><input type="number" ng-model="config.DefaultCritThreshold" step="any"></div>
+    <div class="ap20-ps"><label>מצב סף</label>
+        <select ng-model="config.ThresholdMode">
+            <option value="high">גבוה (מעל = התראה)</option>
+            <option value="low">נמוך (מתחת = התראה)</option>
+            <option value="dual">דו-כיווני</option>
+        </select>
+    </div>
+    <div class="ap20-ps"><label>Debounce (שניות)</label><input type="number" ng-model="config.DebounceSeconds" min="0" max="300"></div>
+    <div class="ap20-ps"><label>משך השהיה (דקות)</label><input type="number" ng-model="config.ShelveDurationMinutes" min="1" max="1440"></div>
+    <div class="ap20-ps"><label><input type="checkbox" ng-model="config.AutoAckOnRTN"> אישור אוטומטי בחזרה לתקין</label></div>
+    <div class="ap20-ps"><label><input type="checkbox" ng-model="config.ShowValue"> הצג ערך</label></div>
+    <div class="ap20-ps"><label><input type="checkbox" ng-model="config.ShowDuration"> הצג משך</label></div>
+    <div class="ap20-ps"><label><input type="checkbox" ng-model="config.ShowAlerts"> הצג התראות קופצות</label></div>
+    <div class="ap20-ps"><label>צבע מבטא</label><input type="color" ng-model="config.accentColor" style="width:50px;height:28px"></div>
+    <div class="ap20-ps"><label>צבע תקין</label><input type="color" ng-model="config.goodColor" style="width:50px;height:28px"></div>
+    <div class="ap20-ps"><label>צבע אזהרה</label><input type="color" ng-model="config.warningColor" style="width:50px;height:28px"></div>
+    <div class="ap20-ps"><label>צבע קריטי</label><input type="color" ng-model="config.criticalColor" style="width:50px;height:28px"></div>
+</div>
+
+<div class="ap20-ftr">נוגה — ניהול התראות ISA-18.2 | PIV20 v20.0</div>
+</div>

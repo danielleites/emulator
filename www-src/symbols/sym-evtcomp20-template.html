@@ -1,0 +1,191 @@
+<link rel="stylesheet" href="/PIVision/Scripts/app/editor/symbols/ext/sym-evtcomp20.css">
+<link rel="stylesheet" href="/PIVision/Scripts/app/editor/symbols/ext/piv20-design-system.css">
+<link rel="stylesheet" href="/PIVision/Scripts/app/editor/symbols/ext/piv20-overrides.css">
+<script type="text/javascript" src="/PIVision/Scripts/app/editor/symbols/ext/piv20-plugins/piv20-core.js"></script>
+<script type="text/javascript" src="/PIVision/Scripts/app/editor/symbols/ext/piv20-plugins/piv20-eventcompare.js"></script>
+<div id="ec20-widget" class="piv20 ec20-widget" style="display:none;"
+     ng-style="{'font-family': config.fontFamily, 'font-size': config.fontSize + 'px'}">
+
+    <!-- Header -->
+    <div class="ec20-header">
+        <span class="ec20-title">{{config.Title}}</span>
+        <div class="ec20-toolbar">
+            <button ng-click="exportCSV()" title="ייצוא CSV">CSV</button>
+            <button ng-click="openPanel()" title="הגדרות">&#9881;</button>
+            <button ng-click="showDocs()" title="תיעוד">?</button>
+        </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="ec20-tabs">
+        <div class="ec20-tab" ng-class="{active: activeTab==='table'}" ng-click="setTab('table')">&#128202; טבלה</div>
+        <div class="ec20-tab" ng-class="{active: activeTab==='timeline'}" ng-click="setTab('timeline')" ng-show="config.showTimeline">&#128197; ציר זמן</div>
+        <div class="ec20-tab" ng-class="{active: activeTab==='stats'}" ng-click="setTab('stats')">&#128200; סטטיסטיקות</div>
+        <div class="ec20-tab" ng-class="{active: activeTab==='reliability'}" ng-click="setTab('reliability')" ng-show="config.showReliabilityScore">&#128170; אמינות</div>
+        <div class="ec20-tab" ng-class="{active: activeTab==='patterns'}" ng-click="setTab('patterns')" ng-show="config.showRecurrence">&#128257; דפוסים</div>
+        <div class="ec20-tab" ng-class="{active: activeTab==='matrix'}" ng-click="setTab('matrix')">&#128178; מטריצה</div>
+    </div>
+
+    <!-- Filter Bar -->
+    <div class="ec20-filter-bar">
+        <input class="ec20-search" ng-model="filterText" ng-change="filterChanged()" placeholder="&#128269; חיפוש...">
+        <select class="ec20-select" ng-model="filterType" ng-change="filterChanged()">
+            <option value="">כל הסוגים</option>
+            <option ng-repeat="(key, type) in eventTypes" value="{{key}}">{{type.label}}</option>
+        </select>
+        <select class="ec20-select" ng-model="filterUnit" ng-change="filterChanged()">
+            <option value="">כל היחידות</option>
+            <option ng-repeat="unit in unitList track by unit.key" value="{{unit.key}}">{{unit.name}}</option>
+        </select>
+        <span style="font-size:10px;color:#6B8FA8;">{{totalEventCount || 0}} אירועים</span>
+    </div>
+
+    <div class="ec20-body">
+
+        <!-- TABLE VIEW -->
+        <div ng-show="activeTab==='table'">
+            <table class="ec20-table">
+                <thead>
+                    <tr>
+                        <th ng-click="doSort('name')">שם</th>
+                        <th ng-click="doSort('type')">סוג</th>
+                        <th ng-click="doSort('severity')">חומרה</th>
+                        <th ng-click="doSort('unit')">יחידה</th>
+                        <th ng-click="doSort('startTime')">התחלה</th>
+                        <th ng-click="doSort('duration')" ng-show="config.showDuration">משך</th>
+                        <th>תיאור</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="evt in filteredEvents track by evt.id">
+                        <td>{{evt.name}}</td>
+                        <td><span class="ec20-type-badge ec20-severity-{{evt.severity}}" ng-style="{'background': evt.typeInfo.color + '22', 'color': evt.typeInfo.color}">{{evt.typeInfo.icon}} {{evt.typeInfo.label}}</span></td>
+                        <td><span class="ec20-type-badge ec20-severity-{{evt.severity}}">{{getSeverityLabel(evt.severity)}}</span></td>
+                        <td>{{evt.unitName}}</td>
+                        <td>{{formatTime(evt.startTime)}}</td>
+                        <td ng-show="config.showDuration">{{evt.durationText}}</td>
+                        <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;">{{evt.description}}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- TIMELINE VIEW -->
+        <div ng-show="activeTab==='timeline'" class="ec20-timeline">
+            <div class="ec20-timeline-axis">
+                <span>{{formatTimeAxis('start')}}</span>
+                <span>{{formatTimeAxis('end')}}</span>
+            </div>
+            <div ng-repeat="row in timelineData track by row.unitKey" class="ec20-timeline-row">
+                <div class="ec20-timeline-label" title="{{row.unitName}}">{{row.unitName}}</div>
+                <div class="ec20-timeline-track">
+                    <div ng-repeat="evt in row.events track by evt.id"
+                         class="ec20-timeline-event"
+                         ng-style="{'left': getTimelinePos(evt.startTime) + '%', 'width': getTimelineWidth(evt) + '%', 'background': evt.typeInfo.color}"
+                         title="{{evt.name}} ({{evt.durationText}})">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- STATISTICS VIEW -->
+        <div ng-show="activeTab==='stats'" class="ec20-stats-grid">
+            <div ng-repeat="(type, stat) in eventStats" class="ec20-stat-card">
+                <div class="ec20-stat-header">
+                    <span class="ec20-stat-icon">{{eventTypes[type].icon}}</span>
+                    <span>{{eventTypes[type].label}}</span>
+                    <span style="margin-right:auto;font-size:14px;font-weight:700;color:#5BC0EB;">{{stat.count}}</span>
+                </div>
+                <div class="ec20-stat-row"><span>ממוצע משך</span><span class="ec20-stat-val">{{formatDuration(stat.avgDuration)}}</span></div>
+                <div class="ec20-stat-row"><span>חציון</span><span class="ec20-stat-val">{{formatDuration(stat.medianDuration)}}</span></div>
+                <div class="ec20-stat-row"><span>מינימום</span><span class="ec20-stat-val">{{formatDuration(stat.minDuration)}}</span></div>
+                <div class="ec20-stat-row"><span>מקסימום</span><span class="ec20-stat-val">{{formatDuration(stat.maxDuration)}}</span></div>
+                <div class="ec20-stat-row"><span>פתוחים</span><span class="ec20-stat-val" style="color:#5BC0EB;">{{stat.openEvents}}</span></div>
+            </div>
+        </div>
+
+        <!-- RELIABILITY VIEW -->
+        <div ng-show="activeTab==='reliability'" class="ec20-reliability-grid">
+            <div ng-repeat="(key, rel) in unitReliability" class="ec20-reliability-card">
+                <div style="font-size:11px;font-weight:600;color:#B8D4E8;">{{rel.name}}</div>
+                <div class="ec20-reliability-score" ng-style="{'color': getReliabilityColor(rel.score)}">{{rel.score}}</div>
+                <div class="ec20-reliability-label">ציון אמינות</div>
+                <div class="ec20-reliability-bar">
+                    <div class="ec20-reliability-fill" ng-style="{'width': rel.uptimePct + '%', 'background': getReliabilityColor(rel.score)}"></div>
+                </div>
+                <div style="font-size:10px;color:#6B8FA8;margin-top:4px;">
+                    {{rel.uptimePct}}% פעילות | {{rel.totalDowntimeHrs}} שע' השבתה
+                </div>
+                <div style="font-size:10px;color:#6B8FA8;">
+                    {{rel.criticalEvents}} קריטיים | {{rel.trips}} טריפים | MTBF: {{getMTBF(key)}} | MTTR: {{getMTTR(key)}}
+                </div>
+            </div>
+        </div>
+
+        <!-- PATTERNS VIEW -->
+        <div ng-show="activeTab==='patterns'">
+            <div style="font-size:12px;font-weight:600;color:#8BACC4;margin-bottom:8px;">דפוסים חוזרים</div>
+            <div class="ec20-pattern-list">
+                <div ng-repeat="pat in recurrencePatterns track by $index" class="ec20-pattern-item">
+                    <div class="ec20-pattern-info">
+                        <span class="ec20-pattern-name">{{pat.unit}} — {{pat.typeLabel}}</span>
+                        <span class="ec20-pattern-meta">{{pat.count}} אירועים | מרווח: {{pat.avgIntervalHrs}} שע' | צפי: {{formatTime(pat.nextExpected)}}</span>
+                    </div>
+                    <div class="ec20-pattern-regularity" ng-style="{'color': pat.regularity > 70 ? '#e74c3c' : '#f39c12'}">{{pat.regularity}}%</div>
+                </div>
+                <div ng-show="!recurrencePatterns.length" style="color:#4A6A7F;font-size:11px;">לא זוהו דפוסים חוזרים</div>
+            </div>
+
+            <div style="font-size:12px;font-weight:600;color:#8BACC4;margin-top:12px;margin-bottom:8px;" ng-show="config.showCrossCorrelation">קורלציות צולבות</div>
+            <div class="ec20-pattern-list" ng-show="config.showCrossCorrelation">
+                <div ng-repeat="corr in crossCorrelations track by $index" class="ec20-pattern-item">
+                    <div class="ec20-pattern-info">
+                        <span class="ec20-pattern-name">{{corr.unit}}: {{corr.triggerLabel}} &#8594; {{corr.resultLabel}}</span>
+                        <span class="ec20-pattern-meta">{{corr.count}} מקרים | עיכוב: {{corr.avgDelayHrs}} שע'</span>
+                    </div>
+                    <div class="ec20-pattern-regularity" ng-style="{'color': corr.confidence > 60 ? '#e74c3c' : '#f39c12'}">{{corr.confidence}}%</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- MATRIX VIEW -->
+        <div ng-show="activeTab==='matrix'">
+            <table class="ec20-matrix">
+                <thead>
+                    <tr>
+                        <th>יחידה</th>
+                        <th ng-repeat="(type, info) in eventTypes">{{info.icon}}</th>
+                        <th>סה"כ</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="(unitKey, row) in comparisonMatrix">
+                        <td style="text-align:right;font-weight:600;">{{row.name}}</td>
+                        <td ng-repeat="(type, info) in eventTypes">
+                            <span class="ec20-matrix-cell" ng-style="getMatrixCellStyle(row.types[type])">
+                                {{row.types[type] || 0}}
+                            </span>
+                        </td>
+                        <td style="font-weight:700;color:#5BC0EB;">{{getRowTotal(row.types)}}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Side Panel -->
+    <div class="ec20-side-panel" ng-show="panelOpen">
+        <div class="ec20-panel-header">
+            <span style="font-weight:600;color:#5BC0EB;">ניתוח אירועים</span>
+            <button class="ec20-panel-close" ng-click="closePanel()">&#10005;</button>
+        </div>
+        <div class="ec20-panel-body">
+            <div style="font-size:10px;color:#6B8FA8;">
+                טווח: {{config.timeRangeHours}} שעות<br>
+                סה"כ אירועים: {{totalEventCount || 0}}<br>
+                יחידות: {{unitList.length || 0}}<br>
+                עדכון אחרון: {{formatTime(lastUpdate)}}
+            </div>
+        </div>
+    </div>
+</div>

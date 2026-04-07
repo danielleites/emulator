@@ -1,0 +1,157 @@
+<link rel="stylesheet" href="/PIVision/Scripts/app/editor/symbols/ext/sym-asstcmp20.css">
+<link rel="stylesheet" href="/PIVision/Scripts/app/editor/symbols/ext/piv20-design-system.css">
+<link rel="stylesheet" href="/PIVision/Scripts/app/editor/symbols/ext/piv20-overrides.css">
+<script type="text/javascript" src="/PIVision/Scripts/app/editor/symbols/ext/piv20-plugins/piv20-core.js"></script>
+<script type="text/javascript" src="/PIVision/Scripts/app/editor/symbols/ext/piv20-plugins/piv20-assetcompare.js"></script>
+<div id="ac20-widget" class="piv20 ac20-widget" style="display:none;"
+     ng-style="{'font-family': config.fontFamily, 'font-size': config.fontSize + 'px'}">
+
+    <!-- Header -->
+    <div class="ac20-header">
+        <span class="ac20-title">{{config.Title}}</span>
+        <div class="ac20-toolbar">
+            <button ng-click="exportCSV()" title="ייצוא CSV">CSV</button>
+            <button ng-click="openPanel()" title="הגדרות">&#9881;</button>
+            <button ng-click="showDocs()" title="תיעוד">?</button>
+        </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="ac20-tabs">
+        <div class="ac20-tab" ng-class="{active: activeTab==='ranking'}" ng-click="setTab('ranking')">&#127942; דירוג</div>
+        <div class="ac20-tab" ng-class="{active: activeTab==='comparison'}" ng-click="setTab('comparison')">&#128202; השוואה</div>
+        <div class="ac20-tab" ng-class="{active: activeTab==='heatmap'}" ng-click="setTab('heatmap')" ng-show="config.showHeatmap">&#127777; מפת חום</div>
+    </div>
+
+    <!-- Filter Bar -->
+    <div class="ac20-filter-bar">
+        <input class="ac20-search" ng-model="filterText" ng-change="filterChanged()" placeholder="&#128269; חיפוש יחידה...">
+        <select class="ac20-select" ng-model="filterSite" ng-change="filterChanged()">
+            <option value="">כל האתרים</option>
+            <option ng-repeat="site in siteList track by site" value="{{site}}">{{site}}</option>
+        </select>
+        <select class="ac20-select" ng-model="filterStatus" ng-change="filterChanged()">
+            <option value="">כל המצבים</option>
+            <option value="producing">ייצור</option>
+            <option value="offline">כבוי</option>
+            <option value="fault">תקלה</option>
+        </select>
+        <span style="font-size:10px;color:#6B8FA8;">{{filteredUnits.length}} יחידות</span>
+    </div>
+
+    <div class="ac20-body">
+
+        <!-- RANKING VIEW -->
+        <div ng-show="activeTab==='ranking'" class="ac20-ranking-grid">
+            <div ng-repeat="unit in filteredUnits track by unit.key"
+                 class="ac20-rank-card"
+                 ng-class="{'ac20-rank-1': unit.rank===1, 'ac20-rank-2': unit.rank===2, 'ac20-rank-3': unit.rank===3}">
+                <div class="ac20-rank-badge">{{unit.rank}}</div>
+                <div class="ac20-rank-name">{{unit.displayName}}</div>
+                <div class="ac20-rank-site">{{unit.site}}</div>
+                <div class="ac20-rank-score" ng-style="{'color': getScoreColor(unit.compositeScore)}">{{unit.compositeScore}}</div>
+                <div class="ac20-score-bar">
+                    <div class="ac20-score-fill" ng-style="{'width': unit.compositeScore + '%', 'background': getScoreColor(unit.compositeScore)}"></div>
+                </div>
+                <div class="ac20-rank-status" ng-class="getStatusClass(unit.status)">{{getStatusText(unit.status)}}</div>
+                <div ng-show="config.showBaseline && unit.healthScore !== undefined"
+                     style="font-size:9px;color:#6B8FA8;margin-top:4px;">
+                    Baseline: {{unit.healthScore}}
+                </div>
+            </div>
+        </div>
+
+        <!-- COMPARISON TABLE -->
+        <div ng-show="activeTab==='comparison'">
+            <table class="ac20-comp-table">
+                <thead>
+                    <tr>
+                        <th ng-click="doSort('name')" style="text-align:right;">יחידה</th>
+                        <th ng-click="doSort('compositeScore')">ציון</th>
+                        <th ng-repeat="param in config.compareParams track by param.key"
+                            ng-click="doSort(param.key)">
+                            {{param.label}}<br><span style="font-size:8px;color:#4A6A7F;">{{param.unit}}</span>
+                        </th>
+                        <th ng-show="config.showBaseline">Baseline</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="unit in filteredUnits track by unit.key">
+                        <td class="ac20-unit-col">
+                            <span style="font-size:10px;color:#6B8FA8;margin-left:4px;">#{{unit.rank}}</span>
+                            {{unit.displayName}}
+                            <span class="ac20-rank-status" ng-class="getStatusClass(unit.status)" style="font-size:9px;">{{getStatusText(unit.status)}}</span>
+                        </td>
+                        <td>
+                            <span style="font-weight:700;" ng-style="{'color': getScoreColor(unit.compositeScore)}">{{unit.compositeScore}}</span>
+                        </td>
+                        <td ng-repeat="param in config.compareParams track by param.key">
+                            <span>{{formatValue(unit.values[param.key], param.decimals)}}</span>
+                            <span ng-show="config.showDeltas && unit.deltas[param.key]"
+                                  class="ac20-delta"
+                                  ng-class="{'ac20-delta-good': unit.deltas[param.key].isBest, 'ac20-delta-bad': !unit.deltas[param.key].isBest && unit.deltas[param.key].value !== 0, 'ac20-delta-zero': unit.deltas[param.key].value === 0}">
+                                {{unit.deltas[param.key].isBest ? '&#9733;' : (unit.deltas[param.key].percent > 0 ? '+' : '') + unit.deltas[param.key].percent + '%'}}
+                            </span>
+                            <svg ng-show="config.showSparklines && getSparklinePath(unit.sparklines && unit.sparklines[param.key])"
+                                 class="ac20-sparkline" viewBox="0 0 60 20">
+                                <path ng-attr-d="{{getSparklinePath(unit.sparklines && unit.sparklines[param.key])}}"/>
+                            </svg>
+                        </td>
+                        <td ng-show="config.showBaseline">
+                            <span ng-show="unit.healthScore !== undefined" ng-style="{'color': getScoreColor(unit.healthScore)}">
+                                {{unit.healthScore}}
+                            </span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- HEATMAP VIEW -->
+        <div ng-show="activeTab==='heatmap'">
+            <table class="ac20-comp-table">
+                <thead>
+                    <tr>
+                        <th style="text-align:right;">יחידה</th>
+                        <th ng-repeat="param in config.compareParams track by param.key">{{param.label}}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="unit in filteredUnits track by unit.key">
+                        <td class="ac20-unit-col">{{unit.displayName}}</td>
+                        <td ng-repeat="param in config.compareParams track by param.key">
+                            <span class="ac20-heatmap-cell"
+                                  ng-class="{'ac20-best-cell': unit.deltas[param.key] && unit.deltas[param.key].isBest}"
+                                  ng-style="{'background': getHeatmapColor(unit.key, param.key)}">
+                                {{formatValue(unit.values[param.key], param.decimals)}}
+                                <span class="ac20-rank-tag" ng-show="getRanking(unit.key, param.key)">#{{getRanking(unit.key, param.key)}}</span>
+                            </span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Side Panel -->
+    <div class="ac20-side-panel" ng-show="panelOpen">
+        <div class="ac20-panel-header">
+            <span style="font-weight:600;color:#5BC0EB;">השוואת Assets</span>
+            <button class="ac20-panel-close" ng-click="closePanel()">&#10005;</button>
+        </div>
+        <div class="ac20-panel-body">
+            <div style="font-size:11px;font-weight:600;color:#8BACC4;margin-bottom:4px;">פרמטרים</div>
+            <div ng-repeat="param in config.compareParams track by param.key"
+                 style="font-size:10px;color:#6B8FA8;margin-bottom:2px;">
+                {{param.label}} ({{param.unit}}) — משקל: {{param.weight}}
+                <span ng-show="param.higherBetter" style="color:#2ecc71;">&#8593;</span>
+                <span ng-hide="param.higherBetter" style="color:#e74c3c;">&#8595;</span>
+            </div>
+            <div style="font-size:11px;font-weight:600;color:#8BACC4;margin-top:8px;margin-bottom:4px;">אתרים</div>
+            <div ng-repeat="site in siteList track by site"
+                 style="font-size:10px;color:#6B8FA8;margin-bottom:2px;">
+                {{site}}
+            </div>
+        </div>
+    </div>
+</div>

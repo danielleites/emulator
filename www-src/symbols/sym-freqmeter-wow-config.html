@@ -1,0 +1,143 @@
+<!-- ═══════════════════════════════════════════════════════
+     Executive Resonance Frequency Meter — Config Panel
+     WOW Resonance Meter v100 — wc20 Pattern + Collapsible <details>
+     ═══════════════════════════════════════════════════════ -->
+
+<div class="wc20-config-panel" style="direction:rtl; font-family:'Segoe UI',Arial,sans-serif;">
+
+    <!-- ── General (open by default) ── -->
+    <details class="wc20-section" open>
+        <summary class="wc20-section-title">כללי</summary>
+
+        <div class="wc20-field">
+            <label class="wc20-label">כותרת</label>
+            <input type="text" class="wc20-input"
+                   ng-model="config.Title"
+                   placeholder="Executive Resonance Meter">
+        </div>
+
+        <div class="wc20-field">
+            <label class="wc20-label">מצב הדגמה (Demo)</label>
+            <input type="checkbox" class="wc20-checkbox"
+                   ng-model="config.DemoMode">
+            <span class="wc20-hint">סימולציה של תנודות רשת — סחף, אירועי עומס, ומיקרו-רעש</span>
+        </div>
+    </details>
+
+    <!-- ── Frequency Settings (open by default) ── -->
+    <details class="wc20-section" open>
+        <summary class="wc20-section-title">הגדרות תדר</summary>
+
+        <div class="wc20-field">
+            <label class="wc20-label">תדר נומינלי (Hz)</label>
+            <input type="number" class="wc20-input wc20-input-sm"
+                   ng-model="config.NominalFrequency"
+                   ng-model-options="{ debounce: 500 }"
+                   min="45" max="65" step="0.01"
+                   placeholder="50.00">
+            <span class="wc20-hint">50Hz (אירופה/ישראל) או 60Hz (צפון אמריקה)</span>
+        </div>
+
+        <div class="wc20-field">
+            <label class="wc20-label">סף אזהרה (±Hz)</label>
+            <input type="number" class="wc20-input wc20-input-sm"
+                   ng-model="config.WarningBand"
+                   ng-model-options="{ debounce: 500 }"
+                   min="0.01" max="1.0" step="0.01"
+                   placeholder="0.15">
+            <span class="wc20-hint">סטייה ≥ WarningBand → צבע כתום, גל מואץ</span>
+        </div>
+
+        <div class="wc20-field">
+            <label class="wc20-label">סף קריטי (±Hz)</label>
+            <input type="number" class="wc20-input wc20-input-sm"
+                   ng-model="config.CriticalBand"
+                   ng-model-options="{ debounce: 500 }"
+                   min="0.02" max="2.0" step="0.01"
+                   placeholder="0.30">
+            <span class="wc20-hint">סטייה ≥ CriticalBand → צבע אדום, ג'יטר + הרמוניקה</span>
+        </div>
+    </details>
+
+    <!-- ── Display ── -->
+    <details class="wc20-section">
+        <summary class="wc20-section-title">תצוגה</summary>
+
+        <div class="wc20-field">
+            <label class="wc20-label">עשרוניות</label>
+            <select class="wc20-select" ng-model="config.Decimals"
+                    ng-options="v as v for v in [1, 2, 3, 4]">
+            </select>
+            <span class="wc20-hint">דיוק תצוגת התדר (2 = 50.00 Hz)</span>
+        </div>
+    </details>
+
+    <!-- ── Theme ── -->
+    <details class="wc20-section">
+        <summary class="wc20-section-title">ערכת נושא</summary>
+
+        <div class="wc20-field">
+            <label class="wc20-label">גופן</label>
+            <select class="wc20-select" ng-model="config.fontFamily">
+                <option value="Segoe UI">Segoe UI</option>
+                <option value="Arial">Arial</option>
+                <option value="Tahoma">Tahoma</option>
+                <option value="Consolas">Consolas (Mono)</option>
+            </select>
+        </div>
+
+        <div class="wc20-field">
+            <label class="wc20-label">גודל גופן (px)</label>
+            <input type="number" class="wc20-input wc20-input-sm"
+                   ng-model="config.fontSize"
+                   ng-model-options="{ debounce: 500 }"
+                   min="8" max="16" step="1">
+        </div>
+    </details>
+
+    <!-- ── Info ── -->
+    <details class="wc20-section">
+        <summary class="wc20-section-title">מידע טכני</summary>
+
+        <div class="wc20-field wc20-readonly">
+            <span class="wc20-badge wc20-badge-blue">DataShape</span>
+            <span>Value (Single Datasource — Current Frequency)</span>
+        </div>
+
+        <div class="wc20-field wc20-readonly">
+            <span class="wc20-badge wc20-badge-green">Rendering</span>
+            <span>Canvas 2D — CRT Phosphor Trail Effect</span>
+        </div>
+
+        <div class="wc20-field wc20-readonly">
+            <span class="wc20-badge wc20-badge-green">Animation</span>
+            <span>Tension Lerp — Smooth Frequency Tracking</span>
+        </div>
+
+        <div class="wc20-field wc20-readonly">
+            <span class="wc20-badge wc20-badge-orange">Wave Physics</span>
+            <span>Stress → Amplitude + Speed + Jitter + Harmonics</span>
+        </div>
+
+        <div class="wc20-field wc20-readonly">
+            <span class="wc20-badge wc20-badge-blue">Pulse Ring</span>
+            <span>Peripheral Vision Alert — Deadband Crossing</span>
+        </div>
+
+        <div class="wc20-field wc20-readonly">
+            <span class="wc20-badge wc20-badge-purple">Performance</span>
+            <span>60fps rAF · 0 DOM updates · CRT trail = 1 fillRect</span>
+        </div>
+
+        <div class="wc20-field wc20-readonly">
+            <span class="wc20-badge wc20-badge-green">Neon Glow</span>
+            <span>shadowBlur GPU Composite — Authentic CRT Phosphor</span>
+        </div>
+
+        <div class="wc20-field wc20-readonly" style="margin-top:8px;">
+            <span class="wc20-badge">WOW Resonance Meter v100</span>
+            <span style="color:#8899AA;">Executive Resonance Frequency Meter</span>
+        </div>
+    </details>
+
+</div>

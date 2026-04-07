@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none">
+  <!-- Cycle arrows -->
+  <path d="M8 16 A8 8 0 1 1 24 16" stroke="#A478F0" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+  <path d="M8 16 l-3-3 l6 0 Z" fill="#A478F0"/>
+  <!-- Count display -->
+  <rect x="11" y="12" width="10" height="8" rx="1.5" fill="#120830" stroke="#A478F0" stroke-width="0.8"/>
+  <line x1="13" y1="15" x2="19" y2="15" stroke="#A478F0" stroke-width="1" stroke-linecap="round"/>
+  <line x1="14" y1="17" x2="18" y2="17" stroke="#A478F0" stroke-width="0.8" stroke-linecap="round"/>
+  <!-- Status dot -->
+  <circle cx="26" cy="6" r="3" fill="#2ECC71" opacity="0.9"/>
+</svg>

@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none">
+  <!-- Sine wave (grid-forming voltage source) -->
+  <path d="M4 20 Q7 8 10 20 Q13 32 16 20 Q19 8 22 20 Q25 32 28 20" stroke="#1ABC9C" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+  <!-- GF readiness ring -->
+  <circle cx="16" cy="10" r="5" fill="#061020" stroke="#7DBAEF" stroke-width="1.3"/>
+  <!-- Check mark inside ring -->
+  <path d="M13 10 l2 2 l4 -4" stroke="#1ABC9C" stroke-width="1.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

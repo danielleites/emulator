@@ -1,0 +1,118 @@
+<link rel="stylesheet" href="/PIVision/Scripts/app/editor/symbols/ext/sym-co2emis20.css">
+<link rel="stylesheet" href="/PIVision/Scripts/app/editor/symbols/ext/piv20-design-system.css">
+<link rel="stylesheet" href="/PIVision/Scripts/app/editor/symbols/ext/piv20-overrides.css">
+<script type="text/javascript" src="/PIVision/Scripts/app/editor/symbols/ext/piv20-plugins/piv20-core.js"></script>
+<script type="text/javascript" src="/PIVision/Scripts/app/editor/symbols/ext/piv20-ultra.js"></script>
+<script type="text/javascript" src="/PIVision/Scripts/app/editor/symbols/ext/piv20-plugins/piv20-co2emissions.js"></script>
+
+<div class="piv20 ce20-root" ng-right-click="showContextMenu($event)">
+
+    <!-- Header -->
+    <div class="ce20-hdr">
+        <div style="display:flex;align-items:center;gap:8px">
+            <span class="ce20-ttl">{{config.Title || 'פליטות CO2'}}</span>
+            <span class="ce20-live" ng-hide="demoMode"><span class="ce20-live-dot"></span>חי</span>
+            <span class="ce20-demo-badge" ng-show="demoMode" ng-click="toggleDemo()">DEMO</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:4px">
+            <div class="ce20-tabs">
+                <button class="ce20-btn" ng-class="{active: activeTab==='monitor'}" ng-click="setTab('monitor')" title="1">ניטור</button>
+                <button class="ce20-btn" ng-class="{active: activeTab==='chart'}" ng-click="setTab('chart')" title="2">גרף</button>
+                <button class="ce20-btn" ng-class="{active: activeTab==='alerts'}" ng-click="setTab('alerts')" title="3">התראות</button>
+            </div>
+            <button class="ce20-btn" ng-click="exportCSV()" title="ייצוא CSV">&#8681;</button>
+            <button class="ce20-btn" ng-click="showDocs()" title="תיעוד">?</button>
+            <button class="ce20-btn" ng-click="openPanel()" title="הגדרות (Esc לסגירה)">&#9881;</button>
+        </div>
+    </div>
+
+    <!-- Summary bar -->
+    <div class="ce20-summary" ng-show="units.length">
+        <span class="ce20-sum-item">סה"כ פליטה: {{totalEmission | number:config.Decimals}} {{config.EmissionUnit || 'טון/שעה'}}</span>
+        <span class="ce20-sum-item">סה"כ ייצור: {{totalProduction | number:config.Decimals}} {{config.ProductionUnit || 'MW'}}</span>
+        <span class="ce20-sum-item">מקדם ממוצע: {{avgFactor | number:4}}</span>
+        <span class="ce20-sum-item" ng-show="correlation">מתאם: {{correlation.r | number:2}}</span>
+        <span class="ce20-sum-item">יחידות: {{units.length}}</span>
+    </div>
+
+    <!-- Body -->
+    <div class="ce20-body">
+
+        <!-- Empty state -->
+        <div class="ce20-empty" ng-show="!units.length && !demoMode">
+            <div style="font-size:32px;opacity:0.3">&#127981;</div>
+            <div>הוסף תגיות CO2 לניטור פליטות</div>
+        </div>
+
+        <!-- Monitor tab: unit cards + fuel breakdown -->
+        <div ng-show="activeTab==='monitor' && units.length">
+            <div class="ce20-cards">
+                <div class="ce20-card" ng-repeat="u in units track by $index" ng-class="'sev-' + u.severity">
+                    <div class="ce20-card-name">{{u.name}}</div>
+                    <div class="ce20-card-val">{{u.emission | number:config.Decimals}}</div>
+                    <div class="ce20-card-sub">ייצור: {{u.production | number:config.Decimals}} MW | מקדם: {{u.factor | number:4}}</div>
+                    <div class="ce20-card-fuel" ng-style="{'background': u.fuelBg, 'color': u.fuelColor}">{{u.fuelIcon}} {{u.fuel}}</div>
+                </div>
+            </div>
+            <!-- Fuel breakdown bar -->
+            <div ng-show="fuelBreakdown.length">
+                <div class="ce20-fuel-bar">
+                    <div class="ce20-fuel-seg" ng-repeat="fb in fuelBreakdown track by $index" ng-style="{'width': fb.pct + '%', 'background': fb.color}" title="{{fb.fuel}}: {{fb.pct | number:1}}%"></div>
+                </div>
+                <div class="ce20-fuel-legend">
+                    <span ng-repeat="fb in fuelBreakdown track by $index"><span class="ce20-fuel-dot" ng-style="{'background': fb.color}"></span>{{fb.fuel}} ({{fb.pct | number:1}}%)</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chart tab -->
+        <div class="ce20-chart-wrap" ng-show="activeTab==='chart' && units.length">
+            <canvas class="ce20-canvas"></canvas>
+        </div>
+
+        <!-- Alerts tab -->
+        <div ng-show="activeTab==='alerts'">
+            <div class="ce20-alert" ng-repeat="a in alertHistory track by $index" ng-class="'alert-' + a.severity">
+                <span class="ce20-alert-icon" ng-if="a.severity==='crit'">&#9888;</span>
+                <span class="ce20-alert-icon" ng-if="a.severity==='warn'">&#9888;</span>
+                <span>{{a.unit}} — {{a.message}}</span>
+                <span style="margin-right:auto;color:var(--ce20-text3)">{{a.time}}</span>
+            </div>
+            <div ng-show="!alertHistory.length" style="padding:20px;text-align:center;color:var(--ce20-text3)">אין התראות</div>
+        </div>
+
+    </div>
+
+    <!-- Side panel -->
+    <div class="ce20-panel" ng-class="{open: panelOpen}">
+        <div class="ce20-phd">
+            <h3>הגדרות פליטות CO2</h3>
+            <button class="ce20-pcl" ng-click="closePanel()">&times;</button>
+        </div>
+        <div class="ce20-ps"><label>כותרת</label><input type="text" ng-model="config.Title"></div>
+        <div class="ce20-ps"><label>ספרות</label><input type="number" ng-model="config.Decimals" min="0" max="6"></div>
+        <div class="ce20-ps"><label>אזהרה — פליטה</label><input type="number" ng-model="config.WarnThreshold" step="any"></div>
+        <div class="ce20-ps"><label>קריטי — פליטה</label><input type="number" ng-model="config.CritThreshold" step="any"></div>
+        <div class="ce20-panel-section">
+            <div class="ce20-ps-title">הגדרות מתקדמות</div>
+            <div class="ce20-ps"><label>מצב דמו</label>
+                <label class="ce20-toggle"><input type="checkbox" ng-model="config.DemoMode" ng-change="toggleDemo()"><span class="ce20-toggle-slider"></span></label>
+            </div>
+            <div class="ce20-ps" style="display:flex;gap:4px">
+                <button class="ce20-btn" ng-click="exportConfig()" style="flex:1">&#8681; ייצוא הגדרות</button>
+                <button class="ce20-btn" ng-click="importConfig()" style="flex:1">&#8679; ייבוא הגדרות</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Keyboard hints tooltip -->
+    <div class="ce20-kbd-hints" ng-show="panelOpen">
+        <span>1 ניטור</span> <span>2 גרף</span> <span>3 התראות</span> <span>Esc סגירה</span>
+    </div>
+
+    <!-- Footer -->
+    <div class="ce20-ftr">PIV20 CO2 Emissions</div>
+
+    <!-- Widget container -->
+    <div id="ce20-widget" style="display:none"></div>
+</div>

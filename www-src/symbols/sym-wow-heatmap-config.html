@@ -1,0 +1,142 @@
+<!-- ═══════════════════════════════════════════════════════
+     Executive Heatmap — Config Panel
+     WOW HM v100 — wc20 Pattern + Collapsible <details>
+     ═══════════════════════════════════════════════════════ -->
+
+<div class="wc20-config-panel" style="direction:rtl; font-family:'Segoe UI',Arial,sans-serif;">
+
+    <!-- ── General (open by default) ── -->
+    <details class="wc20-section" open>
+        <summary class="wc20-section-title">כללי</summary>
+
+        <div class="wc20-field">
+            <label class="wc20-label">כותרת</label>
+            <input type="text" class="wc20-input"
+                   ng-model="config.Title">
+        </div>
+
+        <div class="wc20-field">
+            <label class="wc20-label">מצב הדגמה (Demo)</label>
+            <input type="checkbox" class="wc20-checkbox"
+                   ng-model="config.DemoMode">
+        </div>
+    </details>
+
+    <!-- ── Display (open by default) ── -->
+    <details class="wc20-section" open>
+        <summary class="wc20-section-title">תצוגה</summary>
+
+        <div class="wc20-field">
+            <label class="wc20-label">מדד (Metric)</label>
+            <select class="wc20-select" ng-model="config.Metric">
+                <option value="hours">שעות</option>
+                <option value="pct">% ניצול</option>
+                <option value="quota">מכסה</option>
+            </select>
+        </div>
+
+        <div class="wc20-field">
+            <label class="wc20-label">תצוגה (View)</label>
+            <select class="wc20-select" ng-model="config.ViewMode">
+                <option value="monthly">חודשי</option>
+                <option value="dayHour">יום/שעה</option>
+            </select>
+        </div>
+
+        <div class="wc20-field">
+            <label class="wc20-label">סכמת צבע</label>
+            <select class="wc20-select" ng-model="config.ColorScheme">
+                <option value="executive">Executive (עסקי)</option>
+                <option value="thermal">Thermal</option>
+                <option value="green">ירוק</option>
+                <option value="blue">כחול</option>
+            </select>
+        </div>
+
+        <div class="wc20-field">
+            <label class="wc20-label">נקודות עשרוניות</label>
+            <input type="number" class="wc20-input wc20-input-sm"
+                   ng-model="config.Decimals"
+                   ng-model-options="{ debounce: 500 }"
+                   min="0" max="3" step="1">
+        </div>
+
+        <div class="wc20-field">
+            <label class="wc20-label">הצג ערכים בתאים</label>
+            <input type="checkbox" class="wc20-checkbox"
+                   ng-model="config.ShowValues">
+        </div>
+
+        <div class="wc20-field">
+            <label class="wc20-label">הצג תוויות צירים</label>
+            <input type="checkbox" class="wc20-checkbox"
+                   ng-model="config.ShowLabels">
+        </div>
+    </details>
+
+    <!-- ── Thresholds ── -->
+    <details class="wc20-section">
+        <summary class="wc20-section-title">ספים</summary>
+
+        <div class="wc20-field">
+            <label class="wc20-label">סף אזהרה (%)</label>
+            <input type="number" class="wc20-input wc20-input-sm"
+                   ng-model="config.WarnPct"
+                   ng-model-options="{ debounce: 500 }"
+                   min="0" max="100" step="1">
+        </div>
+
+        <div class="wc20-field">
+            <label class="wc20-label">סף קריטי (%)</label>
+            <input type="number" class="wc20-input wc20-input-sm"
+                   ng-model="config.CritPct"
+                   ng-model-options="{ debounce: 500 }"
+                   min="0" max="100" step="1">
+        </div>
+    </details>
+
+    <!-- ── Theme ── -->
+    <details class="wc20-section">
+        <summary class="wc20-section-title">ערכת נושא</summary>
+
+        <div class="wc20-field">
+            <label class="wc20-label">גופן</label>
+            <select class="wc20-select" ng-model="config.fontFamily">
+                <option value="Segoe UI">Segoe UI</option>
+                <option value="Arial">Arial</option>
+                <option value="Rubik">Rubik</option>
+                <option value="Heebo">Heebo</option>
+                <option value="Consolas">Consolas (Mono)</option>
+            </select>
+        </div>
+
+        <div class="wc20-field">
+            <label class="wc20-label">גודל גופן (px)</label>
+            <input type="number" class="wc20-input wc20-input-sm"
+                   ng-model="config.fontSize"
+                   ng-model-options="{ debounce: 500 }"
+                   min="8" max="20" step="1">
+        </div>
+    </details>
+
+    <!-- ── Info ── -->
+    <details class="wc20-section">
+        <summary class="wc20-section-title">מידע טכני</summary>
+
+        <div class="wc20-field wc20-readonly">
+            <span class="wc20-badge wc20-badge-blue">DataShape</span>
+            <span>Table</span>
+        </div>
+
+        <div class="wc20-field wc20-readonly">
+            <span class="wc20-badge wc20-badge-green">Architecture</span>
+            <span>Canvas + Shadow DOM + Worker</span>
+        </div>
+
+        <div class="wc20-field wc20-readonly" style="margin-top:8px;">
+            <span class="wc20-badge">WOW HM v100</span>
+            <span style="color:#8899AA;">Executive Heatmap</span>
+        </div>
+    </details>
+
+</div>

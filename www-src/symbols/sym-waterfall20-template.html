@@ -1,0 +1,237 @@
+<link rel="stylesheet" href="/PIVision/Scripts/app/editor/symbols/ext/sym-waterfall20.css">
+<link rel="stylesheet" href="/PIVision/Scripts/app/editor/symbols/ext/piv20-design-system.css">
+<link rel="stylesheet" href="/PIVision/Scripts/app/editor/symbols/ext/piv20-overrides.css">
+<script type="text/javascript" src="/PIVision/Scripts/app/editor/symbols/ext/piv20-plugins/piv20-core.js"></script>
+<script type="text/javascript" src="/PIVision/Scripts/app/editor/symbols/ext/piv20-plugins/piv20-waterfall.js"></script>
+
+<div id="wf20-widget" class="piv20 wf20-root" role="region" aria-label="תרשים מפל שינויים" style="width:100%;height:100%;">
+
+<!-- TOAST CONTAINER -->
+<div class="wf20-toast-container"></div>
+
+<!-- HEADER -->
+<div class="wf20-hdr" data-doc="header">
+    <div>
+        <span class="wf20-ttl">{{config.Title || '\מ\פ\ל \ש\י\נ\ו\י\י\ם'}}</span>
+        <span class="wf20-sub" style="margin-right:8px">{{summary.good||0}}/{{summary.total||0}} תקינים</span>
+        <span class="wf20-conn" ng-class="{'wf20-conn-ok':afConn.status==='ok','wf20-conn-partial':afConn.status==='partial','wf20-conn-error':afConn.status==='error'}" ng-show="afConn.total">&#9679; {{afConn.good}}/{{afConn.total}}</span>
+    </div>
+    <div class="wf20-toolbar">
+        <div class="wf20-views">
+            <button class="wf20-btn" ng-class="{'active':viewMode==='waterfall'}" ng-click="setView('waterfall')" title="תרשים מפל">&#9638;</button>
+            <button class="wf20-btn" ng-class="{'active':viewMode==='table'}" ng-click="setView('table')" title="טבלה">&#9776;</button>
+            <button class="wf20-btn" ng-class="{'active':viewMode==='compact'}" ng-click="setView('compact')" title="תקציר">&#9644;</button>
+        </div>
+        <div class="wf20-live"><span class="wf20-live-dot"></span>{{liveTime}}</div>
+        <button class="wf20-btn" ng-click="exportData()" style="padding:4px 8px" title="ייצוא CSV">&#128229;</button>
+        <button class="wf20-btn" ng-click="showDocs()" style="padding:4px 8px" title="מדריך">&#128214;</button>
+        <button class="wf20-btn" ng-click="togglePanel()" style="padding:4px 8px" title="הגדרות">&#9881;</button>
+    </div>
+</div>
+
+<!-- SUMMARY STRIP -->
+<div class="wf20-summary" ng-show="waterfallBars.length">
+    <div class="wf20-sum-item">
+        <div class="wf20-sum-val" style="color:var(--wf20-text2)">{{summary.formattedBase}}</div>
+        <div class="wf20-sum-lbl">בסיס</div>
+    </div>
+    <div class="wf20-sum-item">
+        <div class="wf20-sum-val" style="color:var(--wf20-ok)">{{summary.formattedAdditions}}</div>
+        <div class="wf20-sum-lbl">תוספות</div>
+    </div>
+    <div class="wf20-sum-item">
+        <div class="wf20-sum-val" style="color:var(--wf20-crit)">{{summary.formattedSubtractions}}</div>
+        <div class="wf20-sum-lbl">הפחתות</div>
+    </div>
+    <div class="wf20-sum-item">
+        <div class="wf20-sum-val" ng-style="{'color': summary.netChange >= 0 ? 'var(--wf20-ok)' : 'var(--wf20-crit)'}">{{summary.formattedNet}}</div>
+        <div class="wf20-sum-lbl">שינוי נקי</div>
+    </div>
+    <div class="wf20-sum-item">
+        <div class="wf20-sum-val" ng-style="{'color': summary.netChangePct >= 0 ? 'var(--wf20-ok)' : 'var(--wf20-crit)'}">{{summary.formattedNetPct}}</div>
+        <div class="wf20-sum-lbl">שינוי %</div>
+    </div>
+    <div class="wf20-sum-item">
+        <div class="wf20-sum-val" style="color:var(--wf20-cyan)">{{summary.formattedFinal}}</div>
+        <div class="wf20-sum-lbl">סה"כ סופי</div>
+    </div>
+</div>
+
+<!-- LARGEST ITEMS BADGES -->
+<div style="display:flex;gap:8px;padding:4px 16px;flex-wrap:wrap;flex-shrink:0" ng-show="waterfallBars.length && (summary.largestPositive.label || summary.largestNegative.label)">
+    <span class="wf20-badge wf20-badge-pos" ng-show="summary.largestPositive.label">&#9650; {{summary.largestPositive.label}}: +{{summary.largestPositive.value}}</span>
+    <span class="wf20-badge wf20-badge-neg" ng-show="summary.largestNegative.label">&#9660; {{summary.largestNegative.label}}: -{{summary.largestNegative.value}}</span>
+</div>
+
+<!-- FILTER BAR (table view) -->
+<div class="wf20-filter" ng-show="viewMode==='table'">
+    <input class="wf20-filter-input" type="text" ng-model="filterText" ng-change="onFilterChange()" placeholder="&#128269; סינון...">
+</div>
+
+<!-- BODY -->
+<div class="wf20-body" data-doc="waterfall">
+
+    <!-- Empty state -->
+    <div class="wf20-empty" ng-show="!hasData && !loading">
+        <div style="font-size:40px;opacity:0.3">&#128202;</div>
+        <div>גרור תגים לסימבול כדי להציג תרשים מפל</div>
+    </div>
+    <div class="wf20-empty" ng-show="loading">
+        <div style="font-size:24px">&#8987;</div>
+        <div>טוען...</div>
+    </div>
+
+    <!-- ═══ WATERFALL CHART VIEW ═══ -->
+    <div ng-show="viewMode==='waterfall' && waterfallBars.length" style="display:flex;flex-direction:column;height:100%">
+        <div class="wf20-canvas-wrap">
+            <canvas class="wf20-canvas"
+                    ng-mousemove="_onCanvasMove($event)"
+                    ng-mouseleave="_onCanvasLeave()"
+                    ng-click="_onCanvasClick($event)"></canvas>
+        </div>
+
+        <!-- Stats section below chart -->
+        <div class="wf20-stats" ng-show="stats.min !== '---'">
+            <div class="wf20-stat-cell">
+                <div class="wf20-stat-label">מינ'</div>
+                <div class="wf20-stat-val">{{stats.min}}</div>
+            </div>
+            <div class="wf20-stat-cell">
+                <div class="wf20-stat-label">מקס'</div>
+                <div class="wf20-stat-val">{{stats.max}}</div>
+            </div>
+            <div class="wf20-stat-cell">
+                <div class="wf20-stat-label">ממוצע</div>
+                <div class="wf20-stat-val">{{stats.avg}}</div>
+            </div>
+            <div class="wf20-stat-cell">
+                <div class="wf20-stat-label">סטיית תקן</div>
+                <div class="wf20-stat-val">{{stats.stddev}}</div>
+            </div>
+            <div class="wf20-stat-cell">
+                <div class="wf20-stat-label">סכום</div>
+                <div class="wf20-stat-val">{{stats.sum}}</div>
+            </div>
+            <div class="wf20-stat-cell">
+                <div class="wf20-stat-label">מגמה</div>
+                <div class="wf20-stat-val">{{stats.trend}}</div>
+            </div>
+            <div class="wf20-stat-cell">
+                <div class="wf20-stat-label">R&#178;</div>
+                <div class="wf20-stat-val">{{stats.trendR2}}</div>
+            </div>
+            <div class="wf20-stat-cell" ng-show="stats.outlierCount > 0">
+                <div class="wf20-stat-label">חריגים</div>
+                <div class="wf20-stat-val" style="color:var(--wf20-crit)">{{stats.outlierCount}}</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══ TABLE VIEW ═══ -->
+    <div ng-show="viewMode==='table' && items.length">
+        <table class="wf20-tbl">
+            <thead>
+                <tr>
+                    <th ng-click="sortBy('idx')">#<span class="wf20-sort-arrow" ng-show="sortField==='idx'">{{sortReverse ? '\▲' : '\▼'}}</span></th>
+                    <th ng-click="sortBy('label')">שם<span class="wf20-sort-arrow" ng-show="sortField==='label'">{{sortReverse ? '\▲' : '\▼'}}</span></th>
+                    <th ng-click="sortBy('numeric')">ערך<span class="wf20-sort-arrow" ng-show="sortField==='numeric'">{{sortReverse ? '\▲' : '\▼'}}</span></th>
+                    <th ng-click="sortBy('delta')">דלתא<span class="wf20-sort-arrow" ng-show="sortField==='delta'">{{sortReverse ? '\▲' : '\▼'}}</span></th>
+                    <th ng-click="sortBy('category')">סיווג<span class="wf20-sort-arrow" ng-show="sortField==='category'">{{sortReverse ? '\▲' : '\▼'}}</span></th>
+                    <th>איכות</th>
+                    <th>זמן</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr ng-repeat="item in getFiltered() track by item.idx">
+                    <td style="color:var(--wf20-text3)">{{item.idx + 1}}</td>
+                    <td style="color:var(--wf20-text2)" title="{{item.fullPath}}">{{item.label}}</td>
+                    <td class="wf20-col-val" style="color:var(--wf20-cyan)">{{item.display}}</td>
+                    <td class="wf20-col-delta" ng-style="{'color': item.delta >= 0 ? 'var(--wf20-ok)' : 'var(--wf20-crit)'}">{{item.delta >= 0 ? '+' : ''}}{{item.delta}}</td>
+                    <td><span class="wf20-col-cat" ng-style="{'background': item.category==='positive' ? 'var(--wf20-ok-dim)' : item.category==='negative' ? 'var(--wf20-crit-dim)' : 'rgba(90,122,148,0.15)', 'color': item.category==='positive' ? 'var(--wf20-ok)' : item.category==='negative' ? 'var(--wf20-crit)' : 'var(--wf20-text3)'}">{{item.category === 'positive' ? 'חיובי' : item.category === 'negative' ? 'שלילי' : 'אוטו'}}</span></td>
+                    <td><span style="display:inline-block;width:8px;height:8px;border-radius:50%" ng-style="{'background': item.good ? 'var(--wf20-ok)' : 'var(--wf20-crit)'}"></span></td>
+                    <td style="font-size:10px;color:var(--wf20-text3)">{{item.time}}</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- ═══ COMPACT VIEW ═══ -->
+    <div class="wf20-compact" ng-show="viewMode==='compact' && waterfallBars.length">
+        <!-- Base to Final flow -->
+        <div class="wf20-card" style="padding:20px">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+                <div style="text-align:center">
+                    <div style="font-size:11px;color:var(--wf20-text3)">בסיס</div>
+                    <div style="font-size:28px;font-weight:800;color:var(--wf20-text2)">{{summary.formattedBase}}</div>
+                </div>
+                <div style="font-size:24px;color:var(--wf20-text3)">&#8592;</div>
+                <div style="text-align:center">
+                    <div style="font-size:11px;color:var(--wf20-text3)">סופי</div>
+                    <div style="font-size:28px;font-weight:800;color:var(--wf20-cyan)">{{summary.formattedFinal}}</div>
+                </div>
+            </div>
+            <!-- Net change bar -->
+            <div class="wf20-compact-row">
+                <span style="font-size:11px;color:var(--wf20-text3);min-width:60px">שינוי נקי</span>
+                <div class="wf20-compact-bar">
+                    <div class="wf20-compact-fill" ng-style="{'width': (Math.min(Math.abs(summary.netChangePct), 100)) + '%', 'background': summary.netChange >= 0 ? 'var(--wf20-ok)' : 'var(--wf20-crit)'}"></div>
+                </div>
+                <span style="font-size:13px;font-weight:700;min-width:80px;text-align:left" ng-style="{'color': summary.netChange >= 0 ? 'var(--wf20-ok)' : 'var(--wf20-crit)'}">{{summary.formattedNet}} ({{summary.formattedNetPct}})</span>
+            </div>
+        </div>
+
+        <!-- Additions / Subtractions breakdown -->
+        <div style="display:flex;gap:12px">
+            <div class="wf20-card" style="flex:1;text-align:center">
+                <div style="font-size:11px;color:var(--wf20-text3);margin-bottom:6px">תוספות</div>
+                <div style="font-size:24px;font-weight:800;color:var(--wf20-ok)">{{summary.formattedAdditions}}</div>
+                <div style="font-size:10px;color:var(--wf20-text3);margin-top:4px" ng-show="summary.largestPositive.label">גדול ביותר: {{summary.largestPositive.label}}</div>
+            </div>
+            <div class="wf20-card" style="flex:1;text-align:center">
+                <div style="font-size:11px;color:var(--wf20-text3);margin-bottom:6px">הפחתות</div>
+                <div style="font-size:24px;font-weight:800;color:var(--wf20-crit)">{{summary.formattedSubtractions}}</div>
+                <div style="font-size:10px;color:var(--wf20-text3);margin-top:4px" ng-show="summary.largestNegative.label">גדול ביותר: {{summary.largestNegative.label}}</div>
+            </div>
+        </div>
+
+        <!-- Stats in compact -->
+        <div class="wf20-stats" ng-show="stats.min !== '---'">
+            <div class="wf20-stat-cell"><div class="wf20-stat-label">מינ'</div><div class="wf20-stat-val">{{stats.min}}</div></div>
+            <div class="wf20-stat-cell"><div class="wf20-stat-label">מקס'</div><div class="wf20-stat-val">{{stats.max}}</div></div>
+            <div class="wf20-stat-cell"><div class="wf20-stat-label">ממוצע</div><div class="wf20-stat-val">{{stats.avg}}</div></div>
+            <div class="wf20-stat-cell"><div class="wf20-stat-label">סכום</div><div class="wf20-stat-val">{{stats.sum}}</div></div>
+            <div class="wf20-stat-cell"><div class="wf20-stat-label">מגמה</div><div class="wf20-stat-val">{{stats.trend}}</div></div>
+        </div>
+    </div>
+
+</div>
+
+<!-- TOOLTIP -->
+<div class="wf20-tooltip" ng-show="tooltip.visible" ng-style="{'left': tooltip.x + 12 + 'px', 'top': tooltip.y - 10 + 'px'}">
+    <div class="wf20-tooltip-label">{{tooltip.label}}</div>
+    <div class="wf20-tooltip-row"><span>ערך:</span><span>{{tooltip.value}}</span></div>
+    <div class="wf20-tooltip-row"><span>אחוז מסה"כ:</span><span>{{tooltip.pct}}</span></div>
+    <div class="wf20-tooltip-row"><span>מגמה:</span><span>{{tooltip.trend}}</span></div>
+    <div class="wf20-tooltip-row"><span>סוג:</span><span>{{tooltip.type === 'base' ? 'בסיס' : tooltip.type === 'total' ? 'סה"כ' : 'שינוי'}}</span></div>
+</div>
+
+<!-- SIDE PANEL -->
+<div class="wf20-panel" data-doc="sidepanel" ng-class="{'open':panelOpen}">
+    <div class="wf20-phd"><h3>&#9881; הגדרות מפל</h3><button class="wf20-pcl" ng-click="togglePanel()">&#10005;</button></div>
+    <div class="wf20-ps"><label>כותרת</label><input type="text" ng-model="config.Title"></div>
+    <div class="wf20-ps"><label>ספרות עשרוניות</label><input type="number" ng-model="config.Decimals" min="0" max="4"></div>
+    <div class="wf20-ps"><label>ערך בסיס</label><input type="number" ng-model="config.BaseValue" step="any"></div>
+    <div class="wf20-ps"><label><input type="checkbox" ng-model="config.ShowConnectors"> הצג קווי חיבור</label></div>
+    <div class="wf20-ps"><label><input type="checkbox" ng-model="config.ShowLabels"> הצג תוויות</label></div>
+    <div class="wf20-ps"><label><input type="checkbox" ng-model="config.ShowTotal"> הצג עמודת סיכום</label></div>
+    <div class="wf20-ps"><label>צבע חיובי</label><input type="color" ng-model="config.PositiveColor" style="width:50px;height:28px"></div>
+    <div class="wf20-ps"><label>צבע שלילי</label><input type="color" ng-model="config.NegativeColor" style="width:50px;height:28px"></div>
+    <div class="wf20-ps"><label>צבע סה"כ</label><input type="color" ng-model="config.TotalColor" style="width:50px;height:28px"></div>
+    <div class="wf20-ps"><label>צבע בסיס</label><input type="color" ng-model="config.BaseColor" style="width:50px;height:28px"></div>
+    <div class="wf20-ps"><label>מהירות אנימציה (ms)</label><input type="number" ng-model="config.animationSpeed" min="0" max="2000" step="50"></div>
+</div>
+
+<!-- FOOTER -->
+<div class="wf20-ftr">נוגה — מנהל מערכת החשמל | PIV20 v20.0</div>
+
+</div>

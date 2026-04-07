@@ -1,0 +1,101 @@
+<link rel="stylesheet" href="/PIVision/Scripts/app/editor/symbols/ext/sym-scatter20.css">
+<link rel="stylesheet" href="/PIVision/Scripts/app/editor/symbols/ext/piv20-design-system.css">
+<link rel="stylesheet" href="/PIVision/Scripts/app/editor/symbols/ext/piv20-overrides.css">
+<script type="text/javascript" src="/PIVision/Scripts/app/editor/symbols/ext/piv20-plugins/piv20-core.js"></script>
+<script type="text/javascript" src="/PIVision/Scripts/app/editor/symbols/ext/piv20-plugins/piv20-scatterplot.js"></script>
+
+<div class="piv20 sp20-root" role="region" aria-label="תרשים פיזור — מתאם">
+
+<div id="sp20-widget" style="display:none"></div>
+
+<!-- HEADER -->
+<div class="sp20-hdr">
+    <div><span class="sp20-ttl">{{config.Title || 'תרשים פיזור — מתאם'}}</span></div>
+    <div style="display:flex;gap:6px;align-items:center">
+        <div class="sp20-views">
+            <button class="sp20-btn" ng-class="{'active':viewMode==='scatter'}" ng-click="setView('scatter')" title="פיזור">&#11044;</button>
+            <button class="sp20-btn" ng-class="{'active':viewMode==='stats'}" ng-click="setView('stats')" title="סטטיסטיקה">&#931;</button>
+            <button class="sp20-btn" ng-class="{'active':viewMode==='table'}" ng-click="setView('table')" title="טבלה">&#9776;</button>
+        </div>
+        <div class="sp20-live"><span class="sp20-live-dot"></span>{{liveTime}}</div>
+        <button class="sp20-btn" ng-click="clearHistory()" title="נקה היסטוריה">&#128465;</button>
+        <button class="sp20-btn" ng-click="exportData()" title="ייצוא CSV">&#128229;</button>
+        <button class="sp20-btn" ng-click="showDocs()" title="מדריך">&#128214;</button>
+        <button class="sp20-btn" ng-click="togglePanel()" title="הגדרות">&#9881;</button>
+    </div>
+</div>
+
+<!-- SUMMARY -->
+<div class="sp20-summary" ng-show="totalPoints">
+    <span class="sp20-sum-item">{{totalPoints}} נקודות</span>
+    <span class="sp20-sum-item">{{seriesArr.length}} סדרות</span>
+    <span class="sp20-sum-item" ng-show="hoverPt">X: {{hoverPt.x | number:config.Decimals}} Y: {{hoverPt.y | number:config.Decimals}}</span>
+</div>
+
+<!-- BODY -->
+<div class="sp20-body">
+
+    <div class="sp20-empty" ng-show="!totalPoints">
+        <div style="font-size:40px;opacity:0.3">&#128200;</div>
+        <div>גרור 2+ תגים לבניית מתאם</div>
+        <div style="font-size:10px;color:var(--sp20-text3);margin-top:4px">מצב {{config.PairingMode === 'shared_x' ? 'X משותף' : 'זוגות'}}</div>
+    </div>
+
+    <!-- SCATTER VIEW -->
+    <div class="sp20-chart-wrap" ng-show="viewMode==='scatter' && totalPoints">
+        <canvas class="sp20-canvas"></canvas>
+    </div>
+
+    <!-- STATS VIEW -->
+    <div class="sp20-stats-view" ng-show="viewMode==='stats' && regressionResults.length">
+        <div class="sp20-stat-card" ng-repeat="r in regressionResults track by $index">
+            <div class="sp20-stat-title">{{r.label}}</div>
+            <div class="sp20-stat-row"><span>מקדם פירסון (r)</span><span class="sp20-stat-val">{{r.r}}</span></div>
+            <div class="sp20-stat-row"><span>R&sup2;</span><span class="sp20-stat-val">{{r.r2}}</span></div>
+            <div class="sp20-stat-row"><span>עוצמת מתאם</span><span class="sp20-stat-val">{{r.corrLabel}}</span></div>
+            <div class="sp20-stat-row"><span>שיפוע (slope)</span><span class="sp20-stat-val">{{r.slope}}</span></div>
+            <div class="sp20-stat-row"><span>חיתוך (intercept)</span><span class="sp20-stat-val">{{r.intercept}}</span></div>
+            <div class="sp20-stat-row"><span>נקודות</span><span class="sp20-stat-val">{{r.n}}</span></div>
+        </div>
+    </div>
+
+    <!-- TABLE VIEW -->
+    <div ng-show="viewMode==='table' && totalPoints" style="overflow-y:auto;max-height:100%">
+        <div class="sp20-tbl-row sp20-tbl-hdr">
+            <span class="sp20-tbl-c">סדרה</span>
+            <span class="sp20-tbl-c">X</span>
+            <span class="sp20-tbl-c">Y</span>
+            <span class="sp20-tbl-c">חריג</span>
+        </div>
+        <div ng-repeat="s in seriesArr">
+            <div class="sp20-tbl-row" ng-repeat="p in s.pts | limitTo:-50 track by $index">
+                <span class="sp20-tbl-c">{{s.label}}</span>
+                <span class="sp20-tbl-c">{{p.x | number:config.Decimals}}</span>
+                <span class="sp20-tbl-c">{{p.y | number:config.Decimals}}</span>
+                <span class="sp20-tbl-c" ng-show="p.outlier" style="color:#e74c3c">&#9888;</span>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<!-- SIDE PANEL -->
+<div class="sp20-panel" ng-class="{'open':panelOpen}">
+    <div class="sp20-phd"><h3>&#9881; הגדרות פיזור</h3><button class="sp20-pcl" ng-click="togglePanel()">&#10005;</button></div>
+    <div class="sp20-ps"><label>כותרת</label><input type="text" ng-model="config.Title"></div>
+    <div class="sp20-ps"><label>מצב זיווג</label>
+        <select ng-model="config.PairingMode"><option value="shared_x">X משותף</option><option value="paired">זוגות X/Y</option></select>
+    </div>
+    <div class="sp20-ps"><label>ספרות עשרוניות</label><input type="number" ng-model="config.Decimals" min="0" max="6"></div>
+    <div class="sp20-ps"><label>גודל נקודה</label><input type="number" ng-model="config.PointSize" min="1" max="12"></div>
+    <div class="sp20-ps"><label>היסטוריה מקסימלית</label><input type="number" ng-model="config.MaxHistory" min="20" max="1000"></div>
+    <div class="sp20-ps"><label><input type="checkbox" ng-model="config.ShowRegression"> הצג רגרסיה</label></div>
+    <div class="sp20-ps"><label><input type="checkbox" ng-model="config.ShowR2"> הצג R&sup2;</label></div>
+    <div class="sp20-ps"><label><input type="checkbox" ng-model="config.ShowOutliers"> סמן חריגים</label></div>
+    <div class="sp20-ps"><label>תווית X</label><input type="text" ng-model="config.XLabel"></div>
+    <div class="sp20-ps"><label>תווית Y</label><input type="text" ng-model="config.YLabel"></div>
+    <div class="sp20-ps"><label>צבע מבטא</label><input type="color" ng-model="config.accentColor" style="width:50px;height:28px"></div>
+</div>
+
+<div class="sp20-ftr">נוגה — מנהל מערכת החשמל | PIV20 v20.0</div>
+</div>

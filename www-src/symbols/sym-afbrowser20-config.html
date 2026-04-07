@@ -1,0 +1,94 @@
+<div class="c-config-content" dir="rtl" style="background:#0B1D33;color:#D0E4F5;font-family:'Segoe UI',sans-serif;padding:8px 12px;overflow-y:auto;max-height:100%;">
+<style>/* PIV20 Config Premium */.cr20{margin-bottom:10px;transition:opacity 0.2s}.cr20 label{color:#64748B!important;text-transform:uppercase;letter-spacing:0.3px;font-weight:500;font-size:10px!important;margin-bottom:4px}.cr20 input[type=text],.cr20 input[type=number],.cr20 select{background:rgba(6,12,24,0.6)!important;border:1px solid rgba(91,192,235,0.08)!important;border-radius:6px!important;padding:6px 10px;transition:all 0.25s cubic-bezier(0.4,0,0.2,1)}.cr20 input[type=text]:focus,.cr20 input[type=number]:focus,.cr20 select:focus{border-color:#3B82F6!important;box-shadow:0 0 0 3px rgba(59,130,246,0.12),0 0 12px rgba(59,130,246,0.1)!important}.cr20 input[type=color]{border-radius:6px!important;transition:border-color 0.2s}.cr20 input[type=color]:hover{border-color:rgba(59,130,246,0.3)}.cr20 input[type=checkbox]{accent-color:#3B82F6}.ch20{background:linear-gradient(135deg,#3B82F6,#22D3EE)!important;-webkit-background-clip:text!important;-webkit-text-fill-color:transparent!important;background-clip:text;font-weight:600!important;margin:14px 0 8px!important;padding-bottom:5px!important;border-bottom:1px solid rgba(59,130,246,0.15)!important;letter-spacing:-0.01em}</style>
+
+    <div class="ch20" style="color:#5BC0EB;font-size:13px;font-weight:600;border-bottom:1px solid rgba(91,192,235,.15);padding-bottom:4px;margin-bottom:6px;">
+        דפדפן AF v20
+    </div>
+
+    <!-- Title -->
+    <div class="cr20" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+        <label style="color:#8BACC4;font-size:11px;">כותרת</label>
+        <input ng-model="config.Title" style="width:180px;background:rgba(91,192,235,.08);border:1px solid rgba(91,192,235,.15);color:#D0E4F5;border-radius:3px;padding:3px 6px;font-size:11px;text-align:right;">
+    </div>
+
+    <!-- Connection -->
+    <div class="ch20" style="color:#5BC0EB;font-size:11px;font-weight:600;margin-top:8px;margin-bottom:4px;">
+        חיבור
+    </div>
+
+    <div class="cr20" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;">
+        <label style="color:#8BACC4;font-size:11px;">PI Web API URL</label>
+        <input ng-model="config.piWebApiUrl" placeholder="auto-detect" style="width:180px;background:rgba(91,192,235,.08);border:1px solid rgba(91,192,235,.15);color:#D0E4F5;border-radius:3px;padding:3px 6px;font-size:11px;text-align:left;direction:ltr;">
+    </div>
+
+    <div class="cr20" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;">
+        <label style="color:#8BACC4;font-size:11px;">AF Path ברירת מחדל</label>
+        <input ng-model="config.defaultAfPath" placeholder="\\Server\DB" style="width:180px;background:rgba(91,192,235,.08);border:1px solid rgba(91,192,235,.15);color:#D0E4F5;border-radius:3px;padding:3px 6px;font-size:11px;text-align:left;direction:ltr;">
+    </div>
+
+    <!-- Features -->
+    <div class="ch20" style="color:#5BC0EB;font-size:11px;font-weight:600;margin-top:8px;margin-bottom:4px;">
+        תכונות
+    </div>
+
+    <div class="cr20" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;">
+        <label style="color:#8BACC4;font-size:11px;">הצגת תצוגה מקדימה</label>
+        <input type="checkbox" ng-model="config.showPreview">
+    </div>
+
+    <div class="cr20" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;">
+        <label style="color:#8BACC4;font-size:11px;">פתיחה אוטומטית</label>
+        <input type="checkbox" ng-model="config.autoExpand">
+    </div>
+
+    <div class="cr20" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;">
+        <label style="color:#8BACC4;font-size:11px;">גרירה ושחרור</label>
+        <input type="checkbox" ng-model="config.enableDragDrop">
+    </div>
+
+    <div class="cr20" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;">
+        <label style="color:#8BACC4;font-size:11px;">מועדפים</label>
+        <input type="checkbox" ng-model="config.showFavorites">
+    </div>
+
+    <div class="cr20" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;">
+        <label style="color:#8BACC4;font-size:11px;">אחרונים</label>
+        <input type="checkbox" ng-model="config.showRecent">
+    </div>
+
+    <div class="cr20" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;">
+        <label style="color:#8BACC4;font-size:11px;">סל</label>
+        <input type="checkbox" ng-model="config.showCart">
+    </div>
+
+    <!-- Limits -->
+    <div class="ch20" style="color:#5BC0EB;font-size:11px;font-weight:600;margin-top:8px;margin-bottom:4px;">
+        מגבלות
+    </div>
+
+    <div class="cr20" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;">
+        <label style="color:#8BACC4;font-size:11px;">מקסימום תוצאות חיפוש</label>
+        <input type="number" ng-model="config.maxSearchResults" min="10" max="500" style="width:80px;background:rgba(91,192,235,.08);border:1px solid rgba(91,192,235,.15);color:#D0E4F5;border-radius:3px;padding:3px 6px;font-size:11px;text-align:center;">
+    </div>
+
+    <div class="cr20" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;">
+        <label style="color:#8BACC4;font-size:11px;">מקסימום אחרונים</label>
+        <input type="number" ng-model="config.maxRecent" min="5" max="50" style="width:80px;background:rgba(91,192,235,.08);border:1px solid rgba(91,192,235,.15);color:#D0E4F5;border-radius:3px;padding:3px 6px;font-size:11px;text-align:center;">
+    </div>
+
+    <!-- Display -->
+    <div class="ch20" style="color:#5BC0EB;font-size:11px;font-weight:600;margin-top:8px;margin-bottom:4px;">
+        תצוגה
+    </div>
+
+    <div class="cr20" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;">
+        <label style="color:#8BACC4;font-size:11px;">צבע מבטא</label>
+        <input type="color" ng-model="config.accentColor" style="width:40px;height:24px;border:none;background:transparent;cursor:pointer;">
+    </div>
+
+    <div class="cr20" style="display:flex;align-items:center;justify-content:space-between;margin-bottom:5px;">
+        <label style="color:#8BACC4;font-size:11px;">סף ישנות (שניות)</label>
+        <input type="number" ng-model="config.StaleThreshold" min="0" style="width:80px;background:rgba(91,192,235,.08);border:1px solid rgba(91,192,235,.15);color:#D0E4F5;border-radius:3px;padding:3px 6px;font-size:11px;text-align:center;">
+    </div>
+
+</div>

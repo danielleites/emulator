@@ -1,0 +1,39 @@
+{
+  "name": "pivision-mobile",
+  "version": "4.2.0-R300",
+  "description": "PIVISION — PI Vision R300 emulator, QA toolkit, AF browser, and 569 symbols (incl. MM20)",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint www-src --ext .js,.ts,.html",
+    "lint:fix": "eslint www-src --ext .js,.ts,.html --fix",
+    "format": "prettier --write \"www-src/**/*.{js,ts,html,css,json}\"",
+    "format:check": "prettier --check \"www-src/**/*.{js,ts,html,css,json}\"",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:e2e": "playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.48.0",
+    "@types/node": "^22.9.0",
+    "@typescript-eslint/eslint-plugin": "^8.15.0",
+    "@typescript-eslint/parser": "^8.15.0",
+    "eslint": "^9.15.0",
+    "eslint-plugin-html": "^8.1.2",
+    "prettier": "^3.3.3",
+    "typescript": "^5.6.3",
+    "vite": "^5.4.11",
+    "vite-plugin-pwa": "^0.21.0",
+    "vitest": "^2.1.5"
+  },
+  "dependencies": {
+    "dompurify": "^3.2.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

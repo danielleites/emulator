@@ -1,0 +1,108 @@
+<link rel="stylesheet" href="/PIVision/Scripts/app/editor/symbols/ext/sym-piechart20.css">
+<link rel="stylesheet" href="/PIVision/Scripts/app/editor/symbols/ext/piv20-design-system.css">
+<link rel="stylesheet" href="/PIVision/Scripts/app/editor/symbols/ext/piv20-overrides.css">
+<script type="text/javascript" src="/PIVision/Scripts/app/editor/symbols/ext/piv20-plugins/piv20-core.js"></script>
+<script type="text/javascript" src="/PIVision/Scripts/app/editor/symbols/ext/piv20-plugins/piv20-piechart.js"></script>
+
+<div class="piv20 pc20-root" role="region" aria-label="עוגה / סופגנייה">
+
+<!-- Widget container -->
+<div id="pc20-widget" style="display:none"></div>
+
+<!-- HEADER -->
+<div class="pc20-hdr">
+    <div>
+        <span class="pc20-ttl">{{config.Title || 'תמהיל ייצור'}}</span>
+    </div>
+    <div style="display:flex;gap:6px;align-items:center">
+        <div class="pc20-views">
+            <button class="pc20-btn" ng-class="{'active':viewMode==='donut'}" ng-click="setView('donut')" title="סופגנייה">&#9675;</button>
+            <button class="pc20-btn" ng-class="{'active':viewMode==='pie'}" ng-click="setView('pie')" title="עוגה">&#9679;</button>
+            <button class="pc20-btn" ng-class="{'active':viewMode==='table'}" ng-click="setView('table')" title="טבלה">&#9776;</button>
+        </div>
+        <div class="pc20-live"><span class="pc20-live-dot"></span>{{liveTime}}</div>
+        <button class="pc20-btn" ng-click="exportData()" title="ייצוא CSV">&#128229;</button>
+        <button class="pc20-btn" ng-click="showDocs()" title="מדריך">&#128214;</button>
+        <button class="pc20-btn" ng-click="togglePanel()" title="הגדרות">&#9881;</button>
+    </div>
+</div>
+
+<!-- SUMMARY BAR -->
+<div class="pc20-summary" ng-show="summary.count">
+    <span class="pc20-sum-item">&#931; {{summary.totalDisplay}}</span>
+    <span class="pc20-sum-item">{{summary.count}} פריטים</span>
+    <span class="pc20-sum-item" ng-show="summary.hhi">HHI: {{summary.hhi}}</span>
+    <span class="pc20-sum-item" ng-show="summary.diversityPct">גיוון: {{summary.diversityPct}}%</span>
+    <span class="pc20-sum-item" ng-show="summary.largest">&#9650; {{summary.largest}}</span>
+</div>
+
+<!-- BODY -->
+<div class="pc20-body">
+
+    <!-- Empty state -->
+    <div class="pc20-empty" ng-show="!slices.length">
+        <div style="font-size:40px;opacity:0.3">&#128200;</div>
+        <div>גרור תגים להצגת תרשים עוגה</div>
+    </div>
+
+    <!-- ═══ CHART VIEW (donut/pie) ═══ -->
+    <div class="pc20-chart-area" ng-show="(viewMode==='donut' || viewMode==='pie') && slices.length">
+        <canvas class="pc20-canvas"
+                ng-mousemove="onCanvasMove($event)"
+                ng-click="onCanvasClick($event)"
+                ng-mouseleave="onCanvasLeave()"></canvas>
+
+        <!-- Legend -->
+        <div class="pc20-legend" ng-show="config.ShowLegend">
+            <div class="pc20-legend-item" ng-repeat="sl in slices track by $index"
+                 ng-class="{'pc20-hidden': sl.hidden}"
+                 ng-click="toggleSlice(sl.label)"
+                 title="{{sl.label}} | {{sl.display}} ({{sl.pct | number:1}}%)">
+                <span class="pc20-legend-dot" ng-style="{'background': sl.color}"></span>
+                <span class="pc20-legend-label">{{sl.label}}</span>
+                <span class="pc20-legend-val">{{sl.display}}</span>
+                <span class="pc20-legend-pct">{{sl.pct | number:1}}%</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══ TABLE VIEW ═══ -->
+    <div ng-show="viewMode==='table' && slices.length">
+        <div style="padding:4px 8px"><input type="text" ng-model="filterText" placeholder="סינון..." class="pc20-filter-input"></div>
+        <div class="pc20-tbl-row pc20-tbl-hdr">
+            <span class="pc20-tbl-c" ng-click="sortBy('label')">#</span>
+            <span class="pc20-tbl-c pc20-tbl-name" ng-click="sortBy('label')">שם</span>
+            <span class="pc20-tbl-c" ng-click="sortBy('value')">ערך</span>
+            <span class="pc20-tbl-c" ng-click="sortBy('pct')">אחוז</span>
+            <span class="pc20-tbl-c">סוג דלק</span>
+            <span class="pc20-tbl-c">צבע</span>
+        </div>
+        <div class="pc20-tbl-row" ng-repeat="sl in getFiltered() track by $index">
+            <span class="pc20-tbl-c">{{$index + 1}}</span>
+            <span class="pc20-tbl-c pc20-tbl-name">{{sl.label}}</span>
+            <span class="pc20-tbl-c">{{sl.display}}</span>
+            <span class="pc20-tbl-c">{{sl.pct | number:1}}%</span>
+            <span class="pc20-tbl-c">{{sl.fuelLabel}}</span>
+            <span class="pc20-tbl-c"><span class="pc20-color-swatch" ng-style="{'background': sl.color}"></span></span>
+        </div>
+    </div>
+
+</div>
+
+<!-- SIDE PANEL -->
+<div class="pc20-panel" ng-class="{'open':panelOpen}">
+    <div class="pc20-phd"><h3>&#9881; הגדרות עוגה</h3><button class="pc20-pcl" ng-click="togglePanel()">&#10005;</button></div>
+    <div class="pc20-ps"><label>כותרת</label><input type="text" ng-model="config.Title"></div>
+    <div class="pc20-ps"><label>ספרות עשרוניות</label><input type="number" ng-model="config.Decimals" min="0" max="6"></div>
+    <div class="pc20-ps"><label>סוג תרשים</label>
+        <select ng-model="config.ChartType"><option value="donut">סופגנייה</option><option value="pie">עוגה</option></select>
+    </div>
+    <div class="pc20-ps"><label>רדיוס פנימי %</label><input type="number" ng-model="config.InnerRadiusPct" min="0" max="80"></div>
+    <div class="pc20-ps"><label>קיבוץ פרוסות קטנות %</label><input type="number" ng-model="config.GroupSmallSlicesPct" min="0" max="20"></div>
+    <div class="pc20-ps"><label><input type="checkbox" ng-model="config.ShowLabels"> הצג תוויות</label></div>
+    <div class="pc20-ps"><label><input type="checkbox" ng-model="config.ShowLegend"> הצג מקרא</label></div>
+    <div class="pc20-ps"><label>צבע מבטא</label><input type="color" ng-model="config.accentColor" style="width:50px;height:28px"></div>
+</div>
+
+<div class="pc20-ftr">נוגה — מנהל מערכת החשמל | PIV20 v20.0</div>
+</div>

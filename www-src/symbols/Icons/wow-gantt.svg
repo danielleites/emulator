@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none">
+  <rect x="2" y="2" width="28" height="28" rx="4" fill="#1a1f2e"/>
+  <!-- Gantt bars -->
+  <rect x="8"  y="7"  width="14" height="3" rx="1.5" fill="#60a5fa"/>
+  <rect x="12" y="12" width="10" height="3" rx="1.5" fill="#34d399"/>
+  <rect x="6"  y="17" width="18" height="3" rx="1.5" fill="#fbbf24"/>
+  <rect x="14" y="22" width="12" height="3" rx="1.5" fill="#f87171"/>
+</svg>

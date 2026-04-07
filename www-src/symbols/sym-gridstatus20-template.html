@@ -1,0 +1,183 @@
+<link rel="stylesheet" href="/PIVision/Scripts/app/editor/symbols/ext/sym-gridstatus20.css">
+<link rel="stylesheet" href="/PIVision/Scripts/app/editor/symbols/ext/piv20-design-system.css">
+<link rel="stylesheet" href="/PIVision/Scripts/app/editor/symbols/ext/piv20-overrides.css">
+<script type="text/javascript" src="/PIVision/Scripts/app/editor/symbols/ext/piv20-plugins/piv20-core.js"></script>
+<script type="text/javascript" src="/PIVision/Scripts/app/editor/symbols/ext/piv20-plugins/piv20-gridstatus.js"></script>
+
+<div id="gs20-widget" class="piv20 gs20-widget" style="display:none;"
+     ng-style="{'font-family': config.fontFamily || 'Segoe UI', 'font-size': (config.fontSize || 12) + 'px'}">
+
+    <!-- Header -->
+    <div class="gs20-header">
+        <span class="gs20-title">{{config.Title || 'סטטוס רשת'}}</span>
+        <div class="gs20-toolbar">
+            <input class="gs20-search" type="text" ng-model="filterText" placeholder="חיפוש...">
+            <button ng-click="setTab('dashboard')" ng-class="{active: activeTab==='dashboard'}">לוח</button>
+            <button ng-click="setTab('table')" ng-class="{active: activeTab==='table'}">טבלה</button>
+            <button ng-click="setTab('events')" ng-class="{active: activeTab==='events'}">אירועים</button>
+            <button ng-click="exportCSV()" title="יצוא">CSV</button>
+            <button ng-click="openPanel()" title="מידע נוסף">&#9776;</button>
+        </div>
+    </div>
+
+    <!-- Health Score Section -->
+    <div class="gs20-health-section">
+        <!-- Arc Gauge -->
+        <div class="gs20-arc-container">
+            <svg class="gs20-arc-svg" viewBox="0 0 160 160">
+                <path class="gs20-arc-bg" d="M25 130 A 70 70 0 1 1 135 130" />
+                <path class="gs20-arc-fill" ng-attr-d="{{healthArc}}" ng-style="{'stroke': healthColor}" />
+            </svg>
+            <div class="gs20-score-text">
+                <div class="gs20-score-val" ng-style="{'color': healthColor}">{{healthScore}}</div>
+                <div class="gs20-score-grade" ng-style="{'color': healthColor}">{{healthGrade}}</div>
+                <div class="gs20-score-label">ציון בריאות</div>
+            </div>
+        </div>
+
+        <!-- Summary Cards -->
+        <div class="gs20-health-cards">
+            <div class="gs20-hcard">
+                <span class="gs20-hcard-icon" style="color:#2ecc71">&#9679;</span>
+                <span class="gs20-hcard-label">תקין</span>
+                <span class="gs20-hcard-val" style="color:#2ecc71">{{summary.good || 0}}</span>
+            </div>
+            <div class="gs20-hcard">
+                <span class="gs20-hcard-icon" style="color:#f39c12">&#9679;</span>
+                <span class="gs20-hcard-label">אזהרה</span>
+                <span class="gs20-hcard-val" style="color:#f39c12">{{summary.warn || 0}}</span>
+            </div>
+            <div class="gs20-hcard">
+                <span class="gs20-hcard-icon" style="color:#e74c3c">&#9679;</span>
+                <span class="gs20-hcard-label">קריטי</span>
+                <span class="gs20-hcard-val" style="color:#e74c3c">{{summary.crit || 0}}</span>
+            </div>
+        </div>
+
+        <!-- N-1 Badge -->
+        <div ng-if="n1.available"
+             class="gs20-n1-badge" ng-class="n1.ok ? 'gs20-n1-ok' : 'gs20-n1-fail'">
+            <span>N-1:</span>
+            <span>{{n1.ok ? 'תקין' : 'נכשל'}}</span>
+            <span style="font-size:9px;">(רזרבה: {{n1.reserve | number:0}} MW)</span>
+        </div>
+        <div ng-if="!n1.available" class="gs20-n1-badge gs20-n1-na">
+            <span>N-1: לא זמין</span>
+        </div>
+    </div>
+
+    <!-- Category Filter Chips -->
+    <div class="gs20-filter-chips">
+        <span class="gs20-chip" ng-class="{active: filterCategory===''}" ng-click="filterCategory=''">הכל</span>
+        <span ng-repeat="cat in activeCategories track by cat.key"
+              class="gs20-chip" ng-class="{active: filterCategory===cat.key}"
+              ng-click="filterCategory=cat.key">
+            {{cat.label}}
+        </span>
+    </div>
+
+    <!-- Body -->
+    <div class="gs20-body">
+
+        <!-- Dashboard View -->
+        <div ng-if="activeTab==='dashboard'">
+            <div ng-repeat="(catKey, catGroup) in categories" class="gs20-cat-section"
+                 ng-if="!filterCategory || filterCategory===catKey">
+                <div class="gs20-cat-header">
+                    <span class="gs20-cat-label">{{catGroup.label}}</span>
+                    <span class="gs20-cat-count">{{catGroup.items.length}}</span>
+                </div>
+                <div class="gs20-params">
+                    <div ng-repeat="p in catGroup.items track by p.idx"
+                         ng-if="!filterText || p.label.indexOf(filterText) > -1"
+                         class="gs20-param-card gs20-status-{{p.status}}">
+                        <span class="gs20-param-name">{{p.label}}</span>
+                        <div class="gs20-param-val-row">
+                            <span class="gs20-param-val" ng-style="{'color': p.statusColor}">{{p.display}}</span>
+                            <span class="gs20-param-unit">{{p.unit}}</span>
+                            <span class="gs20-param-status" ng-style="{'background': p.statusBg, 'color': p.statusColor}">{{p.statusText}}</span>
+                        </div>
+                        <div class="gs20-param-stats" ng-if="p.stats">
+                            <span>&#x3BC;={{p.stats.mean}}</span>
+                            <span>&#x3C3;={{p.stats.stddev}}</span>
+                            <span class="gs20-param-trend">{{p.trendIcon}}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Table View -->
+        <table ng-if="activeTab==='table'" class="gs20-table">
+            <thead>
+                <tr>
+                    <th ng-click="sortBy('label')">שם</th>
+                    <th ng-click="sortBy('category')">קטגוריה</th>
+                    <th ng-click="sortBy('numeric')">ערך</th>
+                    <th>יחידה</th>
+                    <th ng-click="sortBy('status')">סטטוס</th>
+                    <th>מגמה</th>
+                    <th>ממוצע</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr ng-repeat="p in filteredItems track by p.idx">
+                    <td>{{p.label}}</td>
+                    <td>{{p.catLabel}}</td>
+                    <td ng-style="{'color': p.statusColor}">{{p.display}}</td>
+                    <td>{{p.unit}}</td>
+                    <td><span ng-style="{'color': p.statusColor}">{{p.statusText}}</span></td>
+                    <td>{{p.trendIcon}}</td>
+                    <td>{{p.stats.mean || '---'}}</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- Events View -->
+        <div ng-if="activeTab==='events'" class="gs20-event-log">
+            <div ng-repeat="e in eventLog track by $index" class="gs20-event-item">
+                <span class="gs20-event-time">{{e.time}}</span>
+                <span>{{e.param}}</span>
+                <span class="gs20-event-arrow">{{e.fromLabel}} &#8592; {{e.toLabel}}</span>
+                <span>{{e.value}}</span>
+            </div>
+            <div ng-if="!eventLog.length" style="color:#4A6A7F;font-size:11px;text-align:center;padding:20px;">
+                אין אירועים
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Side Panel -->
+    <div class="gs20-side-panel" ng-if="panelOpen">
+        <div class="gs20-panel-header">
+            <span style="color:#5BC0EB;font-weight:600;">סיכום מפורט</span>
+            <button class="gs20-panel-close" ng-click="closePanel()">&times;</button>
+        </div>
+        <div class="gs20-panel-body">
+            <div style="margin-bottom:8px;">
+                <div style="color:#8BACC4;font-size:10px;">סה"כ פרמטרים</div>
+                <div style="font-size:18px;font-weight:700;">{{summary.total}}</div>
+            </div>
+            <div style="margin-bottom:8px;">
+                <div style="color:#8BACC4;font-size:10px;">ממוצע</div>
+                <div style="font-size:14px;">{{summary.avg || '---'}}</div>
+            </div>
+            <div style="margin-bottom:8px;">
+                <div style="color:#8BACC4;font-size:10px;">טווח</div>
+                <div style="font-size:14px;">{{summary.min || '---'}} - {{summary.max || '---'}}</div>
+            </div>
+            <div ng-if="n1.available" style="margin-bottom:8px;">
+                <div style="color:#8BACC4;font-size:10px;">N-1 מרווח</div>
+                <div style="font-size:14px;" ng-style="{'color': n1.ok ? '#2ecc71' : '#e74c3c'}">
+                    {{n1.margin | number:0}} MW
+                </div>
+            </div>
+
+            <button ng-click="showDocs()" style="margin-top:12px;width:100%;background:rgba(91,192,235,.1);border:1px solid rgba(91,192,235,.2);color:#5BC0EB;border-radius:4px;padding:5px;font-size:11px;cursor:pointer;">
+                תיעוד
+            </button>
+        </div>
+    </div>
+
+</div>

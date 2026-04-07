@@ -1,0 +1,122 @@
+<link rel="stylesheet" href="/PIVision/Scripts/app/editor/symbols/ext/sym-co2monitor20.css">
+<link rel="stylesheet" href="/PIVision/Scripts/app/editor/symbols/ext/piv20-design-system.css">
+<link rel="stylesheet" href="/PIVision/Scripts/app/editor/symbols/ext/piv20-overrides.css">
+<script type="text/javascript" src="/PIVision/Scripts/app/editor/symbols/ext/piv20-plugins/piv20-core.js"></script>
+<script type="text/javascript" src="/PIVision/Scripts/app/editor/symbols/ext/piv20-plugins/piv20-co2monitor.js"></script>
+
+<div class="piv20 cm20-root" ng-right-click="showContextMenu($event)">
+
+    <!-- Header -->
+    <div class="cm20-hdr">
+        <div style="display:flex;align-items:center;gap:8px">
+            <span class="cm20-ttl">{{config.Title || 'ניטור CO2'}}</span>
+            <span class="cm20-live"><span class="cm20-live-dot"></span>חי</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:4px">
+            <div class="cm20-tabs">
+                <button class="cm20-btn" ng-class="{active: activeTab==='overview'}" ng-click="setTab('overview')">סקירה</button>
+                <button class="cm20-btn" ng-class="{active: activeTab==='units'}" ng-click="setTab('units')">יחידות</button>
+                <button class="cm20-btn" ng-class="{active: activeTab==='alerts'}" ng-click="setTab('alerts')">התראות</button>
+            </div>
+            <button class="cm20-btn" ng-click="exportCSV()" title="ייצוא CSV">&#8681;</button>
+            <button class="cm20-btn" ng-click="showDocs()" title="תיעוד">?</button>
+            <button class="cm20-btn" ng-click="openPanel()" title="הגדרות">&#9881;</button>
+        </div>
+    </div>
+
+    <!-- Summary -->
+    <div class="cm20-summary" ng-show="units.length">
+        <span class="cm20-sum-item">קצב: {{currentRate | number:1}} t/h</span>
+        <span class="cm20-sum-item">היום: {{totalToday | number:0}} טון</span>
+        <span class="cm20-sum-item">שנתי: {{yearlyPct | number:1}}%</span>
+        <span class="cm20-sum-item">יחידות: {{units.length}}</span>
+    </div>
+
+    <!-- Body -->
+    <div class="cm20-body">
+
+        <!-- Empty state -->
+        <div class="cm20-empty" ng-show="!units.length">
+            <div style="font-size:32px;opacity:0.3">&#127981;</div>
+            <div>הוסף תגיות CO2 לניטור</div>
+        </div>
+
+        <!-- Overview tab: quota bars + compact stats -->
+        <div ng-show="activeTab==='overview' && units.length">
+            <div class="cm20-quotas">
+                <!-- Yearly quota -->
+                <div class="cm20-quota">
+                    <div class="cm20-quota-hdr">
+                        <span class="cm20-quota-label">מכסה שנתית</span>
+                        <span class="cm20-quota-pct" ng-class="yearlyStatus">{{yearlyPct | number:1}}%</span>
+                    </div>
+                    <div class="cm20-quota-bar"><div class="cm20-quota-fill" ng-class="yearlyStatus" ng-style="{'width': (yearlyPct > 100 ? 100 : yearlyPct) + '%'}"></div></div>
+                    <div class="cm20-quota-sub"><span>{{yearlyUsed | number:0}} טון</span><span>{{config.YearlyQuota | number:0}} טון</span></div>
+                </div>
+                <!-- Monthly quota -->
+                <div class="cm20-quota">
+                    <div class="cm20-quota-hdr">
+                        <span class="cm20-quota-label">מכסה חודשית</span>
+                        <span class="cm20-quota-pct" ng-class="monthlyStatus">{{monthlyPct | number:1}}%</span>
+                    </div>
+                    <div class="cm20-quota-bar"><div class="cm20-quota-fill" ng-class="monthlyStatus" ng-style="{'width': (monthlyPct > 100 ? 100 : monthlyPct) + '%'}"></div></div>
+                    <div class="cm20-quota-sub"><span>{{monthlyUsed | number:0}} טון</span><span>{{config.MonthlyQuota | number:0}} טון</span></div>
+                </div>
+                <!-- Daily target -->
+                <div class="cm20-quota">
+                    <div class="cm20-quota-hdr">
+                        <span class="cm20-quota-label">יעד יומי</span>
+                        <span class="cm20-quota-pct" ng-class="dailyStatus">{{dailyPct | number:1}}%</span>
+                    </div>
+                    <div class="cm20-quota-bar"><div class="cm20-quota-fill" ng-class="dailyStatus" ng-style="{'width': (dailyPct > 100 ? 100 : dailyPct) + '%'}"></div></div>
+                    <div class="cm20-quota-sub"><span>{{totalToday | number:0}} טון</span><span>{{config.DailyTarget | number:0}} טון</span></div>
+                </div>
+            </div>
+            <!-- Trend chart -->
+            <div class="cm20-chart-wrap" ng-show="trendData.length">
+                <canvas class="cm20-canvas"></canvas>
+            </div>
+        </div>
+
+        <!-- Units tab -->
+        <div ng-show="activeTab==='units' && units.length" style="padding:4px">
+            <div class="cm20-unit-row" ng-repeat="u in units">
+                <span class="cm20-unit-name">{{u.name}}</span>
+                <span class="cm20-unit-val">{{u.co2Rate | number:2}} t/h</span>
+                <span class="cm20-unit-fuel" ng-style="{'background': u.fuelBg, 'color': u.fuelColor}">{{u.fuelType}}</span>
+                <span class="cm20-unit-val">{{u.efficiency | number:0}} kg/MWh</span>
+                <span class="cm20-unit-status" ng-style="{'color': u.statusColor}">{{u.statusText}}</span>
+            </div>
+        </div>
+
+        <!-- Alerts tab -->
+        <div ng-show="activeTab==='alerts'">
+            <div class="cm20-alert" ng-repeat="a in alerts">
+                <span ng-style="{'color': a.color}">{{a.icon}}</span>
+                <span>{{a.text}}</span>
+                <span style="margin-right:auto;color:var(--cm20-text3)">{{a.time}}</span>
+            </div>
+            <div ng-show="!alerts.length" style="padding:20px;text-align:center;color:var(--cm20-text3)">אין התראות</div>
+        </div>
+
+    </div>
+
+    <!-- Side panel -->
+    <div class="cm20-panel" ng-class="{open: panelOpen}">
+        <div class="cm20-phd">
+            <h3>הגדרות ניטור CO2</h3>
+            <button class="cm20-pcl" ng-click="closePanel()">&times;</button>
+        </div>
+        <div class="cm20-ps"><label>מכסה שנתית</label><input type="number" ng-model="config.YearlyQuota" step="1000"></div>
+        <div class="cm20-ps"><label>מכסה חודשית</label><input type="number" ng-model="config.MonthlyQuota" step="100"></div>
+        <div class="cm20-ps"><label>יעד יומי</label><input type="number" ng-model="config.DailyTarget" step="10"></div>
+        <div class="cm20-ps"><label>אזהרה %</label><input type="number" ng-model="config.WarningPct" min="0" max="100"></div>
+        <div class="cm20-ps"><label>קריטי %</label><input type="number" ng-model="config.CriticalPct" min="0" max="100"></div>
+    </div>
+
+    <!-- Footer -->
+    <div class="cm20-ftr">PIV20 CO2 Monitor</div>
+
+    <!-- Widget container -->
+    <div id="cm20-widget" style="display:none"></div>
+</div>

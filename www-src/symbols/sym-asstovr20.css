@@ -1,0 +1,208 @@
+/* ================================================================
+ *  sym-assetoverview20.css  --  Asset Overview v20 Stylesheet
+ * ================================================================
+ *  External CSS for piv20-assetoverview widget.
+ *  All classes prefixed ao20-*, custom properties --ao20-*.
+ *  Flat CSS (no nesting, no :is()).
+ * ================================================================ */
+
+/* ── Custom Properties ── */
+:root {
+    --ao20-bg-deep: #060C18;
+    --ao20-bg-primary: #0A1628;
+    --ao20-bg-secondary: #0D1F35;
+    --ao20-bg-card: #0F2940;
+    --ao20-bg-card-hover: #153858;
+    --ao20-bg-input: #0B1D33;
+    --ao20-accent: #1E5A8A;
+    --ao20-accent-light: #2E8BC0;
+    --ao20-cyan: #5BC0EB;
+    --ao20-ok: #2ECC71;
+    --ao20-ok-dim: rgba(46,204,113,0.15);
+    --ao20-warn: #F39C12;
+    --ao20-warn-dim: rgba(243,156,18,0.15);
+    --ao20-crit: #E74C3C;
+    --ao20-crit-dim: rgba(231,76,60,0.15);
+    --ao20-text: #FFFFFF;
+    --ao20-text2: #8BACC4;
+    --ao20-text3: #5A7A94;
+    --ao20-border: rgba(46,139,192,0.2);
+    --ao20-border-active: rgba(91,192,235,0.45);
+    --ao20-radius: 10px;
+    --ao20-radius-sm: 6px;
+    --ao20-shadow: 0 4px 24px rgba(0,0,0,0.4);
+    --ao20-shadow-lg: 0 8px 40px rgba(0,0,0,0.5);
+    --ao20-transition: all 0.25s cubic-bezier(0.4,0,0.2,1);
+}
+
+/* ── Root Container ── */
+.ao20-root {
+    width: 100%; height: 100%; position: relative; overflow: hidden;
+    background: linear-gradient(160deg, var(--ao20-bg-deep), var(--ao20-bg-primary), var(--ao20-bg-secondary));
+    color: var(--ao20-text); display: flex; flex-direction: column; direction: rtl;
+    font-family: 'Segoe UI', Arial, sans-serif;
+}
+.ao20-root * { box-sizing: border-box; margin: 0; padding: 0; }
+.ao20-root ::-webkit-scrollbar { width: 6px; height: 6px; }
+.ao20-root ::-webkit-scrollbar-track { background: var(--ao20-bg-deep); border-radius: 3px; }
+.ao20-root ::-webkit-scrollbar-thumb { background: var(--ao20-accent); border-radius: 3px; }
+
+/* ── Header / Footer ── */
+.ao20-header {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 10px 14px; background: linear-gradient(135deg, var(--ao20-bg-secondary), var(--ao20-bg-card));
+    border-bottom: 1px solid var(--ao20-border); flex-shrink: 0;
+}
+.ao20-title { font-size: 15px; font-weight: 600; }
+.ao20-subtitle { font-size: 11px; color: var(--ao20-text3); }
+.ao20-toolbar { display: flex; gap: 6px; align-items: center; }
+.ao20-footer {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 6px 14px; background: var(--ao20-bg-deep); border-top: 1px solid var(--ao20-border);
+    font-size: 11px; color: var(--ao20-text3); flex-shrink: 0;
+}
+
+/* ── Buttons ── */
+.ao20-btn {
+    background: linear-gradient(135deg, var(--ao20-accent), var(--ao20-accent-light));
+    color: var(--ao20-text); border: none; padding: 6px 14px; border-radius: var(--ao20-radius-sm);
+    cursor: pointer; font-size: 12px; transition: var(--ao20-transition);
+    display: inline-flex; align-items: center; gap: 5px;
+}
+.ao20-btn:hover { filter: brightness(1.15); transform: translateY(-1px); }
+.ao20-btn.secondary { background: var(--ao20-bg-card); border: 1px solid var(--ao20-border); }
+.ao20-btn.secondary:hover { border-color: var(--ao20-border-active); background: var(--ao20-bg-card-hover); }
+.ao20-btn.active { border-color: var(--ao20-cyan); background: rgba(91,192,235,0.15); color: var(--ao20-cyan); }
+
+/* ── Live clock ── */
+.ao20-live { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--ao20-text3); }
+.ao20-live-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--ao20-ok); box-shadow: 0 0 8px var(--ao20-ok); animation: ao20-pulse 2s infinite; }
+@keyframes ao20-pulse { 0%,100%{ opacity:1; } 50%{ opacity:0.4; } }
+
+/* ── Input ── */
+.ao20-input {
+    background: var(--ao20-bg-input); border: 1px solid var(--ao20-border); color: var(--ao20-text);
+    padding: 6px 10px; border-radius: var(--ao20-radius-sm); font-size: 12px;
+    transition: var(--ao20-transition); outline: none;
+}
+.ao20-input:focus { border-color: var(--ao20-cyan); box-shadow: 0 0 0 3px rgba(91,192,235,0.15); }
+
+/* ── Toast ── */
+.ao20-toast-wrap { position: absolute; top: 10px; left: 50%; transform: translateX(-50%); z-index: 9999; pointer-events: none; }
+.ao20-toast { background: var(--ao20-bg-card); border: 1px solid var(--ao20-border-active); border-radius: var(--ao20-radius-sm); padding: 8px 18px; color: var(--ao20-cyan); font-size: 12px; box-shadow: var(--ao20-shadow-lg); animation: ao20-ti 0.3s ease; }
+.ao20-toast.out { animation: ao20-to 0.3s ease forwards; }
+@keyframes ao20-ti { from { opacity:0; transform:translateY(-14px); } to { opacity:1; transform:translateY(0); } }
+@keyframes ao20-to { to { opacity:0; transform:translateY(-14px); } }
+
+/* ── Loading / Empty ── */
+.ao20-loading { display: flex; align-items: center; justify-content: center; padding: 40px; color: var(--ao20-text3); font-size: 14px; gap: 10px; }
+.ao20-empty { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px; color: var(--ao20-text3); font-size: 14px; gap: 10px; }
+.ao20-empty-icon { font-size: 36px; opacity: 0.4; }
+
+/* ── AF Connection Badge ── */
+.ao20-conn { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 10px; font-size: 11px; }
+.ao20-conn-good { background: rgba(76,175,80,.15); color: #4caf50; }
+.ao20-conn-warn { background: rgba(255,193,7,.15); color: #ffc107; }
+.ao20-conn-bad  { background: rgba(244,67,54,.15); color: #f44336; }
+.ao20-conn-dot { width: 6px; height: 6px; border-radius: 50%; display: inline-block; }
+.ao20-conn-good .ao20-conn-dot { background: #4caf50; box-shadow: 0 0 4px #4caf50; }
+.ao20-conn-warn .ao20-conn-dot { background: #ffc107; box-shadow: 0 0 4px #ffc107; }
+.ao20-conn-bad  .ao20-conn-dot { background: #f44336; box-shadow: 0 0 4px #f44336; }
+
+/* ── Stats Bar ── */
+.ao20-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(70px, 1fr)); gap: 6px; padding: 8px 12px; border-bottom: 1px solid var(--ao20-border); }
+.ao20-stat { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 5px; background: var(--ao20-bg-card); border-radius: var(--ao20-radius-sm); }
+.ao20-stat-label { font-size: 10px; color: var(--ao20-text3); text-transform: uppercase; }
+.ao20-stat-value { font-size: 15px; font-weight: 600; color: var(--ao20-cyan); font-variant-numeric: tabular-nums; }
+
+/* ── Controls Bar ── */
+.ao20-controls { display: flex; gap: 8px; padding: 6px 12px; border-bottom: 1px solid var(--ao20-border); align-items: center; flex-wrap: wrap; }
+
+/* ── Body ── */
+.ao20-body { flex: 1; overflow: auto; padding: 8px; }
+
+/* ── Asset Detail Panel ── */
+.ao20-detail { background: var(--ao20-bg-card); border: 1px solid var(--ao20-border-active); border-radius: var(--ao20-radius); padding: 12px; margin-bottom: 8px; }
+.ao20-detail-title { font-size: 15px; font-weight: 600; color: var(--ao20-cyan); margin-bottom: 8px; }
+.ao20-detail-row { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid var(--ao20-border); font-size: 12px; }
+
+/* ── Table ── */
+.ao20-table { width: 100%; border-collapse: separate; border-spacing: 0 3px; }
+.ao20-table th {
+    position: sticky; top: 0; background: var(--ao20-bg-primary); padding: 7px 10px;
+    text-align: right; font-size: 11px; color: var(--ao20-text3); text-transform: uppercase;
+    cursor: pointer; border-bottom: 1px solid var(--ao20-border); user-select: none; z-index: 5;
+}
+.ao20-table th:hover { color: var(--ao20-cyan); }
+.ao20-table td { padding: 7px 10px; font-size: 12px; background: var(--ao20-bg-card); transition: background 0.2s; }
+.ao20-table tr:hover td { background: var(--ao20-bg-card-hover); cursor: pointer; }
+.ao20-table tr td:first-child { border-radius: 0 var(--ao20-radius-sm) var(--ao20-radius-sm) 0; }
+.ao20-table tr td:last-child  { border-radius: var(--ao20-radius-sm) 0 0 var(--ao20-radius-sm); }
+
+/* ── Progress Bar ── */
+.ao20-progress { width: 100%; height: 8px; background: var(--ao20-bg-deep); border-radius: 4px; overflow: hidden; }
+.ao20-progress-fill { height: 100%; border-radius: 4px; transition: width 0.5s ease; }
+
+/* ── Quality Badge ── */
+.ao20-qbadge { display: inline-flex; align-items: center; gap: 3px; padding: 1px 6px; border-radius: 8px; font-size: 9px; font-weight: 600; }
+.ao20-qbadge.good { background: var(--ao20-ok-dim); color: var(--ao20-ok); }
+.ao20-qbadge.warn { background: var(--ao20-warn-dim); color: var(--ao20-warn); }
+.ao20-qbadge.bad  { background: var(--ao20-crit-dim); color: var(--ao20-crit); }
+.ao20-stale-tag { display: inline-flex; align-items: center; gap: 2px; font-size: 9px; color: var(--ao20-warn); padding: 1px 5px; background: var(--ao20-warn-dim); border-radius: 6px; }
+
+/* ── Cards Grid ── */
+.ao20-cards-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 8px; }
+.ao20-card {
+    background: var(--ao20-bg-card); border: 1px solid var(--ao20-border); border-radius: var(--ao20-radius);
+    padding: 12px; transition: var(--ao20-transition); cursor: pointer; position: relative;
+}
+.ao20-card:hover { border-color: var(--ao20-border-active); transform: translateY(-2px); box-shadow: var(--ao20-shadow); }
+.ao20-card.selected { border-color: var(--ao20-cyan); box-shadow: 0 0 0 3px rgba(91,192,235,0.2); }
+.ao20-card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 5px; }
+.ao20-card-name { font-size: 13px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; }
+.ao20-card-value { font-size: 24px; font-weight: 700; font-variant-numeric: tabular-nums; margin-bottom: 4px; }
+.ao20-card-units { font-size: 12px; color: var(--ao20-text3); font-weight: 400; margin-right: 4px; }
+.ao20-card-path { font-size: 10px; color: var(--ao20-text3); direction: ltr; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-top: 5px; }
+.ao20-card-sparkline { margin: 5px 0 2px; }
+
+/* ── Sparkline Canvas ── */
+.ao20-spark-canvas { display: block; }
+
+/* ── Stale animation ── */
+@keyframes ao20-stale-pulse { 0%,100%{ opacity:1; } 50%{ opacity:0.5; } }
+.ao20-data-stale { animation: ao20-stale-pulse 2s ease-in-out infinite; }
+
+/* ── Outlier indicator ── */
+.ao20-outlier { position: relative; }
+.ao20-outlier::after {
+    content: '!'; position: absolute; top: 2px; left: 2px;
+    width: 14px; height: 14px; border-radius: 50%; font-size: 9px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--ao20-warn-dim); color: var(--ao20-warn);
+}
+.ao20-outlier.severe::after { background: var(--ao20-crit-dim); color: var(--ao20-crit); }
+
+/* ── Trend indicator ── */
+.ao20-trend { font-size: 10px; font-weight: 600; }
+.ao20-trend-up   { color: var(--ao20-crit); }
+.ao20-trend-down { color: var(--ao20-ok); }
+.ao20-trend-flat { color: var(--ao20-text3); }
+
+/* ── Side Panel ── */
+.ao20-panel {
+    position: absolute; top: 0; left: 0; width: 280px; height: 100%;
+    background: rgba(10,22,40,0.92); backdrop-filter: blur(16px);
+    border-right: 1px solid rgba(91,192,235,0.12); z-index: 100;
+    transition: transform 0.35s cubic-bezier(0.4,0,0.2,1); overflow-y: auto;
+}
+.ao20-panel.closed { transform: translateX(-100%); }
+.ao20-panel-header { padding: 14px; border-bottom: 1px solid var(--ao20-border); display: flex; justify-content: space-between; align-items: center; }
+.ao20-panel-title { font-size: 14px; font-weight: 600; color: var(--ao20-cyan); }
+.ao20-panel-close { background: none; border: none; color: var(--ao20-text3); font-size: 18px; cursor: pointer; padding: 4px 8px; }
+.ao20-panel-body { padding: 14px; display: flex; flex-direction: column; gap: 12px; }
+.ao20-panel-section { display: flex; flex-direction: column; gap: 5px; }
+.ao20-panel-label { font-size: 11px; color: var(--ao20-text3); text-transform: uppercase; letter-spacing: 0.5px; }
+
+/* ── Animate In ── */
+@keyframes ao20-fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+.ao20-animate-in { animation: ao20-fadeIn 0.3s ease both; }

@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+  <rect width="32" height="32" rx="4" fill="#37474F" opacity="0.15"/>
+  <rect x="1" y="1" width="30" height="30" rx="3" fill="none" stroke="#37474F" stroke-width="1.5"/>
+  <rect x="5" y="5" width="7" height="7" rx="1" fill="#4CAF50"/><rect x="14" y="5" width="7" height="7" rx="1" fill="#F44336"/><rect x="5" y="14" width="7" height="7" rx="1" fill="#FFC107"/><rect x="14" y="14" width="7" height="7" rx="1" fill="#4CAF50"/>
+  <text x="16" y="28" text-anchor="middle" font-family="Arial,sans-serif" font-size="6" fill="#37474F" font-weight="bold">GRID</text>
+</svg>

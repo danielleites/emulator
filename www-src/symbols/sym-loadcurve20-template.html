@@ -1,0 +1,118 @@
+<link rel="stylesheet" href="/PIVision/Scripts/app/editor/symbols/ext/sym-loadcurve20.css">
+<link rel="stylesheet" href="/PIVision/Scripts/app/editor/symbols/ext/piv20-design-system.css">
+<link rel="stylesheet" href="/PIVision/Scripts/app/editor/symbols/ext/piv20-overrides.css">
+<script type="text/javascript" src="/PIVision/Scripts/app/editor/symbols/ext/piv20-plugins/piv20-core.js"></script>
+<script type="text/javascript" src="/PIVision/Scripts/app/editor/symbols/ext/piv20-plugins/piv20-loadcurve.js"></script>
+
+<div class="piv20 lc20-root" ng-right-click="showContextMenu($event)">
+
+    <!-- Header -->
+    <div class="lc20-hdr">
+        <div style="display:flex;align-items:center;gap:8px">
+            <span class="lc20-ttl">{{config.Title || 'עקומת עומס'}}</span>
+            <span class="lc20-live"><span class="lc20-live-dot"></span>חי</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:4px">
+            <div class="lc20-views">
+                <button class="lc20-btn" ng-class="{active: viewMode==='chart'}" ng-click="setView('chart')">גרף</button>
+                <button class="lc20-btn" ng-class="{active: viewMode==='table'}" ng-click="setView('table')">טבלה</button>
+                <button class="lc20-btn" ng-class="{active: viewMode==='compact'}" ng-click="setView('compact')">קומפקט</button>
+            </div>
+            <button class="lc20-btn" ng-click="exportCSV()" title="ייצוא CSV">&#8681;</button>
+            <button class="lc20-btn" ng-click="showDocs()" title="תיעוד">?</button>
+            <button class="lc20-btn" ng-click="openPanel()" title="הגדרות">&#9881;</button>
+        </div>
+    </div>
+
+    <!-- Summary bar -->
+    <div class="lc20-summary" ng-show="stats.last != null">
+        <span class="lc20-sum-item">נוכחי: {{currentLoad | number:config.Decimals}} {{trendDir}}</span>
+        <span class="lc20-sum-item">קצב: {{rampRate | number:1}} /דקה</span>
+        <span class="lc20-sum-item" ng-show="stats.max">שיא: {{stats.max | number:config.Decimals}}</span>
+        <span class="lc20-sum-item" ng-show="stats.loadFactor">עומס: {{stats.loadFactor | number:1}}%</span>
+        <span class="lc20-sum-item">דגימות: {{stats.n}}</span>
+    </div>
+
+    <!-- Body -->
+    <div class="lc20-body">
+
+        <!-- Empty state -->
+        <div class="lc20-empty" ng-show="!legend.length">
+            <div style="font-size:32px;opacity:0.3">&#128200;</div>
+            <div>הוסף תגיות לעקומת עומס</div>
+        </div>
+
+        <!-- Chart view -->
+        <div class="lc20-chart-wrap" ng-show="viewMode==='chart' && legend.length">
+            <canvas class="lc20-canvas"></canvas>
+            <!-- Legend -->
+            <div class="lc20-legend">
+                <div class="lc20-legend-item" ng-repeat="l in legend" ng-click="toggleSeries(l.key)"
+                     ng-class="{'lc20-hidden': l.hidden}">
+                    <span class="lc20-legend-dot" ng-style="{'background': l.color}"></span>
+                    <span class="lc20-legend-label">{{l.key}}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Table view — stats panel -->
+        <div ng-show="viewMode==='table'" class="lc20-stats-panel">
+            <div class="lc20-stat-row"><span>נוכחי</span><span>{{stats.last | number:config.Decimals}}</span></div>
+            <div class="lc20-stat-row"><span>מינימום</span><span>{{stats.min | number:config.Decimals}}</span></div>
+            <div class="lc20-stat-row"><span>מקסימום</span><span>{{stats.max | number:config.Decimals}}</span></div>
+            <div class="lc20-stat-row"><span>ממוצע</span><span>{{stats.avg | number:config.Decimals}}</span></div>
+            <div class="lc20-stat-row"><span>סטיית תקן</span><span>{{stats.stddev | number:2}}</span></div>
+            <div class="lc20-stat-row"><span>P95</span><span>{{stats.p95 | number:config.Decimals}}</span></div>
+            <div class="lc20-stat-row"><span>גורם עומס</span><span>{{stats.loadFactor | number:1}}%</span></div>
+            <div class="lc20-stat-row"><span>קצב שינוי</span><span>{{rampRate | number:1}} /דקה {{trendDir}}</span></div>
+            <div class="lc20-stat-row" ng-show="peakInfo"><span>שיא</span><span>{{peakInfo.value | number:config.Decimals}}</span></div>
+            <div class="lc20-stat-row" ng-show="valleyInfo"><span>עמק</span><span>{{valleyInfo.value | number:config.Decimals}}</span></div>
+        </div>
+
+        <!-- Compact view -->
+        <div class="lc20-compact" ng-show="viewMode==='compact' && legend.length">
+            <div class="lc20-compact-item">
+                <span class="lc20-compact-label">נוכחי</span>
+                <span class="lc20-compact-val">{{currentLoad | number:config.Decimals}}</span>
+            </div>
+            <div class="lc20-compact-item">
+                <span class="lc20-compact-label">שיא</span>
+                <span class="lc20-compact-val">{{stats.max | number:config.Decimals}}</span>
+            </div>
+            <div class="lc20-compact-item">
+                <span class="lc20-compact-label">ממוצע</span>
+                <span class="lc20-compact-val">{{stats.avg | number:config.Decimals}}</span>
+            </div>
+            <div class="lc20-compact-item">
+                <span class="lc20-compact-label">עומס</span>
+                <span class="lc20-compact-val">{{stats.loadFactor | number:1}}%</span>
+            </div>
+            <div class="lc20-compact-item">
+                <span class="lc20-compact-label">קצב</span>
+                <span class="lc20-compact-val">{{rampRate | number:1}} {{trendDir}}</span>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Side panel -->
+    <div class="lc20-panel" ng-class="{open: panelOpen}">
+        <div class="lc20-phd">
+            <h3>הגדרות עקומת עומס</h3>
+            <button class="lc20-pcl" ng-click="closePanel()">&times;</button>
+        </div>
+        <div class="lc20-ps"><label>כותרת</label><input type="text" ng-model="config.Title"></div>
+        <div class="lc20-ps"><label>ספרות</label><input type="number" ng-model="config.Decimals" min="0" max="6"></div>
+        <div class="lc20-ps"><label>היסטוריה (דגימות)</label><input type="number" ng-model="config.MaxHistory" min="10" max="1440"></div>
+        <div class="lc20-ps"><label>קו קיבולת (0=מבוטל)</label><input type="number" ng-model="config.CapacityLimit" step="any"></div>
+        <div class="lc20-ps"><label>קו אזהרה (0=מבוטל)</label><input type="number" ng-model="config.WarnLimit" step="any"></div>
+        <div class="lc20-ps"><label>מרווח רענון (שניות)</label><input type="number" ng-model="config.RefreshIntervalSec" min="1" max="300"></div>
+        <button class="lc20-btn" ng-click="clearHistory()" style="margin-top:8px">נקה היסטוריה</button>
+    </div>
+
+    <!-- Footer -->
+    <div class="lc20-ftr">PIV20 LoadCurve</div>
+
+    <!-- Widget container -->
+    <div id="lc20-widget" style="display:none"></div>
+</div>

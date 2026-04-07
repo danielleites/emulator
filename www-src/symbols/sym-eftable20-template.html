@@ -1,0 +1,148 @@
+<link rel="stylesheet" href="/PIVision/Scripts/app/editor/symbols/ext/sym-eftable20.css">
+<link rel="stylesheet" href="/PIVision/Scripts/app/editor/symbols/ext/piv20-design-system.css">
+<link rel="stylesheet" href="/PIVision/Scripts/app/editor/symbols/ext/piv20-overrides.css">
+<script type="text/javascript" src="/PIVision/Scripts/app/editor/symbols/ext/piv20-plugins/piv20-core.js"></script>
+<script type="text/javascript" src="/PIVision/Scripts/app/editor/symbols/ext/piv20-plugins/piv20-eftable.js"></script>
+<div id="ef20-widget" class="piv20 ef20-widget" style="display:none;"
+     ng-style="{'font-family': config.fontFamily, 'font-size': config.fontSize + 'px'}">
+
+    <!-- Header -->
+    <div class="ef20-header">
+        <div style="display:flex;align-items:center;gap:8px;">
+            <span class="ef20-title">{{config.Title}}</span>
+            <span class="ef20-badge" ng-show="unackedCount > 0">{{unackedCount}}</span>
+            <span class="ef20-ef-mode" ng-show="efMode">EF</span>
+        </div>
+        <div class="ef20-toolbar">
+            <button ng-click="togglePause()" ng-class="{active: updatePaused}">
+                {{updatePaused ? '&#9654; חדש' : '&#10074;&#10074; השהה'}}
+            </button>
+            <button ng-click="acknowledgeBulk()" ng-show="config.EnableAcknowledge" title="אשר הכל">&#10003; אשר</button>
+            <button ng-click="exportCSV()" title="ייצוא CSV">CSV</button>
+            <button ng-click="openPanel()" title="הגדרות">&#9881;</button>
+            <button ng-click="showDocs()" title="תיעוד">?</button>
+        </div>
+    </div>
+
+    <!-- Filter Bar -->
+    <div class="ef20-filter-bar">
+        <input class="ef20-search" ng-model="searchText" placeholder="&#128269; חיפוש אירוע...">
+        <div class="ef20-sev-filters">
+            <span class="ef20-sev-btn sev-all" ng-class="{active: severityFilter==='all'}" ng-click="setSeverityFilter('all')">הכל</span>
+            <span class="ef20-sev-btn sev-crit" ng-class="{active: severityFilter==='crit'}" ng-click="setSeverityFilter('crit')">&#9650; קריטי</span>
+            <span class="ef20-sev-btn sev-warn" ng-class="{active: severityFilter==='warn'}" ng-click="setSeverityFilter('warn')">&#9670; אזהרה</span>
+            <span class="ef20-sev-btn sev-ok" ng-class="{active: severityFilter==='ok'}" ng-click="setSeverityFilter('ok')">&#9679; תקין</span>
+        </div>
+        <div class="ef20-ack-filters" ng-show="config.EnableAcknowledge">
+            <span class="ef20-sev-btn" ng-class="{active: ackFilter==='all'}" ng-click="setAckFilter('all')">הכל</span>
+            <span class="ef20-sev-btn" ng-class="{active: ackFilter==='unacked'}" ng-click="setAckFilter('unacked')">לא מאושר</span>
+            <span class="ef20-sev-btn" ng-class="{active: ackFilter==='acked'}" ng-click="setAckFilter('acked')">מאושר</span>
+        </div>
+    </div>
+
+    <!-- Status Bar -->
+    <div class="ef20-status-bar">
+        <span>{{filteredEvents.length}} אירועים</span>
+        <span class="ef20-pause-badge" ng-show="updatePaused">מושהה מ-{{pauseTimestamp}}</span>
+        <span ng-show="efLoading" style="color:#5BC0EB;">&#8987; טוען Event Frames...</span>
+        <span ng-show="efError" style="color:#e74c3c;">{{efError}}</span>
+    </div>
+
+    <!-- Table View -->
+    <div class="ef20-body" ng-show="viewMode==='table'">
+        <table class="ef20-table">
+            <thead>
+                <tr>
+                    <th ng-click="setSort('name')">שם &#9660;</th>
+                    <th ng-click="setSort('severity')">חומרה</th>
+                    <th ng-click="setSort('time')">זמן</th>
+                    <th ng-show="efMode">סיום</th>
+                    <th ng-show="efMode">משך</th>
+                    <th>תיאור</th>
+                    <th ng-hide="efMode">ערך</th>
+                    <th ng-show="config.EnableAcknowledge" style="width:60px;">אישור</th>
+                    <th style="width:30px;">&#128221;</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr ng-repeat="evt in getPagedEvents() track by evt.id"
+                    ng-click="selectEvent(evt)"
+                    ng-class="{'ef20-selected': selectedEvent.id === evt.id}">
+                    <td>
+                        <span class="ef20-sev ef20-sev-{{evt.severity}}"></span>
+                        {{evt.name}}
+                        <span class="ef20-open-tag" ng-show="evt.isOpen">פעיל</span>
+                    </td>
+                    <td><span class="ef20-sev-text ef20-sev-text-{{evt.severity}}">{{getSeverityText(evt.severity)}}</span></td>
+                    <td>{{evt.time}}</td>
+                    <td ng-show="efMode">{{evt.endTime || '—'}}</td>
+                    <td ng-show="efMode">{{evt.duration || '—'}}</td>
+                    <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;">{{evt.desc}}</td>
+                    <td ng-hide="efMode">{{evt.value}}</td>
+                    <td ng-show="config.EnableAcknowledge">
+                        <span class="ef20-acked" ng-show="isAcknowledged(evt)">&#10003; {{getAckInfo(evt).by}}</span>
+                        <button class="ef20-ack-btn" ng-hide="isAcknowledged(evt)" ng-click="acknowledgeEvent(evt, $event)">&#10003;</button>
+                    </td>
+                    <td>
+                        <span style="cursor:pointer;color:#5BC0EB;" ng-click="openAnnotation(evt, $event)" title="הערות">
+                            &#128221;<span ng-show="annotationCount(evt) > 0" style="font-size:8px;">({{annotationCount(evt)}})</span>
+                        </span>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Detail View -->
+    <div class="ef20-detail" ng-show="viewMode==='detail' && selectedEvent">
+        <button style="background:none;border:none;color:#5BC0EB;font-size:11px;cursor:pointer;margin-bottom:8px;"
+                ng-click="backToTable()">&#8592; חזרה לטבלה</button>
+        <div class="ef20-detail-card">
+            <div style="font-size:14px;font-weight:600;color:#B8D4E8;margin-bottom:8px;">{{selectedEvent.name}}</div>
+            <div class="ef20-detail-row"><span class="ef20-detail-label">חומרה</span><span class="ef20-detail-val"><span class="ef20-sev ef20-sev-{{selectedEvent.severity}}"></span> {{getSeverityText(selectedEvent.severity)}}</span></div>
+            <div class="ef20-detail-row"><span class="ef20-detail-label">זמן</span><span class="ef20-detail-val">{{selectedEvent.time}}</span></div>
+            <div class="ef20-detail-row" ng-show="selectedEvent.endTime"><span class="ef20-detail-label">סיום</span><span class="ef20-detail-val">{{selectedEvent.endTime}}</span></div>
+            <div class="ef20-detail-row" ng-show="selectedEvent.duration"><span class="ef20-detail-label">משך</span><span class="ef20-detail-val">{{selectedEvent.duration}}</span></div>
+            <div class="ef20-detail-row"><span class="ef20-detail-label">תיאור</span><span class="ef20-detail-val">{{selectedEvent.desc}}</span></div>
+            <div class="ef20-detail-row" ng-show="selectedEvent.template"><span class="ef20-detail-label">תבנית</span><span class="ef20-detail-val">{{selectedEvent.template}}</span></div>
+
+            <!-- Annotations -->
+            <div class="ef20-annotations">
+                <div style="font-size:11px;font-weight:600;color:#8BACC4;margin-bottom:4px;">הערות</div>
+                <div ng-repeat="ann in getAnnotations(selectedEvent) track by $index" class="ef20-annotation">
+                    <div>{{ann.text}}</div>
+                    <div class="ef20-annotation-meta">{{ann.by}} - {{ann.time}}</div>
+                </div>
+                <textarea class="ef20-annotation-input" ng-model="annotationText" placeholder="הוסף הערה..."></textarea>
+                <button style="background:rgba(91,192,235,.15);border:1px solid rgba(91,192,235,.2);color:#5BC0EB;border-radius:3px;padding:2px 8px;font-size:10px;cursor:pointer;margin-top:4px;"
+                        ng-click="saveAnnotation()">שמור הערה</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pagination -->
+    <div class="ef20-pagination" ng-show="viewMode==='table' && totalPages() > 1">
+        <button ng-click="prevPage()" ng-disabled="page === 0">&#8249; הקודם</button>
+        <span style="color:#6B8FA8;">{{page + 1}} / {{totalPages()}}</span>
+        <button ng-click="nextPage()" ng-disabled="page >= totalPages() - 1">הבא &#8250;</button>
+    </div>
+
+    <!-- Side Panel -->
+    <div class="ef20-side-panel" ng-show="panelOpen">
+        <div class="ef20-panel-header">
+            <span style="font-weight:600;color:#5BC0EB;">Event Frames</span>
+            <button class="ef20-panel-close" ng-click="closePanel()">&#10005;</button>
+        </div>
+        <div class="ef20-panel-body">
+            <div style="font-size:11px;font-weight:600;color:#8BACC4;margin-bottom:4px;">מצב</div>
+            <div style="font-size:10px;color:#6B8FA8;margin-bottom:8px;">
+                <span ng-show="efMode" style="color:#2ecc71;">EF Mode פעיל</span>
+                <span ng-hide="efMode" style="color:#f39c12;">מצב זרם (Threshold)</span>
+            </div>
+            <button ng-show="efMode" ng-click="loadEF()"
+                    style="background:rgba(91,192,235,.15);border:1px solid rgba(91,192,235,.2);color:#5BC0EB;border-radius:3px;padding:3px 8px;font-size:10px;cursor:pointer;">
+                &#8635; רענן Event Frames
+            </button>
+        </div>
+    </div>
+</div>

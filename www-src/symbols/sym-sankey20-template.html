@@ -1,0 +1,111 @@
+<link rel="stylesheet" href="/PIVision/Scripts/app/editor/symbols/ext/sym-sankey20.css">
+<link rel="stylesheet" href="/PIVision/Scripts/app/editor/symbols/ext/piv20-design-system.css">
+<link rel="stylesheet" href="/PIVision/Scripts/app/editor/symbols/ext/piv20-overrides.css">
+<script type="text/javascript" src="/PIVision/Scripts/app/editor/symbols/ext/piv20-plugins/piv20-core.js"></script>
+<script type="text/javascript" src="/PIVision/Scripts/app/editor/symbols/ext/piv20-plugins/piv20-sankey.js"></script>
+
+<div class="piv20 sk20-root" ng-right-click="showContextMenu($event)">
+
+    <!-- Header -->
+    <div class="sk20-hdr">
+        <div style="display:flex;align-items:center;gap:8px">
+            <span class="sk20-ttl">{{config.Title || 'סנקי זרימה'}}</span>
+            <span class="sk20-live"><span class="sk20-live-dot"></span>חי</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:4px">
+            <div class="sk20-views">
+                <button class="sk20-btn" ng-class="{active: viewMode==='sankey'}" ng-click="setView('sankey')">סנקי</button>
+                <button class="sk20-btn" ng-class="{active: viewMode==='table'}" ng-click="setView('table')">טבלה</button>
+                <button class="sk20-btn" ng-class="{active: viewMode==='compact'}" ng-click="setView('compact')">קומפקט</button>
+            </div>
+            <button class="sk20-btn" ng-click="exportCSV()" title="ייצוא CSV">&#8681;</button>
+            <button class="sk20-btn" ng-click="showDocs()" title="תיעוד">?</button>
+            <button class="sk20-btn" ng-click="openPanel()" title="הגדרות">&#9881;</button>
+        </div>
+    </div>
+
+    <!-- Summary bar -->
+    <div class="sk20-summary" ng-show="stats.nodeCount">
+        <span class="sk20-sum-item">צמתים: {{stats.nodeCount}}</span>
+        <span class="sk20-sum-item">זרימות: {{stats.flowCount}}</span>
+        <span class="sk20-sum-item" ng-show="stats.totalInput">קלט: {{stats.totalInput | number:config.Decimals}}</span>
+        <span class="sk20-sum-item" ng-show="stats.totalOutput">פלט: {{stats.totalOutput | number:config.Decimals}}</span>
+        <span class="sk20-sum-item" ng-show="config.ShowLosses && stats.totalLoss">הפסד: {{stats.totalLoss | number:config.Decimals}}</span>
+        <span class="sk20-sum-item" ng-show="config.ShowEfficiency">יעילות: {{stats.efficiency | number:1}}%</span>
+    </div>
+
+    <!-- Body -->
+    <div class="sk20-body">
+
+        <!-- Empty state -->
+        <div class="sk20-empty" ng-show="!nodes.length">
+            <div style="font-size:32px;opacity:0.3">&#8644;</div>
+            <div>הוסף תגיות לתצוגת סנקי</div>
+        </div>
+
+        <!-- Sankey view -->
+        <div class="sk20-chart-wrap" ng-show="viewMode==='sankey' && nodes.length">
+            <canvas class="sk20-canvas"></canvas>
+            <!-- Tooltip -->
+            <div class="sk20-tooltip" ng-show="hoverInfo"
+                 ng-style="{'display': hoverInfo ? 'block' : 'none'}">
+                <div style="font-weight:600">{{hoverInfo.label}}</div>
+                <div ng-show="hoverInfo.value != null">ערך: {{hoverInfo.value | number:config.Decimals}}</div>
+                <div ng-show="hoverInfo.cls" style="color:#8BACC4">
+                    {{hoverInfo.cls === 'source' ? 'מקור' : hoverInfo.cls === 'sink' ? 'יעד' : hoverInfo.cls === 'loss' ? 'הפסד' : 'ביניים'}}
+                </div>
+            </div>
+        </div>
+
+        <!-- Table view -->
+        <div ng-show="viewMode==='table' && nodes.length" style="padding:8px">
+            <div class="sk20-tbl-row sk20-tbl-hdr">
+                <span class="sk20-tbl-c" style="flex:2">שם</span>
+                <span class="sk20-tbl-c">ערך</span>
+                <span class="sk20-tbl-c">סיווג</span>
+                <span class="sk20-tbl-c">תת-סוג</span>
+            </div>
+            <div class="sk20-tbl-row" ng-repeat="n in nodes">
+                <span class="sk20-tbl-c" style="flex:2">
+                    <span class="sk20-color-swatch" ng-style="{'background': n.cls==='loss' ? '#EE5A24' : n.cls==='source' ? '#2ecc71' : '#5BC0EB'}"></span>
+                    {{n.label}}
+                </span>
+                <span class="sk20-tbl-c">{{n.value | number:config.Decimals}}</span>
+                <span class="sk20-tbl-c">{{n.cls === 'source' ? 'מקור' : n.cls === 'sink' ? 'יעד' : n.cls === 'loss' ? 'הפסד' : 'ביניים'}}</span>
+                <span class="sk20-tbl-c">{{n.subtype}}</span>
+            </div>
+        </div>
+
+        <!-- Compact view -->
+        <div class="sk20-compact" ng-show="viewMode==='compact' && nodes.length">
+            <div class="sk20-compact-item" ng-repeat="n in nodes"
+                 ng-style="{'border-right-color': n.cls==='loss' ? '#EE5A24' : n.cls==='source' ? '#2ecc71' : '#5BC0EB'}">
+                <span class="sk20-compact-label">{{n.label}}</span>
+                <span class="sk20-compact-val">{{n.value | number:config.Decimals}}</span>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Side panel -->
+    <div class="sk20-panel" ng-class="{open: panelOpen}">
+        <div class="sk20-phd">
+            <h3>הגדרות סנקי</h3>
+            <button class="sk20-pcl" ng-click="closePanel()">&times;</button>
+        </div>
+        <div class="sk20-ps"><label>כותרת</label><input type="text" ng-model="config.Title"></div>
+        <div class="sk20-ps"><label>ספרות</label><input type="number" ng-model="config.Decimals" min="0" max="6"></div>
+        <div class="sk20-ps"><label><input type="checkbox" ng-model="config.ShowLabels"> הצג תוויות</label></div>
+        <div class="sk20-ps"><label><input type="checkbox" ng-model="config.ShowValues"> הצג ערכים</label></div>
+        <div class="sk20-ps"><label><input type="checkbox" ng-model="config.ShowEfficiency"> הצג יעילות</label></div>
+        <div class="sk20-ps"><label><input type="checkbox" ng-model="config.ShowLosses"> הצג הפסדים</label></div>
+        <div class="sk20-ps"><label><input type="checkbox" ng-model="config.AnimateFlows"> אנימציית זרימה</label></div>
+        <div class="sk20-ps"><label>רוחב צומת (px)</label><input type="number" ng-model="config.NodeWidth" min="8" max="60"></div>
+    </div>
+
+    <!-- Footer -->
+    <div class="sk20-ftr">PIV20 Sankey</div>
+
+    <!-- Widget container -->
+    <div id="sk20-widget" style="display:none"></div>
+</div>

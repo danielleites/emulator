@@ -1,0 +1,208 @@
+<!-- sym-navbar20-template.html — Navigation Sidebar v20 -->
+<link rel="stylesheet" href="/PIVision/Scripts/app/editor/symbols/ext/sym-navbar20.css" />
+<link rel="stylesheet" href="/PIVision/Scripts/app/editor/symbols/ext/piv20-design-system.css">
+<link rel="stylesheet" href="/PIVision/Scripts/app/editor/symbols/ext/piv20-overrides.css">
+<script type="text/javascript" src="/PIVision/Scripts/app/editor/symbols/ext/piv20-plugins/piv20-core.js"></script>
+<script type="text/javascript" src="/PIVision/Scripts/app/editor/symbols/ext/piv20-plugins/piv20-navbar.js"></script>
+
+<div class="piv20 nv20-root" id="nv20-widget"
+     ng-style="{'font-family': config.fontFamily, 'font-size': config.fontSize + 'px',
+                'font-weight': config.fontBold ? 'bold' : 'normal',
+                'font-style': config.fontItalic ? 'italic' : 'normal'}">
+
+    <!-- ═══ Toast Container ═══ -->
+    <div class="nv20-toast-container"></div>
+
+    <!-- ═══ Header ═══ -->
+    <div class="nv20-hdr">
+        <div class="nv20-af-badge" ng-class="afConn.status==='connected'?'nv20-af-good':afConn.status==='partial'?'nv20-af-warn':'nv20-af-bad'"
+             ng-show="afConn"
+             title="{{afConn.good}}/{{afConn.total}} &#1514;&#1511;&#1497;&#1504;&#1497;&#1501;{{afConn.stale?' | '+afConn.stale+' &#1497;&#1513;&#1504;&#1497;&#1501;':''}}">
+            <span class="nv20-af-dot"></span>
+            {{afConn.status==='connected'?'&#1502;&#1495;&#1493;&#1489;&#1512;':afConn.status==='partial'?'&#1495;&#1500;&#1511;&#1497;':'&#1502;&#1504;&#1493;&#1514;&#1511;'}}
+        </div>
+        <div>
+            <div class="nv20-ttl">&#x1F9ED; &#1504;&#1497;&#1493;&#1493;&#1496;</div>
+        </div>
+        <div class="nv20-toolbar">
+            <button class="nv20-btn" ng-click="toggleSearch()" title="&#1495;&#1497;&#1508;&#1493;&#1513;">&#x1F50D;</button>
+            <button class="nv20-btn" ng-click="toggleEdit()">{{editMode ? '&#x2713;' : '&#x270F;&#xFE0F;'}}</button>
+            <button class="nv20-btn" ng-click="toggleFullscreen()" title="&#1502;&#1505;&#1498; &#1502;&#1500;&#1488;">{{isFullscreen ? '&#x229E;' : '&#x26F6;'}}</button>
+            <button class="nv20-btn" ng-click="showDocs()" title="&#1502;&#1491;&#1512;&#1497;&#1498;">&#x1F4D6;</button>
+            <button class="nv20-btn" ng-click="toggleSidePanel()">&#x2699;</button>
+        </div>
+    </div>
+
+    <!-- ═══ Clock & Date Banner ═══ -->
+    <div class="nv20-clock">
+        <div>
+            <div class="nv20-clock-time">{{liveTime}}</div>
+            <div class="nv20-live" style="margin-top:2px;"><div class="nv20-live-dot"></div> LIVE</div>
+        </div>
+        <div class="nv20-clock-date">{{liveDate}}</div>
+    </div>
+
+    <!-- ═══ KPI Dashboard (when data items attached) ═══ -->
+    <div class="nv20-kpi" ng-show="hasData && showKpi">
+        <div class="nv20-kpi-hdr">
+            <span class="nv20-kpi-title">&#x1F4CA; &#1505;&#1496;&#1496;&#1493;&#1505; &#1502;&#1506;&#1512;&#1499;&#1514;</span>
+            <button class="nv20-btn" ng-click="toggleKpi()" style="padding:2px 8px;font-size:10px;">&#x25B2; &#1492;&#1505;&#1514;&#1512;</button>
+        </div>
+
+        <!-- MW Total -->
+        <div class="nv20-kpi-mw" ng-show="kpiSummary.sumMW > 0">
+            <span class="nv20-kpi-mw-val">{{kpiSummary.sumMW | number:1}}</span>
+            <span class="nv20-kpi-mw-lbl">MW<br/>&#1497;&#1497;&#1510;&#1493;&#1512; &#1499;&#1493;&#1500;&#1500;</span>
+        </div>
+
+        <!-- Status counters (4-grid) -->
+        <div class="nv20-kpi-grid">
+            <div class="nv20-kpi-stat">
+                <div class="nv20-kpi-stat-val">{{kpiSummary.total}}</div>
+                <div class="nv20-kpi-stat-lbl">&#1505;&#1492;"&#1499;</div>
+            </div>
+            <div class="nv20-kpi-stat">
+                <div class="nv20-kpi-stat-val" style="color:var(--nv20-ok);">{{kpiSummary.good}}</div>
+                <div class="nv20-kpi-stat-lbl">&#1514;&#1511;&#1497;&#1503;</div>
+            </div>
+            <div class="nv20-kpi-stat">
+                <div class="nv20-kpi-stat-val" style="color:var(--nv20-warn);">{{kpiSummary.warn}}</div>
+                <div class="nv20-kpi-stat-lbl">&#1488;&#1494;&#1492;&#1512;&#1492;</div>
+            </div>
+            <div class="nv20-kpi-stat">
+                <div class="nv20-kpi-stat-val" style="color:var(--nv20-crit);">{{kpiSummary.crit}}</div>
+                <div class="nv20-kpi-stat-lbl">&#1511;&#1512;&#1497;&#1496;&#1497;</div>
+            </div>
+        </div>
+
+        <!-- Per-item KPI list -->
+        <div class="nv20-kpi-items">
+            <div class="nv20-kpi-item" ng-repeat="kpi in kpiItems track by $index"
+                 ng-class="{selected: selectedKpi === kpi}" ng-click="selectKpi(kpi)"
+                 title="{{kpi.path}}&#10;&#1506;&#1491;&#1499;&#1493;&#1503;: {{kpi.age || '&#1506;&#1499;&#1513;&#1497;&#1493;'}}">
+                <div class="nv20-kpi-item-dot" ng-style="{'background': getKpiColor(kpi)}"></div>
+                <span class="nv20-kpi-item-name">{{kpi.label}}</span>
+                <span class="nv20-kpi-item-stale" ng-show="kpi.stale">&#x23F1;</span>
+                <span class="nv20-kpi-item-val" ng-style="{color: getKpiColor(kpi)}">{{kpi.display}}</span>
+                <span class="nv20-kpi-item-unit">{{kpi.units}}</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- KPI collapsed toggle -->
+    <div style="padding:4px 12px;border-bottom:1px solid var(--nv20-border);" ng-show="hasData && !showKpi">
+        <button class="nv20-btn" ng-click="toggleKpi()" style="width:100%;font-size:11px;">&#x25BC; &#1492;&#1510;&#1490; &#1505;&#1496;&#1496;&#1493;&#1505; &#1502;&#1506;&#1512;&#1499;&#1514; ({{kpiSummary.total}})</button>
+    </div>
+
+    <!-- ═══ Settings Side Panel ═══ -->
+    <div class="nv20-panel" ng-class="{open: showSidePanel}">
+        <div class="nv20-phd">
+            <h3>&#1492;&#1490;&#1491;&#1512;&#1493;&#1514;</h3>
+            <button class="nv20-pcl" ng-click="toggleSidePanel()">&#x2715;</button>
+        </div>
+        <div class="nv20-ps">
+            <label>&#1504;&#1497;&#1493;&#1493;&#1496;</label>
+            <button class="nv20-btn" ng-click="addItem()" style="width:100%;margin-bottom:6px;">&#x2795; &#1492;&#1493;&#1505;&#1507; &#1508;&#1512;&#1497;&#1496;</button>
+            <label ng-show="hasData" style="font-size:12px;cursor:pointer;">
+                <input type="checkbox" ng-model="showKpi" ng-change="config.showKpi=showKpi" style="margin-left:6px;" />
+                &#1492;&#1510;&#1490; &#1505;&#1496;&#1496;&#1493;&#1505; &#1502;&#1506;&#1512;&#1499;&#1514;
+            </label>
+        </div>
+        <div class="nv20-ps">
+            <label>&#1497;&#1497;&#1510;&#1493;&#1488;</label>
+            <button class="nv20-btn" ng-click="exportItems()" style="width:100%;">&#x1F4E5; &#1497;&#1497;&#1510;&#1488; &#1508;&#1512;&#1497;&#1496;&#1497;&#1501;</button>
+        </div>
+        <div class="nv20-ps" ng-show="afConn">
+            <label>AF &#1495;&#1497;&#1489;&#1493;&#1512;</label>
+            <div style="font-size:12px;">
+                {{afConn.good}}/{{afConn.total}} &#1514;&#1511;&#1497;&#1504;&#1497;&#1501;
+                <span ng-show="afConn.stale"> | {{afConn.stale}} &#1497;&#1513;&#1504;&#1497;&#1501;</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══ Search Bar ═══ -->
+    <div class="nv20-search-bar" ng-show="showSearch">
+        <input class="nv20-search" ng-model="searchText" ng-change="onSearchChange()"
+               placeholder="&#x1F50D; &#1495;&#1497;&#1508;&#1493;&#1513; &#1504;&#1497;&#1493;&#1493;&#1496;..." autofocus />
+    </div>
+
+    <!-- ═══ Navigation Items Body ═══ -->
+    <div class="nv20-body">
+
+        <!-- Favorites section -->
+        <div ng-show="favoriteItems.length && !searchText && !editMode">
+            <div class="nv20-section-title">&#x2B50; &#1502;&#1493;&#1506;&#1491;&#1508;&#1497;&#1501;</div>
+            <div class="nv20-item" ng-repeat="item in favoriteItems track by item.label" ng-click="navigate(item)">
+                <div class="nv20-item-icon">{{item.icon}}</div>
+                <div class="nv20-item-text">
+                    <div class="nv20-item-label">{{item.label}}</div>
+                    <div class="nv20-item-sublabel">{{item.labelEn}}</div>
+                </div>
+            </div>
+            <div class="nv20-divider"></div>
+        </div>
+
+        <!-- Recent section -->
+        <div ng-show="recentItems.length && !searchText && !editMode">
+            <div class="nv20-section-title">&#x1F550; &#1488;&#1495;&#1512;&#1493;&#1504;&#1497;&#1501;</div>
+            <div class="nv20-item" ng-repeat="item in recentItems track by $index" ng-click="navigate(item)">
+                <div class="nv20-item-icon">{{item.icon}}</div>
+                <div class="nv20-item-text"><div class="nv20-item-label">{{item.label}}</div></div>
+            </div>
+            <div class="nv20-divider"></div>
+        </div>
+
+        <!-- Menu section title -->
+        <div class="nv20-section-title">{{editMode ? '&#x270F;&#xFE0F; &#1506;&#1512;&#1497;&#1499;&#1492;' : '&#x1F4CB; &#1514;&#1508;&#1512;&#1497;&#1496;'}}</div>
+
+        <!-- Normal view: clickable items -->
+        <div ng-show="!editMode">
+            <div class="nv20-item nv20-animate-in" ng-repeat="item in filteredItems track by $index"
+                 ng-click="navigate(item)" style="animation-delay:{{$index * 30}}ms">
+                <div class="nv20-item-icon">{{item.icon}}</div>
+                <div class="nv20-item-text">
+                    <div class="nv20-item-label">{{item.label}}</div>
+                    <div class="nv20-item-sublabel">{{item.labelEn}}</div>
+                </div>
+                <div class="nv20-item-actions">
+                    <button class="nv20-item-action" ng-class="{'fav': isFavorite(item)}"
+                            ng-click="toggleFavorite(item, $event)">
+                        {{isFavorite(item) ? '&#x2B50;' : '&#x2606;'}}
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Edit mode: inline editing -->
+        <div ng-show="editMode">
+            <div class="nv20-edit-item nv20-animate-in" ng-repeat="item in items track by $index"
+                 style="animation-delay:{{$index * 30}}ms">
+                <div class="nv20-edit-row">
+                    <input class="nv20-edit-input" ng-model="item.icon" style="max-width:40px;text-align:center;" />
+                    <input class="nv20-edit-input" ng-model="item.label" placeholder="&#1513;&#1501; &#1506;&#1489;&#1512;&#1497;" />
+                    <input class="nv20-edit-input" ng-model="item.labelEn" placeholder="English name" />
+                </div>
+                <div class="nv20-edit-row">
+                    <input class="nv20-edit-input" ng-model="item.url" placeholder="URL ({element} &#1500;&#1511;&#1497;&#1513;&#1493;&#1512;)" style="direction:ltr;" />
+                    <button class="nv20-btn" ng-click="moveItem($index, -1)" style="padding:3px 8px;">&#x25B2;</button>
+                    <button class="nv20-btn" ng-click="moveItem($index, 1)" style="padding:3px 8px;">&#x25BC;</button>
+                    <button class="nv20-btn danger" ng-click="removeItem($index, $event)" style="padding:3px 8px;">&#x1F5D1;</button>
+                </div>
+            </div>
+            <button class="nv20-btn" ng-click="addItem()" style="margin-top:8px;">&#x2795; &#1492;&#1493;&#1505;&#1507; &#1508;&#1512;&#1497;&#1496;</button>
+        </div>
+
+        <!-- Empty state -->
+        <div class="nv20-empty" ng-show="!filteredItems.length && !editMode">
+            <div style="font-size:36px;opacity:0.4;">&#x1F50D;</div>
+            <div>&#1500;&#1488; &#1504;&#1502;&#1510;&#1488;&#1493; &#1514;&#1493;&#1510;&#1488;&#1493;&#1514;</div>
+        </div>
+    </div>
+
+    <!-- ═══ Footer ═══ -->
+    <div class="nv20-ftr">
+        <span>&#1504;&#1497;&#1493;&#1493;&#1496; v20</span>
+        <span>{{items.length}} &#1508;&#1512;&#1497;&#1496;&#1497;&#1501;</span>
+    </div>
+</div>

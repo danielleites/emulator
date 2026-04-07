@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40" width="40" height="40">
+  <rect width="40" height="40" rx="8" fill="#0B1525"/>
+  <!-- Multi-layer bridge: capacity (blue), ops losses (orange), financial (green) -->
+  <rect x="3" y="7" width="34" height="4" rx="2" fill="#4A90D9"/>
+  <rect x="3" y="13" width="10" height="3" rx="1" fill="#F39C12" opacity="0.8"/>
+  <rect x="13" y="13" width="7" height="3" rx="1" fill="#F39C12" opacity="0.8"/>
+  <rect x="20" y="13" width="5" height="3" rx="1" fill="#F39C12" opacity="0.6"/>
+  <rect x="3" y="19" width="8" height="3" rx="1" fill="#27AE60"/>
+  <rect x="11" y="19" width="6" height="3" rx="1" fill="#27AE60"/>
+  <rect x="17" y="19" width="5" height="3" rx="1" fill="#27AE60"/>
+  <rect x="22" y="19" width="8" height="3" rx="1" fill="#E74C3C" opacity="0.8"/>
+  <rect x="3" y="26" width="28" height="5" rx="2" fill="#1A5A8A"/>
+  <!-- category markers -->
+  <rect x="0" y="7"  width="2" height="4"  rx="1" fill="#4A90D9"/>
+  <rect x="0" y="13" width="2" height="3"  rx="1" fill="#F39C12"/>
+  <rect x="0" y="19" width="2" height="3"  rx="1" fill="#27AE60"/>
+  <rect x="0" y="26" width="2" height="5"  rx="1" fill="#1A5A8A"/>
+  <text x="20" y="38" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="5" fill="#5BA8E0">PERF BRIDGE</text>
+</svg>

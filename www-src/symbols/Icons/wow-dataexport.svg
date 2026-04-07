@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none">
+  <rect x="2" y="2" width="28" height="28" rx="4" fill="#1a1f2e"/>
+  <!-- Document -->
+  <rect x="7" y="5" width="12" height="16" rx="1.5" fill="#1e293b" stroke="#475569" stroke-width="0.5"/>
+  <!-- Data lines -->
+  <rect x="9"  y="8"  width="8" height="1.5" rx="0.5" fill="#60a5fa" opacity="0.6"/>
+  <rect x="9"  y="11" width="6" height="1.5" rx="0.5" fill="#94a3b8" opacity="0.5"/>
+  <rect x="9"  y="14" width="7" height="1.5" rx="0.5" fill="#94a3b8" opacity="0.5"/>
+  <rect x="9"  y="17" width="5" height="1.5" rx="0.5" fill="#94a3b8" opacity="0.5"/>
+  <!-- Export arrow -->
+  <line x1="22" y1="20" x2="22" y2="10" stroke="#34d399" stroke-width="2" stroke-linecap="round"/>
+  <polygon points="22,8 19,12 25,12" fill="#34d399"/>
+  <!-- CSV badge -->
+  <rect x="18" y="22" width="8" height="4" rx="1" fill="#334155"/>
+  <rect x="19" y="23" width="6" height="2" rx="0.5" fill="#34d399" opacity="0.8"/>
+</svg>

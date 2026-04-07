@@ -1,0 +1,110 @@
+<link rel="stylesheet" href="/PIVision/Scripts/app/editor/symbols/ext/sym-treemap20.css">
+<link rel="stylesheet" href="/PIVision/Scripts/app/editor/symbols/ext/piv20-design-system.css">
+<link rel="stylesheet" href="/PIVision/Scripts/app/editor/symbols/ext/piv20-overrides.css">
+<script type="text/javascript" src="/PIVision/Scripts/app/editor/symbols/ext/piv20-plugins/piv20-core.js"></script>
+<script type="text/javascript" src="/PIVision/Scripts/app/editor/symbols/ext/piv20-plugins/piv20-treemap.js"></script>
+
+<div class="piv20 tm20-root" role="region" aria-label="מפת עץ">
+
+<div id="tm20-widget" style="display:none"></div>
+
+<!-- HEADER -->
+<div class="tm20-hdr">
+    <div><span class="tm20-ttl">{{config.Title || 'מפת עץ — חלוקת הספק'}}</span></div>
+    <div style="display:flex;gap:6px;align-items:center">
+        <div class="tm20-views">
+            <button class="tm20-btn" ng-class="{'active':viewMode==='treemap'}" ng-click="setView('treemap')" title="מפת עץ">&#9638;</button>
+            <button class="tm20-btn" ng-class="{'active':viewMode==='table'}" ng-click="setView('table')" title="טבלה">&#9776;</button>
+            <button class="tm20-btn" ng-class="{'active':viewMode==='compact'}" ng-click="setView('compact')" title="קומפקט">&#9632;</button>
+        </div>
+        <div class="tm20-live"><span class="tm20-live-dot"></span>{{liveTime}}</div>
+        <button class="tm20-btn" ng-click="exportData()" title="ייצוא CSV">&#128229;</button>
+        <button class="tm20-btn" ng-click="showDocs()" title="מדריך">&#128214;</button>
+        <button class="tm20-btn" ng-click="togglePanel()" title="הגדרות">&#9881;</button>
+    </div>
+</div>
+
+<!-- SUMMARY -->
+<div class="tm20-summary" ng-show="summary.count">
+    <span class="tm20-sum-item">&#931; {{summary.total}}</span>
+    <span class="tm20-sum-item">{{summary.count}} פריטים</span>
+    <span class="tm20-sum-item">{{summary.categories}} קטגוריות</span>
+    <span class="tm20-sum-item" ng-show="summary.largest">&#9650; {{summary.largest}}</span>
+</div>
+
+<!-- BODY -->
+<div class="tm20-body">
+
+    <div class="tm20-empty" ng-show="!items.length">
+        <div style="font-size:40px;opacity:0.3">&#128202;</div>
+        <div>גרור תגים להצגת מפת עץ</div>
+    </div>
+
+    <!-- TREEMAP VIEW -->
+    <div class="tm20-chart-wrap" ng-show="viewMode==='treemap' && items.length">
+        <canvas class="tm20-canvas"
+                ng-mousemove="onCanvasMove($event)"
+                ng-mouseleave="onCanvasLeave()"></canvas>
+
+        <!-- Tooltip -->
+        <div class="tm20-tooltip" ng-show="hoveredItem">
+            <strong>{{hoveredItem.label}}</strong><br>
+            {{hoveredItem.display}} ({{hoveredItem.pct | number:1}}%)<br>
+            <span style="color:var(--tm20-text3)">{{hoveredItem.category}}</span>
+        </div>
+
+        <!-- Category legend -->
+        <div class="tm20-legend">
+            <div class="tm20-legend-item" ng-repeat="lg in legend track by $index">
+                <span class="tm20-legend-dot" ng-style="{'background':lg.color}"></span>
+                <span>{{lg.label}}</span>
+                <span class="tm20-legend-pct">{{lg.pct}}%</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- TABLE VIEW -->
+    <div ng-show="viewMode==='table' && items.length" style="overflow-y:auto">
+        <div style="padding:4px 8px"><input type="text" ng-model="filterText" placeholder="סינון..." class="tm20-filter-input"></div>
+        <div class="tm20-tbl-row tm20-tbl-hdr">
+            <span class="tm20-tbl-c" ng-click="sortBy('label')">שם</span>
+            <span class="tm20-tbl-c" ng-click="sortBy('value')">ערך</span>
+            <span class="tm20-tbl-c" ng-click="sortBy('pct')">אחוז</span>
+            <span class="tm20-tbl-c">קטגוריה</span>
+        </div>
+        <div class="tm20-tbl-row" ng-repeat="it in getFiltered() track by $index">
+            <span class="tm20-tbl-c"><span class="tm20-color-swatch" ng-style="{'background':it.color}"></span> {{it.label}}</span>
+            <span class="tm20-tbl-c">{{it.display}}</span>
+            <span class="tm20-tbl-c">{{it.pct | number:1}}%</span>
+            <span class="tm20-tbl-c">{{it.category}}</span>
+        </div>
+    </div>
+
+    <!-- COMPACT VIEW -->
+    <div class="tm20-compact" ng-show="viewMode==='compact' && items.length">
+        <div class="tm20-compact-item" ng-repeat="it in items track by $index" ng-style="{'border-right-color':it.color}">
+            <span class="tm20-compact-label">{{it.label}}</span>
+            <span class="tm20-compact-val">{{it.display}}</span>
+        </div>
+    </div>
+
+</div>
+
+<!-- SIDE PANEL -->
+<div class="tm20-panel" ng-class="{'open':panelOpen}">
+    <div class="tm20-phd"><h3>&#9881; הגדרות מפת עץ</h3><button class="tm20-pcl" ng-click="togglePanel()">&#10005;</button></div>
+    <div class="tm20-ps"><label>כותרת</label><input type="text" ng-model="config.Title"></div>
+    <div class="tm20-ps"><label>ספרות עשרוניות</label><input type="number" ng-model="config.Decimals" min="0" max="6"></div>
+    <div class="tm20-ps"><label>מצב צבע</label>
+        <select ng-model="config.ColorMode"><option value="category">לפי קטגוריה</option><option value="heatmap">מפת חום</option><option value="status">לפי סף</option></select>
+    </div>
+    <div class="tm20-ps"><label>סף אזהרה</label><input type="number" ng-model="config.WarnThreshold" step="any"></div>
+    <div class="tm20-ps"><label>סף קריטי</label><input type="number" ng-model="config.CritThreshold" step="any"></div>
+    <div class="tm20-ps"><label><input type="checkbox" ng-model="config.ShowLabels"> הצג תוויות</label></div>
+    <div class="tm20-ps"><label><input type="checkbox" ng-model="config.ShowValues"> הצג ערכים</label></div>
+    <div class="tm20-ps"><label><input type="checkbox" ng-model="config.ShowPercentage"> הצג אחוזים</label></div>
+    <div class="tm20-ps"><label>גודל מלבן מינימלי</label><input type="number" ng-model="config.MinRectSize" min="10" max="80"></div>
+</div>
+
+<div class="tm20-ftr">נוגה — מנהל מערכת החשמל | PIV20 v20.0</div>
+</div>

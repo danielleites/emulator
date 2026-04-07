@@ -1,0 +1,160 @@
+<!-- ═══════════════════════════════════════════════════════
+     Executive Zoomable Treemap — Config Panel
+     WOW TM v100 — wc20 Pattern + Collapsible <details>
+     ═══════════════════════════════════════════════════════ -->
+
+<div class="wc20-config-panel" style="direction:rtl; font-family:'Segoe UI',Arial,sans-serif;">
+
+    <!-- ── General (open by default) ── -->
+    <details class="wc20-section" open>
+        <summary class="wc20-section-title">כללי</summary>
+
+        <div class="wc20-field">
+            <label class="wc20-label">כותרת</label>
+            <input type="text" class="wc20-input"
+                   ng-model="config.Title"
+                   placeholder="מפת בריאות ארגוני">
+        </div>
+
+        <div class="wc20-field">
+            <label class="wc20-label">מצב הדגמה (Demo)</label>
+            <input type="checkbox" class="wc20-checkbox"
+                   ng-model="config.DemoMode">
+            <span class="wc20-hint">היררכיה סינתטית (4 מפעלים, ~70 נכסים)</span>
+        </div>
+    </details>
+
+    <!-- ── Hierarchy (open by default) ── -->
+    <details class="wc20-section" open>
+        <summary class="wc20-section-title">היררכיה</summary>
+
+        <div class="wc20-field">
+            <label class="wc20-label">רמות Path לדלג</label>
+            <input type="number" class="wc20-input wc20-input-sm"
+                   ng-model="config.PathLevelsToSkip"
+                   ng-model-options="{ debounce: 500 }"
+                   min="0" max="5" step="1">
+            <span class="wc20-hint">דלג על Server/DB בנתיב AF (ברירת מחדל 0)</span>
+        </div>
+
+        <div class="wc20-field">
+            <label class="wc20-label">עומק תצוגה מקסימלי</label>
+            <select class="wc20-select" ng-model="config.MaxDepth"
+                    ng-options="v as v for v in [1, 2, 3]">
+            </select>
+            <span class="wc20-hint">1 = ילדים ישירים, 2 = נכדים מקוננים</span>
+        </div>
+    </details>
+
+    <!-- ── Thresholds ── -->
+    <details class="wc20-section">
+        <summary class="wc20-section-title">ספי צבע</summary>
+
+        <div class="wc20-field">
+            <label class="wc20-label">% אזהרה (Warn)</label>
+            <input type="number" class="wc20-input wc20-input-sm"
+                   ng-model="config.WarnPct"
+                   ng-model-options="{ debounce: 500 }"
+                   min="1" max="99" step="1">
+            <span class="wc20-hint">Health ≥ ערך זה → כתום</span>
+        </div>
+
+        <div class="wc20-field">
+            <label class="wc20-label">% קריטי (Critical)</label>
+            <input type="number" class="wc20-input wc20-input-sm"
+                   ng-model="config.CritPct"
+                   ng-model-options="{ debounce: 500 }"
+                   min="1" max="100" step="1">
+            <span class="wc20-hint">Health ≥ ערך זה → אדום</span>
+        </div>
+    </details>
+
+    <!-- ── Display ── -->
+    <details class="wc20-section">
+        <summary class="wc20-section-title">תצוגה</summary>
+
+        <div class="wc20-field">
+            <label class="wc20-label">מרווח בין ריבועים (px)</label>
+            <input type="number" class="wc20-input wc20-input-sm"
+                   ng-model="config.Gap"
+                   ng-model-options="{ debounce: 500 }"
+                   min="0" max="8" step="1">
+        </div>
+
+        <div class="wc20-field">
+            <label class="wc20-label">עשרוניות</label>
+            <select class="wc20-select" ng-model="config.Decimals"
+                    ng-options="v as v for v in [0, 1, 2, 3]">
+            </select>
+        </div>
+    </details>
+
+    <!-- ── Theme ── -->
+    <details class="wc20-section">
+        <summary class="wc20-section-title">ערכת נושא</summary>
+
+        <div class="wc20-field">
+            <label class="wc20-label">גופן</label>
+            <select class="wc20-select" ng-model="config.fontFamily">
+                <option value="Segoe UI">Segoe UI</option>
+                <option value="Arial">Arial</option>
+                <option value="Tahoma">Tahoma</option>
+                <option value="Consolas">Consolas (Mono)</option>
+            </select>
+        </div>
+
+        <div class="wc20-field">
+            <label class="wc20-label">גודל גופן (px)</label>
+            <input type="number" class="wc20-input wc20-input-sm"
+                   ng-model="config.fontSize"
+                   ng-model-options="{ debounce: 500 }"
+                   min="8" max="16" step="1">
+        </div>
+    </details>
+
+    <!-- ── Info ── -->
+    <details class="wc20-section">
+        <summary class="wc20-section-title">מידע טכני</summary>
+
+        <div class="wc20-field wc20-readonly">
+            <span class="wc20-badge wc20-badge-blue">DataShape</span>
+            <span>Table (Path / Value / Health)</span>
+        </div>
+
+        <div class="wc20-field wc20-readonly">
+            <span class="wc20-badge wc20-badge-green">Layout Engine</span>
+            <span>Squarify (Bruls–Huizing–van Wijk) — Off-Thread</span>
+        </div>
+
+        <div class="wc20-field wc20-readonly">
+            <span class="wc20-badge wc20-badge-green">Zoom Animation</span>
+            <span>CSS Transform (GPU Bitmap Stretch) — 0 Reflows</span>
+        </div>
+
+        <div class="wc20-field wc20-readonly">
+            <span class="wc20-badge wc20-badge-blue">Hierarchy</span>
+            <span>AF Path Auto-Parsing (Flat → Nested Tree)</span>
+        </div>
+
+        <div class="wc20-field wc20-readonly">
+            <span class="wc20-badge wc20-badge-orange">Color Palette</span>
+            <span>Executive HSL — Fade the Noise</span>
+        </div>
+
+        <div class="wc20-field wc20-readonly">
+            <span class="wc20-badge wc20-badge-purple">Performance</span>
+            <span>5,000+ assets → fillRect loop &lt;2ms</span>
+        </div>
+
+        <div class="wc20-field wc20-readonly">
+            <span class="wc20-badge wc20-badge-blue">Navigation</span>
+            <span>Breadcrumbs + Click Drill-down + Home</span>
+        </div>
+
+        <div class="wc20-field wc20-readonly" style="margin-top:8px;">
+            <span class="wc20-badge">WOW TM v100</span>
+            <span style="color:#8899AA;">Executive Zoomable Treemap</span>
+        </div>
+    </details>
+
+</div>

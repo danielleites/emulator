@@ -1,0 +1,194 @@
+<link rel="stylesheet" href="/PIVision/Scripts/app/editor/symbols/ext/sym-constmon20.css">
+<link rel="stylesheet" href="/PIVision/Scripts/app/editor/symbols/ext/piv20-design-system.css">
+<link rel="stylesheet" href="/PIVision/Scripts/app/editor/symbols/ext/piv20-overrides.css">
+<script type="text/javascript" src="/PIVision/Scripts/app/editor/symbols/ext/piv20-plugins/piv20-core.js"></script>
+<script type="text/javascript" src="/PIVision/Scripts/app/editor/symbols/ext/piv20-ultra.js"></script>
+<script type="text/javascript" src="/PIVision/Scripts/app/editor/symbols/ext/piv20-plugins/piv20-constraintmonitor.js"></script>
+
+<div id="ct20-widget" class="piv20 ct20-widget" style="display:none;">
+
+    <!-- Header -->
+    <div class="ct20-header">
+        <div style="display:flex;align-items:center;gap:8px">
+            <span class="ct20-title">{{config.Title || 'ניטור אילוצים'}}</span>
+            <span class="ct20-demo-badge" ng-show="demoMode" ng-click="toggleDemo()">DEMO</span>
+        </div>
+        <div class="ct20-toolbar">
+            <input class="ct20-search" type="text" ng-model="searchText"
+                   placeholder="חיפוש..." ng-change="filterChanged()">
+            <button ng-click="setTab('cards')" ng-class="{active: activeTab==='cards'}" title="1">כרטיסים</button>
+            <button ng-click="setTab('compact')" ng-class="{active: activeTab==='compact'}" title="2">מצומצם</button>
+            <button ng-click="setTab('table')" ng-class="{active: activeTab==='table'}" title="3">טבלה</button>
+            <button ng-click="setTab('alerts')" ng-class="{active: activeTab==='alerts'}" title="4">התראות</button>
+            <button ng-click="exportCSV()" title="יצוא">CSV</button>
+            <button ng-click="openPanel()" title="מידע נוסף (Esc לסגירה)">&#9776;</button>
+        </div>
+    </div>
+
+    <!-- Summary Bar -->
+    <div class="ct20-summary">
+        <div class="ct20-sum-item">
+            <span class="ct20-sum-val">{{summary.total || 0}}</span>
+            <span class="ct20-sum-label">יחידות</span>
+        </div>
+        <div class="ct20-sum-item">
+            <span class="ct20-sum-val" style="color:var(--ct20-crit,#e74c3c)">{{summary.overQuota || 0}}</span>
+            <span class="ct20-sum-label">חריגה</span>
+        </div>
+        <div class="ct20-sum-item">
+            <span class="ct20-sum-val" style="color:var(--ct20-warn,#f39c12)">{{summary.warnings || 0}}</span>
+            <span class="ct20-sum-label">אזהרות</span>
+        </div>
+        <div class="ct20-sum-item">
+            <span class="ct20-sum-val" style="color:var(--ct20-good,#2ecc71)">{{summary.normal || 0}}</span>
+            <span class="ct20-sum-label">תקין</span>
+        </div>
+    </div>
+
+    <!-- Body -->
+    <div class="ct20-body">
+
+        <!-- Card View -->
+        <div ng-if="activeTab==='cards'">
+            <div ng-repeat="u in filteredUnits track by $index"
+                 class="ct20-unit-card ct20-status-{{u.status}}">
+                <div class="ct20-unit-header">
+                    <div>
+                        <span class="ct20-unit-name">{{u.name}}</span>
+                        <span class="ct20-unit-site">{{u.site}}</span>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:8px;">
+                        <span class="ct20-unit-mw" ng-if="u.currentMW">{{u.currentMW | number:1}} MW</span>
+                        <span class="ct20-unit-status"
+                              ng-style="{'background': getStatusBg(u.status), 'color': getStatusColor(u.status)}">
+                            {{u.statusLabel}}
+                        </span>
+                    </div>
+                </div>
+                <div class="ct20-constraints">
+                    <div ng-repeat="c in u.constraints track by $index" class="ct20-constraint-row">
+                        <div class="ct20-constraint-info">
+                            <span class="ct20-constraint-label">
+                                <span class="ct20-constraint-icon">{{c.icon || '\⬤'}}</span>
+                                {{c.label}}
+                            </span>
+                            <span class="ct20-constraint-vals">
+                                {{c.usedDisplay}} / {{c.quotaDisplay}} {{c.unit}}
+                            </span>
+                            <span class="ct20-constraint-pct" ng-style="{'color': getBarColor(c.pct)}">
+                                {{c.pct | number:1}}%
+                            </span>
+                        </div>
+                        <div class="ct20-bar-track">
+                            <div class="ct20-bar-fill"
+                                 ng-style="{'width': getBarWidth(c.pct), 'background-color': getBarColor(c.pct)}">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div ng-if="!filteredUnits.length" class="ct20-empty-msg">
+                אין יחידות להצגה
+            </div>
+        </div>
+
+        <!-- Compact View -->
+        <div ng-if="activeTab==='compact'" class="ct20-compact-grid">
+            <div ng-repeat="u in filteredUnits track by $index" class="ct20-compact-card"
+                 ng-style="{'border-right': '3px solid ' + getStatusColor(u.status)}">
+                <div class="ct20-compact-name">{{u.name}}</div>
+                <div class="ct20-compact-pct" ng-style="{'color': getStatusColor(u.status)}">
+                    {{u.quotaUsedPct | number:0}}%
+                </div>
+            </div>
+        </div>
+
+        <!-- Table View -->
+        <table ng-if="activeTab==='table'" class="ct20-table">
+            <thead>
+                <tr>
+                    <th ng-click="sortBy('name')">יחידה</th>
+                    <th ng-click="sortBy('site')">אתר</th>
+                    <th ng-click="sortBy('status')">מצב</th>
+                    <th ng-click="sortBy('quotaUsedPct')">ניצול %</th>
+                    <th>שעות</th>
+                    <th>CO2</th>
+                    <th>דלק</th>
+                    <th>התנעות</th>
+                    <th>MW</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr ng-repeat="u in filteredUnits track by $index">
+                    <td>{{u.name}}</td>
+                    <td>{{u.site}}</td>
+                    <td ng-style="{'color': getStatusColor(u.status)}">{{u.statusLabel}}</td>
+                    <td ng-style="{'color': getBarColor(u.quotaUsedPct)}">{{u.quotaUsedPct | number:1}}%</td>
+                    <td>{{u.runningHoursDisplay}}</td>
+                    <td>{{u.co2Display}}</td>
+                    <td>{{u.fuelDisplay}}</td>
+                    <td>{{u.startsDisplay}}</td>
+                    <td>{{u.currentMW | number:1}}</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- Alerts View -->
+        <div ng-if="activeTab==='alerts'" class="ct20-alert-list">
+            <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
+                <span style="color:var(--ct20-accent,#5BC0EB);font-weight:600;font-size:12px;">התראות</span>
+                <button class="ct20-clear-btn" ng-click="clearAlerts()">נקה</button>
+            </div>
+            <div ng-repeat="a in alerts track by $index" class="ct20-alert-item">
+                <span class="ct20-alert-time">{{a.time}}</span>
+                <span class="ct20-alert-icon" ng-style="{'color': a.color}">{{a.icon || '\⚠'}}</span>
+                <span>{{a.text}}</span>
+            </div>
+            <div ng-if="!alerts.length" class="ct20-empty-msg">
+                אין התראות
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Side Panel -->
+    <div class="ct20-side-panel" ng-class="{open: panelOpen}">
+        <div class="ct20-panel-header">
+            <span style="color:var(--ct20-accent,#5BC0EB);font-weight:600;">פירוט אילוצים</span>
+            <button class="ct20-panel-close" ng-click="closePanel()">&times;</button>
+        </div>
+        <div class="ct20-panel-body">
+            <div style="margin-bottom:8px;">
+                <div class="ct20-panel-label">סה"כ שעות מוגבלות</div>
+                <div style="font-size:16px;font-weight:700;">{{summary.totalConstrainedHours | number:0}}</div>
+            </div>
+            <div style="margin-bottom:8px;">
+                <div class="ct20-panel-label">סף אזהרה</div>
+                <div style="font-size:14px;">{{config.WarningPct}}%</div>
+            </div>
+            <div style="margin-bottom:8px;">
+                <div class="ct20-panel-label">סף קריטי</div>
+                <div style="font-size:14px;">{{config.CriticalPct}}%</div>
+            </div>
+            <div class="ct20-panel-section">
+                <div class="ct20-panel-label" style="font-weight:600;margin-bottom:6px;">הגדרות מתקדמות</div>
+                <div style="margin-bottom:6px;">
+                    <label style="font-size:10px;color:#8BACC4"><input type="checkbox" ng-model="config.DemoMode" ng-change="toggleDemo()"> מצב דמו</label>
+                </div>
+                <div style="display:flex;gap:4px;">
+                    <button class="ct20-action-btn" ng-click="exportConfig()">&#8681; ייצוא</button>
+                    <button class="ct20-action-btn" ng-click="importConfig()">&#8679; ייבוא</button>
+                </div>
+            </div>
+            <button class="ct20-action-btn" ng-click="showDocs()" style="margin-top:12px;width:100%;">
+                תיעוד
+            </button>
+        </div>
+    </div>
+
+    <!-- Keyboard hints -->
+    <div class="ct20-kbd-hints" ng-show="panelOpen">
+        <span>1 כרטיסים</span> <span>2 מצומצם</span> <span>3 טבלה</span> <span>4 התראות</span> <span>Esc סגירה</span>
+    </div>
+
+</div>

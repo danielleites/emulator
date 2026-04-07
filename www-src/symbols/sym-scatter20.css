@@ -1,0 +1,69 @@
+/* ================================================================
+   sym-scatterplot20.css — Scatter / Correlation Plot v20
+   ================================================================ */
+.sp20-root {
+    --sp20-bg: #060C18; --sp20-surface: #0B1D33; --sp20-border: rgba(46,139,192,0.15);
+    --sp20-accent: #5BC0EB; --sp20-text1: #FFFFFF; --sp20-text2: #C0D0E0; --sp20-text3: #8BACC4;
+    position: relative; width: 100%; height: 100%; background: var(--sp20-bg);
+    color: var(--sp20-text2); font-family: 'Segoe UI', Arial, sans-serif; font-size: 12px;
+    direction: rtl; overflow: hidden; display: flex; flex-direction: column;
+}
+.sp20-hdr {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 6px 10px; background: var(--sp20-surface); border-bottom: 1px solid var(--sp20-border); flex-shrink: 0;
+}
+.sp20-ttl { font-size: 14px; font-weight: 600; color: var(--sp20-text1); }
+.sp20-btn {
+    background: rgba(91,192,235,0.08); border: 1px solid var(--sp20-border);
+    color: var(--sp20-text3); border-radius: 4px; padding: 4px 8px; font-size: 11px; cursor: pointer;
+}
+.sp20-btn:hover, .sp20-btn.active { background: rgba(91,192,235,0.2); color: var(--sp20-accent); }
+.sp20-views { display: flex; gap: 2px; }
+.sp20-live { font-size: 11px; color: var(--sp20-text3); display: flex; align-items: center; gap: 4px; }
+.sp20-live-dot { width: 6px; height: 6px; border-radius: 50%; background: #2ecc71; animation: sp20-pulse 2s infinite; }
+@keyframes sp20-pulse { 0%,100% { opacity:1 } 50% { opacity:0.4 } }
+
+.sp20-summary {
+    display: flex; gap: 12px; padding: 4px 10px; background: rgba(11,29,51,0.6);
+    border-bottom: 1px solid var(--sp20-border); font-size: 11px; color: var(--sp20-text3); flex-shrink: 0;
+}
+.sp20-sum-item { white-space: nowrap; }
+
+.sp20-body { flex: 1; overflow-y: auto; overflow-x: hidden; }
+.sp20-empty { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 200px; color: var(--sp20-text3); }
+
+.sp20-chart-wrap { width: 100%; height: 100%; }
+.sp20-canvas { width: 100%; height: 100%; cursor: crosshair; }
+
+/* Stats view */
+.sp20-stats-view { padding: 8px; display: flex; flex-wrap: wrap; gap: 8px; }
+.sp20-stat-card {
+    background: var(--sp20-surface); border: 1px solid var(--sp20-border); border-radius: 6px;
+    padding: 8px 12px; min-width: 200px; flex: 1;
+}
+.sp20-stat-title { font-size: 13px; font-weight: 600; color: var(--sp20-accent); margin-bottom: 6px; }
+.sp20-stat-row { display: flex; justify-content: space-between; padding: 2px 0; font-size: 11px; border-bottom: 1px solid rgba(46,139,192,0.08); }
+.sp20-stat-val { color: var(--sp20-text1); font-weight: 600; }
+
+/* Table */
+.sp20-tbl-row { display: flex; padding: 3px 8px; border-bottom: 1px solid var(--sp20-border); font-size: 11px; }
+.sp20-tbl-hdr { font-weight: 600; color: var(--sp20-text3); }
+.sp20-tbl-c { flex: 1; padding: 0 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* Side panel */
+.sp20-panel {
+    position: absolute; top: 0; left: -280px; width: 270px; height: 100%;
+    background: var(--sp20-surface); border-right: 1px solid var(--sp20-border);
+    transition: left 0.3s; z-index: 100; overflow-y: auto; padding: 0 10px 10px;
+}
+.sp20-panel.open { left: 0; box-shadow: 4px 0 20px rgba(0,0,0,0.4); }
+.sp20-phd { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; }
+.sp20-phd h3 { margin: 0; font-size: 13px; color: var(--sp20-accent); }
+.sp20-pcl { background: none; border: none; color: var(--sp20-text3); font-size: 16px; cursor: pointer; }
+.sp20-ps { margin-bottom: 8px; }
+.sp20-ps label { display: block; font-size: 11px; color: var(--sp20-text3); margin-bottom: 3px; }
+.sp20-ps input[type=text], .sp20-ps input[type=number], .sp20-ps select {
+    width: 100%; background: var(--sp20-bg); border: 1px solid var(--sp20-border);
+    border-radius: 4px; padding: 5px 8px; color: var(--sp20-text1); font-size: 12px;
+}
+.sp20-ftr { padding: 3px 10px; font-size: 10px; color: rgba(139,172,196,0.4); text-align: center; border-top: 1px solid var(--sp20-border); flex-shrink: 0; }

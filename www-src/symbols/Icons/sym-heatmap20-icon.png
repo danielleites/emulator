@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+  <rect width="32" height="32" rx="4" fill="#F44336" opacity="0.15"/>
+  <rect x="1" y="1" width="30" height="30" rx="3" fill="none" stroke="#F44336" stroke-width="1.5"/>
+  <rect x="5" y="5" width="6" height="6" fill="#F44336" opacity="0.3"/><rect x="13" y="5" width="6" height="6" fill="#F44336" opacity="0.7"/><rect x="21" y="5" width="6" height="6" fill="#F44336" opacity="0.5"/><rect x="5" y="13" width="6" height="6" fill="#F44336" opacity="0.9"/><rect x="13" y="13" width="6" height="6" fill="#F44336" opacity="0.4"/><rect x="21" y="13" width="6" height="6" fill="#F44336" opacity="0.8"/>
+  <text x="16" y="28" text-anchor="middle" font-family="Arial,sans-serif" font-size="6" fill="#F44336" font-weight="bold">HEAT</text>
+</svg>

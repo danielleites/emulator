@@ -1,0 +1,213 @@
+/* ================================================================
+   sym-genblock20.css — Generator Block Diagram v20
+   ULTRA-upgraded — aligned with sym-mugult20 v1.4 quality
+   ================================================================
+   ISA-101 state shapes, capacity bars, sparklines, fleet stats,
+   CSS variable theme, keyboard hints, demo badge.
+   ================================================================ */
+
+/* ── Root ── */
+.gb20-widget {
+    --gb20-bg: #060C18; --gb20-surface: #0B1D33; --gb20-border: rgba(46,139,192,0.15);
+    --gb20-accent: #5BC0EB; --gb20-text1: #FFFFFF; --gb20-text2: #D0E4F5; --gb20-text3: #8BACC4;
+    --gb20-good: #2ecc71; --gb20-warn: #f39c12; --gb20-crit: #e74c3c;
+    --gb20-font-family: 'Segoe UI', Tahoma, sans-serif;
+    --gb20-font-size: 12px;
+    position: relative; width: 100%; height: 100%;
+    background: var(--gb20-bg); color: var(--gb20-text2);
+    font-family: var(--gb20-font-family); font-size: var(--gb20-font-size);
+    direction: rtl; overflow: hidden; display: flex; flex-direction: column;
+    outline: none;
+}
+.gb20-widget:focus-visible { box-shadow: inset 0 0 0 2px var(--gb20-accent); }
+
+/* ── Header ── */
+.gb20-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 6px 12px; background: var(--gb20-surface);
+    border-bottom: 1px solid var(--gb20-border); flex-shrink: 0;
+}
+.gb20-title { font-size: 14px; font-weight: 600; color: var(--gb20-accent); }
+.gb20-toolbar { display: flex; gap: 6px; align-items: center; }
+.gb20-toolbar button {
+    background: rgba(91,192,235,.1); border: 1px solid var(--gb20-border);
+    color: var(--gb20-text3); border-radius: 4px; padding: 3px 8px;
+    font-size: 11px; cursor: pointer; transition: all .2s;
+}
+.gb20-toolbar button:hover,
+.gb20-toolbar button.active { background: rgba(91,192,235,.25); color: var(--gb20-accent); }
+
+/* ── Demo Badge ── */
+.gb20-demo-badge {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 700;
+    background: linear-gradient(135deg, #f39c12, #e74c3c); color: #fff;
+    letter-spacing: 0.5px; cursor: pointer; animation: gb20-demo-glow 2s infinite alternate;
+}
+@keyframes gb20-demo-glow { 0% { box-shadow: 0 0 4px rgba(243,156,18,0.3) } 100% { box-shadow: 0 0 12px rgba(243,156,18,0.6) } }
+
+/* ── Fleet Summary Bar ── */
+.gb20-fleet {
+    display: flex; gap: 12px; padding: 6px 12px;
+    background: rgba(11,29,51,0.6); border-bottom: 1px solid var(--gb20-border);
+    flex-wrap: wrap; flex-shrink: 0;
+}
+.gb20-fleet-item { display: flex; flex-direction: column; align-items: center; min-width: 60px; }
+.gb20-fleet-val { font-size: 16px; font-weight: 700; color: var(--gb20-text1); }
+.gb20-fleet-label { font-size: 9px; color: #6B8FA8; margin-top: 2px; }
+
+/* ── Body (scrollable) ── */
+.gb20-body { flex: 1; overflow-y: auto; padding: 8px; }
+.gb20-body::-webkit-scrollbar { width: 4px; }
+.gb20-body::-webkit-scrollbar-thumb { background: rgba(91,192,235,.2); border-radius: 2px; }
+
+/* ── Card Grid ── */
+.gb20-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 8px; }
+
+/* ── Generator Card ── */
+.gb20-card {
+    background: var(--gb20-surface); border: 1px solid rgba(91,192,235,.1);
+    border-radius: 6px; padding: 8px; display: flex; flex-direction: column;
+    gap: 6px; transition: border-color .2s, box-shadow .3s;
+}
+.gb20-card:hover { border-color: rgba(91,192,235,.3); box-shadow: 0 2px 12px rgba(91,192,235,0.08); }
+.gb20-card.gb20-state-active    { border-right: 3px solid var(--gb20-good); }
+.gb20-card.gb20-state-overload  { border-right: 3px solid var(--gb20-crit); }
+.gb20-card.gb20-state-starting  { border-right: 3px solid var(--gb20-warn); }
+.gb20-card.gb20-state-standby   { border-right: 3px solid var(--gb20-accent); }
+.gb20-card.gb20-state-fault     { border-right: 3px solid var(--gb20-crit); }
+.gb20-card.gb20-state-maint     { border-right: 3px solid #9b59b6; }
+.gb20-card.gb20-state-off       { border-right: 3px solid #555; }
+
+.gb20-card-header { display: flex; align-items: center; justify-content: space-between; }
+.gb20-card-name { font-size: 11px; font-weight: 600; color: #B8D4E8; }
+.gb20-card-state { font-size: 9px; padding: 1px 6px; border-radius: 8px; font-weight: 600; }
+
+/* ── ISA-101 State Colors ── */
+.gb20-st-active   { background: rgba(46,204,113,.15); color: var(--gb20-good); }
+.gb20-st-overload { background: rgba(231,76,60,.15);  color: var(--gb20-crit); }
+.gb20-st-starting { background: rgba(243,156,18,.15); color: var(--gb20-warn); }
+.gb20-st-standby  { background: rgba(52,152,219,.15); color: var(--gb20-accent); }
+.gb20-st-fault    { background: rgba(231,76,60,.15);  color: var(--gb20-crit); }
+.gb20-st-maint    { background: rgba(155,89,182,.15); color: #9b59b6; }
+.gb20-st-off      { background: rgba(85,85,85,.15);   color: #888; }
+
+/* ── MW Display ── */
+.gb20-mw-row { display: flex; align-items: baseline; gap: 4px; }
+.gb20-mw-val { font-size: 18px; font-weight: 700; color: var(--gb20-text1); }
+.gb20-mw-unit { font-size: 10px; color: #6B8FA8; }
+.gb20-trend { font-size: 12px; margin-right: 4px; }
+
+/* ── Capacity Bar ── */
+.gb20-cap-bar {
+    position: relative; height: 6px; background: rgba(91,192,235,.08);
+    border-radius: 3px; overflow: visible;
+}
+.gb20-cap-fill { height: 100%; border-radius: 3px; transition: width .3s ease; }
+.gb20-cap-marker { position: absolute; top: -2px; width: 1px; height: 10px; background: rgba(255,255,255,.3); }
+
+/* ── Ramp Rate ── */
+.gb20-ramp { display: flex; align-items: center; gap: 4px; font-size: 9px; color: #6B8FA8; }
+.gb20-ramp-val { font-weight: 600; }
+.gb20-ramp-exceed { color: var(--gb20-crit); }
+
+/* ── Sparkline Canvas ── */
+.gb20-spark { width: 100%; height: 24px; display: block; }
+
+/* ── Table View ── */
+.gb20-table { width: 100%; border-collapse: collapse; font-size: 11px; }
+.gb20-table th {
+    background: rgba(91,192,235,.08); color: var(--gb20-text3); padding: 5px 8px;
+    text-align: right; font-weight: 600; cursor: pointer;
+    border-bottom: 1px solid var(--gb20-border); user-select: none; white-space: nowrap;
+}
+.gb20-table th:hover { color: var(--gb20-accent); }
+.gb20-table td { padding: 4px 8px; border-bottom: 1px solid rgba(91,192,235,.06); }
+.gb20-table tr:nth-child(even) { background: rgba(91,192,235,.02); }
+
+/* ── Side Panel (transition-based) ── */
+.gb20-side-panel {
+    position: absolute; top: 0; left: -290px; width: 280px; height: 100%;
+    background: var(--gb20-surface); border-right: 1px solid var(--gb20-border);
+    z-index: 20; display: flex; flex-direction: column;
+    transition: left 0.3s cubic-bezier(0.4,0,0.2,1);
+}
+.gb20-side-panel.open { left: 0; box-shadow: 3px 0 12px rgba(0,0,0,.4); }
+.gb20-panel-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 8px 12px; border-bottom: 1px solid rgba(91,192,235,.1);
+}
+.gb20-panel-body { flex: 1; overflow-y: auto; padding: 8px 12px; }
+.gb20-panel-close {
+    background: none; border: none; color: var(--gb20-text3);
+    cursor: pointer; font-size: 16px; transition: color 0.2s;
+}
+.gb20-panel-close:hover { color: var(--gb20-crit); }
+
+/* ── Panel sections ── */
+.gb20-panel-section { margin-top: 12px; padding-top: 8px; border-top: 1px solid var(--gb20-border); }
+.gb20-ps-title { font-size: 11px; font-weight: 600; color: var(--gb20-accent); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.3px; }
+
+/* ── Stats Section ── */
+.gb20-stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.gb20-stat-item { background: rgba(91,192,235,.05); border-radius: 4px; padding: 6px; text-align: center; }
+.gb20-stat-val { font-size: 14px; font-weight: 700; color: var(--gb20-text1); }
+.gb20-stat-label { font-size: 9px; color: #6B8FA8; }
+
+/* ── Search ── */
+.gb20-search {
+    width: 140px; background: rgba(91,192,235,.08); border: 1px solid var(--gb20-border);
+    color: var(--gb20-text2); border-radius: 4px; padding: 3px 8px; font-size: 11px; direction: rtl;
+    transition: border-color 0.2s;
+}
+.gb20-search:focus { border-color: var(--gb20-accent); outline: none; }
+.gb20-search::placeholder { color: #4A6A7F; }
+
+/* ── Alerts ── */
+.gb20-alert-view { padding: 4px 0; }
+.gb20-alert-item {
+    display: flex; align-items: center; gap: 6px; padding: 4px 8px;
+    border-bottom: 1px solid rgba(91,192,235,.06); font-size: 11px;
+    transition: background 0.2s;
+}
+.gb20-alert-item:hover { background: rgba(91,192,235,0.04); }
+.gb20-alert-time { color: #4A6A7F; font-size: 9px; min-width: 40px; }
+.gb20-alert-icon { font-size: 14px; }
+.gb20-alert-list { max-height: 200px; overflow-y: auto; }
+.gb20-clear-btn {
+    background: rgba(91,192,235,0.08); border: 1px solid var(--gb20-border);
+    color: var(--gb20-text3); border-radius: 4px; padding: 3px 8px;
+    font-size: 10px; cursor: pointer; transition: background 0.2s;
+}
+.gb20-clear-btn:hover { background: rgba(231,76,60,0.15); color: var(--gb20-crit); }
+
+/* ── Action Buttons ── */
+.gb20-action-btn {
+    background: rgba(91,192,235,0.08); border: 1px solid var(--gb20-border);
+    color: var(--gb20-text3); border-radius: 4px; padding: 5px 10px;
+    font-size: 11px; cursor: pointer; flex: 1; transition: background 0.2s, color 0.2s;
+}
+.gb20-action-btn:hover { background: rgba(91,192,235,0.2); color: var(--gb20-accent); }
+
+/* ── Filter Chips ── */
+.gb20-filters { display: flex; gap: 4px; flex-wrap: wrap; padding: 0 4px; flex-shrink: 0; }
+.gb20-filter-chip {
+    font-size: 9px; padding: 2px 6px; border-radius: 8px; cursor: pointer;
+    border: 1px solid var(--gb20-border); background: transparent;
+    color: var(--gb20-text3); transition: all .2s;
+}
+.gb20-filter-chip:hover,
+.gb20-filter-chip.active { background: rgba(91,192,235,.15); color: var(--gb20-accent); }
+
+/* ── Empty message ── */
+.gb20-empty-msg { color: var(--gb20-text3); font-size: 11px; text-align: center; padding: 20px; }
+
+/* ── Keyboard Hints ── */
+.gb20-kbd-hints {
+    position: absolute; bottom: 8px; right: 8px; display: flex; gap: 6px;
+    font-size: 9px; color: rgba(139,172,196,0.5); z-index: 50;
+}
+.gb20-kbd-hints span { background: rgba(11,29,51,0.8); padding: 1px 5px; border-radius: 3px; }
+
+/* Error fallback (from piv20-ultra) */
+.piv20u-error-fallback { padding: 16px; text-align: center; color: var(--gb20-crit); font-size: 12px; }

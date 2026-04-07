@@ -1,0 +1,117 @@
+<!-- ═══════════════════════════════════════════════════════
+     Mugbalot Monitor v20-INT — Display Template
+     Version: 20.1.R1-INT
+     Shares mm20-plugins/ with mugmon20.
+     If plugins are missing, orchestrator shows Hebrew error.
+     ═══════════════════════════════════════════════════════ -->
+
+<!-- Infrastructure loaded dynamically by sym-mugmoni20.js bootstrap loader.
+     No static <script> or <link> tags needed — ensures portability
+     across different PI Vision virtual directories and avoids
+     per-instance re-loading of mm20-plugins. -->
+
+<!-- ═══ Root Container ═══ -->
+<div class="mm20-root" dir="rtl"
+     ng-style="{'font-family': config.fontFamily, 'font-size': config.fontSize + 'px'}">
+
+    <!-- ── Header Bar ── -->
+    <div class="mm20-header" ng-show="layoutShowHeader()">
+        <div class="mm20-header-title">
+            <span ng-bind="config.Title"></span>
+            <span class="mm20-version-badge">v20.1.R1-INT</span>
+            <span class="mm20-demo-badge" ng-show="config.DemoMode">DEMO</span>
+            <span class="mm20-guard-badge" ng-show="config.DisplayGuardEnabled"
+                  title="&#x05E2;&#x05E8;&#x05D9;&#x05DB;&#x05D4; &#x05DE;&#x05D5;&#x05D2;&#x05D1;&#x05DC;&#x05EA; &mdash; Display Guard &#x05E4;&#x05E2;&#x05D9;&#x05DC;">&#x1F512;</span>
+        </div>
+        <div class="mm20-header-info">
+            <button class="mm20-layout-btn" ng-click="toggleLayoutEdit()"
+                    title="&#x05E2;&#x05E8;&#x05D9;&#x05DB;&#x05EA; &#x05E4;&#x05E8;&#x05D9;&#x05E1;&#x05D4;">&#x2699;</button>
+            <button class="mm20-fullscreen-btn" ng-click="toggleFullscreen()" title="&#x05DE;&#x05E1;&#x05DA; &#x05DE;&#x05DC;&#x05D0;">&#x26F6;</button>
+            <span class="mm20-connection-dot"
+                  ng-class="{'mm20-connected': !config.DemoMode, 'mm20-disconnected': config.DemoMode}"
+                  title="{{config.DemoMode ? 'לא מחובר' : 'מחובר'}}">&#9679;</span>
+            <span class="mm20-subtitle" ng-bind="config.Subtitle" ng-show="config.Subtitle"></span>
+        </div>
+    </div>
+
+    <!-- ── Developer Layout Edit Toolbar ── -->
+    <div class="mm20-layout-toolbar" ng-show="config.Layout.editMode">
+        <span class="mm20-layout-toolbar-title">&#x05DE;&#x05E6;&#x05D1; &#x05E2;&#x05E8;&#x05D9;&#x05DB;&#x05D4;</span>
+        <button class="mm20-layout-toolbar-btn mm20-layout-save" ng-click="layoutSave()">
+            &#x05E9;&#x05DE;&#x05D5;&#x05E8;</button>
+        <button class="mm20-layout-toolbar-btn mm20-layout-reset" ng-click="layoutReset()">
+            &#x05D0;&#x05D9;&#x05E4;&#x05D5;&#x05E1;</button>
+        <button class="mm20-layout-toolbar-btn mm20-layout-exit" ng-click="toggleLayoutEdit()">
+            &#x05E1;&#x05D2;&#x05D5;&#x05E8;</button>
+    </div>
+
+    <!-- ── Tab Bar (Dynamic via Layout) ── -->
+    <div class="mm20-tab-bar"
+         ng-class="{'mm20-tab-bar--bottom': config.Layout.tabBarPosition === 'bottom'}">
+        <button class="mm20-tab"
+                ng-repeat="tab in layoutTabOrder() track by tab"
+                ng-show="layoutIsTabVisible(tab) || config.Layout.editMode"
+                ng-class="{'mm20-tab--active': config.ActiveTab === tab, 'mm20-tab--hidden': !layoutIsTabVisible(tab)}"
+                ng-click="switchTab(tab)"
+                ng-bind="layoutTabLabel(tab)">
+        </button>
+    </div>
+
+    <!-- ═══ Tab Content Panels ═══ -->
+    <!-- ng-show (not ng-if) — widgets created once, not destroyed on tab switch -->
+
+    <!-- Realtime Tab -->
+    <div class="mm20-tab-content" ng-show="config.ActiveTab === 'realtime'">
+        <div id="mm20-siteGrid" class="mm20-widget-container"></div>
+    </div>
+
+    <!-- Heatmap Tab -->
+    <div class="mm20-tab-content" ng-show="config.ActiveTab === 'heatmap'">
+        <div id="mm20-heatmap" class="mm20-widget-container"></div>
+    </div>
+
+    <!-- Reports Tab -->
+    <div class="mm20-tab-content" ng-show="config.ActiveTab === 'reports'">
+        <div id="mm20-reports" class="mm20-widget-container"></div>
+    </div>
+
+    <!-- Alerts Tab -->
+    <div class="mm20-tab-content" ng-show="config.ActiveTab === 'alerts'">
+        <div id="mm20-alerts" class="mm20-widget-container"></div>
+    </div>
+
+    <!-- Log Tab -->
+    <div class="mm20-tab-content" ng-show="config.ActiveTab === 'log'">
+        <div id="mm20-log" class="mm20-widget-container"></div>
+    </div>
+
+    <!-- Tags Tab -->
+    <div class="mm20-tab-content" ng-show="config.ActiveTab === 'tags'">
+        <div id="mm20-tags" class="mm20-widget-container"></div>
+    </div>
+
+    <!-- Tag Warehouse Tab -->
+    <div class="mm20-tab-content" ng-show="config.ActiveTab === 'tagWarehouse'">
+        <div id="mm20-tagWarehouse" class="mm20-widget-container"></div>
+    </div>
+
+    <!-- Tag Explorer Tab -->
+    <div class="mm20-tab-content" ng-show="config.ActiveTab === 'tagExplorer'">
+        <div id="mm20-tagExplorer" class="mm20-widget-container"></div>
+    </div>
+
+    <!-- Unit Events Tab -->
+    <div class="mm20-tab-content" ng-show="config.ActiveTab === 'events'">
+        <div id="mm20-unitEvents" class="mm20-widget-container"></div>
+    </div>
+
+    <!-- AF Build Tab -->
+    <div class="mm20-tab-content" ng-show="config.ActiveTab === 'afbuild'">
+        <div id="mm20-afbuild" class="mm20-widget-container"></div>
+    </div>
+
+    <!-- ── Footer ── -->
+    <div class="mm20-footer" ng-show="config.ShowFooter">
+        <span ng-bind="config.FooterText"></span>
+    </div>
+</div>

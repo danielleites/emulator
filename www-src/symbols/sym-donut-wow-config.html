@@ -1,0 +1,157 @@
+<!-- ═══════════════════════════════════════════════════════
+     Executive Smart Donut — Config Panel
+     WOW Smart Donut v100 — wc20 Pattern + Collapsible <details>
+     ═══════════════════════════════════════════════════════ -->
+
+<div class="wc20-config-panel" style="direction:rtl; font-family:'Segoe UI',Arial,sans-serif;">
+
+    <!-- ── General (open by default) ── -->
+    <details class="wc20-section" open>
+        <summary class="wc20-section-title">כללי</summary>
+
+        <div class="wc20-field">
+            <label class="wc20-label">כותרת</label>
+            <input type="text" class="wc20-input"
+                   ng-model="config.Title"
+                   placeholder="Executive Smart Donut">
+        </div>
+
+        <div class="wc20-field">
+            <label class="wc20-label">מצב הדגמה (Demo)</label>
+            <input type="checkbox" class="wc20-checkbox"
+                   ng-model="config.DemoMode">
+            <span class="wc20-hint">תמהיל אנרגיה: גז, פחם, סולרי, רוח, גרעיני, הידרו</span>
+        </div>
+    </details>
+
+    <!-- ── Display (open by default) ── -->
+    <details class="wc20-section" open>
+        <summary class="wc20-section-title">תצוגה</summary>
+
+        <div class="wc20-field">
+            <label class="wc20-label">עובי טבעת (0.1 – 0.6)</label>
+            <input type="number" class="wc20-input wc20-input-sm"
+                   ng-model="config.Thickness"
+                   ng-model-options="{ debounce: 500 }"
+                   min="0.1" max="0.6" step="0.05"
+                   placeholder="0.35">
+            <span class="wc20-hint">0.35 = 35% מהרדיוס → הטבעת</span>
+        </div>
+
+        <div class="wc20-field">
+            <label class="wc20-label">סף איגוד קטנים (%)</label>
+            <input type="number" class="wc20-input wc20-input-sm"
+                   ng-model="config.AggregateThreshold"
+                   ng-model-options="{ debounce: 500 }"
+                   min="0" max="10" step="0.5"
+                   placeholder="2">
+            <span class="wc20-hint">פרוסות מתחת לסף = "אחרים" (1% Rule)</span>
+        </div>
+
+        <div class="wc20-field">
+            <label class="wc20-label">הברקת תלת-מימד (Conic Gradient)</label>
+            <input type="checkbox" class="wc20-checkbox"
+                   ng-model="config.ConicGradient">
+            <span class="wc20-hint">שכבת מתכת/זכוכית מעל הטבעת</span>
+        </div>
+
+        <div class="wc20-field">
+            <label class="wc20-label">עשרוניות</label>
+            <select class="wc20-select" ng-model="config.Decimals"
+                    ng-options="v as v for v in [0, 1, 2, 3]">
+            </select>
+        </div>
+    </details>
+
+    <!-- ── Color ── -->
+    <details class="wc20-section">
+        <summary class="wc20-section-title">צבעים</summary>
+
+        <div class="wc20-field">
+            <label class="wc20-label">ערכת צבעים</label>
+            <select class="wc20-select" ng-model="config.Palette">
+                <option value="executive">Executive (ברירת מחדל)</option>
+                <option value="ocean">Ocean (ים)</option>
+                <option value="warm">Warm (חם)</option>
+                <option value="pastel">Pastel (רך)</option>
+            </select>
+        </div>
+
+        <div class="wc20-field">
+            <label class="wc20-label">מילות מפתח קריטיות</label>
+            <input type="text" class="wc20-input"
+                   ng-model="config.CriticalKeywords"
+                   placeholder="פחם, גז, דלק">
+            <span class="wc20-hint">Smart Center יציג פרוסה התואמת מילות מפתח אלו</span>
+        </div>
+    </details>
+
+    <!-- ── Theme ── -->
+    <details class="wc20-section">
+        <summary class="wc20-section-title">ערכת נושא</summary>
+
+        <div class="wc20-field">
+            <label class="wc20-label">גופן</label>
+            <select class="wc20-select" ng-model="config.fontFamily">
+                <option value="Segoe UI">Segoe UI</option>
+                <option value="Arial">Arial</option>
+                <option value="Tahoma">Tahoma</option>
+                <option value="Consolas">Consolas (Mono)</option>
+            </select>
+        </div>
+
+        <div class="wc20-field">
+            <label class="wc20-label">גודל גופן (px)</label>
+            <input type="number" class="wc20-input wc20-input-sm"
+                   ng-model="config.fontSize"
+                   ng-model-options="{ debounce: 500 }"
+                   min="8" max="16" step="1">
+        </div>
+    </details>
+
+    <!-- ── Info ── -->
+    <details class="wc20-section">
+        <summary class="wc20-section-title">מידע טכני</summary>
+
+        <div class="wc20-field wc20-readonly">
+            <span class="wc20-badge wc20-badge-blue">DataShape</span>
+            <span>Table (Multiple Datasources)</span>
+        </div>
+
+        <div class="wc20-field wc20-readonly">
+            <span class="wc20-badge wc20-badge-green">Rendering</span>
+            <span>Canvas 2D — Arc + Conic Gradient</span>
+        </div>
+
+        <div class="wc20-field wc20-readonly">
+            <span class="wc20-badge wc20-badge-green">Animation</span>
+            <span>Angle Lerp — Smooth Angular Transitions</span>
+        </div>
+
+        <div class="wc20-field wc20-readonly">
+            <span class="wc20-badge wc20-badge-orange">Hit Testing</span>
+            <span>O(1) atan2 Raycasting — Single mousemove</span>
+        </div>
+
+        <div class="wc20-field wc20-readonly">
+            <span class="wc20-badge wc20-badge-blue">Smart Center</span>
+            <span>Hovered → Critical → Total — Zero Legend</span>
+        </div>
+
+        <div class="wc20-field wc20-readonly">
+            <span class="wc20-badge wc20-badge-purple">Performance</span>
+            <span>0.3ms/frame · 0 SVG · 1 mousemove · GPU accelerated</span>
+        </div>
+
+        <div class="wc20-field wc20-readonly">
+            <span class="wc20-badge wc20-badge-blue">1% Rule</span>
+            <span>Aggregate tiny slices → "Others" (Pareto 80/20)</span>
+        </div>
+
+        <div class="wc20-field wc20-readonly" style="margin-top:8px;">
+            <span class="wc20-badge">WOW Smart Donut v100</span>
+            <span style="color:#8899AA;">Executive Smart Donut</span>
+        </div>
+    </details>
+
+</div>

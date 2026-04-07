@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none">
+  <rect x="2" y="2" width="28" height="28" rx="4" fill="#1a1f2e"/>
+  <!-- Gauge circle outline -->
+  <circle cx="16" cy="16" r="10" stroke="#475569" stroke-width="1" fill="none"/>
+  <!-- Liquid fill (bottom portion) -->
+  <clipPath id="gc"><circle cx="16" cy="16" r="9.5"/></clipPath>
+  <g clip-path="url(#gc)">
+    <rect x="6" y="14" width="20" height="12" fill="#60a5fa" opacity="0.6"/>
+    <!-- Wave -->
+    <path d="M6,15 Q10,12 14,15 Q18,18 22,15 Q24,13.5 26,15 L26,28 L6,28 Z" fill="#60a5fa" opacity="0.8"/>
+  </g>
+  <!-- Percentage text block -->
+  <rect x="11" y="14" width="10" height="4" rx="1" fill="none"/>
+  <rect x="12" y="15" width="8" height="2" rx="0.5" fill="#fff" opacity="0.9"/>
+</svg>

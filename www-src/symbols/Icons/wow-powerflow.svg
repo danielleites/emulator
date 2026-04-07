@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none">
+  <rect x="2" y="2" width="28" height="28" rx="4" fill="#1a1f2e"/>
+  <!-- Generator node -->
+  <circle cx="8" cy="10" r="3" fill="#34d399" opacity="0.8"/>
+  <!-- Load node -->
+  <circle cx="24" cy="10" r="3" fill="#f87171" opacity="0.8"/>
+  <!-- Transformer node -->
+  <rect x="13" y="19" width="6" height="6" rx="1" fill="#fbbf24" opacity="0.8"/>
+  <!-- Flow lines -->
+  <path d="M11,10 L21,10" stroke="#60a5fa" stroke-width="2" opacity="0.6"/>
+  <path d="M8,13 Q8,22 13,22" stroke="#60a5fa" stroke-width="1.5" opacity="0.5" fill="none"/>
+  <path d="M24,13 Q24,22 19,22" stroke="#60a5fa" stroke-width="1.5" opacity="0.5" fill="none"/>
+  <!-- Flow arrows -->
+  <polygon points="19,10 17,8.5 17,11.5" fill="#60a5fa" opacity="0.8"/>
+</svg>

@@ -1,0 +1,46 @@
+<!-- sym-paramctrl20-config.html -->
+<div class="config-form">
+  <div class="config-group">
+    <label>Type</label>
+    <select ng-model="config.controlType">
+      <option value="slider">Slider</option>
+      <option value="stepper">Stepper</option>
+      <option value="toggle">Toggle</option>
+      <option value="dropdown">Dropdown</option>
+      <option value="timerange">Time Range</option>
+      <option value="text">Text Input</option>
+    </select>
+  </div>
+  <div class="config-group">
+    <label>Parameter Name</label>
+    <input type="text" ng-model="config.paramName">
+  </div>
+  <div class="config-group">
+    <label>Title</label>
+    <input type="text" ng-model="config.title">
+  </div>
+  <div class="config-group">
+    <label>Min</label>
+    <input type="number" ng-model="config.min">
+  </div>
+  <div class="config-group">
+    <label>Max</label>
+    <input type="number" ng-model="config.max">
+  </div>
+  <div class="config-group">
+    <label>Step</label>
+    <input type="number" ng-model="config.step">
+  </div>
+  <div class="config-group">
+    <label>Default</label>
+    <input type="number" ng-model="config.defaultValue">
+  </div>
+  <div class="config-group">
+    <label>Unit</label>
+    <input type="text" ng-model="config.unit">
+  </div>
+  <div class="config-group">
+    <label>Auto Apply</label>
+    <input type="checkbox" ng-model="config.autoApply">
+  </div>
+</div>

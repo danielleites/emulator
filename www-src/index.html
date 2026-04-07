@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1, user-scalable=no">
+  <title>PIVISION</title>
+  <meta name="description" content="PIVISION — אפליקציית מובייל לניהול PI Vision">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' data: blob: https: http:; img-src 'self' data: blob: https: http:; connect-src 'self' https: http: ws: wss:; font-src 'self' data:; style-src 'self' 'unsafe-inline';">
+
+  <!-- PWA & Mobile -->
+  <link rel="manifest" href="manifest-mobile.json">
+  <meta name="theme-color" content="#060b18">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="format-detection" content="telephone=no">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+
+  <!-- Fonts -->
+  <link rel="stylesheet" href="fonts/heebo.css">
+
+  <!-- Favicon -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%23060b18'/><path d='M8 16 L13 21 L24 11' stroke='%2300b4d8' stroke-width='3' stroke-linecap='round' stroke-linejoin='round' fill='none'/></svg>">
+
+  <!-- Mobile App Styles -->
+  <link rel="stylesheet" href="css/mobile-app.css">
+  <style>
+    .connection-banner.sync-connected { background: rgba(16, 185, 129, 0.14); color: #c7f9d8; }
+    .connection-banner.sync-connecting { background: rgba(14, 165, 233, 0.14); color: #cdefff; }
+    .connection-banner.sync-disconnected { background: rgba(245, 158, 11, 0.18); color: #ffe8b2; }
+  </style>
+</head>
+<body>
+
+<!-- ═══ Splash Screen ═══ -->
+<div id="splash" class="splash-screen" role="status" aria-label="טוען PIVISION">
+  <svg class="splash-logo" width="80" height="80" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <rect width="64" height="64" rx="16" fill="#0c1425"/>
+    <rect x="4" y="4" width="56" height="56" rx="12" fill="#111d30"/>
+    <path d="M32 10 L52 18 L52 32 C52 44 32 54 32 54 C32 54 12 44 12 32 L12 18 Z"
+          stroke="#00b4d8" stroke-width="1.5" stroke-opacity="0.2" fill="none"/>
+    <path d="M20 32 L28 40 L44 24" stroke="#00b4d8" stroke-width="3.5"
+          stroke-linecap="round" stroke-linejoin="round"/>
+    <circle cx="32" cy="32" r="22" stroke="#00b4d8" stroke-width="0.5" stroke-opacity="0.1" fill="none"/>
+  </svg>
+  <div class="splash-text">PIVISION</div>
+  <div class="splash-subtitle">טוען משאבים...</div>
+  <div class="splash-version">v4.2.0-R300</div>
+  <div class="splash-loader" aria-hidden="true"></div>
+</div>
+
+<!-- ═══ Onboarding Wizard (5 steps) ═══ -->
+<div id="onboarding" class="onboarding-overlay" role="dialog" aria-label="אשף הגדרות ראשוני" aria-hidden="true">
+  <div class="onboarding-content" id="onboarding-content">
+    <!-- Step content injected by JS -->
+  </div>
+  <div class="onboarding-dots" id="onboarding-dots">
+    <div class="onboarding-dot active"></div>
+    <div class="onboarding-dot"></div>
+    <div class="onboarding-dot"></div>
+    <div class="onboarding-dot"></div>
+    <div class="onboarding-dot"></div>
+  </div>
+  <div class="onboarding-actions" id="onboarding-actions">
+    <!-- Buttons injected by JS -->
+  </div>
+</div>
+
+<!-- ═══ App Shell ═══ -->
+<div id="app" class="app-shell" style="display:none;">
+
+  <!-- Status Bar Spacer -->
+  <div class="mobile-status-bar"></div>
+
+  <!-- App Header -->
+  <header class="app-header" role="banner">
+    <div class="app-header-logo">
+      <svg width="28" height="28" viewBox="0 0 64 64" fill="none" aria-hidden="true">
+        <rect width="64" height="64" rx="16" fill="#0c1425"/>
+        <rect x="4" y="4" width="56" height="56" rx="12" fill="#111d30"/>
+        <path d="M20 32 L28 40 L44 24" stroke="#00b4d8" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <span class="app-header-title">PIVISION</span>
+    </div>
+    <div class="header-actions">
+      <span id="mode-badge" class="mode-badge mode-badge--demo" role="status" aria-live="polite">
+        <span class="dot" aria-hidden="true"></span>
+        DEMO
+      </span>
+      <button id="btn-theme" class="header-btn" title="מצב בהיר/כהה" aria-label="החלפת ערכת נושא">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <circle cx="12" cy="12" r="5"/>
+          <line x1="12" y1="1" x2="12" y2="3"/>
+          <line x1="12" y1="21" x2="12" y2="23"/>
+          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+          <line x1="1" y1="12" x2="3" y2="12"/>
+          <line x1="21" y1="12" x2="23" y2="12"/>
+          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+        </svg>
+      </button>
+      <button id="btn-notifications" class="header-btn" title="התראות" aria-label="התראות">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+          <path d="M13.73 21a2 2 0 01-3.46 0"/>
+        </svg>
+        <span class="notification-dot" id="notification-dot" style="display:none;"></span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Connection Banner -->
+  <div id="connection-banner" class="connection-banner hidden" role="status" aria-live="polite">
+    <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+      <circle cx="8" cy="8" r="6"/>
+      <path d="M8 5v3M8 10.5v.5"/>
+    </svg>
+    <span id="connection-text">מצב הדגמה — נתונים מדומים</span>
+  </div>
+
+  <!-- Pull to Refresh Indicator -->
+  <div id="pull-indicator" class="pull-indicator" style="display:none;">
+    <svg class="pull-spinner" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linecap="round">
+      <polyline points="23 4 23 10 17 10"/>
+      <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+    </svg>
+    <span class="pull-text">שחרר לרענון</span>
+  </div>
+
+  <!-- Main Content -->
+  <main class="app-content" role="main">
+
+    <!-- ═══ Dashboard Page ═══ -->
+    <div id="page-dashboard" class="page active" role="tabpanel" aria-label="דשבורד">
+
+      <!-- Data Mode Selector -->
+      <div class="data-mode-selector" role="radiogroup" aria-label="בחירת מצב נתונים">
+        <button class="data-mode-btn active" data-mode="demo" role="radio" aria-checked="true" onclick="setDataMode('demo')">
+          <span class="mode-emoji" aria-hidden="true">🎭</span> DEMO
+        </button>
+        <button class="data-mode-btn" data-mode="simulation" role="radio" aria-checked="false" onclick="setDataMode('simulation')">
+          <span class="mode-emoji" aria-hidden="true">⚙️</span> SIM
+        </button>
+        <button class="data-mode-btn" data-mode="live" role="radio" aria-checked="false" onclick="setDataMode('live')">
+          <span class="mode-emoji" aria-hidden="true">🔴</span> LIVE
+        </button>
+      </div>
+
+      <!-- KPI Cards -->
+      <div class="section-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
+        מדדים ראשיים
+      </div>
+      <div class="kpi-row" id="kpi-cards" role="region" aria-label="מדדי KPI">
+        <!-- Dynamically populated -->
+      </div>
+
+      <!-- Quick Launch -->
+      <div class="section-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        הפעלה מהירה
+      </div>
+      <div class="mode-cards-mobile" id="quick-launch" role="list">
+        <!-- Dynamically populated -->
+      </div>
+
+      <!-- Recent Activity -->
+      <div class="section-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        פעילות אחרונה
+        <span class="section-count" id="recent-count"></span>
+      </div>
+      <div class="alert-list" id="recent-activity" role="list">
+        <!-- Dynamically populated -->
+      </div>
+    </div>
+
+    <!-- ═══ Symbols Page ═══ -->
+    <div id="page-symbols" class="page" role="tabpanel" aria-label="סמלים">
+      <div class="section-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5 12 2"/></svg>
+        ספריית סמלים
+        <span class="section-count" id="symbol-count">(40)</span>
+      </div>
+      <div class="search-bar">
+        <svg class="search-icon" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+          <circle cx="11" cy="11" r="8"/>
+          <path d="M21 21l-4.35-4.35"/>
+        </svg>
+        <input id="symbol-search" type="search" placeholder="חיפוש סמלים..." autocomplete="off" aria-label="חיפוש סמלים">
+      </div>
+      <div class="category-filters" id="category-filters" role="tablist">
+        <!-- Dynamically populated -->
+      </div>
+      <div class="symbol-grid" id="symbol-grid" role="grid" aria-label="רשת סמלים">
+        <!-- Dynamically populated -->
+      </div>
+    </div>
+
+    <!-- ═══ Alerts Page ═══ -->
+    <div id="page-alerts" class="page" role="tabpanel" aria-label="התראות">
+      <div class="section-title">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        התראות מערכת
+      </div>
+
+      <!-- Alert Summary -->
+      <div class="alert-summary" id="alert-summary" role="region" aria-label="סיכום התראות">
+        <!-- Dynamically populated -->
+      </div>
+
+      <div class="alert-filters" id="alert-filters" role="tablist">
+        <!-- Dynamically populated -->
+      </div>
+      <div class="alert-list" id="alerts-list" role="list">
+        <!-- Dynamically populated -->
+      </div>
+    </div>
+
+    <!-- ═══ Settings Page ═══ -->
+    <div id="page-settings" class="page" role="tabpanel" aria-label="הגדרות">
+      <div class="section-title" style="margin-bottom: 20px;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+        הגדרות
+      </div>
+
+      <!-- Connection Settings -->
+      <div class="settings-group">
+        <div class="settings-group-title">חיבור PI System</div>
+        <div class="settings-list">
+          <div class="settings-item" onclick="showModeSelector()" role="button" tabindex="0" aria-label="בחירת מצב נתונים">
+            <div class="setting-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>
+            </div>
+            <div class="setting-content">
+              <div class="setting-label">מצב נתונים</div>
+              <div class="setting-value" id="current-mode-text">DEMO — נתונים מדומים</div>
+            </div>
+            <svg class="setting-arrow" viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M10 4l-4 4 4 4"/></svg>
+          </div>
+          <div class="settings-item" onclick="showProfilesSheet()" role="button" tabindex="0" aria-label="פרופילי חיבור">
+            <div class="setting-icon" style="background: var(--purple-glow); color: var(--purple);">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            </div>
+            <div class="setting-content">
+              <div class="setting-label">פרופילי חיבור</div>
+              <div class="setting-value" id="profiles-count">1 פרופילים</div>
+            </div>
+            <svg class="setting-arrow" viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M10 4l-4 4 4 4"/></svg>
+          </div>
+          <div class="settings-item" id="setting-pi-url" onclick="showLiveWizard()" role="button" tabindex="0" aria-label="הגדרת PI Web API URL">
+            <div class="setting-icon" style="background: var(--success-glow); color: var(--success);">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9"/></svg>
+            </div>
+            <div class="setting-content">
+              <div class="setting-label">PI Web API URL</div>
+              <div class="setting-value" id="pi-url-value">לא מוגדר — לחץ להגדרה</div>
+            </div>
+            <svg class="setting-arrow" viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M10 4l-4 4 4 4"/></svg>
+          </div>
+          <div class="settings-item" id="setting-refresh-rate" onclick="cycleRefreshRate()" role="button" tabindex="0" aria-label="קצב רענון">
+            <div class="setting-icon" style="background: var(--accent-glow); color: var(--accent);">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+            </div>
+            <div class="setting-content">
+              <div class="setting-label">קצב רענון נתונים</div>
+              <div class="setting-value" id="refresh-rate-value">3 שניות</div>
+            </div>
+            <svg class="setting-arrow" viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M10 4l-4 4 4 4"/></svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- Display Settings -->
+      <div class="settings-group">
+        <div class="settings-group-title">תצוגה</div>
+        <div class="settings-list">
+          <div class="settings-item" onclick="toggleTheme()" role="button" tabindex="0" aria-label="מצב כהה">
+            <div class="setting-icon" style="background: var(--purple-glow); color: var(--purple);">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+            </div>
+            <div class="setting-content">
+              <div class="setting-label">מצב כהה</div>
+              <div class="setting-value" id="theme-status">פעיל</div>
+            </div>
+            <button id="toggle-dark" class="toggle-switch on" onclick="event.stopPropagation(); toggleTheme()" aria-label="הפעלת מצב כהה"></button>
+          </div>
+          <div class="settings-item" role="button" tabindex="0">
+            <div class="setting-icon" style="background: var(--warning-glow); color: var(--warning);">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2v6M12 18v4M4.93 4.93l4.24 4.24M14.83 14.83l4.24 4.24M2 12h6M18 12h4M4.93 19.07l4.24-4.24M14.83 9.17l4.24-4.24"/></svg>
+            </div>
+            <div class="setting-content">
+              <div class="setting-label">שפה</div>
+              <div class="setting-value">עברית (RTL)</div>
+            </div>
+            <svg class="setting-arrow" viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M10 4l-4 4 4 4"/></svg>
+          </div>
+          <div class="settings-item" onclick="toggleNotifications()" role="button" tabindex="0" aria-label="התראות Push">
+            <div class="setting-icon" style="background: var(--danger-glow); color: var(--danger);">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+            </div>
+            <div class="setting-content">
+              <div class="setting-label">התראות Push</div>
+              <div class="setting-value" id="notifications-status">מושבת</div>
+            </div>
+            <button id="toggle-notifications" class="toggle-switch" onclick="event.stopPropagation(); toggleNotifications()" aria-label="הפעלת התראות"></button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Data & Cache -->
+      <div class="settings-group">
+        <div class="settings-group-title">נתונים וביצועים</div>
+        <div class="settings-list">
+          <div class="settings-item" onclick="clearAppCache()" role="button" tabindex="0">
+            <div class="setting-icon" style="background: var(--accent-glow); color: var(--accent);">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+            </div>
+            <div class="setting-content">
+              <div class="setting-label">ניקוי מטמון</div>
+              <div class="setting-value">נקה נתוני דמו ומטמון</div>
+            </div>
+            <svg class="setting-arrow" viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M10 4l-4 4 4 4"/></svg>
+          </div>
+          <div class="settings-item" onclick="showOnboarding()" role="button" tabindex="0">
+            <div class="setting-icon" style="background: var(--success-glow); color: var(--success);">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            </div>
+            <div class="setting-content">
+              <div class="setting-label">הצג מדריך</div>
+              <div class="setting-value">הפעל שוב את המדריך הראשוני</div>
+            </div>
+            <svg class="setting-arrow" viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M10 4l-4 4 4 4"/></svg>
+          </div>
+          <div class="settings-item" onclick="resetApp()" role="button" tabindex="0">
+            <div class="setting-icon" style="background: var(--danger-glow); color: var(--danger);">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 102.13-9.36L1 10"/></svg>
+            </div>
+            <div class="setting-content">
+              <div class="setting-label">איפוס אפליקציה</div>
+              <div class="setting-value">מחק הגדרות ופרופילים</div>
+            </div>
+            <svg class="setting-arrow" viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M10 4l-4 4 4 4"/></svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- About -->
+      <div class="settings-group">
+        <div class="settings-group-title">אודות</div>
+        <div class="settings-list">
+          <div class="settings-item">
+            <div class="setting-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+            </div>
+            <div class="setting-content">
+              <div class="setting-label">גרסה</div>
+              <div class="setting-value" id="settings-version-text">PIVISION Mobile v4.2.0-R300 (PIV 4.2.0)</div>
+            </div>
+          </div>
+          <div class="settings-item" onclick="showChangelog()" role="button" tabindex="0">
+            <div class="setting-icon" style="background: var(--accent-glow); color: var(--accent);">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+            </div>
+            <div class="setting-content">
+              <div class="setting-label">יומן שינויים</div>
+              <div class="setting-value">מה חדש בגרסה v4.2.0-R300</div>
+            </div>
+            <svg class="setting-arrow" viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M10 4l-4 4 4 4"/></svg>
+          </div>
+          <div class="settings-item" onclick="showDiagnostics()" role="button" tabindex="0">
+            <div class="setting-icon" style="background: var(--warning-glow); color: var(--warning);">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+            </div>
+            <div class="setting-content">
+              <div class="setting-label">אבחון מערכת</div>
+              <div class="setting-value">מידע טכני ומצב מכשיר</div>
+            </div>
+            <svg class="setting-arrow" viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M10 4l-4 4 4 4"/></svg>
+          </div>
+          <div class="settings-item" onclick="openDesktopVersion()" role="button" tabindex="0">
+            <div class="setting-icon" style="background: var(--success-glow); color: var(--success);">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+            </div>
+            <div class="setting-content">
+              <div class="setting-label">גרסת דסקטופ</div>
+              <div class="setting-value">פתח את PI Vision המלא בדפדפן</div>
+            </div>
+            <svg class="setting-arrow" viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M10 4l-4 4 4 4"/></svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- App Footer -->
+      <div class="settings-footer">
+        <div class="settings-footer-logo">
+          <svg width="20" height="20" viewBox="0 0 64 64" fill="none" aria-hidden="true">
+            <rect width="64" height="64" rx="16" fill="var(--bg-card)"/>
+            <path d="M20 32 L28 40 L44 24" stroke="var(--accent)" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" stroke-opacity="0.5"/>
+          </svg>
+        </div>
+        <div class="settings-footer-text">PIVISION Mobile v4.2.0-R300</div>
+        <div class="settings-footer-sub">Built with Cordova + PI Vision — R300 Operational Release</div>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Bottom Navigation -->
+  <nav class="bottom-nav" id="bottom-nav" role="tablist" aria-label="ניווט ראשי">
+    <button class="nav-item active" data-page="dashboard" role="tab" aria-selected="true" aria-controls="page-dashboard" onclick="navigateTo('dashboard')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/>
+        <polyline points="9 22 9 12 15 12 15 22"/>
+      </svg>
+      <span>ראשי</span>
+    </button>
+    <button class="nav-item" data-page="symbols" role="tab" aria-selected="false" aria-controls="page-symbols" onclick="navigateTo('symbols')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <polygon points="12 2 22 8.5 22 15.5 12 22 2 15.5 2 8.5 12 2"/>
+        <line x1="12" y1="22" x2="12" y2="15.5"/>
+        <polyline points="22 8.5 12 15.5 2 8.5"/>
+      </svg>
+      <span>סמלים</span>
+    </button>
+    <button class="nav-item" data-page="alerts" role="tab" aria-selected="false" aria-controls="page-alerts" onclick="navigateTo('alerts')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+        <path d="M13.73 21a2 2 0 01-3.46 0"/>
+      </svg>
+      <span>התראות</span>
+    </button>
+    <button class="nav-item" data-page="settings" role="tab" aria-selected="false" aria-controls="page-settings" onclick="navigateTo('settings')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="12" cy="12" r="3"/>
+        <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/>
+      </svg>
+      <span>הגדרות</span>
+    </button>
+  </nav>
+
+</div>
+
+<!-- ═══ Mode Selector Bottom Sheet ═══ -->
+<div id="mode-selector" class="mode-selector-overlay" onclick="closeModeSelector(event)" role="dialog" aria-label="בחירת מצב נתונים">
+  <div class="mode-selector-sheet" onclick="event.stopPropagation()">
+    <div class="sheet-handle" aria-hidden="true"></div>
+    <div class="sheet-title">בחר מצב נתונים</div>
+    
+    <div class="mode-option selected" data-mode="demo" onclick="selectMode('demo')" role="button" tabindex="0">
+      <div class="mode-opt-icon card-icon--qa">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      </div>
+      <div>
+        <div class="mode-opt-title">DEMO</div>
+        <div class="mode-opt-desc">נתוני הדגמה סטטיים — ללא חיבור חיצוני</div>
+      </div>
+    </div>
+
+    <div class="mode-option" data-mode="simulation" onclick="selectMode('simulation')" role="button" tabindex="0">
+      <div class="mode-opt-icon card-icon--combined">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+      </div>
+      <div>
+        <div class="mode-opt-title">FULL SIMULATION</div>
+        <div class="mode-opt-desc">סימולציה מלאה עם נתונים דינמיים בזמן אמת</div>
+      </div>
+    </div>
+
+    <div class="mode-option" data-mode="live" onclick="selectMode('live')" role="button" tabindex="0">
+      <div class="mode-opt-icon card-icon--builder">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>
+      </div>
+      <div>
+        <div class="mode-opt-title">LIVE</div>
+        <div class="mode-opt-desc">חיבור לשרת PI Web API בזמן אמת</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ Alert Detail Bottom Sheet ═══ -->
+<div id="alert-detail" class="alert-detail-overlay" onclick="closeAlertDetail(event)" role="dialog" aria-label="פרטי התראה">
+  <div class="alert-detail-sheet" onclick="event.stopPropagation()">
+    <div class="sheet-handle" aria-hidden="true"></div>
+    <div id="alert-detail-content">
+      <!-- Dynamically populated -->
+    </div>
+  </div>
+</div>
+
+<!-- ═══ Live Connection Wizard (Enhanced v4) ═══ -->
+<div id="live-wizard" class="live-wizard-overlay" onclick="closeLiveWizard(event)" role="dialog" aria-label="אשף חיבור LIVE">
+  <div class="live-wizard-sheet" onclick="event.stopPropagation()">
+    <div class="sheet-handle" aria-hidden="true"></div>
+    <div class="sheet-title">הגדרת חיבור PI Web API</div>
+    <div class="wizard-steps-indicator">
+      <div class="wizard-step-dot active" data-step="1">1</div>
+      <div class="wizard-step-line"></div>
+      <div class="wizard-step-dot" data-step="2">2</div>
+      <div class="wizard-step-line"></div>
+      <div class="wizard-step-dot" data-step="3">3</div>
+    </div>
+    
+    <label class="wizard-label">כתובת שרת <span class="wizard-required">*</span></label>
+    <input id="wizard-url" class="wizard-input" type="url" placeholder="https://your-server/piwebapi" autocomplete="url" dir="ltr">
+    <div class="wizard-field-hint">לדוגמה: https://mypi-server.company.com/piwebapi</div>
+    
+    <label class="wizard-label">שם משתמש (אופציונלי)</label>
+    <input id="wizard-user" class="wizard-input" type="text" placeholder="DOMAIN\username" autocomplete="username" dir="ltr">
+    
+    <label class="wizard-label">סיסמה (אופציונלי)</label>
+    <input id="wizard-pass" class="wizard-input" type="password" placeholder="••••••••" autocomplete="current-password" dir="ltr">
+
+    <div id="wizard-status" style="display:none;"></div>
+
+    <div style="display: flex; gap: 10px; margin-top: 16px;">
+      <button class="alert-dismiss-btn" style="flex:1; padding: 12px; border-radius: var(--radius-md); border: none; font-size: 14px; font-weight: 600; font-family: inherit; cursor: pointer;" onclick="closeLiveWizard()">ביטול</button>
+      <button class="alert-ack-btn" style="flex:1; padding: 12px; border-radius: var(--radius-md); border: none; font-size: 14px; font-weight: 600; font-family: inherit; cursor: pointer;" onclick="testConnection()">בדוק חיבור</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ Connection Profiles Sheet ═══ -->
+<div id="profiles-sheet" class="sheet-overlay" onclick="closeProfilesSheet(event)" role="dialog" aria-label="פרופילי חיבור">
+  <div class="sheet-panel" onclick="event.stopPropagation()">
+    <div class="sheet-handle" aria-hidden="true"></div>
+    <div class="sheet-title">פרופילי חיבור</div>
+    <div class="sheet-desc">נהל שרתי PI Web API שונים</div>
+    
+    <div id="profiles-list" class="profiles-list">
+      <!-- Dynamically populated -->
+    </div>
+
+    <button class="add-profile-btn" onclick="showAddProfileForm()">
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      הוסף פרופיל חדש
+    </button>
+
+    <div id="add-profile-form" class="add-profile-form" style="display:none;">
+      <input id="new-profile-name" class="wizard-input" type="text" placeholder="שם הפרופיל" dir="rtl" autocomplete="off">
+      <input id="new-profile-url" class="wizard-input" type="url" placeholder="https://your-server/piwebapi" dir="ltr" autocomplete="url">
+      <input id="new-profile-user" class="wizard-input" type="text" placeholder="שם משתמש (אופציונלי)" dir="ltr" autocomplete="username">
+      <input id="new-profile-pass" class="wizard-input" type="password" placeholder="סיסמה (אופציונלי)" dir="ltr" autocomplete="current-password">
+      <button class="alert-ack-btn" style="width:100%; padding: 12px; border-radius: var(--radius-md); border: none; font-size: 14px; font-weight: 600; font-family: inherit; cursor: pointer; margin-top: 8px;" onclick="saveNewProfile()">שמור פרופיל</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ Changelog Sheet ═══ -->
+<div id="changelog-sheet" class="sheet-overlay" onclick="closeChangelog(event)" role="dialog" aria-label="יומן שינויים">
+  <div class="sheet-panel" onclick="event.stopPropagation()">
+    <div class="sheet-handle" aria-hidden="true"></div>
+    <div class="sheet-title">יומן שינויים</div>
+    <div id="changelog-content" class="changelog-content">
+      <!-- Dynamically populated -->
+    </div>
+  </div>
+</div>
+
+<!-- ═══ Diagnostics Sheet ═══ -->
+<div id="diagnostics-sheet" class="sheet-overlay" onclick="closeDiagnostics(event)" role="dialog" aria-label="אבחון מערכת">
+  <div class="sheet-panel" onclick="event.stopPropagation()">
+    <div class="sheet-handle" aria-hidden="true"></div>
+    <div class="sheet-title">אבחון מערכת</div>
+    <div id="diagnostics-content" class="diagnostics-content">
+      <!-- Dynamically populated -->
+    </div>
+  </div>
+</div>
+
+<!-- ═══ Toast Notification ═══ -->
+<div id="toast" class="toast" role="alert" aria-live="assertive">
+  <svg class="toast-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+    <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/>
+    <polyline points="22 4 12 14.01 9 11.01"/>
+  </svg>
+  <span id="toast-text"></span>
+</div>
+
+<!-- ═══ Embedded View (for full mode displays) ═══ -->
+<div id="embedded-view" class="embedded-view" aria-hidden="true">
+  <div class="embedded-header">
+    <button class="embedded-back" onclick="closeEmbeddedView()" aria-label="חזרה">
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 18l6-6-6-6"/></svg>
+    </button>
+    <span class="embedded-title" id="embedded-title">אמולטור</span>
+    <button class="header-btn" onclick="closeEmbeddedView()" style="margin-right: auto;" aria-label="סגור">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+  </div>
+  <iframe id="embedded-frame" class="embedded-frame" loading="eager" referrerpolicy="no-referrer" title="תצוגה מוטמעת"></iframe>
+</div>
+
+<!-- ═══ App Script ═══ -->
+<script src="js/mobile-sync.js"></script>
+<script src="js/mobile-app.js"></script>
+
+</body>
+</html>

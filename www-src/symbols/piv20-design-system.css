@@ -1,0 +1,14 @@
+/* piv20-design-system.css — Shared design tokens for PIV20 symbols */
+:root {
+  --piv-bg: #0d1b2a;
+  --piv-surface: #1a2744;
+  --piv-border: rgba(0,212,255,0.12);
+  --piv-text: #ccd6f6;
+  --piv-text-dim: #8892b0;
+  --piv-accent: #00d4ff;
+  --piv-success: #06d6a0;
+  --piv-warning: #ff6b35;
+  --piv-danger: #e63946;
+  --piv-radius: 6px;
+  --piv-font: 'Heebo', sans-serif;
+}

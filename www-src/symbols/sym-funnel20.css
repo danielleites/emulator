@@ -1,0 +1,200 @@
+/**
+ * ================================================================
+ *  sym-funnel20.css  --  Funnel / Pipeline Chart v20 Stylesheet
+ * ================================================================
+ *  External CSS for SVG funnel, efficiency tables & pipeline views.
+ *  All classes prefixed fn20-, custom properties prefixed --fn20-.
+ *  Flat CSS | RTL-first layout
+ * ================================================================
+ */
+
+/* ── Custom Properties ── */
+.fn20-root {
+    --fn20-bg-deep: #060C18;
+    --fn20-bg1: #0A1628;
+    --fn20-bg2: #0D1F35;
+    --fn20-bg-card: #0F2940;
+    --fn20-bg-card-hover: #153858;
+    --fn20-bg-input: #0B1D33;
+    --fn20-accent: #1E5A8A;
+    --fn20-accent-lt: #2E8BC0;
+    --fn20-cyan: #5BC0EB;
+    --fn20-ok: #2ECC71;
+    --fn20-ok-dim: rgba(46,204,113,0.15);
+    --fn20-warn: #F39C12;
+    --fn20-warn-dim: rgba(243,156,18,0.15);
+    --fn20-crit: #E74C3C;
+    --fn20-crit-dim: rgba(231,76,60,0.15);
+    --fn20-text: #FFFFFF;
+    --fn20-text2: #8BACC4;
+    --fn20-text3: #5A7A94;
+    --fn20-border: rgba(46,139,192,0.2);
+    --fn20-border-active: rgba(91,192,235,0.45);
+    --fn20-shadow: 0 4px 24px rgba(0,0,0,0.4);
+    --fn20-shadow-lg: 0 8px 40px rgba(0,0,0,0.5);
+    --fn20-glass-bg: rgba(10,22,40,0.7);
+    --fn20-glass-border: rgba(91,192,235,0.12);
+    --fn20-radius: 10px;
+    --fn20-radius-sm: 6px;
+    --fn20-font: 'Segoe UI','Arial',sans-serif;
+    --fn20-ease: all 0.25s cubic-bezier(0.4,0,0.2,1);
+}
+
+/* ── Root ── */
+.fn20-root {
+    background: linear-gradient(160deg, var(--fn20-bg-deep), var(--fn20-bg1), var(--fn20-bg2));
+    color: var(--fn20-text);
+    display: flex;
+    flex-direction: column;
+    width: 100%; height: 100%;
+    position: relative;
+    overflow: hidden;
+    font-family: var(--fn20-font);
+}
+.fn20-root * { box-sizing: border-box; margin: 0; padding: 0; }
+.fn20-root ::-webkit-scrollbar { width: 6px; }
+.fn20-root ::-webkit-scrollbar-track { background: var(--fn20-bg-deep); }
+.fn20-root ::-webkit-scrollbar-thumb { background: var(--fn20-accent); border-radius: 3px; }
+
+/* ── Header ── */
+.fn20-hdr {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 10px 16px;
+    background: linear-gradient(135deg, var(--fn20-bg2), var(--fn20-bg-card));
+    border-bottom: 1px solid var(--fn20-border);
+    flex-shrink: 0;
+}
+.fn20-ttl { font-size: 15px; font-weight: 700; }
+.fn20-sub { font-size: 11px; color: var(--fn20-text3); margin-right: 8px; }
+.fn20-toolbar { display: flex; gap: 6px; align-items: center; }
+.fn20-btn {
+    background: var(--fn20-bg-card);
+    border: 1px solid var(--fn20-border);
+    color: var(--fn20-text2);
+    padding: 4px 10px; border-radius: var(--fn20-radius-sm);
+    cursor: pointer; font-size: 11px; font-family: var(--fn20-font);
+    transition: var(--fn20-ease);
+}
+.fn20-btn:hover { border-color: var(--fn20-border-active); background: var(--fn20-bg-card-hover); color: var(--fn20-text); }
+.fn20-btn.active { background: rgba(91,192,235,0.25); border-color: rgba(91,192,235,0.5); color: var(--fn20-cyan); }
+
+/* ── AF Badge ── */
+.fn20-af-badge { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 10px; font-size: 11px; }
+.fn20-af-good { background: var(--fn20-ok-dim); color: var(--fn20-ok); }
+.fn20-af-warn { background: var(--fn20-warn-dim); color: var(--fn20-warn); }
+.fn20-af-bad  { background: var(--fn20-crit-dim); color: var(--fn20-crit); }
+.fn20-af-dot  { width: 6px; height: 6px; border-radius: 50%; background: currentColor; box-shadow: 0 0 4px currentColor; }
+
+/* ── Live indicator ── */
+.fn20-live { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--fn20-text3); }
+.fn20-live-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--fn20-ok); box-shadow: 0 0 8px var(--fn20-ok); animation: fn20-pulse 2s infinite; }
+@keyframes fn20-pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+/* ── Toast ── */
+.fn20-toast-container { position: absolute; top: 12px; left: 50%; transform: translateX(-50%); z-index: 9999; display: flex; flex-direction: column; gap: 8px; pointer-events: none; }
+.fn20-toast { background: var(--fn20-bg-card); border: 1px solid var(--fn20-border-active); border-radius: var(--fn20-radius-sm); padding: 10px 20px; color: var(--fn20-cyan); font-size: 13px; box-shadow: var(--fn20-shadow-lg); animation: fn20-tin 0.35s ease; pointer-events: auto; }
+.fn20-toast.out { animation: fn20-tout 0.3s ease forwards; }
+@keyframes fn20-tin  { from { opacity: 0; transform: translateY(-16px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes fn20-tout { to   { opacity: 0; transform: translateY(-16px); } }
+
+/* ── Summary Bar ── */
+.fn20-summary {
+    display: flex; align-items: center; gap: 12px;
+    padding: 6px 16px;
+    border-bottom: 1px solid var(--fn20-border);
+    font-size: 11px; flex-wrap: wrap; flex-shrink: 0;
+}
+.fn20-sum-badge { display: inline-flex; align-items: center; gap: 4px; padding: 2px 10px; border-radius: 12px; font-size: 11px; font-weight: 600; }
+.fn20-sum-ok   { background: var(--fn20-ok-dim); color: var(--fn20-ok); }
+.fn20-sum-warn { background: var(--fn20-warn-dim); color: var(--fn20-warn); }
+.fn20-sum-crit { background: var(--fn20-crit-dim); color: var(--fn20-crit); }
+
+/* ── KPI Tiles ── */
+.fn20-kpi-row { display: flex; gap: 12px; padding: 6px 16px; border-bottom: 1px solid var(--fn20-border); flex-shrink: 0; flex-wrap: wrap; }
+.fn20-kpi-tile { text-align: center; flex: 1; min-width: 70px; }
+.fn20-kpi-val { font-size: 18px; font-weight: 700; line-height: 1.2; }
+.fn20-kpi-lbl { font-size: 10px; color: var(--fn20-text3); }
+
+/* ── Cumulative Losses ── */
+.fn20-cum-losses { display: flex; gap: 8px; padding: 6px 16px; font-size: 11px; flex-wrap: wrap; border-bottom: 1px solid rgba(255,255,255,0.03); }
+.fn20-cum-item { display: inline-flex; align-items: center; gap: 3px; padding: 2px 8px; border-radius: 4px; background: var(--fn20-crit-dim); color: var(--fn20-crit); font-size: 10px; }
+
+/* ── Body ── */
+.fn20-body { overflow-y: auto; flex: 1; padding: 12px 16px; }
+
+/* ── SVG Wrapper ── */
+.fn20-svg-wrap { display: flex; align-items: center; justify-content: center; min-height: 200px; overflow: hidden; }
+.fn20-svg-wrap svg { max-width: 100%; max-height: 100%; }
+
+/* ── View Area (rendered by widget) ── */
+.fn20-view { flex: 1; overflow: auto; }
+
+/* ── Table View ── */
+.fn20-table { width: 100%; border-collapse: separate; border-spacing: 0 3px; }
+.fn20-table th { position: sticky; top: 0; background: var(--fn20-bg1); padding: 8px 10px; text-align: right; font-size: 11px; color: var(--fn20-text3); text-transform: uppercase; border-bottom: 1px solid var(--fn20-border); cursor: pointer; z-index: 5; }
+.fn20-table th:hover { color: var(--fn20-cyan); }
+.fn20-table td { padding: 7px 10px; font-size: 12px; background: var(--fn20-bg-card); text-align: right; }
+.fn20-table tr:hover td { background: var(--fn20-bg-card-hover); }
+.fn20-table tr td:first-child { border-radius: 0 var(--fn20-radius-sm) var(--fn20-radius-sm) 0; }
+.fn20-table tr td:last-child { border-radius: var(--fn20-radius-sm) 0 0 var(--fn20-radius-sm); }
+
+/* ── Hover Tooltip ── */
+.fn20-tooltip {
+    position: relative; margin: 8px auto; width: fit-content;
+    background: var(--fn20-bg-deep); border: 1px solid var(--fn20-border-active);
+    border-radius: var(--fn20-radius-sm); padding: 10px 14px;
+    font-size: 11px; color: var(--fn20-text2); max-width: 280px;
+    box-shadow: var(--fn20-shadow);
+}
+.fn20-tip-label { font-weight: 600; color: var(--fn20-cyan); font-size: 12px; margin-bottom: 4px; }
+.fn20-tip-row { display: flex; justify-content: space-between; gap: 12px; padding: 1px 0; }
+.fn20-tip-k { color: var(--fn20-text3); }
+.fn20-tip-v { color: var(--fn20-text); font-weight: 600; }
+
+/* ── Stats Grid ── */
+.fn20-stats { display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 8px; padding: 8px 0; }
+.fn20-stat-cell { background: var(--fn20-bg-card); border: 1px solid var(--fn20-border); border-radius: var(--fn20-radius-sm); padding: 8px 10px; text-align: center; }
+.fn20-stat-label { font-size: 10px; color: var(--fn20-text3); margin-bottom: 2px; }
+.fn20-stat-val { font-size: 15px; font-weight: 600; color: var(--fn20-text); }
+
+/* ── Trend Arrows ── */
+.fn20-trend-up { color: var(--fn20-ok); }
+.fn20-trend-down { color: var(--fn20-crit); }
+.fn20-trend-stable { color: var(--fn20-text3); }
+
+/* ── Side Panel ── */
+.fn20-panel {
+    position: absolute; left: 0; top: 0;
+    width: 300px; height: 100%;
+    background: var(--fn20-glass-bg);
+    backdrop-filter: blur(16px);
+    border-right: 1px solid var(--fn20-glass-border);
+    z-index: 100;
+    transform: translateX(-100%);
+    transition: transform 0.35s cubic-bezier(0.4,0,0.2,1);
+    overflow-y: auto;
+}
+.fn20-panel.open { transform: translateX(0); }
+.fn20-phd { padding: 16px; border-bottom: 1px solid var(--fn20-border); display: flex; justify-content: space-between; align-items: center; }
+.fn20-phd h3 { font-size: 15px; font-weight: 600; color: var(--fn20-cyan); margin: 0; }
+.fn20-pcl { background: none; border: none; color: var(--fn20-text3); font-size: 18px; cursor: pointer; padding: 4px 8px; border-radius: 4px; transition: var(--fn20-ease); }
+.fn20-pcl:hover { background: var(--fn20-bg-card); color: var(--fn20-text); }
+.fn20-ps { padding: 12px 16px; border-bottom: 1px solid var(--fn20-border); }
+.fn20-ps label { display: block; font-size: 11px; color: var(--fn20-text3); margin-bottom: 4px; }
+
+/* ── Empty State ── */
+.fn20-empty { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px; color: var(--fn20-text3); font-size: 13px; gap: 8px; }
+
+/* ── Footer ── */
+.fn20-ftr {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 6px 16px;
+    background: var(--fn20-bg-deep);
+    border-top: 1px solid var(--fn20-border);
+    font-size: 10px; color: var(--fn20-text3);
+    flex-shrink: 0;
+}
+
+/* ── Animation ── */
+@keyframes fn20-fade-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+.fn20-anim-in { animation: fn20-fade-in 0.3s ease both; }

@@ -1,0 +1,48 @@
+/*
+ * Heebo Font — Local Bundle
+ * Downloaded from Google Fonts for offline use.
+ * Replaces: https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700&display=swap
+ *
+ * To use: replace the Google Fonts <link> in HTML with:
+ *   <link rel="stylesheet" href="/fonts/heebo.css">
+ */
+
+@font-face {
+  font-family: 'Heebo';
+  font-style: normal;
+  font-weight: 300;
+  font-display: swap;
+  src: url('./heebo-300.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Heebo';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('./heebo-400.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Heebo';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('./heebo-500.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Heebo';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('./heebo-600.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Heebo';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('./heebo-700.ttf') format('truetype');
+}

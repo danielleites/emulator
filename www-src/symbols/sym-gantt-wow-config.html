@@ -1,0 +1,141 @@
+<!-- ═══════════════════════════════════════════════════════
+     Executive Canvas Gantt — Config Panel
+     WOW GT v100 — wc20 Pattern + Collapsible <details>
+     ═══════════════════════════════════════════════════════ -->
+
+<div class="wc20-config-panel" style="direction:rtl; font-family:'Segoe UI',Arial,sans-serif;">
+
+    <!-- ── General (open by default) ── -->
+    <details class="wc20-section" open>
+        <summary class="wc20-section-title">כללי</summary>
+
+        <div class="wc20-field">
+            <label class="wc20-label">כותרת</label>
+            <input type="text" class="wc20-input"
+                   ng-model="config.Title">
+        </div>
+
+        <div class="wc20-field">
+            <label class="wc20-label">מצב הדגמה (Demo)</label>
+            <input type="checkbox" class="wc20-checkbox"
+                   ng-model="config.DemoMode">
+        </div>
+
+        <div class="wc20-field" ng-show="config.DemoMode">
+            <label class="wc20-label">טווח דמו (ימים)</label>
+            <select class="wc20-select" ng-model="config.DemoRange">
+                <option value="1">יום אחד</option>
+                <option value="3">3 ימים</option>
+                <option value="7">שבוע</option>
+                <option value="14">שבועיים</option>
+                <option value="30">חודש</option>
+                <option value="90">3 חודשים</option>
+            </select>
+        </div>
+    </details>
+
+    <!-- ── Status Colors (open by default) ── -->
+    <details class="wc20-section" open>
+        <summary class="wc20-section-title">צבעי סטטוס</summary>
+        <span class="wc20-hint">צבעים ברירת מחדל — ניתן לדרוס ב-StatusColors</span>
+
+        <div class="wc20-field wc20-readonly" style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px;">
+            <span style="display:inline-flex;align-items:center;gap:4px;font-size:10px;color:#AAA;">
+                <span style="width:12px;height:12px;border-radius:3px;background:#00F5D4;display:inline-block;"></span> Running
+            </span>
+            <span style="display:inline-flex;align-items:center;gap:4px;font-size:10px;color:#AAA;">
+                <span style="width:12px;height:12px;border-radius:3px;background:#2ECC71;display:inline-block;"></span> OK
+            </span>
+            <span style="display:inline-flex;align-items:center;gap:4px;font-size:10px;color:#AAA;">
+                <span style="width:12px;height:12px;border-radius:3px;background:#5BC0EB;display:inline-block;"></span> Idle
+            </span>
+            <span style="display:inline-flex;align-items:center;gap:4px;font-size:10px;color:#AAA;">
+                <span style="width:12px;height:12px;border-radius:3px;background:#F39C12;display:inline-block;"></span> Maintenance
+            </span>
+            <span style="display:inline-flex;align-items:center;gap:4px;font-size:10px;color:#AAA;">
+                <span style="width:12px;height:12px;border-radius:3px;background:#FFCC00;display:inline-block;"></span> Warning
+            </span>
+            <span style="display:inline-flex;align-items:center;gap:4px;font-size:10px;color:#AAA;">
+                <span style="width:12px;height:12px;border-radius:3px;background:#FF3B30;display:inline-block;"></span> Fault
+            </span>
+            <span style="display:inline-flex;align-items:center;gap:4px;font-size:10px;color:#AAA;">
+                <span style="width:12px;height:12px;border-radius:3px;background:#FF2D55;display:inline-block;"></span> Trip
+            </span>
+            <span style="display:inline-flex;align-items:center;gap:4px;font-size:10px;color:#AAA;">
+                <span style="width:12px;height:12px;border-radius:3px;background:#555555;display:inline-block;"></span> Offline
+            </span>
+        </div>
+
+        <div class="wc20-field" style="margin-top:8px;">
+            <label class="wc20-label">דריסה מותאמת (JSON)</label>
+            <input type="text" class="wc20-input"
+                   ng-model="config.StatusColors"
+                   placeholder='{"Running":"#00FF00"}'>
+        </div>
+    </details>
+
+    <!-- ── Theme ── -->
+    <details class="wc20-section">
+        <summary class="wc20-section-title">ערכת נושא</summary>
+
+        <div class="wc20-field">
+            <label class="wc20-label">גופן</label>
+            <select class="wc20-select" ng-model="config.fontFamily">
+                <option value="Segoe UI">Segoe UI</option>
+                <option value="Arial">Arial</option>
+                <option value="Rubik">Rubik</option>
+                <option value="Heebo">Heebo</option>
+                <option value="Consolas">Consolas (Mono)</option>
+            </select>
+        </div>
+
+        <div class="wc20-field">
+            <label class="wc20-label">גודל גופן (px)</label>
+            <input type="number" class="wc20-input wc20-input-sm"
+                   ng-model="config.fontSize"
+                   ng-model-options="{ debounce: 500 }"
+                   min="8" max="20" step="1">
+        </div>
+    </details>
+
+    <!-- ── Info ── -->
+    <details class="wc20-section">
+        <summary class="wc20-section-title">מידע טכני</summary>
+
+        <div class="wc20-field wc20-readonly">
+            <span class="wc20-badge wc20-badge-blue">DataShape</span>
+            <span>Table</span>
+        </div>
+
+        <div class="wc20-field wc20-readonly">
+            <span class="wc20-badge wc20-badge-green">Rendering</span>
+            <span>Canvas (GPU raster)</span>
+        </div>
+
+        <div class="wc20-field wc20-readonly">
+            <span class="wc20-badge wc20-badge-green">Architecture</span>
+            <span>Shadow DOM + Canvas</span>
+        </div>
+
+        <div class="wc20-field wc20-readonly">
+            <span class="wc20-badge wc20-badge-blue">Zoom/Pan</span>
+            <span>Client-Side Math — No Server</span>
+        </div>
+
+        <div class="wc20-field wc20-readonly">
+            <span class="wc20-badge wc20-badge-blue">Semantic Zoom</span>
+            <span>Pixel-Bucket Aggregation</span>
+        </div>
+
+        <div class="wc20-field wc20-readonly">
+            <span class="wc20-badge wc20-badge-orange">Sync Toggle</span>
+            <span>Unlink Time Button</span>
+        </div>
+
+        <div class="wc20-field wc20-readonly" style="margin-top:8px;">
+            <span class="wc20-badge">WOW GT v100</span>
+            <span style="color:#8899AA;">Executive Canvas Gantt</span>
+        </div>
+    </details>
+
+</div>

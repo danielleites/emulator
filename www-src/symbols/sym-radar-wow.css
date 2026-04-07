@@ -1,0 +1,331 @@
+/**
+ * ═══════════════════════════════════════════════════════
+ *  sym-radar-wow.css — Executive Morphing Radar Styles
+ * ═══════════════════════════════════════════════════════
+ *  Structural styling: toolbar, stats, glassmorphism tooltip
+ *  with health bar, skeleton shimmer, footer, and print media.
+ *  All radar rendering (grid, polygon, highlights) happens
+ *  on Canvas — CSS is lightweight.
+ *
+ *  Version : WOW Radar v100
+ *  Prefix  : wow-rd-
+ * ═══════════════════════════════════════════════════════
+ */
+
+
+/* ═══ CSS Custom Properties ═══ */
+
+:host {
+    --wow-rd-bg-start:     #0A0F1C;
+    --wow-rd-bg-end:       #111B2E;
+    --wow-rd-surface:      #0F2940;
+    --wow-rd-accent:       #5BC0EB;
+    --wow-rd-accent-glow:  rgba(91, 192, 235, 0.3);
+    --wow-rd-ok:           #00F5D4;
+    --wow-rd-warn:         #FFCC00;
+    --wow-rd-crit:         #FF3B30;
+    --wow-rd-text:         #ECF0F1;
+    --wow-rd-text-muted:   #8899AA;
+    --wow-rd-border:       #1A3A5C;
+    --wow-rd-glass-bg:     rgba(15, 41, 64, 0.92);
+    --wow-rd-glass-border: rgba(91, 192, 235, 0.15);
+    --wow-rd-font:         'Segoe UI', Arial, sans-serif;
+    --wow-rd-font-size:    12px;
+    --wow-rd-radius:       8px;
+    --wow-rd-transition:   0.2s ease-out;
+}
+
+
+/* ═══ Safe Reset ═══ */
+
+.wow-rd-root { box-sizing: border-box; }
+.wow-rd-root *, .wow-rd-root *::before, .wow-rd-root *::after {
+    box-sizing: border-box;
+}
+
+
+/* ═══ Root Layout ═══ */
+
+.wow-rd-root {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    background: linear-gradient(180deg, var(--wow-rd-bg-start), var(--wow-rd-bg-end));
+    font-family: var(--wow-rd-font);
+    font-size: var(--wow-rd-font-size);
+    color: var(--wow-rd-text);
+    direction: rtl;
+    overflow: hidden;
+    border-radius: var(--wow-rd-radius);
+}
+
+
+/* ═══ Toolbar ═══ */
+
+.wow-rd-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 14px;
+    min-height: 40px;
+    flex-shrink: 0;
+    border-bottom: 1px solid var(--wow-rd-border);
+    background: rgba(10, 15, 28, 0.6);
+}
+
+.wow-rd-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--wow-rd-text);
+    letter-spacing: 0.3px;
+    text-shadow: 0 0 12px var(--wow-rd-accent-glow);
+}
+
+.wow-rd-toolbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    direction: ltr;
+}
+
+.wow-rd-btn {
+    padding: 5px 12px;
+    border: 1px solid var(--wow-rd-border);
+    border-radius: 6px;
+    background: rgba(91, 192, 235, 0.08);
+    color: var(--wow-rd-accent);
+    font-size: 11px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all var(--wow-rd-transition);
+    white-space: nowrap;
+}
+
+.wow-rd-btn:hover {
+    background: rgba(91, 192, 235, 0.18);
+    border-color: var(--wow-rd-accent);
+}
+
+
+/* ═══ Stats Bar ═══ */
+
+.wow-rd-stats {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 4px 14px;
+    flex-shrink: 0;
+    font-size: 10px;
+    color: var(--wow-rd-text-muted);
+    border-bottom: 1px solid rgba(26, 58, 92, 0.5);
+    direction: rtl;
+}
+
+.wow-rd-stat {
+    white-space: nowrap;
+}
+
+.wow-rd-stat b {
+    color: var(--wow-rd-text);
+    font-weight: 600;
+}
+
+
+/* ═══ Canvas Container ═══ */
+
+.wow-rd-canvas-outer {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+}
+
+.wow-rd-canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+    cursor: crosshair;
+}
+
+
+/* ═══ Tooltip (Glassmorphism) ═══ */
+
+.wow-rd-tooltip {
+    position: absolute;
+    z-index: 20;
+    padding: 10px 14px;
+    min-width: 160px;
+    max-width: 240px;
+    background: var(--wow-rd-glass-bg);
+    border: 1px solid var(--wow-rd-glass-border);
+    border-radius: 8px;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    pointer-events: none;
+    direction: rtl;
+    font-family: var(--wow-rd-font);
+    will-change: left, top;
+}
+
+.wow-rd-tt-label {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--wow-rd-text);
+    margin-bottom: 4px;
+}
+
+.wow-rd-tt-value {
+    font-size: 11px;
+    color: var(--wow-rd-text-muted);
+    margin-bottom: 6px;
+    font-variant-numeric: tabular-nums;
+}
+
+.wow-rd-tt-value b {
+    color: var(--wow-rd-text);
+    font-weight: 700;
+}
+
+
+/* ── Health Bar ── */
+
+.wow-rd-tt-bar-wrap {
+    height: 4px;
+    border-radius: 2px;
+    overflow: hidden;
+    margin-bottom: 6px;
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.wow-rd-tt-bar {
+    height: 100%;
+    border-radius: 2px;
+    transition: width 0.3s ease;
+}
+
+
+/* ── Status Labels ── */
+
+.wow-rd-tt-ok   { color: var(--wow-rd-ok);   font-size: 10px; font-weight: 600; }
+.wow-rd-tt-warn { color: var(--wow-rd-warn); font-size: 10px; font-weight: 600; }
+.wow-rd-tt-crit { color: var(--wow-rd-crit); font-size: 10px; font-weight: 600; }
+
+
+/* ═══ Footer ═══ */
+
+.wow-rd-footer {
+    flex-shrink: 0;
+    padding: 4px 14px;
+    font-size: 9px;
+    color: var(--wow-rd-text-muted);
+    text-align: center;
+    border-top: 1px solid var(--wow-rd-border);
+}
+
+
+/* ═══ Empty State ═══ */
+
+.wow-rd-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 200px;
+    color: var(--wow-rd-text-muted);
+    font-size: 14px;
+    gap: 8px;
+}
+
+
+/* ═══ Skeleton / Ghost Loading ═══ */
+
+.wow-rd-skeleton {
+    position: absolute;
+    inset: 0;
+    z-index: 50;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--wow-rd-bg-start);
+}
+
+.wow-rd-skeleton::after {
+    content: '';
+    width: 50%;
+    height: 3px;
+    border-radius: 2px;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        var(--wow-rd-accent),
+        transparent
+    );
+    animation: wowRdShimmer 1.5s ease-in-out infinite;
+}
+
+@keyframes wowRdShimmer {
+    0%   { transform: translateX(-100%); opacity: 0.3; }
+    50%  { opacity: 1; }
+    100% { transform: translateX(100%); opacity: 0.3; }
+}
+
+
+/* ═══ Responsive ═══ */
+
+@container (max-width: 400px) {
+    .wow-rd-toolbar {
+        flex-direction: column;
+        gap: 6px;
+        align-items: stretch;
+    }
+    .wow-rd-stats {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+}
+
+
+/* ═══ Print Media ═══ */
+
+@media print {
+    .wow-rd-root {
+        background: #FFFFFF !important;
+        color: #333 !important;
+        border: 1px solid #DDD;
+    }
+
+    .wow-rd-toolbar {
+        background: #F5F5F5 !important;
+        border-color: #DDD !important;
+    }
+
+    .wow-rd-toolbar-actions {
+        display: none !important;
+    }
+
+    .wow-rd-title {
+        color: #000 !important;
+        text-shadow: none !important;
+    }
+
+    .wow-rd-tooltip {
+        display: none !important;
+    }
+
+    .wow-rd-canvas {
+        cursor: default;
+    }
+
+    .wow-rd-stats,
+    .wow-rd-footer {
+        color: #666 !important;
+        border-color: #DDD !important;
+    }
+
+    .wow-rd-stat b {
+        color: #000 !important;
+    }
+}

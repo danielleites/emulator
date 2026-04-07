@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <rect width="32" height="32" rx="6" fill="#080A0F"/>
+  <!-- Transformer coils -->
+  <ellipse cx="11" cy="16" rx="5" ry="9" fill="none" stroke="#EF4444" stroke-width="1.6"/>
+  <ellipse cx="21" cy="16" rx="5" ry="9" fill="none" stroke="#EF4444" stroke-width="1.6"/>
+  <!-- Core lines -->
+  <line x1="11" y1="7" x2="21" y2="7" stroke="#8898B8" stroke-width="1.4"/>
+  <line x1="11" y1="25" x2="21" y2="25" stroke="#8898B8" stroke-width="1.4"/>
+  <!-- Oil drop small -->
+  <circle cx="16" cy="16" r="2" fill="rgba(239,68,68,0.4)" stroke="#EF4444" stroke-width="1"/>
+</svg>

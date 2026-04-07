@@ -1,0 +1,282 @@
+<!-- sym-unitstatus20-template.html  --  Unit Status v20 Template -->
+<!-- Power generation unit status with ISA-101 shapes, 6-state machine. -->
+<!-- External CSS: sym-unitstatus20.css | Plugin: piv20-unitstatus.js -->
+
+<!-- ── External Dependencies ── -->
+<link rel="stylesheet" href="/PIVision/Scripts/app/editor/symbols/ext/sym-unitstatus20.css">
+<link rel="stylesheet" href="/PIVision/Scripts/app/editor/symbols/ext/piv20-design-system.css">
+<link rel="stylesheet" href="/PIVision/Scripts/app/editor/symbols/ext/piv20-overrides.css">
+<script type="text/javascript" src="/PIVision/Scripts/app/editor/symbols/ext/piv20-plugins/piv20-core.js"></script>
+<script type="text/javascript" src="/PIVision/Scripts/app/editor/symbols/ext/piv20-plugins/piv20-unitstatus.js"></script>
+
+<!-- ── Root Container ── -->
+<div class="piv20 us20-root" dir="rtl">
+
+    <!-- Hidden widget mount point -->
+    <div id="us20-widget" style="display:none"></div>
+
+    <!-- Toast container -->
+    <div class="us20-toast-container"></div>
+
+    <!-- ════════════════════════════════════════ -->
+    <!--  HEADER                                  -->
+    <!-- ════════════════════════════════════════ -->
+    <div class="us20-hdr">
+        <div style="display:flex;align-items:center;gap:10px">
+            <span class="us20-ttl">&#9889; {{config.Title || '\ס\ט\ט\ו\ס \י\ח\י\ד\ו\ת'}}</span>
+
+            <!-- AF Connection badge -->
+            <span ng-show="afConn"
+                  ng-class="{'us20-af-badge': true,
+                             'us20-af-good': afConn.pct >= 80,
+                             'us20-af-warn': afConn.pct >= 50 && afConn.pct < 80,
+                             'us20-af-bad':  afConn.pct < 50}">
+                <span class="us20-af-dot"></span>
+                AF {{afConn.pct}}%
+            </span>
+        </div>
+
+        <div class="us20-toolbar">
+            <button class="us20-btn" ng-click="exportData()" title="\י\י\צ\ו\א CSV">
+                &#9660; CSV
+            </button>
+            <button class="us20-btn" ng-click="toggleSidePanel()" title="\ה\ג\ד\ר\ו\ת">
+                &#9881;
+            </button>
+            <div class="us20-live">
+                <span class="us20-live-dot"></span>
+                <span>{{liveTime}}</span>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ════════════════════════════════════════ -->
+    <!--  SUMMARY BAR — State filter buttons      -->
+    <!-- ════════════════════════════════════════ -->
+    <div class="us20-summary">
+        <div class="us20-summary-item" ng-class="{active: filterState==='all'}" ng-click="setFilter('all')">
+            <span style="color:var(--us20-cyan)">\ס\ה\״\כ</span>
+            <span class="us20-summary-count" style="color:var(--us20-cyan)">{{summary.total}}</span>
+        </div>
+        <div class="us20-summary-item" ng-class="{active: filterState==='active'}" ng-click="setFilter('active')">
+            <span style="color:var(--us20-ok)">\●</span>
+            <span class="us20-summary-count" style="color:var(--us20-ok)">{{summary.active}}</span>
+        </div>
+        <div class="us20-summary-item" ng-class="{active: filterState==='starting'}" ng-click="setFilter('starting')">
+            <span style="color:var(--us20-starting)">\▶</span>
+            <span class="us20-summary-count" style="color:var(--us20-starting)">{{summary.starting}}</span>
+        </div>
+        <div class="us20-summary-item" ng-class="{active: filterState==='standby'}" ng-click="setFilter('standby')">
+            <span style="color:var(--us20-warn)">\◆</span>
+            <span class="us20-summary-count" style="color:var(--us20-warn)">{{summary.standby}}</span>
+        </div>
+        <div class="us20-summary-item" ng-class="{active: filterState==='maint'}" ng-click="setFilter('maint')">
+            <span style="color:var(--us20-maint)">\✦</span>
+            <span class="us20-summary-count" style="color:var(--us20-maint)">{{summary.maint}}</span>
+        </div>
+        <div class="us20-summary-item" ng-class="{active: filterState==='fault'}" ng-click="setFilter('fault')">
+            <span style="color:var(--us20-crit)">\▲</span>
+            <span class="us20-summary-count" style="color:var(--us20-crit)">{{summary.fault}}</span>
+        </div>
+        <div class="us20-summary-item" ng-class="{active: filterState==='off'}" ng-click="setFilter('off')">
+            <span style="color:var(--us20-off)">\■</span>
+            <span class="us20-summary-count" style="color:var(--us20-off)">{{summary.off}}</span>
+        </div>
+    </div>
+
+
+    <!-- ════════════════════════════════════════ -->
+    <!--  CONTROLS — Search + View Toggle         -->
+    <!-- ════════════════════════════════════════ -->
+    <div class="us20-controls">
+        <input class="us20-search" ng-model="searchText" ng-change="onSearchChange()"
+               placeholder="&#128269; \ח\י\פ\ו\ש...">
+        <span style="flex:1"></span>
+        <button class="us20-view-btn" ng-class="{active: viewMode==='cards'}" ng-click="setView('cards')">
+            \▦ \כ\ר\ט\י\ס\י\ם
+        </button>
+        <button class="us20-view-btn" ng-class="{active: viewMode==='table'}" ng-click="setView('table')">
+            \≡ \ט\ב\ל\ה
+        </button>
+    </div>
+
+
+    <!-- ════════════════════════════════════════ -->
+    <!--  CARDS VIEW                              -->
+    <!-- ════════════════════════════════════════ -->
+    <div class="us20-body" ng-show="viewMode==='cards'">
+        <div class="us20-grid">
+            <div class="us20-card us20-animate-in"
+                 ng-repeat="u in filteredUnits track by $index"
+                 ng-class="{'fault': u.state.id==='fault'}"
+                 ng-style="{'animation-delay': ($index * 25) + 'ms'}">
+                <div class="us20-card-stripe" ng-style="{'background': u.state.color}"></div>
+                <button class="us20-card-gear" ng-click="openGear($index)" title="\פ\ר\ט\י \י\ח\י\ד\ה">
+                    &#9881;
+                </button>
+                <div class="us20-card-hdr">
+                    <div class="us20-card-name" title="{{u.label}}">{{u.label}}</div>
+                    <div class="us20-card-icon">
+                        <span style="font-size:14px">{{u.state.shape}}</span>
+                    </div>
+                </div>
+                <div class="us20-card-val" ng-style="{color: u.state.color}">
+                    {{u.displayValue}}
+                </div>
+                <span class="us20-card-state"
+                      ng-style="{'background': u.state.color + '22', 'color': u.state.color}">
+                    {{u.state.shape}} {{u.state.label}} | {{u.state.labelEn}}
+                </span>
+            </div>
+        </div>
+
+        <!-- Empty state -->
+        <div class="us20-empty" ng-show="filteredUnits.length === 0 && !loading">
+            <span style="font-size:36px">&#9889;</span>
+            <span ng-show="units.length">\ל\א \נ\מ\צ\א\ו \ת\ו\צ\א\ו\ת</span>
+            <span ng-show="!units.length">\מ\מ\ת\י\ן \ל\נ\ת\ו\נ\י\ם \— \ג\ר\ו\ר \ת\ג\י\ו\ת \מ-AF</span>
+        </div>
+
+        <!-- Loading -->
+        <div class="us20-empty" ng-show="loading && units.length === 0">
+            <span style="font-size:32px">\⬡</span>
+            <span>\מ\מ\ת\י\ן \ל\נ\ת\ו\נ\י\ם...</span>
+        </div>
+    </div>
+
+
+    <!-- ════════════════════════════════════════ -->
+    <!--  TABLE VIEW                              -->
+    <!-- ════════════════════════════════════════ -->
+    <div class="us20-body" ng-show="viewMode==='table'" style="padding:8px 12px">
+        <table class="us20-table">
+            <thead>
+                <tr>
+                    <th>\י\ח\י\ד\ה</th>
+                    <th>\מ\צ\ב</th>
+                    <th>\ע\ר\ך</th>
+                    <th>Tag</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="us20-animate-in"
+                    ng-repeat="u in filteredUnits track by $index"
+                    ng-style="{'animation-delay': ($index * 20) + 'ms'}">
+                    <td style="font-weight:500">{{u.label}}</td>
+                    <td>
+                        <span class="us20-badge"
+                              ng-style="{'background': u.state.color + '22', 'color': u.state.color}">
+                            {{u.state.shape}} {{u.state.label}}
+                        </span>
+                    </td>
+                    <td style="font-variant-numeric:tabular-nums" ng-style="{color: u.state.color}">
+                        {{u.displayValue}}
+                    </td>
+                    <td style="font-size:10px;color:var(--us20-text3);direction:ltr">{{u.path}}</td>
+                    <td>
+                        <button class="us20-btn" style="padding:2px 5px" ng-click="openGear($index)">&#9881;</button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <div class="us20-empty" ng-show="filteredUnits.length === 0">
+            <span>\א\י\ן \י\ח\י\ד\ו\ת \ל\ה\צ\ג\ה</span>
+        </div>
+    </div>
+
+
+    <!-- ════════════════════════════════════════ -->
+    <!--  GEAR MODAL                              -->
+    <!-- ════════════════════════════════════════ -->
+    <div class="us20-modal-overlay" ng-show="showGearModal" ng-click="closeGearModal()">
+        <div class="us20-modal" ng-click="$event.stopPropagation()">
+            <div class="us20-modal-title">
+                <span>&#9881; {{gearUnit.label}} \— \פ\ר\ט\י \י\ח\י\ד\ה</span>
+                <button class="us20-modal-close" ng-click="closeGearModal()">&times;</button>
+            </div>
+            <div ng-show="gearUnit">
+                <div class="us20-modal-row">
+                    <span>\ע\ר\ך \נ\ו\כ\ח\י</span>
+                    <strong ng-style="{color: gearUnit.state.color}">{{gearUnit.displayValue}}</strong>
+                </div>
+                <div class="us20-modal-row">
+                    <span>\מ\צ\ב</span>
+                    <span class="us20-badge" ng-style="{'background': gearUnit.state.color + '22', 'color': gearUnit.state.color}">
+                        {{gearUnit.state.shape}} {{gearUnit.state.label}} | {{gearUnit.state.labelEn}}
+                    </span>
+                </div>
+                <div class="us20-modal-row">
+                    <span>\נ\ת\י\ב \ת\ג</span>
+                    <span style="direction:ltr;font-size:10px;max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"
+                          title="{{gearUnit.path}}">{{gearUnit.path}}</span>
+                </div>
+                <div class="us20-modal-row" ng-show="gearUnit.stale">
+                    <span>\מ\צ\ב \נ\ת\ו\ן</span>
+                    <span style="color:var(--us20-warn)">\⛱ \נ\ת\ו\ן \י\ש\ן</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ════════════════════════════════════════ -->
+    <!--  SIDE PANEL                              -->
+    <!-- ════════════════════════════════════════ -->
+    <div class="us20-panel" ng-class="{open: showSidePanel}">
+        <div class="us20-phd">
+            <h3>\ה\ג\ד\ר\ו\ת \ס\ט\ט\ו\ס</h3>
+            <button class="us20-pcl" ng-click="toggleSidePanel()">&times;</button>
+        </div>
+
+        <!-- Thresholds -->
+        <div class="us20-ps">
+            <label>\ס\פ\י \מ\צ\ב (MW)</label>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-top:4px;font-size:11px">
+                <span style="color:var(--us20-text3)">\פ\ע\י\ל:</span>
+                <span>{{config.ActiveThreshold}}</span>
+                <span style="color:var(--us20-text3)">\ה\פ\ע\ל\ה:</span>
+                <span>{{config.StartingThreshold}}</span>
+                <span style="color:var(--us20-text3)">\ה\מ\ת\נ\ה:</span>
+                <span>{{config.StandbyThreshold}}</span>
+                <span style="color:var(--us20-text3)">\ת\ח\ז\ו\ק\ה:</span>
+                <span>{{config.MaintThreshold}}</span>
+                <span style="color:var(--us20-text3)">\ה\י\ס\ט\ר\ז\י\ס:</span>
+                <span>{{config.Hysteresis}}</span>
+            </div>
+        </div>
+
+        <!-- State Legend -->
+        <div class="us20-ps">
+            <label>\מ\ק\ר\א \מ\צ\ב\י\ם (ISA-101)</label>
+            <div style="margin-top:4px" ng-repeat="st in states">
+                <span style="font-size:14px" ng-style="{color: st.color}">{{st.shape}}</span>
+                <span style="font-size:11px;margin-right:6px">{{st.label}} ({{st.labelEn}})</span>
+            </div>
+        </div>
+
+        <!-- AF Connection -->
+        <div class="us20-ps" ng-show="afConn">
+            <label>\ח\י\ב\ו\ר AF</label>
+            <div style="font-size:12px;margin-top:4px;color:var(--us20-text2)">
+                \מ\ח\ו\ב\ר: {{afConn.connected}}/{{afConn.total}} ({{afConn.pct}}%)
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ════════════════════════════════════════ -->
+    <!--  FOOTER                                  -->
+    <!-- ════════════════════════════════════════ -->
+    <div class="us20-ftr">
+        <span>\נ\ו\ג\ה \— \ס\ט\ט\ו\ס \י\ח\י\ד\ו\ת | PIV20 v20.0</span>
+        <div style="display:flex;align-items:center;gap:8px">
+            <span class="us20-ftr-status">
+                <span class="us20-ftr-dot ok"></span>
+                <span>{{filteredUnits.length}} / {{units.length}} \י\ח\י\ד\ו\ת</span>
+            </span>
+        </div>
+    </div>
+
+</div>

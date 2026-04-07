@@ -1,0 +1,268 @@
+/* ================================================================
+ *  sym-heatmap20.css  —  Heatmap v20  External Stylesheet
+ * ================================================================
+ *  CSS prefix : hm20-*
+ *  Custom props: --hm20-*
+ *  Flat CSS (no nesting)
+ * ================================================================ */
+
+/* ── Custom Properties ── */
+.hm20-root {
+    --hm20-bg-deep:   #060C18;
+    --hm20-bg1:       #0A1628;
+    --hm20-bg2:       #0D1F35;
+    --hm20-bg-card:   #0F2940;
+    --hm20-bg-hover:  #153858;
+    --hm20-bg-input:  #0B1D33;
+    --hm20-accent:    #1E5A8A;
+    --hm20-accent-lt: #2E8BC0;
+    --hm20-cyan:      #5BC0EB;
+    --hm20-ok:        #2ECC71;
+    --hm20-ok-dim:    rgba(46,204,113,0.15);
+    --hm20-warn:      #F39C12;
+    --hm20-warn-dim:  rgba(243,156,18,0.15);
+    --hm20-crit:      #E74C3C;
+    --hm20-crit-dim:  rgba(231,76,60,0.15);
+    --hm20-off:       #607D8B;
+    --hm20-text:      #FFFFFF;
+    --hm20-text2:     #8BACC4;
+    --hm20-text3:     #5A7A94;
+    --hm20-border:    rgba(46,139,192,0.2);
+    --hm20-border-a:  rgba(91,192,235,0.45);
+    --hm20-shadow:    0 4px 24px rgba(0,0,0,0.4);
+    --hm20-shadow-lg: 0 8px 40px rgba(0,0,0,0.5);
+    --hm20-glass-bg:  rgba(10,22,40,0.7);
+    --hm20-glass-b:   rgba(91,192,235,0.12);
+    --hm20-radius:    10px;
+    --hm20-radius-sm: 6px;
+    --hm20-font:      'Segoe UI','Arial',sans-serif;
+    --hm20-tr:        all 0.25s cubic-bezier(0.4,0,0.2,1);
+}
+
+/* ── Root Container ── */
+.hm20-root {
+    width: 100%; height: 100%; position: relative; overflow: hidden;
+    font-family: var(--hm20-font); direction: rtl; color: var(--hm20-text);
+    background: linear-gradient(160deg, var(--hm20-bg-deep), var(--hm20-bg1), var(--hm20-bg2));
+    display: flex; flex-direction: column;
+}
+.hm20-root * { box-sizing: border-box; margin: 0; padding: 0; }
+.hm20-root ::-webkit-scrollbar { width: 6px; height: 6px; }
+.hm20-root ::-webkit-scrollbar-track { background: var(--hm20-bg-deep); border-radius: 3px; }
+.hm20-root ::-webkit-scrollbar-thumb { background: var(--hm20-accent); border-radius: 3px; }
+.hm20-root ::-webkit-scrollbar-thumb:hover { background: var(--hm20-cyan); }
+
+/* ── Header ── */
+.hm20-header {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 10px 16px;
+    background: linear-gradient(135deg, var(--hm20-bg2), var(--hm20-bg-card));
+    border-bottom: 1px solid var(--hm20-border); flex-shrink: 0;
+}
+.hm20-title-area { display: flex; align-items: center; gap: 10px; }
+.hm20-title { font-size: 15px; font-weight: 600; }
+.hm20-subtitle { font-size: 11px; color: var(--hm20-text3); }
+.hm20-toolbar { display: flex; gap: 6px; align-items: center; }
+
+/* ── Buttons ── */
+.hm20-btn {
+    background: var(--hm20-bg-card); color: var(--hm20-text2);
+    border: 1px solid var(--hm20-border); padding: 5px 12px;
+    border-radius: var(--hm20-radius-sm); cursor: pointer;
+    font-size: 12px; font-family: var(--hm20-font);
+    transition: var(--hm20-tr); display: inline-flex; align-items: center; gap: 4px;
+}
+.hm20-btn:hover { border-color: var(--hm20-border-a); background: var(--hm20-bg-hover); color: var(--hm20-text); }
+.hm20-btn.active { background: var(--hm20-accent); border-color: var(--hm20-cyan); color: var(--hm20-text); }
+
+/* ── Live Clock ── */
+.hm20-live { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--hm20-text3); }
+.hm20-live-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--hm20-ok); box-shadow: 0 0 8px var(--hm20-ok); animation: hm20-pulse 2s infinite; }
+@keyframes hm20-pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+/* ── Toast ── */
+.hm20-toast-wrap { position: absolute; top: 12px; left: 50%; transform: translateX(-50%); z-index: 9999; pointer-events: none; }
+
+/* ── Badge ── */
+.hm20-badge { display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 10px; font-size: 10px; font-weight: 600; gap: 4px; }
+.hm20-badge-ok   { background: var(--hm20-ok-dim);   color: var(--hm20-ok); }
+.hm20-badge-warn { background: var(--hm20-warn-dim); color: var(--hm20-warn); }
+.hm20-badge-crit { background: var(--hm20-crit-dim); color: var(--hm20-crit); }
+
+/* ── AF Connection ── */
+.hm20-af-badge { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 10px; font-size: 11px; }
+.hm20-af-dot { width: 6px; height: 6px; border-radius: 50%; display: inline-block; }
+.hm20-af-good { background: rgba(76,175,80,0.15); color: #4caf50; }
+.hm20-af-good .hm20-af-dot { background: #4caf50; box-shadow: 0 0 4px #4caf50; }
+.hm20-af-warn { background: rgba(255,193,7,0.15); color: #ffc107; }
+.hm20-af-warn .hm20-af-dot { background: #ffc107; box-shadow: 0 0 4px #ffc107; }
+.hm20-af-bad  { background: rgba(244,67,54,0.15); color: #f44336; }
+.hm20-af-bad .hm20-af-dot  { background: #f44336; box-shadow: 0 0 4px #f44336; }
+
+/* ── Stats Bar ── */
+.hm20-stats {
+    display: flex; gap: 12px; padding: 8px 16px;
+    border-bottom: 1px solid var(--hm20-border);
+}
+.hm20-stat { display: flex; flex-direction: column; align-items: center; gap: 2px; flex: 1; }
+.hm20-stat-label { font-size: 10px; color: var(--hm20-text3); text-transform: uppercase; }
+.hm20-stat-value { font-size: 16px; font-weight: 600; color: var(--hm20-cyan); font-variant-numeric: tabular-nums; }
+
+/* ── Controls Bar ── */
+.hm20-controls {
+    display: flex; gap: 8px; padding: 8px 16px;
+    border-bottom: 1px solid var(--hm20-border);
+    align-items: center; flex-wrap: wrap;
+}
+.hm20-sep { width: 1px; height: 16px; background: var(--hm20-border); margin: 0 4px; }
+
+/* ── View Toggle ── */
+.hm20-view-toggle { display: flex; gap: 2px; background: var(--hm20-bg-card); border-radius: var(--hm20-radius-sm); padding: 2px; }
+.hm20-view-btn {
+    padding: 3px 10px; border-radius: 4px; font-size: 11px; cursor: pointer;
+    border: none; background: transparent; color: var(--hm20-text3);
+    transition: var(--hm20-tr); font-family: var(--hm20-font);
+}
+.hm20-view-btn:hover { color: var(--hm20-text2); }
+.hm20-view-btn.active { background: var(--hm20-accent); color: var(--hm20-text); }
+
+/* ── Color Scheme Buttons ── */
+.hm20-scheme-btn {
+    padding: 3px 10px; border-radius: 10px; font-size: 11px; cursor: pointer;
+    border: 1px solid var(--hm20-border); background: transparent;
+    color: var(--hm20-text2); transition: var(--hm20-tr); font-family: var(--hm20-font);
+}
+.hm20-scheme-btn:hover { border-color: var(--hm20-border-a); }
+.hm20-scheme-btn.active { background: var(--hm20-accent); border-color: var(--hm20-cyan); color: var(--hm20-text); }
+
+/* ── Bucket Selector ── */
+.hm20-bucket-sel { display: flex; gap: 2px; background: var(--hm20-bg-card); border-radius: var(--hm20-radius-sm); padding: 2px; }
+.hm20-bucket-btn {
+    padding: 2px 8px; border-radius: 4px; font-size: 10px; cursor: pointer;
+    border: none; background: transparent; color: var(--hm20-text3);
+    transition: var(--hm20-tr); font-family: var(--hm20-font);
+}
+.hm20-bucket-btn:hover { color: var(--hm20-text2); }
+.hm20-bucket-btn.active { background: var(--hm20-accent-lt); color: var(--hm20-text); }
+
+/* ── Gradient Bar ── */
+.hm20-gradient-bar { height: 8px; border-radius: 4px; margin: 0 16px 4px; }
+.hm20-grad-thermal { background: linear-gradient(to left, #ff4444, #ff8800, #ffdd00, #44ff44, #4444ff); }
+.hm20-grad-green   { background: linear-gradient(to left, #2ecc71, #145a32); }
+.hm20-grad-blue    { background: linear-gradient(to left, #5bc0eb, #0a1628); }
+.hm20-gradient-labels { display: flex; justify-content: space-between; padding: 0 16px 6px; font-size: 10px; color: var(--hm20-text3); }
+
+/* ── Body ── */
+.hm20-body { flex: 1; overflow: auto; padding: 12px; }
+
+/* ── Grid View ── */
+.hm20-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 8px; }
+.hm20-cell {
+    border-radius: var(--hm20-radius); padding: 14px 10px; text-align: center;
+    cursor: pointer; transition: all 0.3s ease; position: relative; overflow: hidden;
+    min-height: 80px; display: flex; flex-direction: column;
+    justify-content: center; align-items: center; gap: 4px;
+    border: 2px solid transparent;
+}
+.hm20-cell:hover { transform: translateY(-2px); box-shadow: var(--hm20-shadow-lg); border-color: rgba(255,255,255,0.2); }
+.hm20-cell.selected { border-color: var(--hm20-cyan); box-shadow: 0 0 0 3px rgba(91,192,235,0.3); }
+.hm20-cell.outlier { border-color: var(--hm20-warn); }
+.hm20-cell-label { font-size: 11px; font-weight: 500; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.hm20-cell-value { font-size: 20px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.hm20-cell-pct   { font-size: 10px; opacity: 0.7; }
+
+/* ── Calendar View ── */
+.hm20-cal-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap: 6px; }
+.hm20-cal-cell {
+    border-radius: var(--hm20-radius-sm); padding: 10px 8px; text-align: center;
+    cursor: pointer; transition: all 0.3s ease; min-height: 60px;
+    display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 2px;
+    border: 1px solid transparent;
+}
+.hm20-cal-cell:hover { border-color: rgba(255,255,255,0.2); transform: translateY(-1px); box-shadow: var(--hm20-shadow); }
+.hm20-cal-label { font-size: 10px; opacity: 0.8; }
+.hm20-cal-val   { font-size: 16px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.hm20-cal-count { font-size: 9px; opacity: 0.5; }
+.hm20-cal-empty { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 30px; color: var(--hm20-text3); font-size: 12px; gap: 8px; }
+
+/* ── Cell Detail Panel ── */
+.hm20-detail {
+    background: var(--hm20-bg-card); border: 1px solid var(--hm20-border);
+    border-radius: var(--hm20-radius); padding: 12px; margin: 8px 0;
+}
+.hm20-detail-title { font-size: 14px; font-weight: 600; color: var(--hm20-cyan); margin-bottom: 8px; }
+.hm20-detail-row { display: flex; justify-content: space-between; padding: 4px 0; font-size: 12px; border-bottom: 1px solid var(--hm20-border); }
+
+/* ── Playback Bar ── */
+.hm20-pb-bar {
+    display: flex; align-items: center; gap: 6px; padding: 6px 16px;
+    background: rgba(243,156,18,0.08); border-bottom: 1px solid rgba(243,156,18,0.25);
+    flex-shrink: 0;
+}
+.hm20-pb-btn {
+    padding: 3px 10px; border-radius: 6px; border: 1px solid rgba(243,156,18,0.3);
+    background: rgba(243,156,18,0.1); color: #F39C12; cursor: pointer;
+    font-size: 12px; font-family: var(--hm20-font); transition: all 0.2s;
+}
+.hm20-pb-btn:hover { background: rgba(243,156,18,0.25); }
+.hm20-pb-btn.exit { border-color: rgba(231,76,60,0.3); color: #E74C3C; background: rgba(231,76,60,0.1); }
+.hm20-pb-slider {
+    flex: 1; height: 4px; -webkit-appearance: none; appearance: none;
+    background: rgba(243,156,18,0.2); border-radius: 2px; outline: none; cursor: pointer;
+}
+.hm20-pb-slider::-webkit-slider-thumb {
+    -webkit-appearance: none; width: 14px; height: 14px; border-radius: 50%;
+    background: #F39C12; cursor: pointer; border: 2px solid var(--hm20-bg-deep);
+}
+.hm20-pb-time { font-size: 11px; color: #F39C12; font-variant-numeric: tabular-nums; min-width: 65px; text-align: center; }
+.hm20-pb-badge { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 10px; font-size: 10px; background: rgba(243,156,18,0.15); color: #F39C12; font-weight: 600; }
+
+/* ── Loading / Empty / Error ── */
+.hm20-loading { display: flex; align-items: center; justify-content: center; padding: 40px; color: var(--hm20-text3); gap: 10px; font-size: 13px; }
+.hm20-empty { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px; color: var(--hm20-text3); font-size: 14px; gap: 12px; }
+.hm20-empty-icon { font-size: 36px; opacity: 0.4; }
+
+/* ── Side Panel ── */
+.hm20-panel {
+    position: absolute; top: 0; left: 0; width: 280px; height: 100%;
+    background: var(--hm20-glass-bg); backdrop-filter: blur(16px);
+    border-right: 1px solid var(--hm20-glass-b); z-index: 100;
+    transition: transform 0.35s cubic-bezier(0.4,0,0.2,1); overflow-y: auto;
+}
+.hm20-panel.closed { transform: translateX(-100%); }
+.hm20-panel-header {
+    padding: 14px 16px; border-bottom: 1px solid var(--hm20-border);
+    display: flex; justify-content: space-between; align-items: center;
+}
+.hm20-panel-title { font-size: 14px; font-weight: 600; color: var(--hm20-cyan); }
+.hm20-panel-close {
+    background: none; border: none; color: var(--hm20-text3); font-size: 18px;
+    cursor: pointer; padding: 4px 8px; border-radius: 4px; transition: var(--hm20-tr);
+}
+.hm20-panel-close:hover { background: var(--hm20-bg-card); color: var(--hm20-text); }
+.hm20-panel-body { padding: 14px; display: flex; flex-direction: column; gap: 14px; }
+.hm20-panel-section { display: flex; flex-direction: column; gap: 6px; }
+.hm20-panel-label { font-size: 11px; color: var(--hm20-text3); text-transform: uppercase; letter-spacing: 0.5px; }
+
+/* ── Footer ── */
+.hm20-footer {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 6px 16px; background: linear-gradient(135deg, var(--hm20-bg-deep), rgba(13,31,53,0.95));
+    border-top: 1px solid var(--hm20-border); font-size: 11px; color: var(--hm20-text3);
+    flex-shrink: 0; gap: 10px;
+}
+.hm20-ftr-status { display: inline-flex; align-items: center; gap: 5px; }
+.hm20-ftr-dot { width: 6px; height: 6px; border-radius: 50%; display: inline-block; }
+.hm20-ftr-dot.live { background: var(--hm20-ok); box-shadow: 0 0 6px var(--hm20-ok); animation: hm20-pulse 2s infinite; }
+.hm20-ftr-dot.pb   { background: var(--hm20-warn); box-shadow: 0 0 6px var(--hm20-warn); animation: hm20-pulse 1.5s infinite; }
+.hm20-ftr-sep { width: 1px; height: 14px; background: var(--hm20-border); }
+.hm20-ftr-btn {
+    background: none; border: 1px solid var(--hm20-border); color: var(--hm20-text3);
+    padding: 2px 8px; border-radius: 4px; font-size: 10px; cursor: pointer;
+    font-family: var(--hm20-font); transition: all 0.2s;
+}
+.hm20-ftr-btn:hover { border-color: var(--hm20-cyan); color: var(--hm20-cyan); }
+
+/* ── Animation ── */
+@keyframes hm20-fade-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+.hm20-anim-in { animation: hm20-fade-in 0.3s ease both; }

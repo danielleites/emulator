@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <rect width="32" height="32" rx="6" fill="#0C0E14"/>
+  <!-- Vibration waveform -->
+  <polyline points="2,16 6,16 8,8 10,24 12,10 14,22 16,14 18,20 20,16 22,8 24,22 26,16 30,16"
+            fill="none" stroke="#3DC8B0" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/>
+  <!-- Bearings dots -->
+  <circle cx="8" cy="8"  r="1.5" fill="#3DC8B0"/>
+  <circle cx="12" cy="10" r="1.5" fill="#3DC8B0"/>
+  <circle cx="24" cy="22" r="1.5" fill="#E74C3C"/>
+</svg>

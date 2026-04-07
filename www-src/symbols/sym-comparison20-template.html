@@ -1,0 +1,217 @@
+<div class="piv20 cp20-root" dir="rtl"
+     ng-style="{'font-family': config.fontFamily, 'font-size': config.fontSize + 'px', 'font-weight': config.fontBold ? 'bold' : 'normal', 'font-style': config.fontItalic ? 'italic' : 'normal'}">
+
+<!-- ── External CSS ── -->
+<link rel="stylesheet" href="/PIVision/Scripts/app/editor/symbols/ext/sym-comparison20.css" />
+<link rel="stylesheet" href="/PIVision/Scripts/app/editor/symbols/ext/piv20-design-system.css">
+<link rel="stylesheet" href="/PIVision/Scripts/app/editor/symbols/ext/piv20-overrides.css">
+
+<!-- ── External JS ── -->
+<script type="text/javascript" src="/PIVision/Scripts/app/editor/symbols/ext/piv20-plugins/piv20-core.js"></script>
+<script type="text/javascript" src="/PIVision/Scripts/app/editor/symbols/ext/piv20-plugins/piv20-comparison.js"></script>
+
+<!-- ── Toast Container ── -->
+<div class="cp20-toast-container"></div>
+
+<!-- ══════════ HEADER ══════════ -->
+<div class="cp20-hdr" ng-style="{'background': config.headerBg}">
+    <!-- AF Connection Badge -->
+    <div class="cp20-af-badge"
+         ng-class="{'cp20-af-good': afConn.status==='connected', 'cp20-af-warn': afConn.status==='partial', 'cp20-af-bad': afConn.status==='disconnected'}"
+         ng-show="afConn"
+         title="{{afConn.good}}/{{afConn.total}} תקינים{{afConn.stale ? ' | ' + afConn.stale + ' ישנים' : ''}}">
+        <span class="cp20-af-dot"></span>
+        {{afConn.status === 'connected' ? 'מחובר' : afConn.status === 'partial' ? 'חלקי' : 'מנותק'}}
+    </div>
+
+    <!-- Title -->
+    <div class="cp20-ttl" ng-style="{'font-size': config.headerFontSize + 'px'}">השוואה</div>
+
+    <!-- Toolbar -->
+    <div class="cp20-toolbar">
+        <button class="cp20-btn" title="ייצוא CSV" ng-click="exportCSV()">📥</button>
+        <button class="cp20-btn" title="העתק" ng-click="copyToClipboard()">📋</button>
+        <button class="cp20-btn" title="הגדרות" ng-click="toggleSidePanel()">⚙</button>
+        <div class="cp20-live"><div class="cp20-live-dot"></div>{{liveTime}}</div>
+    </div>
+</div>
+
+<!-- ══════════ CONTROLS BAR ══════════ -->
+<div class="cp20-controls">
+    <button class="cp20-btn" ng-class="{active: viewMode==='bars'}" ng-click="setView('bars')">📊 עמודות</button>
+    <button class="cp20-btn" ng-class="{active: viewMode==='table'}" ng-click="setView('table')">📋 טבלה</button>
+    <span style="flex:1;"></span>
+    <span class="cp20-baseline-label">בסיס: {{baselineMode === 'first' ? 'ראשון' : baselineMode === 'max' ? 'מקסימום' : 'ממוצע'}} ({{baseline | number:1}})</span>
+</div>
+
+<!-- ══════════ STATISTICS SUMMARY ══════════ -->
+<div class="cp20-stats" ng-show="items.length >= 2">
+    <div class="cp20-stat-item">
+        <span>ממוצע:</span>
+        <span class="cp20-stat-val">{{compStats.mean | number:1}}</span>
+    </div>
+    <div class="cp20-stat-item">
+        <span>סטיית תקן:</span>
+        <span class="cp20-stat-val">{{compStats.stddev | number:2}}</span>
+    </div>
+    <div class="cp20-stat-item">
+        <span>CV:</span>
+        <span class="cp20-stat-val">{{compStats.cv | number:1}}%</span>
+    </div>
+    <div class="cp20-stat-item">
+        <span>טווח:</span>
+        <span class="cp20-stat-val">{{compStats.spread | number:1}}</span>
+    </div>
+    <div class="cp20-stat-item">
+        <span>מינ/מקס:</span>
+        <span class="cp20-stat-val">{{compStats.min | number:1}} / {{compStats.max | number:1}}</span>
+    </div>
+</div>
+
+<!-- ══════════ BODY ══════════ -->
+<div class="cp20-body" id="cp20-widget">
+
+    <!-- ── Bars View ── -->
+    <div ng-show="viewMode === 'bars'">
+        <div class="cp20-bar-item cp20-anim-in"
+             ng-repeat="item in items track by $index"
+             ng-class="{'cp20-bar-outlier': item.isOutlier}"
+             style="animation-delay:{{$index * 40}}ms">
+            <div class="cp20-bar-label" title="{{item.label}}">{{item.label}}</div>
+            <div class="cp20-bar-wrap">
+                <div class="cp20-bar-fill"
+                     ng-style="{'width': getBarWidth(item.value), 'background': getBarColor($index)}">
+                    <span class="cp20-bar-value">{{item.value | number:config.Decimals}}</span>
+                </div>
+            </div>
+            <div class="cp20-bar-diff"
+                 ng-class="{'positive': getDiff(item.value).pct > 0, 'negative': getDiff(item.value).pct < 0, 'zero': getDiff(item.value).pct === 0}">
+                {{getDiff(item.value).pct > 0 ? '+' : ''}}{{getDiff(item.value).pct | number:1}}%
+            </div>
+        </div>
+
+        <!-- Empty State -->
+        <div class="cp20-empty" ng-show="!items.length && !loading">
+            <div style="font-size:36px;opacity:0.4;">📊</div>
+            <div>ממתין לנתונים</div>
+            <div style="font-size:11px;">גרור תגים מ-AF Browser או PI Search</div>
+        </div>
+    </div>
+
+    <!-- ── Table View ── -->
+    <div ng-show="viewMode === 'table'">
+        <table class="cp20-table" ng-show="items.length">
+            <thead>
+                <tr>
+                    <th ng-click="setSortBy('name')">שם</th>
+                    <th ng-click="setSortBy('value-desc')">ערך</th>
+                    <th>הפרש</th>
+                    <th>שינוי %</th>
+                    <th>z-score</th>
+                    <th>דרגה</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr ng-repeat="item in items track by $index"
+                    class="cp20-anim-in"
+                    ng-class="{'outlier': item.isOutlier}"
+                    style="animation-delay:{{$index * 25}}ms">
+                    <td style="font-weight:500;">{{item.label}}</td>
+                    <td style="font-variant-numeric:tabular-nums;">{{item.value | number:config.Decimals}}</td>
+                    <td style="font-variant-numeric:tabular-nums;"
+                        ng-class="{'positive': getDiff(item.value).abs > 0, 'negative': getDiff(item.value).abs < 0}">
+                        {{getDiff(item.value).abs > 0 ? '+' : ''}}{{getDiff(item.value).abs | number:config.Decimals}}
+                    </td>
+                    <td ng-class="{'positive': getDiff(item.value).pct > 0, 'negative': getDiff(item.value).pct < 0, 'zero': getDiff(item.value).pct === 0}">
+                        {{getDiff(item.value).pct > 0 ? '▲' : getDiff(item.value).pct < 0 ? '▼' : '─'}} {{getDiff(item.value).pct | number:1}}%
+                    </td>
+                    <td style="font-variant-numeric:tabular-nums;">{{item.zscore | number:2}}</td>
+                    <td>#{{item.rank}}</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- Empty State -->
+        <div class="cp20-empty" ng-show="!items.length && !loading">
+            <div style="font-size:36px;opacity:0.4;">📊</div>
+            <div>ממתין לנתונים</div>
+        </div>
+    </div>
+</div>
+
+<!-- ══════════ SIDE PANEL ══════════ -->
+<div class="cp20-panel" ng-class="{open: showSidePanel}">
+    <div class="cp20-phd">
+        <h3>הגדרות</h3>
+        <button class="cp20-pcl" ng-click="toggleSidePanel()">✕</button>
+    </div>
+
+    <!-- Baseline Mode -->
+    <div class="cp20-ps">
+        <label>בסיס השוואה</label>
+        <select style="width:100%;background:#0B1D33;border:1px solid rgba(46,139,192,.2);border-radius:4px;padding:5px 8px;color:#fff;font-size:12px;"
+                ng-model="baselineMode" ng-change="setBaseline(baselineMode)">
+            <option value="first">ראשון</option>
+            <option value="max">מקסימום</option>
+            <option value="avg">ממוצע</option>
+        </select>
+    </div>
+
+    <!-- Sort -->
+    <div class="cp20-ps">
+        <label>מיון לפי</label>
+        <select style="width:100%;background:#0B1D33;border:1px solid rgba(46,139,192,.2);border-radius:4px;padding:5px 8px;color:#fff;font-size:12px;"
+                ng-model="sortBy" ng-change="setSortBy(sortBy)">
+            <option value="name">שם</option>
+            <option value="value-asc">ערך עולה</option>
+            <option value="value-desc">ערך יורד</option>
+        </select>
+    </div>
+
+    <!-- Statistics Summary (in panel) -->
+    <div class="cp20-ps" ng-show="items.length >= 2">
+        <label>סטטיסטיקה (DS-3)</label>
+        <div style="font-size:11px;color:#8BACC4;line-height:1.8;">
+            ממוצע: <span style="color:#5BC0EB;">{{compStats.mean | number:2}}</span><br>
+            סטיית תקן: <span style="color:#5BC0EB;">{{compStats.stddev | number:2}}</span><br>
+            מקדם שונות: <span style="color:#5BC0EB;">{{compStats.cv | number:1}}%</span><br>
+            טווח: <span style="color:#5BC0EB;">{{compStats.min | number:1}} — {{compStats.max | number:1}}</span><br>
+            חריגים: <span style="color:#F39C12;">{{(items | filter:{isOutlier:true}).length}}</span>
+        </div>
+    </div>
+
+    <!-- AF Connection Info -->
+    <div class="cp20-ps" ng-show="afConn">
+        <label>חיבור AF</label>
+        <div style="font-size:11px;color:#8BACC4;line-height:1.8;">
+            סטטוס: <span ng-style="{'color': afConn.status==='connected' ? '#2ECC71' : afConn.status==='partial' ? '#F39C12' : '#E74C3C'}">
+                {{afConn.status === 'connected' ? 'מחובר' : afConn.status === 'partial' ? 'חלקי' : 'מנותק'}}
+            </span><br>
+            תקינים: {{afConn.good}} / {{afConn.total}}
+            <span ng-show="afConn.stale"> | ישנים: {{afConn.stale}}</span>
+        </div>
+    </div>
+
+    <!-- Tag List -->
+    <div class="cp20-ps" ng-show="symbol.DataSources.length">
+        <label>תגים ({{symbol.DataSources.length}})</label>
+        <div style="max-height:160px;overflow-y:auto;">
+            <div ng-repeat="ds in symbol.DataSources track by $index"
+                 style="display:flex;align-items:center;justify-content:space-between;padding:4px 8px;background:#0F2940;border-radius:4px;margin-bottom:3px;font-size:11px;">
+                <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;direction:ltr;max-width:180px;" title="{{ds}}">
+                    {{ds.split('|').pop()}}
+                </span>
+                <button style="background:none;border:none;color:#E74C3C;cursor:pointer;font-size:14px;padding:0 4px;"
+                        ng-click="symbol.DataSources.splice($index,1)">✕</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ══════════ FOOTER ══════════ -->
+<div class="cp20-ftr">
+    <span>השוואה v20</span>
+    <span>{{items.length}} פריטים | בסיס: {{baselineMode === 'first' ? 'ראשון' : baselineMode === 'max' ? 'מקסימום' : 'ממוצע'}}</span>
+</div>
+
+</div>

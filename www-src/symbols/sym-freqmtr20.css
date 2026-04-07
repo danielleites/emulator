@@ -1,0 +1,65 @@
+/* ================================================================
+   sym-frequencymeter20.css — Grid Frequency Meter v20
+   ================================================================ */
+.fm20-root {
+    --fm20-bg: #060C18; --fm20-surface: #0B1D33; --fm20-border: rgba(46,139,192,0.15);
+    --fm20-accent: #5BC0EB; --fm20-text1: #FFFFFF; --fm20-text2: #C0D0E0; --fm20-text3: #8BACC4;
+    position: relative; width: 100%; height: 100%; background: var(--fm20-bg);
+    color: var(--fm20-text2); font-family: 'Segoe UI', Arial, sans-serif; font-size: 12px;
+    direction: rtl; overflow: hidden; display: flex; flex-direction: column;
+}
+.fm20-hdr {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 6px 10px; background: var(--fm20-surface); border-bottom: 1px solid var(--fm20-border); flex-shrink: 0;
+}
+.fm20-ttl { font-size: 14px; font-weight: 600; color: var(--fm20-text1); }
+.fm20-btn {
+    background: rgba(91,192,235,0.08); border: 1px solid var(--fm20-border);
+    color: var(--fm20-text3); border-radius: 4px; padding: 4px 8px; font-size: 11px; cursor: pointer;
+}
+.fm20-btn:hover, .fm20-btn.active { background: rgba(91,192,235,0.2); color: var(--fm20-accent); }
+.fm20-views { display: flex; gap: 2px; }
+.fm20-live { font-size: 11px; color: var(--fm20-text3); display: flex; align-items: center; gap: 4px; }
+.fm20-live-dot { width: 6px; height: 6px; border-radius: 50%; background: #2ecc71; animation: fm20-pulse 2s infinite; }
+@keyframes fm20-pulse { 0%,100% { opacity:1 } 50% { opacity:0.4 } }
+
+.fm20-summary { display: flex; gap: 12px; padding: 4px 10px; background: rgba(11,29,51,0.6); border-bottom: 1px solid var(--fm20-border); font-size: 11px; color: var(--fm20-text3); flex-shrink: 0; }
+.fm20-sum-item { white-space: nowrap; }
+
+.fm20-body { flex: 1; overflow-y: auto; overflow-x: hidden; }
+
+/* Gauge view */
+.fm20-gauge-view { display: flex; flex-direction: column; align-items: center; padding: 8px; gap: 8px; }
+.fm20-gauge-svg { display: flex; justify-content: center; }
+
+/* UFLS */
+.fm20-ufls { width: 100%; max-width: 300px; }
+.fm20-ufls-title { font-size: 11px; color: var(--fm20-accent); font-weight: 600; margin-bottom: 4px; }
+.fm20-ufls-row { display: flex; justify-content: space-between; padding: 2px 4px; font-size: 10px; border-radius: 2px; }
+.fm20-ufls-row.fm20-ufls-active { background: rgba(231,76,60,0.15); color: #e74c3c; }
+
+/* Sparkline */
+.fm20-spark-wrap { width: 100%; max-width: 400px; }
+
+/* Trend view */
+.fm20-trend-view { width: 100%; height: 100%; }
+
+/* Detail view */
+.fm20-detail-view { padding: 8px; }
+.fm20-stats, .fm20-events { margin-bottom: 12px; }
+.fm20-stat-title { font-size: 12px; color: var(--fm20-accent); font-weight: 600; margin-bottom: 4px; padding-bottom: 2px; border-bottom: 1px solid var(--fm20-border); }
+.fm20-stat-row { display: flex; justify-content: space-between; padding: 2px 4px; font-size: 11px; border-bottom: 1px solid rgba(46,139,192,0.08); }
+.fm20-event-empty { font-size: 11px; color: var(--fm20-text3); text-align: center; padding: 8px; }
+.fm20-event-row { display: flex; justify-content: space-between; padding: 2px 4px; font-size: 10px; border-bottom: 1px solid rgba(46,139,192,0.08); }
+
+/* Side panel */
+.fm20-panel { position: absolute; top: 0; left: -280px; width: 270px; height: 100%; background: var(--fm20-surface); border-right: 1px solid var(--fm20-border); transition: left 0.3s; z-index: 100; overflow-y: auto; padding: 0 10px 10px; }
+.fm20-panel.open { left: 0; box-shadow: 4px 0 20px rgba(0,0,0,0.4); }
+.fm20-phd { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; }
+.fm20-phd h3 { margin: 0; font-size: 13px; color: var(--fm20-accent); }
+.fm20-pcl { background: none; border: none; color: var(--fm20-text3); font-size: 16px; cursor: pointer; }
+.fm20-ps { margin-bottom: 8px; }
+.fm20-ps label { display: block; font-size: 11px; color: var(--fm20-text3); margin-bottom: 3px; }
+.fm20-ps input[type=text], .fm20-ps input[type=number], .fm20-ps select { width: 100%; background: var(--fm20-bg); border: 1px solid var(--fm20-border); border-radius: 4px; padding: 5px 8px; color: var(--fm20-text1); font-size: 12px; }
+
+.fm20-ftr { padding: 3px 10px; font-size: 10px; color: rgba(139,172,196,0.4); text-align: center; border-top: 1px solid var(--fm20-border); flex-shrink: 0; }

@@ -1,0 +1,177 @@
+<!-- ═══════════════════════════════════════════════════════
+     Executive Morphing Radar — Config Panel
+     WOW Radar v100 — wc20 Pattern + Collapsible <details>
+     ═══════════════════════════════════════════════════════ -->
+
+<div class="wc20-config-panel" style="direction:rtl; font-family:'Segoe UI',Arial,sans-serif;">
+
+    <!-- ── General (open by default) ── -->
+    <details class="wc20-section" open>
+        <summary class="wc20-section-title">כללי</summary>
+
+        <div class="wc20-field">
+            <label class="wc20-label">כותרת</label>
+            <input type="text" class="wc20-input"
+                   ng-model="config.Title"
+                   placeholder="Executive Anomaly Radar">
+        </div>
+
+        <div class="wc20-field">
+            <label class="wc20-label">מצב הדגמה (Demo)</label>
+            <input type="checkbox" class="wc20-checkbox"
+                   ng-model="config.DemoMode">
+            <span class="wc20-hint">טורבינה סינתטית (6 צירים, אוסצילציה חיה)</span>
+        </div>
+    </details>
+
+    <!-- ── Display ── -->
+    <details class="wc20-section" open>
+        <summary class="wc20-section-title">תצוגה</summary>
+
+        <div class="wc20-field">
+            <label class="wc20-label">מצב תוויות</label>
+            <select class="wc20-select" ng-model="config.LabelMode">
+                <option value="hover">Hover — הצג רק בריחוף</option>
+                <option value="always">Always — הצג תמיד</option>
+                <option value="anomaly">Anomaly — הצג רק בחריגה</option>
+            </select>
+            <span class="wc20-hint">Hover Raycasting: Math.atan2 זיהוי ציר קרוב</span>
+        </div>
+
+        <div class="wc20-field">
+            <label class="wc20-label">הצג קו בסיס (Reference)</label>
+            <input type="checkbox" class="wc20-checkbox"
+                   ng-model="config.ShowReference">
+            <span class="wc20-hint">קו מקווקו ב-50% לכל ציר</span>
+        </div>
+
+        <div class="wc20-field">
+            <label class="wc20-label">טבעות רשת</label>
+            <select class="wc20-select" ng-model="config.GridRings"
+                    ng-options="v as v for v in [3, 4, 5, 6]">
+            </select>
+        </div>
+
+        <div class="wc20-field">
+            <label class="wc20-label">עשרוניות</label>
+            <select class="wc20-select" ng-model="config.Decimals"
+                    ng-options="v as v for v in [0, 1, 2, 3]">
+            </select>
+        </div>
+    </details>
+
+    <!-- ── Thresholds ── -->
+    <details class="wc20-section">
+        <summary class="wc20-section-title">ספי צבע</summary>
+
+        <div class="wc20-field">
+            <label class="wc20-label">% אזהרה (Warn)</label>
+            <input type="number" class="wc20-input wc20-input-sm"
+                   ng-model="config.WarnPct"
+                   ng-model-options="{ debounce: 500 }"
+                   min="1" max="99" step="1">
+            <span class="wc20-hint">ציר ≥ ערך זה → כתום + הילה</span>
+        </div>
+
+        <div class="wc20-field">
+            <label class="wc20-label">% קריטי (Critical)</label>
+            <input type="number" class="wc20-input wc20-input-sm"
+                   ng-model="config.CritPct"
+                   ng-model-options="{ debounce: 500 }"
+                   min="1" max="100" step="1">
+            <span class="wc20-hint">ציר ≥ ערך זה → אדום + פעימה</span>
+        </div>
+    </details>
+
+    <!-- ── Physics ── -->
+    <details class="wc20-section">
+        <summary class="wc20-section-title">פיזיקת אנימציה</summary>
+
+        <div class="wc20-field">
+            <label class="wc20-label">מקדם Lerp (רכות)</label>
+            <input type="number" class="wc20-input wc20-input-sm"
+                   ng-model="config.LerpFactor"
+                   ng-model-options="{ debounce: 500 }"
+                   min="1" max="25" step="1">
+            <span class="wc20-hint">1 = ג'לי רך, 8 = ברירת מחדל, 25 = חד</span>
+        </div>
+
+        <div class="wc20-field">
+            <label class="wc20-label">ערך מקסימום ברירת מחדל</label>
+            <input type="number" class="wc20-input wc20-input-sm"
+                   ng-model="config.DefaultMax"
+                   ng-model-options="{ debounce: 500 }"
+                   min="1" step="1">
+            <span class="wc20-hint">חל על כל ציר ללא override</span>
+        </div>
+    </details>
+
+    <!-- ── Theme ── -->
+    <details class="wc20-section">
+        <summary class="wc20-section-title">ערכת נושא</summary>
+
+        <div class="wc20-field">
+            <label class="wc20-label">גופן</label>
+            <select class="wc20-select" ng-model="config.fontFamily">
+                <option value="Segoe UI">Segoe UI</option>
+                <option value="Arial">Arial</option>
+                <option value="Tahoma">Tahoma</option>
+                <option value="Consolas">Consolas (Mono)</option>
+            </select>
+        </div>
+
+        <div class="wc20-field">
+            <label class="wc20-label">גודל גופן (px)</label>
+            <input type="number" class="wc20-input wc20-input-sm"
+                   ng-model="config.fontSize"
+                   ng-model-options="{ debounce: 500 }"
+                   min="8" max="16" step="1">
+        </div>
+    </details>
+
+    <!-- ── Info (collapsed by default) ── -->
+    <details class="wc20-section">
+        <summary class="wc20-section-title">מידע טכני</summary>
+
+        <div class="wc20-field wc20-readonly">
+            <span class="wc20-badge wc20-badge-blue">DataShape</span>
+            <span>Table (Multiple Attributes → Rows)</span>
+        </div>
+
+        <div class="wc20-field wc20-readonly">
+            <span class="wc20-badge wc20-badge-green">Animation</span>
+            <span>Spring Physics Lerp — 60fps Fluid Morphing</span>
+        </div>
+
+        <div class="wc20-field wc20-readonly">
+            <span class="wc20-badge wc20-badge-green">Axis Highlight</span>
+            <span>Dynamic radialGradient Halo + Pulse Ring</span>
+        </div>
+
+        <div class="wc20-field wc20-readonly">
+            <span class="wc20-badge wc20-badge-blue">Hover</span>
+            <span>Math.atan2 Raycasting — O(n) Nearest Axis</span>
+        </div>
+
+        <div class="wc20-field wc20-readonly">
+            <span class="wc20-badge wc20-badge-orange">Color Palette</span>
+            <span>Executive Neon Glow — Fade the Noise</span>
+        </div>
+
+        <div class="wc20-field wc20-readonly">
+            <span class="wc20-badge wc20-badge-purple">Performance</span>
+            <span>rAF + idle sleep — 0% CPU when converged</span>
+        </div>
+
+        <div class="wc20-field wc20-readonly">
+            <span class="wc20-badge wc20-badge-blue">Rendering</span>
+            <span>Vanilla Canvas 2D — 0 Dependencies, 0 DOM cells</span>
+        </div>
+
+        <div class="wc20-field wc20-readonly" style="margin-top:8px;">
+            <span class="wc20-badge">WOW Radar v100</span>
+            <span style="color:#8899AA;">Executive Morphing Radar</span>
+        </div>
+    </details>
+
+</div>

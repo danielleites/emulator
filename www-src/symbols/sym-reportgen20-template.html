@@ -1,0 +1,303 @@
+<link rel="stylesheet" href="/PIVision/Scripts/app/editor/symbols/ext/sym-reportgen20.css">
+<link rel="stylesheet" href="/PIVision/Scripts/app/editor/symbols/ext/piv20-design-system.css">
+<link rel="stylesheet" href="/PIVision/Scripts/app/editor/symbols/ext/piv20-overrides.css">
+<script type="text/javascript" src="/PIVision/Scripts/app/editor/symbols/ext/piv20-plugins/piv20-core.js"></script>
+<script type="text/javascript" src="/PIVision/Scripts/app/editor/symbols/ext/piv20-plugins/piv20-baseline.js"></script>
+<script type="text/javascript" src="/PIVision/Scripts/app/editor/symbols/ext/piv20-plugins/piv20-reportgen.js"></script>
+<div id="rg20-widget" class="piv20 rg20-widget" style="display:none;"
+     ng-style="{'font-family': config.fontFamily || 'Segoe UI', 'font-size': (config.fontSize || 12) + 'px'}">
+
+    <!-- Header -->
+    <div class="rg20-header">
+        <span class="rg20-title">{{config.Title || 'מחולל דוחות'}}</span>
+        <div class="rg20-toolbar">
+            <button ng-click="openPanel()" title="מידע">&#9776;</button>
+            <button ng-click="showDocs()" title="תיעוד">?</button>
+        </div>
+    </div>
+
+    <!-- Status Bar -->
+    <div class="rg20-status-bar">
+        <span class="rg20-status-dot" ng-class="engineStatus"></span>
+        <span>{{engineStatusText}}</span>
+        <span style="color:#4A6A7F;margin-right:auto;">{{currentUnit || '---'}}</span>
+        <span ng-show="reportCount">דוחות: {{reportCount}}</span>
+    </div>
+
+    <!-- Tabs -->
+    <div class="rg20-tabs">
+        <div class="rg20-tab" ng-class="{active: activeTab==='generate'}" ng-click="setTab('generate')">&#128196; יצירת דוח</div>
+        <div class="rg20-tab" ng-class="{active: activeTab==='preview'}" ng-click="setTab('preview')">&#128065; תצוגה מקדימה</div>
+        <div class="rg20-tab" ng-class="{active: activeTab==='templates'}" ng-click="setTab('templates')">&#128203; תבניות</div>
+        <div class="rg20-tab" ng-class="{active: activeTab==='history'}" ng-click="setTab('history')" ng-show="config.keepHistory">&#128340; היסטוריה</div>
+    </div>
+
+    <!-- Body -->
+    <div class="rg20-body">
+
+        <!-- GENERATE VIEW -->
+        <div ng-show="activeTab==='generate'">
+
+            <div class="rg20-form-group">
+                <label class="rg20-label">תבנית דוח</label>
+                <select class="rg20-select" ng-model="reportConfig.template">
+                    <option value="status">סטטוס נוכחי</option>
+                    <option value="baseline">ניתוח Baseline</option>
+                    <option value="health">בריאות יחידה</option>
+                    <option value="anomaly">יומן חריגות</option>
+                    <option value="forecast">תחזית שעתית</option>
+                    <option value="full">דוח מלא</option>
+                </select>
+            </div>
+
+            <div class="rg20-form-group">
+                <label class="rg20-label">יחידה (Unit Key)</label>
+                <input class="rg20-input" ng-model="reportConfig.unitKey" placeholder="SiteName/UnitName">
+            </div>
+
+            <div style="display:flex;gap:8px;">
+                <div class="rg20-form-group" style="flex:1;">
+                    <label class="rg20-label">אתר</label>
+                    <input class="rg20-input" ng-model="reportConfig.site" placeholder="שם אתר">
+                </div>
+                <div class="rg20-form-group" style="flex:1;">
+                    <label class="rg20-label">יחידה</label>
+                    <input class="rg20-input" ng-model="reportConfig.unit" placeholder="שם יחידה">
+                </div>
+            </div>
+
+            <div class="rg20-form-group">
+                <label class="rg20-label">כותרת דוח</label>
+                <input class="rg20-input" ng-model="reportConfig.title" placeholder="כותרת מותאמת אישית...">
+            </div>
+
+            <div class="rg20-checkbox-row">
+                <input type="checkbox" ng-model="reportConfig.includeCharts" style="accent-color:#5BC0EB;">
+                <span>כלול גרפים</span>
+            </div>
+            <div class="rg20-checkbox-row">
+                <input type="checkbox" ng-model="reportConfig.includeCorrelations" style="accent-color:#5BC0EB;">
+                <span>כלול מתאמים</span>
+            </div>
+            <div class="rg20-checkbox-row">
+                <input type="checkbox" ng-model="reportConfig.includeAnomalyLog" style="accent-color:#5BC0EB;">
+                <span>כלול יומן חריגות</span>
+            </div>
+
+            <div style="display:flex;gap:8px;margin-top:12px;">
+                <button class="rg20-btn rg20-btn-primary" ng-click="generateReport()" ng-disabled="generating || !reportConfig.unitKey">
+                    {{generating ? 'מייצר...' : 'צור דוח'}}
+                </button>
+                <button class="rg20-btn" ng-click="clearConfig()" style="background:rgba(91,192,235,.05);color:#6B8FA8;border-color:rgba(91,192,235,.15);">
+                    נקה
+                </button>
+            </div>
+
+            <div ng-show="generateError" style="margin-top:8px;font-size:10px;color:#e74c3c;">
+                &#10060; {{generateError}}
+            </div>
+            <div ng-show="generateSuccess" style="margin-top:8px;font-size:10px;color:#2ecc71;">
+                &#10004; {{generateSuccess}}
+            </div>
+        </div>
+
+        <!-- PREVIEW VIEW -->
+        <div ng-show="activeTab==='preview'">
+            <div ng-show="!currentReport" style="color:#4A6A7F;font-size:11px;text-align:center;padding:40px;">
+                אין דוח. צור דוח בלשונית "יצירת דוח"
+            </div>
+
+            <div ng-show="currentReport" class="rg20-preview">
+                <div class="rg20-preview-title">{{currentReport.title}}</div>
+
+                <!-- Meta -->
+                <div class="rg20-section">
+                    <div class="rg20-section-title">פרטי דוח</div>
+                    <div class="rg20-kv-row">
+                        <span class="rg20-kv-label">יחידה</span>
+                        <span class="rg20-kv-value">{{currentReport.unit}}</span>
+                    </div>
+                    <div class="rg20-kv-row">
+                        <span class="rg20-kv-label">נוצר</span>
+                        <span class="rg20-kv-value">{{currentReport.generatedAt}}</span>
+                    </div>
+                    <div class="rg20-kv-row">
+                        <span class="rg20-kv-label">תבנית</span>
+                        <span class="rg20-kv-value">{{currentReport.templateName}}</span>
+                    </div>
+                </div>
+
+                <!-- Health Score -->
+                <div class="rg20-section" ng-show="currentReport.healthScore != null">
+                    <div class="rg20-section-title">ציון בריאות</div>
+                    <div style="display:flex;align-items:center;gap:12px;">
+                        <span style="font-size:24px;font-weight:700;" ng-style="{'color': getScoreColor(currentReport.healthScore)}">
+                            {{currentReport.healthScore}}
+                        </span>
+                        <div style="flex:1;">
+                            <div class="rg20-health-bar">
+                                <div class="rg20-health-fill" ng-style="{'width': currentReport.healthScore + '%', 'background': getScoreColor(currentReport.healthScore)}"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div ng-show="currentReport.healthBreakdown" style="margin-top:6px;">
+                        <div ng-repeat="(cat, val) in currentReport.healthBreakdown" class="rg20-kv-row">
+                            <span class="rg20-kv-label">{{getBreakdownLabel(cat)}}</span>
+                            <span class="rg20-kv-value">{{formatValue(val)}}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Baseline Statistics -->
+                <div class="rg20-section" ng-show="currentReport.statistics">
+                    <div class="rg20-section-title">נתוני Baseline</div>
+                    <table class="rg20-stats-table">
+                        <thead>
+                            <tr>
+                                <th>פרמטר</th><th>ממוצע</th><th>סטיית תקן</th><th>מינימום</th><th>מקסימום</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="(field, stat) in currentReport.statistics">
+                                <td style="font-weight:500;">{{field}}</td>
+                                <td>{{formatValue(stat.Mean)}}</td>
+                                <td>{{formatValue(stat.StdDev)}}</td>
+                                <td>{{formatValue(stat.Min)}}</td>
+                                <td>{{formatValue(stat.Max)}}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Current Deviations -->
+                <div class="rg20-section" ng-show="currentReport.deviations">
+                    <div class="rg20-section-title">סטיות נוכחיות</div>
+                    <table class="rg20-stats-table">
+                        <thead>
+                            <tr>
+                                <th>פרמטר</th><th>ערך</th><th>Z-Score</th><th>סטטוס</th><th>ממוצע Baseline</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="(field, dev) in currentReport.deviations">
+                                <td style="font-weight:500;">{{field}}</td>
+                                <td>{{formatValue(dev.value)}}</td>
+                                <td>{{formatValue(dev.zScore)}}</td>
+                                <td><span class="rg20-badge" ng-class="dev.status">{{getStatusText(dev.status)}}</span></td>
+                                <td>{{formatValue(dev.baselineMean)}}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pattern -->
+                <div class="rg20-section" ng-show="currentReport.pattern">
+                    <div class="rg20-section-title">דפוס פעילות</div>
+                    <div class="rg20-kv-row">
+                        <span class="rg20-kv-label">דפוס</span>
+                        <span class="rg20-kv-value">{{getPatternText(currentReport.pattern)}}</span>
+                    </div>
+                </div>
+
+                <!-- Forecast -->
+                <div class="rg20-section" ng-show="currentReport.forecast">
+                    <div class="rg20-section-title">תחזית שעה קרובה</div>
+                    <div ng-repeat="(field, val) in currentReport.forecast" class="rg20-kv-row">
+                        <span class="rg20-kv-label">{{field}}</span>
+                        <span class="rg20-kv-value">{{formatValue(val)}}</span>
+                    </div>
+                </div>
+
+                <!-- Correlations -->
+                <div class="rg20-section" ng-show="currentReport.correlations && currentReport.correlations.length">
+                    <div class="rg20-section-title">מתאמים</div>
+                    <div ng-repeat="corr in currentReport.correlations" class="rg20-kv-row">
+                        <span class="rg20-kv-label">{{corr.FieldA}} / {{corr.FieldB}}</span>
+                        <span class="rg20-kv-value" ng-style="{'color': corr.Correlation > 0 ? '#2ecc71' : '#e74c3c'}">
+                            {{formatValue(corr.Correlation, 3)}}
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Anomaly Log -->
+                <div class="rg20-section" ng-show="currentReport.anomalyLog && currentReport.anomalyLog.length">
+                    <div class="rg20-section-title">יומן חריגות (אחרונים)</div>
+                    <table class="rg20-stats-table">
+                        <thead>
+                            <tr><th>זמן</th><th>שדה</th><th>ערך</th><th>Z-Score</th><th>מעבר</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr ng-repeat="a in currentReport.anomalyLog track by $index">
+                                <td style="font-size:9px;">{{a.timestamp | limitTo:19}}</td>
+                                <td>{{a.field}}</td>
+                                <td>{{formatValue(a.value)}}</td>
+                                <td>{{formatValue(a.zScore)}}</td>
+                                <td style="font-size:9px;">{{a.transition}}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Export Bar -->
+                <div class="rg20-export-bar">
+                    <button class="rg20-btn rg20-btn-export" ng-click="exportHTML()">HTML</button>
+                    <button class="rg20-btn rg20-btn-export" ng-click="exportCSV()">CSV</button>
+                    <button class="rg20-btn rg20-btn-export" ng-click="printReport()">&#128424; הדפסה</button>
+                    <button class="rg20-btn" ng-click="copyToClipboard()" style="background:rgba(91,192,235,.08);color:#8BACC4;border-color:rgba(91,192,235,.12);">
+                        &#128203; העתק
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- TEMPLATES VIEW -->
+        <div ng-show="activeTab==='templates'" class="rg20-template-grid">
+            <div ng-repeat="tmpl in reportTemplates track by tmpl.key"
+                 class="rg20-template-card" ng-class="{selected: reportConfig.template === tmpl.key}"
+                 ng-click="selectTemplate(tmpl)">
+                <div class="rg20-template-icon">{{tmpl.icon}}</div>
+                <div class="rg20-template-name">{{tmpl.name}}</div>
+                <div class="rg20-template-desc">{{tmpl.description}}</div>
+            </div>
+        </div>
+
+        <!-- HISTORY VIEW -->
+        <div ng-show="activeTab==='history'">
+            <div ng-repeat="item in reportHistory track by $index" class="rg20-history-item" ng-click="loadHistory(item)">
+                <span class="rg20-history-time">{{item.timeText}}</span>
+                <span class="rg20-history-name">{{item.title}}</span>
+                <span class="rg20-history-tmpl">{{item.templateName}}</span>
+            </div>
+            <div ng-show="!reportHistory.length" style="color:#4A6A7F;font-size:11px;text-align:center;padding:30px;">
+                אין היסטוריית דוחות
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Side Panel -->
+    <div class="rg20-side-panel" ng-show="panelOpen">
+        <div class="rg20-panel-header">
+            <span style="color:#5BC0EB;font-weight:600;">מחולל דוחות</span>
+            <button class="rg20-panel-close" ng-click="closePanel()">&#10005;</button>
+        </div>
+        <div class="rg20-panel-body">
+            <div style="font-size:10px;color:#6B8FA8;margin-bottom:6px;">
+                מנוע: <span style="color:#D0E4F5;">BaselineEngine v20</span>
+            </div>
+            <div style="font-size:10px;color:#6B8FA8;margin-bottom:6px;">
+                יחידה: <span style="color:#D0E4F5;">{{currentUnit || '---'}}</span>
+            </div>
+            <div style="font-size:10px;color:#6B8FA8;margin-bottom:6px;">
+                דוחות שנוצרו: <span style="color:#D0E4F5;">{{reportCount || 0}}</span>
+            </div>
+            <div style="font-size:10px;color:#6B8FA8;margin-bottom:6px;">
+                פרופילים טעונים: <span style="color:#D0E4F5;">{{loadedProfiles || 0}}</span>
+            </div>
+            <button ng-click="showDocs()" style="margin-top:12px;width:100%;background:rgba(91,192,235,.1);border:1px solid rgba(91,192,235,.2);color:#5BC0EB;border-radius:4px;padding:5px;font-size:11px;cursor:pointer;">
+                תיעוד
+            </button>
+        </div>
+    </div>
+
+</div>

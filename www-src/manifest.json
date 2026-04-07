@@ -1,0 +1,17 @@
+{
+  "name": "PI Vision — כלי QA ואמולטור סימבולים",
+  "short_name": "PIV QA",
+  "description": "חבילה מאוחדת — אמולטור PI Vision R300, בדיקות QA, דפדפן AF, ו-569 סמלים כולל MM20",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0a0f1e",
+  "theme_color": "#00d4ff",
+  "dir": "rtl",
+  "lang": "he",
+  "orientation": "any",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ],
+  "categories": ["productivity", "utilities", "developer"]
+}

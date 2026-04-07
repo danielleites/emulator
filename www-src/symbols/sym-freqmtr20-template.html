@@ -1,0 +1,115 @@
+<link rel="stylesheet" href="/PIVision/Scripts/app/editor/symbols/ext/sym-freqmtr20.css">
+<link rel="stylesheet" href="/PIVision/Scripts/app/editor/symbols/ext/piv20-design-system.css">
+<link rel="stylesheet" href="/PIVision/Scripts/app/editor/symbols/ext/piv20-overrides.css">
+<script type="text/javascript" src="/PIVision/Scripts/app/editor/symbols/ext/piv20-plugins/piv20-core.js"></script>
+<script type="text/javascript" src="/PIVision/Scripts/app/editor/symbols/ext/piv20-plugins/piv20-frequencymeter.js"></script>
+
+<div class="piv20 fm20-root" ng-right-click="showContextMenu($event)">
+
+    <!-- Header -->
+    <div class="fm20-hdr">
+        <div style="display:flex;align-items:center;gap:8px">
+            <span class="fm20-ttl">{{config.Title || 'תדר רשת'}}</span>
+            <span class="fm20-live"><span class="fm20-live-dot"></span>חי</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:4px">
+            <div class="fm20-views">
+                <button class="fm20-btn" ng-class="{active: viewMode==='gauge'}" ng-click="setView('gauge')">מד</button>
+                <button class="fm20-btn" ng-class="{active: viewMode==='trend'}" ng-click="setView('trend')">מגמה</button>
+                <button class="fm20-btn" ng-class="{active: viewMode==='detail'}" ng-click="setView('detail')">פרטים</button>
+            </div>
+            <button class="fm20-btn" ng-click="exportCSV()" title="ייצוא CSV">&#8681;</button>
+            <button class="fm20-btn" ng-click="showDocs()" title="תיעוד">?</button>
+            <button class="fm20-btn" ng-click="openPanel()" title="הגדרות">&#9881;</button>
+        </div>
+    </div>
+
+    <!-- Summary bar -->
+    <div class="fm20-summary">
+        <span class="fm20-sum-item" ng-style="{'color': status.color}">{{freq | number:3}} Hz</span>
+        <span class="fm20-sum-item" ng-style="{'color': status.color}">{{status.label}}</span>
+        <span class="fm20-sum-item" ng-show="config.ShowROCOF">ROCOF: {{rocof | number:3}} Hz/s</span>
+    </div>
+
+    <!-- Body -->
+    <div class="fm20-body">
+
+        <!-- Gauge view -->
+        <div ng-show="viewMode==='gauge'" class="fm20-gauge-view">
+            <div class="fm20-gauge-svg"></div>
+
+            <!-- UFLS staging -->
+            <div class="fm20-ufls" ng-show="config.ShowUFLS">
+                <div class="fm20-ufls-title">שלבי UFLS</div>
+                <div class="fm20-ufls-row" ng-repeat="u in ufls" ng-class="{'fm20-ufls-active': u.active}">
+                    <span>{{u.label}}</span>
+                    <span>{{u.freq}} Hz</span>
+                    <span ng-style="{'color': u.proximity < 0 ? '#e74c3c' : u.proximity < 0.2 ? '#f39c12' : '#2ecc71'}">
+                        {{u.proximity > 0 ? '+' : ''}}{{u.proximity | number:2}} Hz
+                    </span>
+                </div>
+            </div>
+
+            <!-- Sparkline -->
+            <div class="fm20-spark-wrap" ng-show="config.ShowSpark">
+                <canvas class="fm20-spark-canvas" width="300" height="50" style="width:100%;height:40px"></canvas>
+            </div>
+        </div>
+
+        <!-- Trend view -->
+        <div ng-show="viewMode==='trend'" class="fm20-trend-view">
+            <canvas class="fm20-spark-canvas" width="600" height="200" style="width:100%;height:100%"></canvas>
+        </div>
+
+        <!-- Detail view -->
+        <div ng-show="viewMode==='detail'" class="fm20-detail-view">
+            <!-- Stats -->
+            <div class="fm20-stats" ng-show="config.ShowStats">
+                <div class="fm20-stat-title">סטטיסטיקה</div>
+                <div class="fm20-stat-row"><span>נוכחי</span><span>{{stats.current | number:3}} Hz</span></div>
+                <div class="fm20-stat-row"><span>מינימום</span><span>{{stats.min | number:3}} Hz</span></div>
+                <div class="fm20-stat-row"><span>מקסימום</span><span>{{stats.max | number:3}} Hz</span></div>
+                <div class="fm20-stat-row"><span>ממוצע</span><span>{{stats.avg | number:3}} Hz</span></div>
+                <div class="fm20-stat-row"><span>סטיית תקן</span><span>{{stats.stddev | number:4}} Hz</span></div>
+                <div class="fm20-stat-row"><span>סטייה</span><span ng-style="{'color': status.color}">{{stats.deviation | number:3}} Hz</span></div>
+                <div class="fm20-stat-row"><span>דגימות</span><span>{{stats.n}}</span></div>
+            </div>
+
+            <!-- Events -->
+            <div class="fm20-events">
+                <div class="fm20-stat-title">אירועי תדר</div>
+                <div class="fm20-event-empty" ng-show="!events.length">אין אירועים</div>
+                <div class="fm20-event-row" ng-repeat="ev in events">
+                    <span>{{ev.time}}</span>
+                    <span>נדיר: {{ev.nadir}} Hz</span>
+                    <span>{{ev.duration}}</span>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Side panel -->
+    <div class="fm20-panel" ng-class="{open: panelOpen}">
+        <div class="fm20-phd">
+            <h3>הגדרות מד תדר</h3>
+            <button class="fm20-pcl" ng-click="closePanel()">&times;</button>
+        </div>
+        <div class="fm20-ps"><label>כותרת</label><input type="text" ng-model="config.Title"></div>
+        <div class="fm20-ps"><label>תדר נומינלי (Hz)</label><input type="number" ng-model="config.NominalFreq" step="0.1"></div>
+        <div class="fm20-ps"><label>מינימום (Hz)</label><input type="number" ng-model="config.MinHz" step="0.1"></div>
+        <div class="fm20-ps"><label>מקסימום (Hz)</label><input type="number" ng-model="config.MaxHz" step="0.1"></div>
+        <div class="fm20-ps"><label>רצועה תקינה (Hz)</label><input type="number" ng-model="config.NormalBand" step="0.01"></div>
+        <div class="fm20-ps"><label>רצועת אזהרה (Hz)</label><input type="number" ng-model="config.WarnBand" step="0.01"></div>
+        <div class="fm20-ps"><label><input type="checkbox" ng-model="config.ShowROCOF"> הצג ROCOF</label></div>
+        <div class="fm20-ps"><label><input type="checkbox" ng-model="config.ShowUFLS"> הצג UFLS</label></div>
+        <div class="fm20-ps"><label><input type="checkbox" ng-model="config.ShowSpark"> הצג גרף</label></div>
+        <div class="fm20-ps"><label><input type="checkbox" ng-model="config.ShowStats"> הצג סטטיסטיקה</label></div>
+    </div>
+
+    <!-- Footer -->
+    <div class="fm20-ftr">PIV20 FreqMeter</div>
+
+    <!-- Widget container -->
+    <div id="fm20-widget" style="display:none"></div>
+</div>

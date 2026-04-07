@@ -1,0 +1,397 @@
+/**
+ * ═══════════════════════════════════════════════════════
+ *  sym-freqmeter-wow.css — Executive Resonance Meter Styles
+ * ═══════════════════════════════════════════════════════
+ *  Lightweight CSS — Canvas handles all oscilloscope
+ *  rendering (CRT trail, sine wave, grid, pulse ring).
+ *  CSS only styles the toolbar, stats, value overlay
+ *  (glassmorphism text centered over the CRT display),
+ *  status badges, skeleton, and footer.
+ *
+ *  Version : WOW Resonance Meter v100
+ *  Prefix  : wow-fm-
+ * ═══════════════════════════════════════════════════════
+ */
+
+
+/* ═══ CSS Custom Properties ═══ */
+
+:host {
+    --wow-fm-bg-start:     #0A0F1C;
+    --wow-fm-bg-end:       #0B0F19;
+    --wow-fm-surface:      #0F2940;
+    --wow-fm-accent:       #5BC0EB;
+    --wow-fm-accent-glow:  rgba(91, 192, 235, 0.3);
+    --wow-fm-ok:           #00F5D4;
+    --wow-fm-warn:         #FF9500;
+    --wow-fm-crit:         #FF3B30;
+    --wow-fm-text:         #ECF0F1;
+    --wow-fm-text-muted:   #8899AA;
+    --wow-fm-border:       #1A3A5C;
+    --wow-fm-font:         'Segoe UI', Arial, sans-serif;
+    --wow-fm-font-size:    12px;
+    --wow-fm-radius:       8px;
+    --wow-fm-transition:   0.2s ease-out;
+}
+
+
+/* ═══ Safe Reset ═══ */
+
+.wow-fm-root { box-sizing: border-box; }
+.wow-fm-root *, .wow-fm-root *::before, .wow-fm-root *::after {
+    box-sizing: border-box;
+}
+
+
+/* ═══ Root Layout ═══ */
+
+.wow-fm-root {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    background: linear-gradient(180deg, var(--wow-fm-bg-start), var(--wow-fm-bg-end));
+    font-family: var(--wow-fm-font);
+    font-size: var(--wow-fm-font-size);
+    color: var(--wow-fm-text);
+    direction: rtl;
+    overflow: hidden;
+    border-radius: var(--wow-fm-radius);
+}
+
+
+/* ═══ Toolbar ═══ */
+
+.wow-fm-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 14px;
+    min-height: 40px;
+    flex-shrink: 0;
+    border-bottom: 1px solid var(--wow-fm-border);
+    background: rgba(10, 15, 28, 0.6);
+}
+
+.wow-fm-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--wow-fm-text);
+    letter-spacing: 0.3px;
+    text-shadow: 0 0 12px var(--wow-fm-accent-glow);
+}
+
+.wow-fm-toolbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    direction: ltr;
+}
+
+.wow-fm-btn {
+    padding: 5px 12px;
+    border: 1px solid var(--wow-fm-border);
+    border-radius: 6px;
+    background: rgba(91, 192, 235, 0.08);
+    color: var(--wow-fm-accent);
+    font-size: 11px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all var(--wow-fm-transition);
+    white-space: nowrap;
+}
+
+.wow-fm-btn:hover {
+    background: rgba(91, 192, 235, 0.18);
+    border-color: var(--wow-fm-accent);
+}
+
+
+/* ═══ Stats Bar ═══ */
+
+.wow-fm-stats {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 4px 14px;
+    flex-shrink: 0;
+    font-size: 10px;
+    color: var(--wow-fm-text-muted);
+    border-bottom: 1px solid rgba(26, 58, 92, 0.5);
+    direction: rtl;
+}
+
+.wow-fm-stat {
+    white-space: nowrap;
+}
+
+.wow-fm-stat b {
+    color: var(--wow-fm-text);
+    font-weight: 600;
+}
+
+
+/* ═══ Canvas Container ═══ */
+
+.wow-fm-canvas-outer {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* CRT monitor subtle inner shadow */
+    box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.5);
+}
+
+.wow-fm-canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+
+/* ═══════════════════════════════════════════════════
+ *  Value Overlay (Glassmorphism)
+ *
+ *  Centered over the oscilloscope canvas. The semi-
+ *  transparent backdrop-blur lets the CRT phosphor
+ *  glow bleed through the frequency readout — so the
+ *  text feels "part of the scope" rather than pasted
+ *  on top of it.
+ * ═══════════════════════════════════════════════════ */
+
+.wow-fm-value-overlay {
+    position: absolute;
+    bottom: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 10px 20px;
+    border-radius: 10px;
+    background: rgba(10, 15, 28, 0.50);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    border: 1px solid rgba(91, 192, 235, 0.08);
+    pointer-events: none;
+    text-align: center;
+    min-width: 100px;
+}
+
+.wow-fm-value-freq {
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--wow-fm-text);
+    line-height: 1.1;
+    font-variant-numeric: tabular-nums;
+    transition: color 0.3s ease, text-shadow 0.3s ease;
+}
+
+.wow-fm-value-deviation {
+    font-size: 12px;
+    color: var(--wow-fm-text-muted);
+    margin-top: 3px;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.3px;
+}
+
+.wow-fm-value-status {
+    font-size: 11px;
+    margin-top: 4px;
+    font-weight: 600;
+    letter-spacing: 0.2px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+}
+
+
+/* ═══════════════════════════════════════════════════
+ *  Status Badges
+ *
+ *  Three-tier traffic light with glow background.
+ *  The subtle bg glow reinforces the CRT phosphor
+ *  aesthetic — it looks like the status is "lit up"
+ *  on the instrument panel.
+ * ═══════════════════════════════════════════════════ */
+
+.wow-fm-status-ok {
+    color: var(--wow-fm-ok);
+    background: rgba(0, 245, 212, 0.10);
+}
+
+.wow-fm-status-warn {
+    color: var(--wow-fm-warn);
+    background: rgba(255, 149, 0, 0.12);
+    animation: wowFmPulseWarn 2s ease-in-out infinite;
+}
+
+.wow-fm-status-crit {
+    color: var(--wow-fm-crit);
+    background: rgba(255, 59, 48, 0.15);
+    animation: wowFmPulseCrit 1s ease-in-out infinite;
+}
+
+@keyframes wowFmPulseWarn {
+    0%, 100% { background: rgba(255, 149, 0, 0.12); }
+    50%      { background: rgba(255, 149, 0, 0.22); }
+}
+
+@keyframes wowFmPulseCrit {
+    0%, 100% { background: rgba(255, 59, 48, 0.15); }
+    50%      { background: rgba(255, 59, 48, 0.30); }
+}
+
+
+/* ═══════════════════════════════════════════════════
+ *  Level Colors on Frequency Text
+ *
+ *  These classes are toggled by JavaScript on the
+ *  frequency readout. The text-shadow adds a soft
+ *  neon glow matching the wave color — so the number
+ *  "resonates" with the oscilloscope display.
+ * ═══════════════════════════════════════════════════ */
+
+.wow-fm-level-ok {
+    color: var(--wow-fm-ok) !important;
+    text-shadow: 0 0 16px rgba(0, 245, 212, 0.4) !important;
+}
+
+.wow-fm-level-warn {
+    color: var(--wow-fm-warn) !important;
+    text-shadow: 0 0 16px rgba(255, 149, 0, 0.4) !important;
+}
+
+.wow-fm-level-crit {
+    color: var(--wow-fm-crit) !important;
+    text-shadow: 0 0 20px rgba(255, 59, 48, 0.5) !important;
+}
+
+
+/* ═══ Skeleton / Initial Loading ═══ */
+
+.wow-fm-skeleton {
+    position: absolute;
+    inset: 0;
+    z-index: 50;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--wow-fm-bg-start);
+}
+
+.wow-fm-skeleton::after {
+    content: '';
+    width: 50%;
+    height: 3px;
+    border-radius: 2px;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        var(--wow-fm-accent),
+        transparent
+    );
+    animation: wowFmShimmer 1.5s ease-in-out infinite;
+}
+
+@keyframes wowFmShimmer {
+    0%   { transform: translateX(-100%); opacity: 0.3; }
+    50%  { opacity: 1; }
+    100% { transform: translateX(100%); opacity: 0.3; }
+}
+
+
+/* ═══ Footer ═══ */
+
+.wow-fm-footer {
+    flex-shrink: 0;
+    padding: 4px 14px;
+    font-size: 9px;
+    color: var(--wow-fm-text-muted);
+    text-align: center;
+    border-top: 1px solid var(--wow-fm-border);
+}
+
+
+/* ═══ Responsive ═══ */
+
+@container (max-width: 300px) {
+    .wow-fm-value-freq {
+        font-size: 20px;
+    }
+    .wow-fm-value-overlay {
+        padding: 6px 12px;
+        min-width: 70px;
+    }
+    .wow-fm-stats {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+    .wow-fm-value-deviation {
+        font-size: 10px;
+    }
+}
+
+
+/* ═══ Print Media ═══ */
+
+@media print {
+    .wow-fm-root {
+        background: #FFFFFF !important;
+        color: #333 !important;
+        border: 1px solid #DDD;
+    }
+
+    .wow-fm-toolbar {
+        background: #F5F5F5 !important;
+        border-color: #DDD !important;
+    }
+
+    .wow-fm-toolbar-actions {
+        display: none !important;
+    }
+
+    .wow-fm-title {
+        color: #000 !important;
+        text-shadow: none !important;
+    }
+
+    .wow-fm-value-overlay {
+        background: rgba(255, 255, 255, 0.7) !important;
+        backdrop-filter: none !important;
+        border-color: #DDD !important;
+    }
+
+    .wow-fm-value-freq {
+        text-shadow: none !important;
+    }
+
+    .wow-fm-canvas {
+        cursor: default;
+    }
+
+    .wow-fm-canvas-outer {
+        box-shadow: none !important;
+    }
+
+    .wow-fm-status-ok,
+    .wow-fm-status-warn,
+    .wow-fm-status-crit {
+        animation: none !important;
+    }
+
+    .wow-fm-stats,
+    .wow-fm-footer {
+        color: #666 !important;
+        border-color: #DDD !important;
+    }
+
+    .wow-fm-stat b {
+        color: #000 !important;
+    }
+}

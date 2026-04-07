@@ -1,0 +1,274 @@
+<!-- sym-gantt20-template.html  --  Gantt Card Grid v20 Template -->
+<!-- Extracted from v10 inline template, all classes prefixed gt20-. -->
+<!-- External CSS: sym-gantt20.css | Plugin: piv20-gantt.js -->
+
+<!-- ── External Dependencies ── -->
+<link rel="stylesheet" href="/PIVision/Scripts/app/editor/symbols/ext/sym-gantt20.css">
+<link rel="stylesheet" href="/PIVision/Scripts/app/editor/symbols/ext/piv20-design-system.css">
+<link rel="stylesheet" href="/PIVision/Scripts/app/editor/symbols/ext/piv20-overrides.css">
+<script type="text/javascript" src="/PIVision/Scripts/app/editor/symbols/ext/piv20-plugins/piv20-core.js"></script>
+<script type="text/javascript" src="/PIVision/Scripts/app/editor/symbols/ext/piv20-plugins/piv20-gantt.js"></script>
+
+<!-- ── Root Container ── -->
+<div class="piv20 gt20-root" dir="rtl">
+
+    <!-- Hidden widget mount point -->
+    <div id="gt20-widget" style="display:none"></div>
+
+    <!-- Toast container -->
+    <div class="gt20-toast-container"></div>
+
+    <!-- ════════════════════════════════════════ -->
+    <!--  HEADER                                  -->
+    <!-- ════════════════════════════════════════ -->
+    <div class="gt20-hdr">
+        <div style="display:flex;align-items:center;gap:10px">
+            <span class="gt20-ttl">{{config.Title || '\ת\ר\ש\י\ם \ג\נ\ט'}}</span>
+            <span style="font-size:11px;color:var(--gt20-text3)" ng-show="summary.total > 0">
+                ({{filteredItems.length}}/{{summary.total}})
+            </span>
+
+            <!-- AF Connection badge -->
+            <span ng-show="afConn"
+                  ng-class="{'gt20-af-badge': true,
+                             'gt20-af-good': afConn.pct >= 80,
+                             'gt20-af-warn': afConn.pct >= 50 && afConn.pct < 80,
+                             'gt20-af-bad':  afConn.pct < 50}">
+                <span class="gt20-af-dot"></span>
+                AF {{afConn.pct}}%
+            </span>
+        </div>
+
+        <div class="gt20-toolbar">
+            <!-- Export -->
+            <button class="gt20-btn" ng-click="exportData()" title="\י\י\צ\ו\א CSV">
+                &#9660; CSV
+            </button>
+
+            <!-- Side panel toggle -->
+            <button class="gt20-btn" ng-click="toggleSidePanel()" title="\ה\ג\ד\ר\ו\ת">
+                &#9881;
+            </button>
+
+            <!-- Live indicator -->
+            <div class="gt20-live">
+                <span class="gt20-live-dot"></span>
+                <span>{{liveTime}}</span>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ════════════════════════════════════════ -->
+    <!--  SUMMARY BAR                             -->
+    <!-- ════════════════════════════════════════ -->
+    <div class="gt20-summary">
+        <div class="gt20-kpi">
+            <span class="gt20-kpi-val">{{summary.total}}</span>
+            <span class="gt20-kpi-lbl">\ס\ה\״\כ</span>
+        </div>
+        <div class="gt20-kpi">
+            <span class="gt20-kpi-val" style="color:var(--gt20-ok)">{{summary.ok}}</span>
+            <span class="gt20-kpi-lbl">\ת\ק\י\ן</span>
+        </div>
+        <div class="gt20-kpi">
+            <span class="gt20-kpi-val" style="color:var(--gt20-warn)">{{summary.warn}}</span>
+            <span class="gt20-kpi-lbl">\א\ז\ה\ר\ה</span>
+        </div>
+        <div class="gt20-kpi">
+            <span class="gt20-kpi-val" style="color:var(--gt20-crit)">{{summary.crit}}</span>
+            <span class="gt20-kpi-lbl">\ק\ר\י\ט\י</span>
+        </div>
+        <div class="gt20-kpi">
+            <span class="gt20-kpi-val">{{summary.avg | number:config.Decimals}}</span>
+            <span class="gt20-kpi-lbl">\מ\מ\ו\צ\ע</span>
+        </div>
+        <div class="gt20-kpi">
+            <span class="gt20-kpi-val">{{summary.max | number:config.Decimals}}</span>
+            <span class="gt20-kpi-lbl">\מ\ק\ס\י\מ\ו\ם</span>
+        </div>
+    </div>
+
+
+    <!-- ════════════════════════════════════════ -->
+    <!--  CONTROLS BAR                            -->
+    <!-- ════════════════════════════════════════ -->
+    <div class="gt20-controls">
+        <input class="gt20-search" type="text"
+               ng-model="searchText" ng-change="onSearchChange()"
+               placeholder="\ח\י\פ\ו\ש...">
+
+        <span style="flex:1"></span>
+
+        <button class="gt20-view-btn" ng-class="{active: viewMode==='cards'}" ng-click="setView('cards')">
+            &#9641; \כ\ר\ט\י\ס\י\ם
+        </button>
+        <button class="gt20-view-btn" ng-class="{active: viewMode==='table'}" ng-click="setView('table')">
+            &#8801; \ט\ב\ל\ה
+        </button>
+    </div>
+
+
+    <!-- ════════════════════════════════════════ -->
+    <!--  BODY                                    -->
+    <!-- ════════════════════════════════════════ -->
+    <div class="gt20-body">
+
+        <!-- Loading state -->
+        <div class="gt20-empty" ng-show="loading && summary.total === 0">
+            <span style="font-size:32px">&#9200;</span>
+            <span>\מ\מ\ת\י\ן \ל\נ\ת\ו\נ\י\ם...</span>
+            <span style="font-size:11px">\ג\ר\ו\ר \ת\ג\י\ו\ת \ל\ס\מ\ל</span>
+        </div>
+
+        <!-- Empty filtered -->
+        <div class="gt20-empty" ng-show="!loading && filteredItems.length === 0 && summary.total > 0">
+            <span style="font-size:32px">&#128269;</span>
+            <span>\ל\א \נ\מ\צ\א\ו \ת\ו\צ\א\ו\ת</span>
+        </div>
+
+        <!-- ── Cards View ── -->
+        <div class="gt20-grid" ng-show="viewMode === 'cards' && filteredItems.length > 0">
+            <div class="gt20-card gt20-animate-in"
+                 ng-repeat="item in filteredItems track by item.idx"
+                 ng-class="item.status"
+                 ng-style="{'animation-delay': ($index * 30) + 'ms'}">
+
+                <!-- Status stripe -->
+                <div class="gt20-card-stripe" ng-style="{'background': item.colors.fg}"></div>
+
+                <!-- Card header -->
+                <div class="gt20-card-hdr">
+                    <span class="gt20-card-name" title="{{item.label}}">{{item.label}}</span>
+                    <span style="font-size:14px">{{item.statusIcon}}</span>
+                </div>
+
+                <!-- Value -->
+                <div class="gt20-card-val" ng-style="{'color': item.colors.fg}">
+                    {{item.display}}
+                </div>
+
+                <!-- Status badge -->
+                <span class="gt20-card-status"
+                      ng-style="{'background': item.colors.bg, 'color': item.colors.fg}">
+                    {{item.statusLabel}}
+                </span>
+
+                <!-- Timestamp -->
+                <div class="gt20-card-time" ng-show="item.time">{{item.time}}</div>
+
+                <!-- Progress bar -->
+                <div class="gt20-bar-wrap">
+                    <div class="gt20-bar-fill"
+                         ng-style="{'width': item.pct + '%', 'background': item.colors.bar}"></div>
+                </div>
+                <div class="gt20-bar-pct">{{item.pct}}%</div>
+            </div>
+        </div>
+
+        <!-- ── Table View ── -->
+        <table class="gt20-table" ng-show="viewMode === 'table' && filteredItems.length > 0">
+            <thead>
+                <tr>
+                    <th ng-click="sortBy('label')">\ת\ו\ו\י\ת
+                        <span ng-show="sortField==='label'">{{sortDesc ? '\▼' : '\▲'}}</span>
+                    </th>
+                    <th ng-click="sortBy('value')">\ע\ר\ך
+                        <span ng-show="sortField==='value'">{{sortDesc ? '\▼' : '\▲'}}</span>
+                    </th>
+                    <th ng-click="sortBy('status')">\מ\צ\ב
+                        <span ng-show="sortField==='status'">{{sortDesc ? '\▼' : '\▲'}}</span>
+                    </th>
+                    <th>\א\ח\ו\ז</th>
+                    <th>\ז\מ\ן</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr ng-repeat="item in filteredItems track by item.idx">
+                    <td>{{item.label}}</td>
+                    <td style="font-weight:700;font-variant-numeric:tabular-nums"
+                        ng-style="{'color': item.colors.fg}">
+                        {{item.display}}
+                    </td>
+                    <td>
+                        <span class="gt20-badge"
+                              ng-style="{'background': item.colors.bg, 'color': item.colors.fg}">
+                            {{item.statusIcon}} {{item.statusLabel}}
+                        </span>
+                    </td>
+                    <td>
+                        <div style="display:flex;align-items:center;gap:6px">
+                            <div style="flex:1;height:4px;background:rgba(255,255,255,0.06);border-radius:2px;overflow:hidden">
+                                <div ng-style="{'width': item.pct + '%', 'height': '100%', 'background': item.colors.bar, 'border-radius': '2px'}"></div>
+                            </div>
+                            <span style="font-size:10px;color:var(--gt20-text3);min-width:30px">{{item.pct}}%</span>
+                        </div>
+                    </td>
+                    <td style="font-size:11px;color:var(--gt20-text3)">{{item.time}}</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+
+    <!-- ════════════════════════════════════════ -->
+    <!--  SIDE PANEL                              -->
+    <!-- ════════════════════════════════════════ -->
+    <div class="gt20-panel" ng-class="{open: showSidePanel}">
+        <div class="gt20-phd">
+            <h3>\ה\ג\ד\ר\ו\ת</h3>
+            <button class="gt20-pcl" ng-click="toggleSidePanel()">&times;</button>
+        </div>
+
+        <!-- Statistics -->
+        <div class="gt20-ps" ng-show="stats">
+            <label>\ס\ט\ט\י\ס\ט\י\ק\ה</label>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px 12px;font-size:11px;color:var(--gt20-text2);margin-top:6px">
+                <span>\מ\י\נ\י\מ\ו\ם: {{stats.min | number:config.Decimals}}</span>
+                <span>\מ\ק\ס\י\מ\ו\ם: {{stats.max | number:config.Decimals}}</span>
+                <span>\מ\מ\ו\צ\ע: {{stats.avg | number:config.Decimals}}</span>
+                <span>\ח\צ\י\ו\ן: {{stats.median | number:config.Decimals}}</span>
+                <span>\ס\ט\י\י\ת \ת\ק\ן: {{stats.stddev | number:config.Decimals}}</span>
+                <span>\ס\כ\ו\ם: {{stats.sum | number:config.Decimals}}</span>
+            </div>
+        </div>
+
+        <!-- Thresholds (read-only display) -->
+        <div class="gt20-ps">
+            <label>\ס\פ\י\ם</label>
+            <div style="font-size:12px;color:var(--gt20-text2);margin-top:4px">
+                <div style="margin-bottom:3px">
+                    <span style="color:var(--gt20-warn)">\⚠</span>
+                    \א\ז\ה\ר\ה: {{config.WarnThreshold || '\ל\א \מ\ו\ג\ד\ר'}}
+                </div>
+                <div>
+                    <span style="color:var(--gt20-crit)">\✘</span>
+                    \ק\ר\י\ט\י: {{config.CritThreshold || '\ל\א \מ\ו\ג\ד\ר'}}
+                </div>
+            </div>
+        </div>
+
+        <!-- AF Connection -->
+        <div class="gt20-ps" ng-show="afConn">
+            <label>\ח\י\ב\ו\ר AF</label>
+            <div style="font-size:12px;margin-top:4px;color:var(--gt20-text2)">
+                \מ\ח\ו\ב\ר: {{afConn.connected}}/{{afConn.total}} ({{afConn.pct}}%)
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ════════════════════════════════════════ -->
+    <!--  FOOTER                                  -->
+    <!-- ════════════════════════════════════════ -->
+    <div class="gt20-ftr">
+        <span>\נ\ו\ג\ה \— \ת\ר\ש\י\ם \ג\נ\ט | PIV20 v20.0</span>
+        <div style="display:flex;align-items:center;gap:8px">
+            <span class="gt20-ftr-status">
+                <span class="gt20-ftr-dot ok"></span>
+                <span>\ח\י | {{filteredItems.length}} \פ\ר\י\ט\י\ם</span>
+            </span>
+        </div>
+    </div>
+
+</div>

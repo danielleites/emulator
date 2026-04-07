@@ -1,0 +1,8 @@
+dist/
+node_modules/
+www-src/vendor/
+www-src/cordova.js
+www-src/emulator/js/jquery-*.js
+www-src/symbols/
+**/*.min.js
+**/*.min.css

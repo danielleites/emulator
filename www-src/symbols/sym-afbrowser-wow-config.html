@@ -1,0 +1,125 @@
+<!-- ═══════════════════════════════════════════════════════
+     Executive Predictive AF Navigator — Config Panel
+     WOW AF Navigator v100 — wc20 Pattern + Collapsible <details>
+     ═══════════════════════════════════════════════════════ -->
+
+<div class="wc20-config-panel" style="direction:rtl; font-family:'Segoe UI',Arial,sans-serif;">
+
+    <!-- ── General (open by default) ── -->
+    <details class="wc20-section" open>
+        <summary class="wc20-section-title">כללי</summary>
+
+        <div class="wc20-field">
+            <label class="wc20-label">כותרת</label>
+            <input type="text" class="wc20-input"
+                   ng-model="config.Title"
+                   placeholder="Executive AF Navigator">
+        </div>
+
+        <div class="wc20-field">
+            <label class="wc20-label">מצב הדגמה (Demo)</label>
+            <input type="checkbox" class="wc20-checkbox"
+                   ng-model="config.DemoMode">
+            <span class="wc20-hint">עץ דמו: ארגון → מפעלים → טורבינות → חיישנים</span>
+        </div>
+    </details>
+
+    <!-- ── Connection (open by default) ── -->
+    <details class="wc20-section" open>
+        <summary class="wc20-section-title">חיבור PI Web API</summary>
+
+        <div class="wc20-field">
+            <label class="wc20-label">כתובת PI Web API</label>
+            <input type="text" class="wc20-input"
+                   ng-model="config.PIWebApiUrl"
+                   placeholder="https://piserver/piwebapi"
+                   dir="ltr">
+        </div>
+
+        <div class="wc20-field">
+            <label class="wc20-label">WebId שורש (Root)</label>
+            <input type="text" class="wc20-input"
+                   ng-model="config.RootWebId"
+                   placeholder="E0HkOiWBxkSku..."
+                   dir="ltr">
+            <span class="wc20-hint">WebId של Element הראשי בעץ ה-AF</span>
+        </div>
+
+        <div class="wc20-field">
+            <label class="wc20-label">שם שורש</label>
+            <input type="text" class="wc20-input"
+                   ng-model="config.RootName"
+                   placeholder="ארגון">
+            <span class="wc20-hint">תווית שורש העץ</span>
+        </div>
+    </details>
+
+    <!-- ── Theme ── -->
+    <details class="wc20-section">
+        <summary class="wc20-section-title">ערכת נושא</summary>
+
+        <div class="wc20-field">
+            <label class="wc20-label">גופן</label>
+            <select class="wc20-select" ng-model="config.fontFamily">
+                <option value="Segoe UI">Segoe UI</option>
+                <option value="Arial">Arial</option>
+                <option value="Tahoma">Tahoma</option>
+                <option value="Consolas">Consolas (Mono)</option>
+            </select>
+        </div>
+
+        <div class="wc20-field">
+            <label class="wc20-label">גודל גופן (px)</label>
+            <input type="number" class="wc20-input wc20-input-sm"
+                   ng-model="config.fontSize"
+                   ng-model-options="{ debounce: 500 }"
+                   min="8" max="16" step="1">
+        </div>
+    </details>
+
+    <!-- ── Info ── -->
+    <details class="wc20-section">
+        <summary class="wc20-section-title">מידע טכני</summary>
+
+        <div class="wc20-field wc20-readonly">
+            <span class="wc20-badge wc20-badge-blue">DataShape</span>
+            <span>None (Self-Initiated API Calls)</span>
+        </div>
+
+        <div class="wc20-field wc20-readonly">
+            <span class="wc20-badge wc20-badge-green">Rendering</span>
+            <span>Flat Virtual DOM — CSS Variable Indentation</span>
+        </div>
+
+        <div class="wc20-field wc20-readonly">
+            <span class="wc20-badge wc20-badge-green">Prefetch</span>
+            <span>Predictive on Hover — 0ms Expand Time</span>
+        </div>
+
+        <div class="wc20-field wc20-readonly">
+            <span class="wc20-badge wc20-badge-orange">Worker</span>
+            <span>Debounced Batch API — Anti Rate-Limit</span>
+        </div>
+
+        <div class="wc20-field wc20-readonly">
+            <span class="wc20-badge wc20-badge-blue">Events</span>
+            <span>Event Delegation — 2 Listeners for All Nodes</span>
+        </div>
+
+        <div class="wc20-field wc20-readonly">
+            <span class="wc20-badge wc20-badge-purple">Context</span>
+            <span>Global Broadcasting — Master Remote for Dashboard</span>
+        </div>
+
+        <div class="wc20-field wc20-readonly">
+            <span class="wc20-badge wc20-badge-blue">Search</span>
+            <span>Full Hierarchy Search via PI Web API</span>
+        </div>
+
+        <div class="wc20-field wc20-readonly" style="margin-top:8px;">
+            <span class="wc20-badge">WOW AF Navigator v100</span>
+            <span style="color:#8899AA;">Executive Predictive AF Navigator</span>
+        </div>
+    </details>
+
+</div>

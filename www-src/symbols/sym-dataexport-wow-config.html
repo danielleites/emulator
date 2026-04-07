@@ -1,0 +1,150 @@
+<!-- ═══════════════════════════════════════════════════════
+     Executive Big Data Exporter — Config Panel
+     WOW Data Exporter v100 — wc20 Pattern + Collapsible <details>
+     ═══════════════════════════════════════════════════════ -->
+
+<div class="wc20-config-panel" style="direction:rtl; font-family:'Segoe UI',Arial,sans-serif;">
+
+    <!-- ── General (open by default) ── -->
+    <details class="wc20-section" open>
+        <summary class="wc20-section-title">כללי</summary>
+
+        <div class="wc20-field">
+            <label class="wc20-label">כותרת</label>
+            <input type="text" class="wc20-input"
+                   ng-model="config.Title"
+                   placeholder="Executive Data Exporter">
+        </div>
+
+        <div class="wc20-field">
+            <label class="wc20-label">מצב הדגמה (Demo)</label>
+            <input type="checkbox" class="wc20-checkbox"
+                   ng-model="config.DemoMode">
+            <span class="wc20-hint">סימולציה: ייצוא מדומה עם התקדמות אנימטיבית</span>
+        </div>
+    </details>
+
+    <!-- ── Export Settings (open by default) ── -->
+    <details class="wc20-section" open>
+        <summary class="wc20-section-title">הגדרות ייצוא</summary>
+
+        <div class="wc20-field">
+            <label class="wc20-label">מרווח צ'אנק (Chunk Interval)</label>
+            <select class="wc20-select" ng-model="config.ChunkInterval">
+                <option value="1h">שעה (1h)</option>
+                <option value="6h">6 שעות (6h)</option>
+                <option value="12h">12 שעות (12h)</option>
+                <option value="1d">יום (1d) — ברירת מחדל</option>
+                <option value="7d">שבוע (7d)</option>
+            </select>
+            <span class="wc20-hint">גודל כל חלון זמן — קטן יותר = יציב יותר, איטי יותר</span>
+        </div>
+
+        <div class="wc20-field">
+            <label class="wc20-label">מגבלת שורות לבקשה (MaxCount)</label>
+            <input type="number" class="wc20-input wc20-input-sm"
+                   ng-model="config.MaxCount"
+                   ng-model-options="{ debounce: 500 }"
+                   min="10000" max="500000" step="10000"
+                   placeholder="150000">
+            <span class="wc20-hint">PI Web API MaxCount — חריגה מפעילה Pagination אוטומטי</span>
+        </div>
+
+        <div class="wc20-field">
+            <label class="wc20-label">כותרת מטא-דאטה ב-CSV</label>
+            <input type="checkbox" class="wc20-checkbox"
+                   ng-model="config.MetadataHeader">
+            <span class="wc20-hint">הוסף שורות הקשר (תאריך, טווח, מקור) בתחילת הקובץ</span>
+        </div>
+
+        <div class="wc20-field">
+            <label class="wc20-label">כתובת PI Web API</label>
+            <input type="text" class="wc20-input"
+                   ng-model="config.PiWebApiUrl"
+                   placeholder="/piwebapi (אוטומטי)">
+            <span class="wc20-hint">השאר ריק לזיהוי אוטומטי</span>
+        </div>
+    </details>
+
+    <!-- ── Display ── -->
+    <details class="wc20-section">
+        <summary class="wc20-section-title">תצוגה</summary>
+
+        <div class="wc20-field">
+            <label class="wc20-label">עשרוניות</label>
+            <select class="wc20-select" ng-model="config.Decimals"
+                    ng-options="v as v for v in [0, 1, 2, 3, 4]">
+            </select>
+            <span class="wc20-hint">דיוק ערכים מספריים בקובץ CSV</span>
+        </div>
+    </details>
+
+    <!-- ── Theme ── -->
+    <details class="wc20-section">
+        <summary class="wc20-section-title">ערכת נושא</summary>
+
+        <div class="wc20-field">
+            <label class="wc20-label">גופן</label>
+            <select class="wc20-select" ng-model="config.fontFamily">
+                <option value="Segoe UI">Segoe UI</option>
+                <option value="Arial">Arial</option>
+                <option value="Tahoma">Tahoma</option>
+                <option value="Consolas">Consolas (Mono)</option>
+            </select>
+        </div>
+
+        <div class="wc20-field">
+            <label class="wc20-label">גודל גופן (px)</label>
+            <input type="number" class="wc20-input wc20-input-sm"
+                   ng-model="config.fontSize"
+                   ng-model-options="{ debounce: 500 }"
+                   min="8" max="16" step="1">
+        </div>
+    </details>
+
+    <!-- ── Info ── -->
+    <details class="wc20-section">
+        <summary class="wc20-section-title">מידע טכני</summary>
+
+        <div class="wc20-field wc20-readonly">
+            <span class="wc20-badge wc20-badge-blue">DataShape</span>
+            <span>None — Direct PI Web API via Worker</span>
+        </div>
+
+        <div class="wc20-field wc20-readonly">
+            <span class="wc20-badge wc20-badge-green">Architecture</span>
+            <span>Web Worker + Chunk Streaming + Blob Assembly</span>
+        </div>
+
+        <div class="wc20-field wc20-readonly">
+            <span class="wc20-badge wc20-badge-green">Memory</span>
+            <span>Blob (OS-managed) — Zero JS Heap Pressure</span>
+        </div>
+
+        <div class="wc20-field wc20-readonly">
+            <span class="wc20-badge wc20-badge-orange">Pagination</span>
+            <span>Recursive — Auto-chain on MaxItemsExceeded</span>
+        </div>
+
+        <div class="wc20-field wc20-readonly">
+            <span class="wc20-badge wc20-badge-blue">Progress</span>
+            <span>SVG Ring — stroke-dashoffset GPU Animation</span>
+        </div>
+
+        <div class="wc20-field wc20-readonly">
+            <span class="wc20-badge wc20-badge-purple">Cancel</span>
+            <span>Graceful (flag) + Hard Kill (terminate) Dual Path</span>
+        </div>
+
+        <div class="wc20-field wc20-readonly">
+            <span class="wc20-badge wc20-badge-green">CSV</span>
+            <span>RFC 4180 Compliant — Escape, Quote, CRLF</span>
+        </div>
+
+        <div class="wc20-field wc20-readonly" style="margin-top:8px;">
+            <span class="wc20-badge">WOW Data Exporter v100</span>
+            <span style="color:#8899AA;">Executive Big Data Exporter</span>
+        </div>
+    </details>
+
+</div>

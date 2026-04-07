@@ -1,0 +1,387 @@
+/**
+ * ═══════════════════════════════════════════════════════
+ *  sym-loadcurve-wow.css  —  Executive Load Curve Styles
+ * ═══════════════════════════════════════════════════════
+ *  Lightweight CSS — Canvas handles all data rendering.
+ *  CSS only handles: tooltip, now-line pulse, stats bar,
+ *  legend, skeleton shimmer, and print media.
+ *
+ *  Version : WOW LC 100.0
+ *  Prefix  : wow-lc-
+ * ═══════════════════════════════════════════════════════
+ */
+
+
+/* ═══ CSS Custom Properties ═══ */
+
+:host {
+    --wow-lc-bg-start:     #060C18;
+    --wow-lc-bg-end:       #0D1F35;
+    --wow-lc-surface:      #0F2940;
+    --wow-lc-accent:       #5BC0EB;
+    --wow-lc-accent-glow:  rgba(91, 192, 235, 0.3);
+    --wow-lc-ok:           #00F5D4;
+    --wow-lc-warn:         #FFCC00;
+    --wow-lc-crit:         #FF3B30;
+    --wow-lc-text:         #ECF0F1;
+    --wow-lc-text-muted:   #8899AA;
+    --wow-lc-border:       #1A3A5C;
+    --wow-lc-glass-bg:     rgba(15, 41, 64, 0.92);
+    --wow-lc-glass-border: rgba(91, 192, 235, 0.15);
+    --wow-lc-font:         'Segoe UI', Arial, sans-serif;
+    --wow-lc-font-size:    12px;
+    --wow-lc-radius:       8px;
+    --wow-lc-transition:   0.3s ease-out;
+}
+
+
+/* ═══ Safe Reset ═══ */
+
+.wow-lc-root { box-sizing: border-box; }
+.wow-lc-root *, .wow-lc-root *::before, .wow-lc-root *::after {
+    box-sizing: border-box;
+}
+
+
+/* ═══ Root Layout ═══ */
+
+.wow-lc-root {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    background: linear-gradient(180deg, var(--wow-lc-bg-start), var(--wow-lc-bg-end));
+    font-family: var(--wow-lc-font);
+    font-size: var(--wow-lc-font-size);
+    color: var(--wow-lc-text);
+    direction: rtl;
+    overflow: hidden;
+    border-radius: var(--wow-lc-radius);
+}
+
+
+/* ═══ Title Bar ═══ */
+
+.wow-lc-title-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 14px 4px 14px;
+    min-height: 32px;
+    flex-shrink: 0;
+}
+
+.wow-lc-title-text {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--wow-lc-text);
+    letter-spacing: 0.3px;
+    text-shadow: 0 0 12px var(--wow-lc-accent-glow);
+}
+
+
+/* ═══ Legend ═══ */
+
+.wow-lc-legend {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    direction: ltr;
+}
+
+.wow-lc-legend-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 10px;
+    color: var(--wow-lc-text-muted);
+}
+
+.wow-lc-legend-line {
+    display: inline-block;
+    width: 18px;
+    height: 3px;
+    border-radius: 2px;
+}
+
+.wow-lc-legend-dashed {
+    background: repeating-linear-gradient(
+        90deg,
+        currentColor 0, currentColor 5px,
+        transparent 5px, transparent 8px
+    ) !important;
+    /* Override solid bg */
+    height: 2px;
+}
+
+.wow-lc-legend-swatch {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 2px;
+}
+
+
+/* ═══ Stats Bar ═══ */
+
+.wow-lc-stats-bar {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 2px 14px 6px 14px;
+    flex-shrink: 0;
+    font-size: 11px;
+    color: var(--wow-lc-text-muted);
+    border-bottom: 1px solid var(--wow-lc-border);
+}
+
+.wow-lc-stat {
+    white-space: nowrap;
+}
+
+.wow-lc-stat b {
+    color: var(--wow-lc-text);
+    font-weight: 600;
+}
+
+
+/* ═══ Canvas Container ═══ */
+
+.wow-lc-canvas-wrap {
+    position: relative;
+    flex: 1;
+    min-height: 100px;
+    overflow: hidden;
+}
+
+.wow-lc-canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+    cursor: crosshair;
+}
+
+
+/* ═══ "Now" Line — CSS Pulse Animation ═══ */
+
+.wow-lc-now-line {
+    position: absolute;
+    width: 2px;
+    pointer-events: none;
+    z-index: 5;
+    /* White core line */
+    background: linear-gradient(
+        180deg,
+        rgba(255, 255, 255, 0.0) 0%,
+        rgba(255, 255, 255, 0.7) 10%,
+        rgba(255, 255, 255, 0.7) 90%,
+        rgba(255, 255, 255, 0.0) 100%
+    );
+    /* Pulse animation on GPU */
+    animation: wowNowPulse 2s ease-in-out infinite;
+    will-change: opacity, box-shadow;
+}
+
+.wow-lc-now-line::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -4px;
+    width: 10px;
+    height: 100%;
+    background: linear-gradient(
+        180deg,
+        transparent 0%,
+        rgba(255, 255, 255, 0.08) 20%,
+        rgba(255, 255, 255, 0.08) 80%,
+        transparent 100%
+    );
+    animation: wowNowGlow 2s ease-in-out infinite;
+}
+
+@keyframes wowNowPulse {
+    0%, 100% { opacity: 0.5; }
+    50%      { opacity: 1.0; }
+}
+
+@keyframes wowNowGlow {
+    0%, 100% {
+        box-shadow: 0 0 4px rgba(255, 255, 255, 0.1);
+    }
+    50% {
+        box-shadow: 0 0 16px rgba(255, 255, 255, 0.3),
+                    0 0 32px rgba(91, 192, 235, 0.15);
+    }
+}
+
+
+/* ═══ Crosshair (follows mouse) ═══ */
+
+.wow-lc-crosshair {
+    position: absolute;
+    width: 1px;
+    pointer-events: none;
+    z-index: 4;
+    background: rgba(91, 192, 235, 0.3);
+    display: none;
+}
+
+
+/* ═══ Tooltip — Glassmorphism ═══ */
+
+.wow-lc-tooltip {
+    position: absolute;
+    z-index: 20;
+    pointer-events: none;
+    padding: 8px 12px;
+    min-width: 110px;
+    background: var(--wow-lc-glass-bg);
+    border: 1px solid var(--wow-lc-glass-border);
+    border-radius: 8px;
+    backdrop-filter: blur(16px) saturate(1.4);
+    -webkit-backdrop-filter: blur(16px) saturate(1.4);
+    box-shadow:
+        0 4px 20px rgba(0, 0, 0, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.05);
+    font-family: var(--wow-lc-font);
+    direction: rtl;
+    transition: opacity 0.15s ease-out;
+}
+
+.wow-lc-tt-time {
+    font-size: 10px;
+    color: var(--wow-lc-text-muted);
+    margin-bottom: 3px;
+    direction: ltr;
+    text-align: right;
+}
+
+.wow-lc-tt-value {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--wow-lc-ok);
+    line-height: 1.2;
+}
+
+.wow-lc-tt-type {
+    font-size: 10px;
+    font-weight: 600;
+    margin-top: 2px;
+}
+
+
+/* ═══ Footer ═══ */
+
+.wow-lc-footer {
+    flex-shrink: 0;
+    padding: 4px 14px;
+    font-size: 9px;
+    color: var(--wow-lc-text-muted);
+    text-align: center;
+    border-top: 1px solid var(--wow-lc-border);
+}
+
+
+/* ═══ Skeleton Shimmer (loading state) ═══ */
+
+.wow-lc-skeleton {
+    position: absolute;
+    inset: 0;
+    z-index: 50;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--wow-lc-bg-start);
+}
+
+.wow-lc-skeleton::after {
+    content: '';
+    width: 60%;
+    height: 3px;
+    border-radius: 2px;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        var(--wow-lc-accent),
+        transparent
+    );
+    animation: wowLcShimmer 1.5s ease-in-out infinite;
+}
+
+@keyframes wowLcShimmer {
+    0%   { transform: translateX(-100%); opacity: 0.3; }
+    50%  { opacity: 1; }
+    100% { transform: translateX(100%); opacity: 0.3; }
+}
+
+
+/* ═══ Responsive Breakpoints ═══ */
+
+@container (max-width: 500px) {
+    .wow-lc-title-bar {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+    }
+    .wow-lc-legend {
+        flex-wrap: wrap;
+    }
+    .wow-lc-stats-bar {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+}
+
+@container (max-width: 350px) {
+    .wow-lc-title-text { font-size: 12px; }
+    .wow-lc-legend { display: none; }
+}
+
+
+/* ═══ Print Media ═══ */
+
+@media print {
+    .wow-lc-root {
+        background: #FFFFFF !important;
+        color: #333 !important;
+        border: 1px solid #DDD;
+    }
+
+    .wow-lc-now-line {
+        animation: none !important;
+        background: #000 !important;
+        opacity: 0.4 !important;
+    }
+
+    .wow-lc-now-line::before {
+        animation: none !important;
+    }
+
+    .wow-lc-tooltip {
+        display: none !important;
+    }
+
+    .wow-lc-crosshair {
+        display: none !important;
+    }
+
+    .wow-lc-title-text {
+        color: #000 !important;
+        text-shadow: none !important;
+    }
+
+    .wow-lc-stats-bar,
+    .wow-lc-footer {
+        color: #666 !important;
+        border-color: #DDD !important;
+    }
+
+    .wow-lc-stat b {
+        color: #000 !important;
+    }
+
+    .wow-lc-skeleton {
+        display: none !important;
+    }
+}
