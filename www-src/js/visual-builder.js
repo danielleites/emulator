@@ -23,6 +23,23 @@
 
 window.PIV_BUILDER = (function () {
 
+  // ─── Stage 7 round 5: SafeDOM helper for innerHTML migration ───
+  // Routes through window.SafeDOM (loaded as a module from
+  // js/security/safe-dom.js) when available so component labels,
+  // template names, design names, and any user-supplied property
+  // values can never inject script tags or event handlers via
+  // the visual builder. Falls back to raw innerHTML only when
+  // SafeDOM was not loaded.
+  function _setSafeInner(el, html) {
+    if (!el) return;
+    if (window.SafeDOM && typeof window.SafeDOM.setSafeHTML === 'function') {
+      window.SafeDOM.setSafeHTML(el, html);
+      return;
+    }
+    // eslint-disable-next-line no-restricted-properties
+    el.innerHTML = html;
+  }
+
   // ─── קבועים ───────────────────────────────────────────────────────────
 
   const STORAGE_KEY = 'piv_builder_designs';
@@ -1316,7 +1333,7 @@ window.PIV_BUILDER = (function () {
     _overlay.id = 'piv-builder-overlay';
     _overlay.dir = 'rtl';
     _overlay.setAttribute('aria-label', 'עורך ויזואלי PI Vision');
-    _overlay.innerHTML = `
+    _setSafeInner(_overlay, `
 <!-- Toolbar -->
 <div id="pib-toolbar">
   <div class="pib-logo">
@@ -1428,7 +1445,7 @@ window.PIV_BUILDER = (function () {
   <span class="pib-status-sep">|</span>
   <span id="pib-status-zoom">זום: 100%</span>
 </div>
-`;
+`);
     document.body.appendChild(_overlay);
 
     // Get refs
@@ -1446,12 +1463,12 @@ window.PIV_BUILDER = (function () {
   // ─── Component Library builder ──────────────────────────────────────────
 
   function _buildCompLib() {
-    _compLib.innerHTML = '';
+    _compLib.replaceChildren();
     COMPONENT_LIBRARY.forEach(cat => {
       const header = document.createElement('div');
       header.className = 'pib-cat-header';
-      header.innerHTML = `<span>${cat.icon}</span><span>${cat.label}</span>
-        <svg class="pib-cat-toggle" viewBox="0 0 10 10" width="8" height="8" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 4l3 3 3-3"/></svg>`;
+      _setSafeInner(header, `<span>${_esc(cat.icon)}</span><span>${_esc(cat.label)}</span>
+        <svg class="pib-cat-toggle" viewBox="0 0 10 10" width="8" height="8" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2 4l3 3 3-3"/></svg>`);
       header.addEventListener('click', () => {
         header.classList.toggle('collapsed');
         itemsDiv.classList.toggle('collapsed');
@@ -1465,7 +1482,7 @@ window.PIV_BUILDER = (function () {
         el.className = 'pib-comp-item';
         el.draggable = true;
         el.dataset.compType = comp.type;
-        el.innerHTML = `<div class="pib-comp-icon">${_compIcon(comp.type)}</div><span>${comp.label}</span>`;
+        _setSafeInner(el, `<div class="pib-comp-icon">${_compIcon(comp.type)}</div><span>${_esc(comp.label)}</span>`);
 
         el.addEventListener('dragstart', (e) => {
           e.dataTransfer.setData('piv-comp-type', comp.type);
@@ -1576,7 +1593,11 @@ window.PIV_BUILDER = (function () {
 
       const inner = document.createElement('div');
       inner.className = 'pib-item-inner';
-      inner.innerHTML = _renderItemContent(item);
+      // _renderItemContent returns markup built from the item's
+      // user-edited props (text, label, etc.). It already escapes
+      // its inputs, but routing through SafeDOM at the sink is the
+      // single source of truth for stage-7 hardening.
+      _setSafeInner(inner, _renderItemContent(item));
       el.appendChild(inner);
 
       // Resize handles (only if selected and single-select)
@@ -2030,15 +2051,15 @@ window.PIV_BUILDER = (function () {
     if (!_propPanel) return;
 
     if (_selected.size === 0) {
-      _propPanel.innerHTML = `<div class="pib-props-empty">
+      _setSafeInner(_propPanel, `<div class="pib-props-empty">
         <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="rgba(0,212,255,0.25)" stroke-width="1.5" style="margin:0 auto 10px;display:block"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
         בחר פריט בבד הציור<br>לעריכת מאפיינים
-      </div>`;
+      </div>`);
       return;
     }
 
     if (_selected.size > 1) {
-      _propPanel.innerHTML = `
+      _setSafeInner(_propPanel, `
       <div class="pib-section">
         <div class="pib-section-title">ריבוי בחירה (${_selected.size} פריטים)</div>
         <div class="pib-align-bar">
@@ -2055,7 +2076,7 @@ window.PIV_BUILDER = (function () {
           <button class="pib-btn" data-zfront style="flex:1;font-size:11px">הבא קדימה</button>
           <button class="pib-btn" data-zback  style="flex:1;font-size:11px">שלח אחורה</button>
         </div>
-      </div>`;
+      </div>`);
 
       _propPanel.querySelectorAll('[data-align]').forEach(btn => {
         btn.addEventListener('click', () => _alignItems(btn.dataset.align));
@@ -2072,7 +2093,7 @@ window.PIV_BUILDER = (function () {
 
     const p = item.props || {};
 
-    _propPanel.innerHTML = `
+    _setSafeInner(_propPanel, `
     <!-- Section: General -->
     <div class="pib-section">
       <div class="pib-section-title">כללי</div>
@@ -2152,7 +2173,7 @@ window.PIV_BUILDER = (function () {
     </div>
 
     ${_renderTypeSpecificProps(item)}
-    `;
+    `);
 
     // Bind prop events
     const bind = (id, prop, isNum) => {
@@ -2353,8 +2374,8 @@ window.PIV_BUILDER = (function () {
     const selEl   = document.getElementById('pib-status-sel');
     const zoomEl  = document.getElementById('pib-status-zoom');
 
-    if (sizeEl)  sizeEl.innerHTML  = `<svg viewBox="0 0 12 12" width="10" height="10" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="1" width="10" height="10" rx="1"/></svg> ${_canvasW}×${_canvasH}`;
-    if (gridEl)  gridEl.innerHTML  = `<svg viewBox="0 0 12 12" width="10" height="10" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="4" y1="0" x2="4" y2="12"/><line x1="8" y1="0" x2="8" y2="12"/><line x1="0" y1="4" x2="12" y2="4"/><line x1="0" y1="8" x2="12" y2="8"/></svg> רשת: ${GRID_SIZE}px ${_snapToGrid?'✓':'✗'}`;
+    if (sizeEl)  _setSafeInner(sizeEl, `<svg viewBox="0 0 12 12" width="10" height="10" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="1" width="10" height="10" rx="1"/></svg> ${_canvasW}×${_canvasH}`);
+    if (gridEl)  _setSafeInner(gridEl, `<svg viewBox="0 0 12 12" width="10" height="10" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="4" y1="0" x2="4" y2="12"/><line x1="8" y1="0" x2="8" y2="12"/><line x1="0" y1="4" x2="12" y2="4"/><line x1="0" y1="8" x2="12" y2="8"/></svg> רשת: ${GRID_SIZE}px ${_snapToGrid?'✓':'✗'}`);
     if (itemsEl) itemsEl.textContent = _items.length + ' פריטים';
     if (selEl)   selEl.textContent  = _selected.size > 0 ? `נבחרו: ${_selected.size}` : 'אין בחירה';
     if (zoomEl)  zoomEl.textContent = `זום: ${Math.round(_zoom*100)}%`;
@@ -2371,7 +2392,7 @@ window.PIV_BUILDER = (function () {
     const jsCode   = _generateJS(symbolName);
     const cssCode  = _generateCSS(symbolName);
 
-    backdrop.innerHTML = `
+    _setSafeInner(backdrop, `
     <div class="pib-modal" style="max-width:760px">
       <div class="pib-modal-header">
         <span>ייצוא סמל PI Vision</span>
@@ -2447,7 +2468,7 @@ window.PIV_BUILDER = (function () {
       <div class="pib-modal-footer">
         <button class="pib-btn pib-btn--danger" id="pib-modal-cancel-ex">סגור</button>
       </div>
-    </div>`;
+    </div>`);
 
     // Tab switching
     backdrop.querySelectorAll('.pib-tab').forEach(tab => {
@@ -2573,7 +2594,7 @@ ${itemStyles}`;
   function _showTemplatesDialog() {
     const backdrop = document.createElement('div');
     backdrop.className = 'pib-modal-backdrop';
-    backdrop.innerHTML = `
+    _setSafeInner(backdrop, `
     <div class="pib-modal" style="max-width:560px">
       <div class="pib-modal-header">
         <span>תבניות מוכנות</span>
@@ -2583,16 +2604,16 @@ ${itemStyles}`;
         <div style="font-size:12px;color:#64748b;margin-bottom:14px">בחר תבנית לטעינה בבד הציור. שינויים לא שמורים יאבדו.</div>
         <div class="pib-templates-grid">
           ${TEMPLATES.map(t => `
-          <div class="pib-template-card" data-tid="${t.id}">
-            <div class="pib-template-name">${t.name}</div>
-            <div class="pib-template-desc">${t.desc}</div>
+          <div class="pib-template-card" data-tid="${_esc(t.id)}">
+            <div class="pib-template-name">${_esc(t.name)}</div>
+            <div class="pib-template-desc">${_esc(t.desc)}</div>
           </div>`).join('')}
         </div>
       </div>
       <div class="pib-modal-footer">
         <button class="pib-btn pib-btn--danger" id="pib-tmpl-cancel">ביטול</button>
       </div>
-    </div>`;
+    </div>`);
 
     backdrop.querySelector('.pib-modal-close').addEventListener('click', () => backdrop.remove());
     backdrop.querySelector('#pib-tmpl-cancel').addEventListener('click', () => backdrop.remove());
@@ -2624,7 +2645,7 @@ ${itemStyles}`;
     const designs = _loadDesigns();
     const backdrop = document.createElement('div');
     backdrop.className = 'pib-modal-backdrop';
-    backdrop.innerHTML = `
+    _setSafeInner(backdrop, `
     <div class="pib-modal" style="max-width:500px">
       <div class="pib-modal-header">
         <span>פתח עיצוב שמור</span>
@@ -2636,7 +2657,7 @@ ${itemStyles}`;
           : `<div class="pib-designs-list">${designs.map((d,i) => `
           <div class="pib-design-row" data-idx="${i}">
             <div class="pib-design-name">${_esc(d.name)}</div>
-            <div class="pib-design-meta">${d.modified||d.created||''} · ${(d.items||[]).length} פריטים</div>
+            <div class="pib-design-meta">${_esc(d.modified||d.created||'')} · ${(d.items||[]).length} פריטים</div>
             <button class="pib-design-del" data-del="${i}" title="מחק">🗑</button>
           </div>`).join('')}
           </div>`
@@ -2645,7 +2666,7 @@ ${itemStyles}`;
       <div class="pib-modal-footer">
         <button class="pib-btn pib-btn--danger" id="pib-open-cancel">ביטול</button>
       </div>
-    </div>`;
+    </div>`);
 
     backdrop.querySelector('.pib-modal-close').addEventListener('click', () => backdrop.remove());
     backdrop.querySelector('#pib-open-cancel').addEventListener('click', () => backdrop.remove());

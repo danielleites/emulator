@@ -24,6 +24,23 @@ window.PIV_COLLAB = (function () {
   const PRESENCE_INTERVAL = 20000; // שולח heartbeat כל 20 שניות
   const STORAGE_KEY = 'piv_collab_identity';
 
+  // ─── Stage 7 round 5: SafeDOM helper for innerHTML migration ───
+  // Routes through window.SafeDOM (loaded as a module from
+  // js/security/safe-dom.js) when available so user-supplied
+  // chat messages, mention dropdowns, and notification badges
+  // can never inject script tags or event handlers via the
+  // collab UI. The legacy raw-innerHTML path is the unconditional
+  // fallback for runtimes that strip the SafeDOM script tag.
+  function _setSafeInner(el, html) {
+    if (!el) return;
+    if (window.SafeDOM && typeof window.SafeDOM.setSafeHTML === 'function') {
+      window.SafeDOM.setSafeHTML(el, html);
+      return;
+    }
+    // eslint-disable-next-line no-restricted-properties
+    el.innerHTML = html;
+  }
+
   // ─── מצב מודול ────────────────────────────────────────────────────────────
 
   let _ws = null;
@@ -548,7 +565,7 @@ window.PIV_COLLAB = (function () {
 
     const bar = document.createElement('div');
     bar.id = 'piv-presence-bar';
-    bar.innerHTML = `
+    _setSafeInner(bar, `
       <div class="piv-avatars-wrap" id="piv-avatars-wrap"></div>
       <span class="piv-presence-label" id="piv-user-count"></span>
       <span class="piv-presence-room" id="piv-room-label" style="display:none"></span>
@@ -556,7 +573,7 @@ window.PIV_COLLAB = (function () {
         <span class="piv-dot offline" id="piv-conn-dot"></span>
         <span id="piv-conn-label">שיתוף פעולה</span>
       </button>
-    `;
+    `);
     document.body.prepend(bar);
 
     // adjust body padding
@@ -570,7 +587,7 @@ window.PIV_COLLAB = (function () {
 
     const panel = document.createElement('div');
     panel.id = 'piv-activity-panel';
-    panel.innerHTML = `
+    _setSafeInner(panel, `
       <div class="piv-panel-header">
         <h3>שיתוף פעולה</h3>
         <button class="piv-panel-close" id="piv-panel-close" title="סגור (Ctrl+Shift+A)">✕</button>
@@ -620,7 +637,7 @@ window.PIV_COLLAB = (function () {
           </div>
         </div>
       </div>
-    `;
+    `);
     document.body.appendChild(panel);
 
     // event wiring
@@ -671,22 +688,25 @@ window.PIV_COLLAB = (function () {
     const identity = _loadIdentity();
     const dialog = document.createElement('div');
     dialog.id = 'piv-join-dialog';
-    dialog.innerHTML = `
+    // identity.nickname and _roomId both come from localStorage and
+    // could in theory contain `"` that would break out of the input
+    // value="..." attribute. Escape them through _escapeAttr.
+    _setSafeInner(dialog, `
       <div class="piv-join-box">
         <h3>הצטרפות לחדר שיתוף פעולה</h3>
         <p>הזן שם תצוגה כדי להצטרף לחדר</p>
         <div class="piv-join-label">שם שלך</div>
         <input id="piv-join-nickname" class="piv-join-input"
-               placeholder="למשל: דניאל" value="${identity ? identity.nickname : ''}">
+               placeholder="למשל: דניאל" value="${_escapeAttr(identity ? identity.nickname : '')}">
         <div class="piv-join-label">מזהה חדר</div>
         <input id="piv-join-room" class="piv-join-input"
-               placeholder="למשל: project-alpha" value="${_roomId || 'main'}">
+               placeholder="למשל: project-alpha" value="${_escapeAttr(_roomId || 'main')}">
         <div class="piv-join-actions">
           <button class="piv-join-cancel" id="piv-join-cancel">ביטול</button>
           <button class="piv-join-submit" id="piv-join-submit">הצטרף</button>
         </div>
       </div>
-    `;
+    `);
     document.body.appendChild(dialog);
 
     document.getElementById('piv-join-submit').addEventListener('click', () => {
@@ -716,10 +736,10 @@ window.PIV_COLLAB = (function () {
     if (!container) return;
     const toast = document.createElement('div');
     toast.className = 'piv-toast';
-    toast.innerHTML = `
-      <span class="piv-toast-dot" style="background:${color || '#00d4ff'}"></span>
-      <span>${text}</span>
-    `;
+    _setSafeInner(toast, `
+      <span class="piv-toast-dot" style="background:${_escapeAttr(color || '#00d4ff')}"></span>
+      <span>${_escapeHtml(text)}</span>
+    `);
     container.appendChild(toast);
     setTimeout(() => {
       toast.classList.add('leaving');
@@ -779,21 +799,21 @@ window.PIV_COLLAB = (function () {
     }
 
     // rebuild avatars
-    wrap.innerHTML = '';
+    wrap.replaceChildren();
     userList.slice(0, 12).forEach(user => {
       const letter = (user.nickname || '?')[0];
       const div = document.createElement('div');
       div.className = 'piv-avatar';
       div.style.background = user.color;
       div.dataset.userId = user.userId;
-      div.innerHTML = `
-        ${letter}
+      _setSafeInner(div, `
+        ${_escapeHtml(letter)}
         <span class="piv-avatar-tooltip">
-          <strong>${user.nickname}</strong>
-          ${user.currentSymbol ? `צופה ב: ${user.currentSymbol}` : ''}
-          ${user.currentMode ? ` | ${user.currentMode}` : ''}
+          <strong>${_escapeHtml(user.nickname)}</strong>
+          ${user.currentSymbol ? `צופה ב: ${_escapeHtml(user.currentSymbol)}` : ''}
+          ${user.currentMode ? ` | ${_escapeHtml(user.currentMode)}` : ''}
         </span>
-      `;
+      `);
       div.addEventListener('click', () => {
         _showToast(`${user.nickname} — ${user.currentSymbol || 'לא צופה בסמל כרגע'}`, user.color);
       });
@@ -857,18 +877,18 @@ window.PIV_COLLAB = (function () {
       ? _activities
       : _activities.filter(a => a.type === activeFilter || a.activityType === activeFilter);
 
-    feed.innerHTML = '';
+    feed.replaceChildren();
     [...items].reverse().forEach(act => {
       const item = document.createElement('div');
       item.className = 'piv-feed-item';
       const letter = (act.nickname || '?')[0];
-      item.innerHTML = `
-        <div class="piv-feed-avatar" style="background:${act.color || '#4b5568'}">${letter}</div>
+      _setSafeInner(item, `
+        <div class="piv-feed-avatar" style="background:${_escapeAttr(act.color || '#4b5568')}">${_escapeHtml(letter)}</div>
         <div class="piv-feed-body">
           <div class="piv-feed-text">${_activityBadge(act.type)}${_escapeHtml(act.text || '')}</div>
           <div class="piv-feed-time">${_timeAgo(act.timestamp || 0)}</div>
         </div>
-      `;
+      `);
       feed.appendChild(item);
     });
   }
@@ -878,7 +898,7 @@ window.PIV_COLLAB = (function () {
   function _renderComments() {
     const list = document.getElementById('piv-comments-list');
     if (!list) return;
-    list.innerHTML = '';
+    list.replaceChildren();
 
     Object.values(_comments).forEach(c => {
       const card = document.createElement('div');
@@ -889,16 +909,16 @@ window.PIV_COLLAB = (function () {
         <div class="piv-reply-list">
           ${c.replies.map(r => `
             <div class="piv-reply">
-              <div class="piv-reply-dot" style="background:${r.color}"></div>
-              <div><strong style="color:${r.color}">${_escapeHtml(r.nickname)}</strong>: ${_escapeHtml(r.text)}</div>
+              <div class="piv-reply-dot" style="background:${_escapeAttr(r.color)}"></div>
+              <div><strong style="color:${_escapeAttr(r.color)}">${_escapeHtml(r.nickname)}</strong>: ${_escapeHtml(r.text)}</div>
             </div>
           `).join('')}
         </div>
       ` : '';
 
-      card.innerHTML = `
+      _setSafeInner(card, `
         <div class="piv-comment-header">
-          <div class="piv-comment-dot" style="background:${c.color}"></div>
+          <div class="piv-comment-dot" style="background:${_escapeAttr(c.color)}"></div>
           <div class="piv-comment-meta">${_escapeHtml(c.nickname)}</div>
           <span class="piv-comment-sym">${_escapeHtml(c.symbolName)}</span>
           ${c.lineNumber != null ? `<span class="piv-comment-sym">שורה ${c.lineNumber}</span>` : ''}
@@ -906,16 +926,16 @@ window.PIV_COLLAB = (function () {
         <div class="piv-comment-text">${_escapeHtml(c.text)}</div>
         ${repliesHtml}
         <div class="piv-reply-input-wrap">
-          <input class="piv-reply-input" placeholder="השב..." data-comment="${c.commentId}">
-          <button class="piv-reply-send" data-comment="${c.commentId}">שלח</button>
+          <input class="piv-reply-input" placeholder="השב..." data-comment="${_escapeAttr(c.commentId)}">
+          <button class="piv-reply-send" data-comment="${_escapeAttr(c.commentId)}">שלח</button>
         </div>
         <div class="piv-comment-actions">
           ${c.resolved
-            ? `<button class="piv-comment-action" data-unresolve="${c.commentId}">פתח מחדש</button>`
-            : `<button class="piv-comment-action" data-resolve="${c.commentId}">✓ סמן כפתור</button>`
+            ? `<button class="piv-comment-action" data-unresolve="${_escapeAttr(c.commentId)}">פתח מחדש</button>`
+            : `<button class="piv-comment-action" data-resolve="${_escapeAttr(c.commentId)}">✓ סמן כפתור</button>`
           }
         </div>
-      `;
+      `);
       list.appendChild(card);
     });
 
@@ -943,7 +963,7 @@ window.PIV_COLLAB = (function () {
   function _renderChat() {
     const msgs = document.getElementById('piv-chat-msgs');
     if (!msgs) return;
-    msgs.innerHTML = '';
+    msgs.replaceChildren();
     _chatMessages.forEach(m => _appendChatMessage(m));
   }
 
@@ -953,16 +973,19 @@ window.PIV_COLLAB = (function () {
     const div = document.createElement('div');
     div.className = 'piv-chat-msg';
     const letter = (m.nickname || '?')[0];
+    // formattedText is already escaped via _escapeHtml on m.text BEFORE
+    // the @mention span is injected, so the spans pass through
+    // SafeDOM as legitimate markup.
     const formattedText = _escapeHtml(m.text).replace(/@(\S+)/g,
       '<span class="piv-chat-mention">@$1</span>');
-    div.innerHTML = `
-      <div class="piv-feed-avatar" style="background:${m.color || '#4b5568'}">${letter}</div>
+    _setSafeInner(div, `
+      <div class="piv-feed-avatar" style="background:${_escapeAttr(m.color || '#4b5568')}">${_escapeHtml(letter)}</div>
       <div class="piv-chat-msg-body">
-        <div class="piv-chat-msg-name" style="color:${m.color}">${_escapeHtml(m.nickname)}</div>
+        <div class="piv-chat-msg-name" style="color:${_escapeAttr(m.color)}">${_escapeHtml(m.nickname)}</div>
         <div class="piv-chat-msg-text">${formattedText}</div>
         <div class="piv-chat-msg-time">${_timeAgo(m.timestamp || 0)}</div>
       </div>
-    `;
+    `);
     msgs.appendChild(div);
     msgs.scrollTop = msgs.scrollHeight;
   }
@@ -990,12 +1013,12 @@ window.PIV_COLLAB = (function () {
 
     dropdown.className = 'piv-mention-list';
     dropdown.style.display = 'block';
-    dropdown.innerHTML = matches.slice(0, 5).map(u => `
+    _setSafeInner(dropdown, matches.slice(0, 5).map(u => `
       <div class="piv-mention-item" data-nick="${_escapeAttr(u.nickname)}">
-        <div class="piv-mention-dot" style="background:${u.color}"></div>
+        <div class="piv-mention-dot" style="background:${_escapeAttr(u.color)}"></div>
         ${_escapeHtml(u.nickname)}
       </div>
-    `).join('');
+    `).join(''));
 
     dropdown.querySelectorAll('.piv-mention-item').forEach(item => {
       item.addEventListener('click', () => {
@@ -1305,13 +1328,13 @@ window.PIV_COLLAB = (function () {
       candidates.forEach(el => {
         const badge = document.createElement('span');
         badge.className = 'piv-lock-badge';
-        badge.innerHTML = `
+        _setSafeInner(badge, `
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
             <rect x="3" y="11" width="18" height="11" rx="2"/>
             <path d="M7 11V7a5 5 0 0110 0v4"/>
           </svg>
-          נערך על ידי ${lock.nickname}
-        `;
+          נערך על ידי ${_escapeHtml(lock.nickname)}
+        `);
         el.style.outline = '2px solid rgba(245,158,11,0.45)';
         el.appendChild(badge);
       });
