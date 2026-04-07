@@ -59,6 +59,80 @@ function collectScaffoldErrors(page: Page): string[] {
   return errors;
 }
 
+/**
+ * CSP violation collector. Installs a `securitypolicyviolation`
+ * listener in the page via `addInitScript` so it runs before any
+ * app code, and exposes the collected violations through a
+ * window-global that the test reads after load.
+ *
+ * This is the stage-7 regression guard for the `'unsafe-eval'`
+ * removal (commit 41a664e). Any future commit that sneaks
+ * `new Function(...)`, an inline on* handler, a `data:` script
+ * src, or a missing directive back into production will fire
+ * a `securitypolicyviolation` event the moment the page loads,
+ * and this collector will fail the test with the exact directive
+ * and blocked URI.
+ *
+ * We treat this listener as an isolated oracle — it has no
+ * allowlist. Any violation is a test failure.
+ */
+async function installCspViolationCollector(page: Page): Promise<void> {
+  await page.addInitScript(() => {
+    // Expose the collection through a window-global the test
+    // reads via page.evaluate() after load.
+    interface CspViolation {
+      directive: string;
+      blockedURI: string;
+      sourceFile: string;
+      lineNumber: number;
+      sample: string;
+    }
+    (window as unknown as { __cspViolations: CspViolation[] }).__cspViolations = [];
+    document.addEventListener('securitypolicyviolation', (e: SecurityPolicyViolationEvent) => {
+      (window as unknown as { __cspViolations: CspViolation[] }).__cspViolations.push({
+        directive: e.violatedDirective,
+        blockedURI: e.blockedURI,
+        sourceFile: e.sourceFile,
+        lineNumber: e.lineNumber,
+        sample: e.sample || '',
+      });
+    });
+  });
+}
+
+/** Pull the collected violations out of the page. */
+async function getCspViolations(
+  page: Page
+): Promise<Array<{ directive: string; blockedURI: string; sourceFile: string; sample: string }>> {
+  return page.evaluate(
+    () =>
+      (
+        window as unknown as {
+          __cspViolations: Array<{
+            directive: string;
+            blockedURI: string;
+            sourceFile: string;
+            sample: string;
+          }>;
+        }
+      ).__cspViolations || []
+  );
+}
+
+/** Format violations into a human-readable block for assertion failures. */
+function formatCspViolations(
+  violations: Array<{ directive: string; blockedURI: string; sourceFile: string; sample: string }>
+): string {
+  return violations
+    .map(
+      (v, i) =>
+        `  ${i + 1}. ${v.directive} blocked "${v.blockedURI}"` +
+        (v.sourceFile ? `\n     at ${v.sourceFile}` : '') +
+        (v.sample ? `\n     sample: ${v.sample}` : '')
+    )
+    .join('\n');
+}
+
 // ──────────────────────────────────────────────────────────────────────────
 // mobile entry (index.html)
 // ──────────────────────────────────────────────────────────────────────────
@@ -69,6 +143,16 @@ test.describe('mobile entry (index.html)', () => {
     await page.goto('/index.html');
     await page.waitForLoadState('domcontentloaded');
     expect(errors, errors.join('\n')).toEqual([]);
+  });
+
+  test('CSP: no securitypolicyviolation events fire during load', async ({ page }) => {
+    await installCspViolationCollector(page);
+    await page.goto('/index.html');
+    await page.waitForLoadState('domcontentloaded');
+    // Give late-arriving violations a beat to register
+    await page.waitForTimeout(300);
+    const violations = await getCspViolations(page);
+    expect(violations, formatCspViolations(violations)).toEqual([]);
   });
 
   test('has the expected title', async ({ page }) => {
@@ -131,6 +215,15 @@ test.describe('desktop entry (desktop.html)', () => {
     expect(errors, errors.join('\n')).toEqual([]);
   });
 
+  test('CSP: no securitypolicyviolation events fire during load', async ({ page }) => {
+    await installCspViolationCollector(page);
+    await page.goto('/desktop.html');
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(300);
+    const violations = await getCspViolations(page);
+    expect(violations, formatCspViolations(violations)).toEqual([]);
+  });
+
   test('has the expected title', async ({ page }) => {
     await page.goto('/desktop.html');
     await expect(page).toHaveTitle(/PI Vision/);
@@ -161,6 +254,15 @@ test.describe('qa entry (qa/qa-app.html)', () => {
     expect(errors, errors.join('\n')).toEqual([]);
   });
 
+  test('CSP: no securitypolicyviolation events fire during load', async ({ page }) => {
+    await installCspViolationCollector(page);
+    await page.goto('/qa/qa-app.html');
+    await page.waitForLoadState('domcontentloaded');
+    await page.waitForTimeout(300);
+    const violations = await getCspViolations(page);
+    expect(violations, formatCspViolations(violations)).toEqual([]);
+  });
+
   test('CSP for QA does NOT permit unsafe-eval', async ({ page }) => {
     await page.goto('/qa/qa-app.html');
     const csp = await page.evaluate(() => {
@@ -170,6 +272,46 @@ test.describe('qa entry (qa/qa-app.html)', () => {
       return meta?.content || '';
     });
     expect(csp).not.toContain("'unsafe-eval'");
+  });
+});
+
+// ──────────────────────────────────────────────────────────────────────────
+// emulator entry (emulator/index.html) — most important CSP check because
+// this is where the Angular-shim `_evalExpr` runs at runtime. If
+// `'unsafe-eval'` is missing *and* some expression escapes SafeExpr, the
+// legacy `new Function` fallback will fire a CSP violation right here.
+// ──────────────────────────────────────────────────────────────────────────
+
+test.describe('emulator entry (emulator/index.html)', () => {
+  test('CSP: no securitypolicyviolation events fire during load', async ({ page }) => {
+    await installCspViolationCollector(page);
+    await page.goto('/emulator/index.html');
+    await page.waitForLoadState('domcontentloaded');
+    // Emulator boots asynchronously — wait longer so shim
+    // initialization + first $digest cycle have a chance to fire
+    // any latent CSP violation.
+    await page.waitForTimeout(1000);
+    const violations = await getCspViolations(page);
+    expect(violations, formatCspViolations(violations)).toEqual([]);
+  });
+
+  test('CSP meta tag no longer permits unsafe-eval', async ({ page }) => {
+    await page.goto('/emulator/index.html');
+    const csp = await page.evaluate(() => {
+      const meta = document.querySelector(
+        'meta[http-equiv="Content-Security-Policy"]'
+      ) as HTMLMetaElement | null;
+      return meta?.content || '';
+    });
+    expect(csp).not.toContain("'unsafe-eval'");
+  });
+
+  test('PIVISION_ALLOW_UNSAFE_EVAL is explicitly set to false', async ({ page }) => {
+    await page.goto('/emulator/index.html');
+    const flag = await page.evaluate(
+      () => (window as unknown as { PIVISION_ALLOW_UNSAFE_EVAL: unknown }).PIVISION_ALLOW_UNSAFE_EVAL
+    );
+    expect(flag).toBe(false);
   });
 });
 
