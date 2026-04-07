@@ -36,8 +36,7 @@ window.PIV_BUILDER = (function () {
       window.SafeDOM.setSafeHTML(el, html);
       return;
     }
-    // eslint-disable-next-line no-restricted-properties
-    el.innerHTML = html;
+    el.innerHTML = html; // eslint-disable-line no-restricted-properties
   }
 
   // ─── קבועים ───────────────────────────────────────────────────────────
