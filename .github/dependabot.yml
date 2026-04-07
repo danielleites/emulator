@@ -1,0 +1,39 @@
+# Dependabot — keeps build tooling dependencies fresh.
+# Stage 5 of the modernization plan.
+#
+# Only the npm ecosystem is enabled because the legacy Cordova/native
+# layer is not under source control in this repo. GitHub Actions
+# updates are also tracked so the workflow doesn't drift.
+
+version: 2
+updates:
+  - package-ecosystem: 'npm'
+    directory: '/'
+    schedule:
+      interval: 'weekly'
+      day: 'monday'
+    open-pull-requests-limit: 5
+    groups:
+      vite-stack:
+        patterns:
+          - 'vite*'
+          - 'vitest*'
+          - '@vitest/*'
+          - 'rollup-plugin-*'
+      eslint-stack:
+        patterns:
+          - 'eslint*'
+          - '@typescript-eslint/*'
+          - 'prettier'
+      playwright:
+        patterns:
+          - '@playwright/*'
+          - 'playwright*'
+      types:
+        patterns:
+          - '@types/*'
+
+  - package-ecosystem: 'github-actions'
+    directory: '/'
+    schedule:
+      interval: 'monthly'

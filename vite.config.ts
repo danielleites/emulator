@@ -148,7 +148,31 @@ export default defineConfig(async () => {
     test: {
       environment: 'jsdom',
       include: ['www-src/**/*.{test,spec}.{js,ts}'],
+      exclude: [
+        '**/node_modules/**',
+        '**/dist/**',
+        'tests/e2e/**', // playwright handles e2e
+      ],
       globals: false,
+      setupFiles: ['./tests/vitest.setup.ts'],
+      coverage: {
+        provider: 'v8',
+        reporter: ['text', 'html', 'lcov'],
+        reportsDirectory: './coverage',
+        include: [
+          'www-src/js/security/**/*.{js,ts}',
+          'www-src/js/perf/**/*.{js,ts}',
+          'www-src/js/ux/**/*.{js,ts}',
+        ],
+        exclude: ['**/*.test.{js,ts}', '**/*.spec.{js,ts}'],
+        thresholds: {
+          // Phased rollout — these get tightened in subsequent stages.
+          lines: 70,
+          functions: 70,
+          branches: 60,
+          statements: 70,
+        },
+      },
     },
   };
 });

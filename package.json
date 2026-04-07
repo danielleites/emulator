@@ -16,11 +16,16 @@
     "format:check": "prettier --check \"www-src/**/*.{js,ts,html,css,json}\"",
     "test": "vitest run",
     "test:watch": "vitest",
-    "test:e2e": "playwright test"
+    "test:coverage": "vitest run --coverage",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:e2e:install": "playwright install --with-deps chromium",
+    "ci": "npm run typecheck && npm run test && npm run build"
   },
   "devDependencies": {
     "@playwright/test": "^1.48.0",
     "@types/node": "^22.9.0",
+    "@vitest/coverage-v8": "^2.1.5",
     "@typescript-eslint/eslint-plugin": "^8.15.0",
     "@typescript-eslint/parser": "^8.15.0",
     "eslint": "^9.15.0",

@@ -76,7 +76,7 @@ below.
 | 2 | Architecture: SafeExpr evaluator, ambient types, ESM facades | ✅ done |
 | 3 | Performance: Workbox PWA, refined chunks, symbol loader | ✅ done |
 | 4 | UX/UI: design tokens, theme switcher, a11y, View Transitions | ✅ done |
-| 5 | Tests + CI: Vitest, Playwright, GitHub Actions | pending |
+| 5 | Tests + CI: Vitest setup, Playwright e2e, GitHub Actions | ✅ done |
 | 6 | Capacitor migration | pending |
 | 7 | New features (TBD) | pending |
 
@@ -241,7 +241,67 @@ between them is transparent.
   is now: SafeDOM (10), SafeExpr (43), symbol-loader (11), theme
   (11), a11y (11) = **86 unit tests** total.
 
-### Tracked tech debt for stages 5+
+### Stage 5 — done
+- **Vitest setup file** at `tests/vitest.setup.ts`. Runs in jsdom and:
+  - clears `localStorage` / `sessionStorage` before each test,
+  - polyfills `matchMedia` and `requestIdleCallback` (jsdom omits both),
+  - tears down DOM mutations and the `data-theme` attribute after
+    each test so files don't bleed into one another.
+- **Coverage config** in `vite.config.ts`:
+  - v8 provider, html + lcov + text reporters → `./coverage`,
+  - includes only the new code under `js/security/`, `js/perf/`,
+    `js/ux/` (legacy is intentionally excluded until it's migrated),
+  - thresholds: 70% lines / functions / statements, 60% branches
+    (phased rollout — tightened in later stages).
+- **Playwright config** at `playwright.config.ts`:
+  - Two projects: `chromium-mobile` (Pixel 7 device) and
+    `chromium-desktop` (1440×900).
+  - `locale: 'he-IL'`, `timezoneId: 'Asia/Jerusalem'`,
+    `reducedMotion: 'reduce'` for deterministic runs.
+  - `webServer` boots `vite preview` automatically; bypassed when
+    `BASE_URL` is supplied (for testing against deployed previews).
+- **E2E smoke tests** at `tests/e2e/smoke.spec.ts` cover:
+  - Each entry HTML loads with no console errors (with a small
+    allow-list for known legacy noise).
+  - Page titles match expectations.
+  - `data-theme` is set on `<html>` (no FOUC).
+  - `window.SafeDOM` is exposed and actually strips `<script>`.
+  - Skip link is injected after DOMContentLoaded.
+  - CSP meta tag exists and contains `object-src 'none'` /
+    `base-uri 'self'`.
+  - QA entry CSP **does not** contain `'unsafe-eval'` (regression
+    guard for stage 1).
+  - SafeExpr correctly evaluates expressions and blocks
+    `__proto__` access.
+- **GitHub Actions** at `.github/workflows/ci.yml`:
+  - `build` job: lint + format + typecheck + Vitest + `vite build`,
+    uploads `dist/` as an artifact.
+  - `e2e` job: depends on `build`, downloads the artifact, installs
+    Chromium, runs Playwright, uploads the HTML report.
+  - `security` job: `npm audit --audit-level=high` + a grep guard
+    that fails the build if a new `eval()` or `new Function()` is
+    introduced outside the allow-list.
+  - Concurrency group cancels in-progress runs on the same ref.
+  - Format/lint steps use `continue-on-error: true` for the phased
+    rollout — they will become hard failures in stage 6.
+- **Dependabot** at `.github/dependabot.yml` — weekly npm updates
+  grouped by stack (vite, eslint, playwright, types) and monthly
+  GitHub Actions updates.
+- **package.json** scripts: `test:coverage`, `test:e2e:ui`,
+  `test:e2e:install`, `ci`. Added `@vitest/coverage-v8` devDep.
+
+### How to run locally
+
+```bash
+npm install              # installs Vite, Vitest, Playwright, etc.
+npm run test:e2e:install # one-time: downloads Chromium for Playwright
+npm run ci               # full local CI: typecheck + unit tests + build
+npm run test:coverage    # unit tests with coverage report → ./coverage
+npm run test:e2e         # boots vite preview and runs Playwright
+npm run test:e2e:ui      # interactive Playwright UI mode
+```
+
+### Tracked tech debt for stages 6+
 - 351 raw `innerHTML =` assignments across 75 files. Migration order:
   `js/ai-chat.js` (17), `js/af-browser-ui.js` (30), `js/mobile-app.js` (28),
   `js/collab-ui.js` (14), `js/visual-builder.js` (13), then symbols.

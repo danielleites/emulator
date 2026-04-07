@@ -25,7 +25,9 @@
     "www-src/**/*.ts",
     "www-src/**/*.d.ts",
     "www-src/**/*.js",
-    "vite.config.ts"
+    "tests/**/*.ts",
+    "vite.config.ts",
+    "playwright.config.ts"
   ],
   "exclude": [
     "node_modules",

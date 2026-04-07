@@ -13,7 +13,9 @@ build/
 # Test output
 coverage/
 playwright-report/
+playwright/.cache/
 test-results/
+.nyc_output/
 
 # Editor
 .vscode/
