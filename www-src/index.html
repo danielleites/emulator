@@ -1,20 +1,27 @@
 <!DOCTYPE html>
 <html lang="he" dir="rtl">
 <head>
+  <!-- Stage 7: disable the Angular-shim `new Function` fallback at the
+       very top of the page so emu-shims._evalExpr returns undefined
+       (instead of trying a call that the CSP now blocks). Developers
+       can re-enable from the devtools console by assigning `true`
+       before the emulator loads. -->
+  <script>window.PIVISION_ALLOW_UNSAFE_EVAL = false;</script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1, user-scalable=no">
   <title>PIVISION</title>
   <meta name="description" content="PIVISION — אפליקציית מובייל לניהול PI Vision">
   <!--
-    CSP — tightened in stage 1 of the modernization plan.
-    'unsafe-eval' is still required by the legacy Angular-shim expression
-    evaluator in emulator/js/emu-shims.js (scheduled for removal in stage 2).
-    'unsafe-inline' for scripts/styles is required by ~350 innerHTML sites
-    and many inline <script>/<style> blocks; it will migrate to nonces in
-    stage 3 once Vite bundles the entries.
-    Removed: 'http:' wildcards (downgrade attacks), broad default-src.
+    CSP — hardened in stages 1 and 7.
+    - stage 1: dropped `http:` wildcards, added object-src/base-uri/etc.
+    - stage 7: removed `'unsafe-eval'`. The emu-shims Angular expression
+      evaluator now always routes through `window.SafeExpr` (a safe
+      recursive-descent parser); the legacy `new Function` fallback is
+      gated off by PIVISION_ALLOW_UNSAFE_EVAL = false above.
+    `'unsafe-inline'` remains for now because ~249 legacy innerHTML
+    sinks haven't been migrated yet; stage 8 will swap it for nonces.
   -->
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' blob:; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' https: wss:; media-src 'self' data: blob:; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self';">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' blob:; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' https: wss:; media-src 'self' data: blob:; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self';">
 
   <!-- PWA & Mobile -->
   <link rel="manifest" href="manifest-mobile.json">

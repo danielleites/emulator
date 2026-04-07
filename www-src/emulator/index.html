@@ -1,6 +1,10 @@
 <!DOCTYPE html>
 <html lang="he" dir="rtl">
 <head>
+<!-- Stage 7: disable the Angular-shim `new Function` fallback at the
+     very top of the page so emu-shims._evalExpr returns undefined
+     (instead of trying a call that the CSP now blocks). -->
+<script>window.PIVISION_ALLOW_UNSAFE_EVAL = false;</script>
 <!-- Perplexity Computer Attribution -->
 <meta name="generator" content="Perplexity Computer">
 <meta name="created-with" content="https://www.perplexity.ai/computer">
@@ -8,7 +12,13 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="description" content="PI Vision Symbol Emulator v4.2.0-R300 — אמולטור לסמלי PI Vision">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval'; font-src 'self' data:; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline';">
+<!--
+  CSP — stage 7 dropped `'unsafe-eval'` after SafeExpr replaced the
+  Angular-shim `new Function` evaluator. `'unsafe-inline'` remains
+  because the emulator still relies on many inline <script>/<style>
+  blocks; stage 8 will migrate to nonces.
+-->
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline';">
 <title>PI Vision Symbol Emulator R300</title>
 
 <!-- Fonts — Hebrew support (local, air-gapped safe) -->
