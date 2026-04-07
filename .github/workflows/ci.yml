@@ -167,12 +167,18 @@ jobs:
       - name: Check for known dangerous patterns in source
         run: |
           set -e
-          echo "::group::Checking for new eval() / new Function() in www-src/js/"
-          # Allow-listed files (legacy emulator devtools and Angular shim)
-          ALLOWED='emu-devtools.js|emu-shims.js|cordova.js|vendor/'
-          if grep -RInE '\beval\s*\(|new Function\s*\(' www-src/js/ \
+          echo "::group::Checking for new eval() / new Function() across www-src/"
+          # Allow-listed files (legacy emulator devtools, Angular shim,
+          # cordova bridge, vendored libraries, jQuery, and minified
+          # bundles which we deliberately do not lint).
+          ALLOWED='emu-devtools\.js|emu-shims\.js|cordova\.js|/vendor/|jquery-[0-9.]+\.min\.js|\.min\.js$'
+          # Scan every JS source file under www-src (HTML, TS, and
+          # symbols included) so additions outside js/ also fail CI.
+          if grep -RIn --include='*.js' --include='*.ts' --include='*.html' \
+                 -E '\beval\s*\(|new Function\s*\(' www-src/ \
                | grep -vE "$ALLOWED" \
-               | grep -v 'eslint-disable'; then
+               | grep -v 'eslint-disable' \
+               | grep -v 'eslint-disable-next-line'; then
             echo "::error::eval() or new Function() found outside allow-list"
             exit 1
           fi

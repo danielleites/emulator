@@ -7,19 +7,40 @@
  * `npm run test:e2e` works without an external setup step.
  */
 
-import { defineConfig, devices } from '@playwright/test';
+import {
+  defineConfig,
+  devices,
+  type ReporterDescription,
+  type PlaywrightTestConfig,
+} from '@playwright/test';
 
 const PORT = Number(process.env.PORT || 4173);
 const BASE_URL = process.env.BASE_URL || `http://127.0.0.1:${PORT}`;
+const IS_CI = !!process.env.CI;
+
+// Build the reporter list as a typed local so TypeScript doesn't have
+// to widen a conditional union at the defineConfig() call site.
+const reporter: ReporterDescription[] = IS_CI
+  ? [['github'], ['html', { open: 'never' }]]
+  : [['list']];
+
+const webServer: PlaywrightTestConfig['webServer'] = process.env.BASE_URL
+  ? undefined
+  : {
+      command: `npm run preview -- --port ${PORT} --strictPort`,
+      url: BASE_URL,
+      reuseExistingServer: !IS_CI,
+      timeout: 60_000,
+    };
 
 export default defineConfig({
   testDir: './tests/e2e',
   timeout: 30_000,
   expect: { timeout: 5_000 },
-  forbidOnly: !!process.env.CI,
-  retries: process.env.CI ? 2 : 0,
-  workers: process.env.CI ? 2 : undefined,
-  reporter: process.env.CI ? [['github'], ['html', { open: 'never' }]] : 'list',
+  forbidOnly: IS_CI,
+  retries: IS_CI ? 2 : 0,
+  workers: IS_CI ? 2 : undefined,
+  reporter,
 
   use: {
     baseURL: BASE_URL,
@@ -34,8 +55,11 @@ export default defineConfig({
 
   projects: [
     {
+      // Pixel 5 is in every Playwright release; Pixel 7 was added
+      // in 1.39 and we want to be conservative for runners on older
+      // bundled versions.
       name: 'chromium-mobile',
-      use: { ...devices['Pixel 7'] },
+      use: { ...devices['Pixel 5'] },
     },
     {
       name: 'chromium-desktop',
@@ -43,15 +67,5 @@ export default defineConfig({
     },
   ],
 
-  // Boot `vite preview` for the duration of the test run. Skip on
-  // CI when BASE_URL is supplied externally (e.g. against a
-  // deployed preview).
-  webServer: process.env.BASE_URL
-    ? undefined
-    : {
-        command: 'npm run preview -- --port ' + PORT + ' --strictPort',
-        url: BASE_URL,
-        reuseExistingServer: !process.env.CI,
-        timeout: 60_000,
-      },
+  webServer,
 });

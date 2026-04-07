@@ -1,5 +1,7 @@
 /// <reference types="vitest" />
-import { defineConfig, type PluginOption } from 'vite';
+// `defineConfig` is imported from `vitest/config` (not `vite`) so the
+// `test:` block typechecks alongside the regular Vite UserConfig keys.
+import { defineConfig, type PluginOption } from 'vitest/config';
 import { resolve } from 'path';
 import { VitePWA } from 'vite-plugin-pwa';
 
@@ -24,7 +26,12 @@ export default defineConfig(async () => {
     VitePWA({
       registerType: 'autoUpdate',
       strategies: 'generateSW',
-      injectRegister: false, // we register manually in main-mobile.ts
+      // 'auto' injects a registration snippet into every entry HTML.
+      // The legacy `mobile-app.js` also calls
+      // `navigator.serviceWorker.register('./sw.js')` for the
+      // standalone-APK code path; double-registration is idempotent
+      // so the two paths coexist safely.
+      injectRegister: 'auto',
       filename: 'sw.js',
       manifestFilename: 'manifest-mobile.json',
       includeAssets: ['icons/icon-192.png', 'icons/icon-512.png', 'fonts/*.{woff2,ttf}'],
