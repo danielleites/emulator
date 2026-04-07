@@ -28,8 +28,24 @@
   <!-- Fonts (local bundle for offline use; no CDN required) -->
   <link rel="stylesheet" href="../fonts/heebo.css">
 
+  <!-- Stage 4: design tokens -->
+  <link rel="stylesheet" href="../css/tokens.css">
+
   <!-- Security: SafeDOM (must load before any script that touches innerHTML) -->
   <script type="module" src="../js/security/safe-dom.js"></script>
+
+  <!-- Stage 4 UX layer (theme, a11y, transitions) -->
+  <script type="module">
+    import { initTheme } from '../js/ux/theme.js';
+    import { injectSkipLink } from '../js/ux/a11y.js';
+    import '../js/ux/transitions.js';
+    initTheme();
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', () => injectSkipLink());
+    } else {
+      injectSkipLink();
+    }
+  </script>
 
   <!-- JSZip (local vendor bundle for offline use) -->
   <script src="../vendor/jszip.min.js"></script>

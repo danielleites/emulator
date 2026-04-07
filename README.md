@@ -75,7 +75,7 @@ below.
 | 1 | Security: tighten CSP, SafeDOM helper, eslint rules | ✅ done |
 | 2 | Architecture: SafeExpr evaluator, ambient types, ESM facades | ✅ done |
 | 3 | Performance: Workbox PWA, refined chunks, symbol loader | ✅ done |
-| 4 | UX/UI: theming, View Transitions, a11y, responsive | pending |
+| 4 | UX/UI: design tokens, theme switcher, a11y, View Transitions | ✅ done |
 | 5 | Tests + CI: Vitest, Playwright, GitHub Actions | pending |
 | 6 | Capacitor migration | pending |
 | 7 | New features (TBD) | pending |
@@ -193,7 +193,55 @@ There are now **two** service workers, one per build path:
 Both workers use the same cache-class names so a future migration
 between them is transparent.
 
-### Tracked tech debt for stages 4+
+### Stage 4 — done
+- **Design tokens** at `www-src/css/tokens.css`. CSS custom properties
+  for brand, surface, text, border, status, spacing (4px grid),
+  radius, typography, elevation, motion, z-index, and a container-
+  query breakpoint scale. Three themes:
+  - `:root[data-theme='dark']` (default, matches the legacy look)
+  - `:root[data-theme='light']`
+  - `:root[data-theme='auto']` honors `prefers-color-scheme` via a
+    pure-CSS cascade (no JS dependency).
+  - `prefers-reduced-motion` collapses motion durations to 0.
+  - Includes `.pi-skip-link`, `.pi-sr-only`, and a global
+    `:focus-visible` outline ring.
+- **Theme switcher** at `www-src/js/ux/theme.js`:
+  - `initTheme()` reads `localStorage.pivision.theme` and applies
+    `data-theme` to `<html>` before paint (no FOUC).
+  - `setTheme(t)`, `getTheme()`, `getResolvedTheme()`, `cycleTheme()`,
+    `onThemeChange(fn)`.
+  - Subscribes to `(prefers-color-scheme: dark)` so 'auto' listeners
+    re-fire on OS-level changes.
+  - Exposed as `window.PIVisionTheme`.
+- **Accessibility helpers** at `www-src/js/ux/a11y.js`:
+  - `injectSkipLink({ targetSelector, label })` — adds the
+    skip-to-content link, makes the target focusable.
+  - `createFocusTrap(container, { onEscape })` — locks Tab/Shift+Tab
+    inside a container, restores focus on release.
+  - `announce(message, { assertive })` — ARIA live region helper
+    (polite + assertive variants).
+  - `onArrowKeyNav(container, { itemSelector, orientation, wrap })`
+    — keyboard navigation for lists/grids/tabs/menus.
+  - `prefersReducedMotion()`.
+  - Exposed as `window.PIVisionA11y`.
+- **View Transitions wrapper** at `www-src/js/ux/transitions.js`:
+  - `withTransition(callback)` runs the DOM update inside
+    `document.startViewTransition` when available, falls back to
+    immediate update otherwise. Always returns the same shape.
+  - Honors `prefers-reduced-motion`.
+  - `tagForTransition(el, name)` sets `view-transition-name`.
+  - Exposed as `window.PIVisionTransitions`.
+- **Wired into all three entry HTMLs** (`index.html`, `desktop.html`,
+  `qa/qa-app.html`):
+  - `tokens.css` is the first stylesheet so legacy CSS can shadow it.
+  - The UX bootstrap module runs early (before app code) to set the
+    theme attribute and inject the skip link without FOUC.
+- **Tests**: 11 tests for `theme.js` and 11 for `a11y.js` (all
+  jsdom-based via Vitest). Combined with previous stages the suite
+  is now: SafeDOM (10), SafeExpr (43), symbol-loader (11), theme
+  (11), a11y (11) = **86 unit tests** total.
+
+### Tracked tech debt for stages 5+
 - 351 raw `innerHTML =` assignments across 75 files. Migration order:
   `js/ai-chat.js` (17), `js/af-browser-ui.js` (30), `js/mobile-app.js` (28),
   `js/collab-ui.js` (14), `js/visual-builder.js` (13), then symbols.
