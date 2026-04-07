@@ -1,0 +1,660 @@
+/**
+ * ═══════════════════════════════════════════════════════
+ *  sym-eventwriter-wow.css — Executive Action Hub Styles
+ * ═══════════════════════════════════════════════════════
+ *  Full DOM-driven symbol — CSS handles ALL visual states:
+ *  button morphing (loading → success → error), shake reject,
+ *  form flash confirmation, input validation glow, permission
+ *  lock overlay, history timeline, skeleton shimmer.
+ *
+ *  Unlike Canvas WOW symbols, every pixel is CSS-controlled.
+ *  Micro-interactions run on GPU compositor (transform/opacity).
+ *
+ *  Version : WOW Action Hub v100
+ *  Prefix  : wow-eh-
+ * ═══════════════════════════════════════════════════════
+ */
+
+
+/* ═══ CSS Custom Properties ═══ */
+
+:host {
+    --wow-eh-bg-start:     #0A0F1C;
+    --wow-eh-bg-end:       #111B2E;
+    --wow-eh-surface:      #0F2940;
+    --wow-eh-accent:       #5BC0EB;
+    --wow-eh-accent-glow:  rgba(91, 192, 235, 0.3);
+    --wow-eh-ok:           #00F5D4;
+    --wow-eh-ok-glow:      rgba(0, 245, 212, 0.35);
+    --wow-eh-warn:         #FFCC00;
+    --wow-eh-crit:         #FF3B30;
+    --wow-eh-crit-glow:    rgba(255, 59, 48, 0.35);
+    --wow-eh-text:         #ECF0F1;
+    --wow-eh-text-muted:   #8899AA;
+    --wow-eh-border:       #1A3A5C;
+    --wow-eh-glass-bg:     rgba(15, 41, 64, 0.92);
+    --wow-eh-glass-border: rgba(91, 192, 235, 0.15);
+    --wow-eh-font:         'Segoe UI', Arial, sans-serif;
+    --wow-eh-font-size:    12px;
+    --wow-eh-radius:       8px;
+    --wow-eh-transition:   0.2s ease-out;
+}
+
+
+/* ═══ Safe Reset ═══ */
+
+.wow-eh-root { box-sizing: border-box; }
+.wow-eh-root *, .wow-eh-root *::before, .wow-eh-root *::after {
+    box-sizing: border-box;
+}
+
+
+/* ═══ Root Layout ═══ */
+
+.wow-eh-root {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    background: linear-gradient(180deg, var(--wow-eh-bg-start), var(--wow-eh-bg-end));
+    font-family: var(--wow-eh-font);
+    font-size: var(--wow-eh-font-size);
+    color: var(--wow-eh-text);
+    direction: rtl;
+    overflow: hidden;
+    border-radius: var(--wow-eh-radius);
+}
+
+
+/* ═══ Toolbar ═══ */
+
+.wow-eh-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 14px;
+    min-height: 40px;
+    flex-shrink: 0;
+    border-bottom: 1px solid var(--wow-eh-border);
+    background: rgba(10, 15, 28, 0.6);
+}
+
+.wow-eh-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--wow-eh-text);
+    letter-spacing: 0.3px;
+    text-shadow: 0 0 12px var(--wow-eh-accent-glow);
+}
+
+.wow-eh-toolbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    direction: ltr;
+}
+
+.wow-eh-btn {
+    padding: 5px 12px;
+    border: 1px solid var(--wow-eh-border);
+    border-radius: 6px;
+    background: rgba(91, 192, 235, 0.08);
+    color: var(--wow-eh-accent);
+    font-size: 11px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all var(--wow-eh-transition);
+    white-space: nowrap;
+}
+
+.wow-eh-btn:hover {
+    background: rgba(91, 192, 235, 0.18);
+    border-color: var(--wow-eh-accent);
+}
+
+.wow-eh-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.wow-eh-retry-btn {
+    color: var(--wow-eh-warn);
+    border-color: rgba(255, 204, 0, 0.3);
+    background: rgba(255, 204, 0, 0.08);
+}
+
+.wow-eh-retry-btn:hover {
+    background: rgba(255, 204, 0, 0.18);
+    border-color: var(--wow-eh-warn);
+}
+
+.wow-eh-queue-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 6px;
+    border-radius: 10px;
+    background: var(--wow-eh-crit);
+    color: #FFFFFF;
+    font-size: 10px;
+    font-weight: 700;
+    font-family: inherit;
+}
+
+
+/* ═══ Stats Bar ═══ */
+
+.wow-eh-stats {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 4px 14px;
+    flex-shrink: 0;
+    font-size: 10px;
+    color: var(--wow-eh-text-muted);
+    border-bottom: 1px solid rgba(26, 58, 92, 0.5);
+    direction: rtl;
+    min-height: 24px;
+}
+
+.wow-eh-stat {
+    white-space: nowrap;
+}
+
+.wow-eh-stat b {
+    color: var(--wow-eh-text);
+    font-weight: 600;
+}
+
+
+/* ═══════════════════════════════════════════════════
+ *  Form Card (Glassmorphism)
+ *  The command center for data entry — prominent and
+ *  visually distinct from read-only display areas.
+ * ═══════════════════════════════════════════════════ */
+
+.wow-eh-form {
+    position: relative;
+    margin: 12px 14px;
+    padding: 16px 18px;
+    background: var(--wow-eh-glass-bg);
+    border: 1px solid var(--wow-eh-glass-border);
+    border-radius: 10px;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    flex-shrink: 0;
+    transition: box-shadow 0.3s ease;
+}
+
+
+/* ── Current Value Display ── */
+
+.wow-eh-current {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    margin-bottom: 12px;
+    direction: rtl;
+}
+
+.wow-eh-current-label {
+    font-size: 11px;
+    color: var(--wow-eh-text-muted);
+    font-weight: 500;
+}
+
+.wow-eh-current-value {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--wow-eh-text);
+    font-variant-numeric: tabular-nums;
+    text-shadow: 0 0 14px var(--wow-eh-accent-glow);
+}
+
+
+/* ═══════════════════════════════════════════════════
+ *  Input Row — Vanilla JS Input + Submit Button
+ *  Input has no ng-model — pure browser performance.
+ *  Validation glow appears AS the operator types.
+ * ═══════════════════════════════════════════════════ */
+
+.wow-eh-input-row {
+    display: flex;
+    gap: 8px;
+    align-items: stretch;
+}
+
+.wow-eh-input {
+    flex: 1;
+    padding: 10px 14px;
+    border: 2px solid var(--wow-eh-border);
+    border-radius: 8px;
+    background: rgba(10, 15, 28, 0.6);
+    color: var(--wow-eh-text);
+    font-size: 14px;
+    font-family: inherit;
+    direction: rtl;
+    outline: none;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.wow-eh-input::placeholder {
+    color: var(--wow-eh-text-muted);
+    opacity: 0.6;
+}
+
+.wow-eh-input:focus {
+    border-color: var(--wow-eh-accent);
+    box-shadow: 0 0 0 3px var(--wow-eh-accent-glow);
+}
+
+.wow-eh-input:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+/* ── Validation States ── */
+
+.wow-eh-input.wow-eh-valid {
+    border-color: var(--wow-eh-ok);
+    box-shadow: 0 0 0 3px var(--wow-eh-ok-glow);
+}
+
+.wow-eh-input.wow-eh-invalid {
+    border-color: var(--wow-eh-crit);
+    box-shadow: 0 0 0 3px var(--wow-eh-crit-glow);
+}
+
+
+/* ═══════════════════════════════════════════════════
+ *  THE GEM: Button Morphing Micro-interactions
+ *
+ *  "Update" → circle spinner → "✓ נשמר" (green)
+ *                            → "✗ שגיאה" (red)
+ *
+ *  Width collapses to 42px circle during loading,
+ *  then expands back. All on GPU (transform + opacity).
+ * ═══════════════════════════════════════════════════ */
+
+.wow-eh-submit {
+    padding: 10px 20px;
+    min-width: 100px;
+    border: 2px solid var(--wow-eh-accent);
+    border-radius: 8px;
+    background: rgba(91, 192, 235, 0.12);
+    color: var(--wow-eh-accent);
+    font-size: 13px;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    white-space: nowrap;
+    overflow: hidden;
+    direction: ltr;
+}
+
+.wow-eh-submit:hover:not(:disabled) {
+    background: rgba(91, 192, 235, 0.22);
+    border-color: var(--wow-eh-accent);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px var(--wow-eh-accent-glow);
+}
+
+.wow-eh-submit:active:not(:disabled) {
+    transform: translateY(0);
+}
+
+.wow-eh-submit:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+/* ── Loading: collapse to circle with spinner ── */
+.wow-eh-submit.wow-eh-loading {
+    min-width: 42px;
+    width: 42px;
+    padding: 10px;
+    border-radius: 50%;
+    border-color: var(--wow-eh-accent);
+    background: rgba(91, 192, 235, 0.08);
+    color: transparent;
+    pointer-events: none;
+}
+
+/* ── Success: expand green ── */
+.wow-eh-submit.wow-eh-success {
+    min-width: 100px;
+    border-radius: 8px;
+    border-color: var(--wow-eh-ok);
+    background: rgba(0, 245, 212, 0.15);
+    color: var(--wow-eh-ok);
+    pointer-events: none;
+    box-shadow: 0 0 16px var(--wow-eh-ok-glow);
+}
+
+/* ── Error: expand red ── */
+.wow-eh-submit.wow-eh-error {
+    min-width: 100px;
+    border-radius: 8px;
+    border-color: var(--wow-eh-crit);
+    background: rgba(255, 59, 48, 0.15);
+    color: var(--wow-eh-crit);
+    pointer-events: none;
+    box-shadow: 0 0 16px var(--wow-eh-crit-glow);
+}
+
+
+/* ═══ Spinner (inside loading button) ═══ */
+
+.wow-eh-spinner {
+    display: inline-block;
+    width: 18px;
+    height: 18px;
+    border: 2px solid transparent;
+    border-top-color: var(--wow-eh-accent);
+    border-right-color: var(--wow-eh-accent);
+    border-radius: 50%;
+    animation: wowEhSpin 0.6s linear infinite;
+    vertical-align: middle;
+}
+
+@keyframes wowEhSpin {
+    0%   { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+
+/* ═══ Shake Animation (invalid submit attempt) ═══ */
+
+.wow-eh-input.wow-eh-shake {
+    animation: wowEhShake 0.35s ease-in-out;
+}
+
+@keyframes wowEhShake {
+    0%, 100% { transform: translateX(0); }
+    20%      { transform: translateX(-6px); }
+    40%      { transform: translateX(5px); }
+    60%      { transform: translateX(-4px); }
+    80%      { transform: translateX(3px); }
+}
+
+
+/* ═══ Form Flash Animations ═══ */
+
+.wow-eh-form.wow-eh-flash-ok {
+    animation: wowEhFlashOk 0.5s ease-out;
+}
+
+@keyframes wowEhFlashOk {
+    0%   { box-shadow: 0 0 0 0 var(--wow-eh-ok-glow); }
+    50%  { box-shadow: 0 0 30px 8px var(--wow-eh-ok-glow); }
+    100% { box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3); }
+}
+
+.wow-eh-form.wow-eh-flash-err {
+    animation: wowEhFlashErr 0.5s ease-out;
+}
+
+@keyframes wowEhFlashErr {
+    0%   { box-shadow: 0 0 0 0 var(--wow-eh-crit-glow); }
+    50%  { box-shadow: 0 0 30px 8px var(--wow-eh-crit-glow); }
+    100% { box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3); }
+}
+
+
+/* ═══ Validation Message ═══ */
+
+.wow-eh-validation {
+    font-size: 10px;
+    color: var(--wow-eh-crit);
+    margin-top: 6px;
+    min-height: 14px;
+    direction: rtl;
+    opacity: 0;
+    transform: translateY(-4px);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.wow-eh-validation.wow-eh-validation-show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+
+/* ═══ Permission Lock Overlay ═══ */
+
+.wow-eh-lock {
+    position: absolute;
+    inset: 0;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(10, 15, 28, 0.85);
+    border-radius: 10px;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--wow-eh-text-muted);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    letter-spacing: 0.5px;
+}
+
+
+/* ═══ History ═══ */
+
+.wow-eh-history {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding: 0 14px 8px;
+    direction: rtl;
+}
+
+.wow-eh-history-title {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--wow-eh-text-muted);
+    margin-bottom: 6px;
+    padding-bottom: 4px;
+    border-bottom: 1px solid rgba(26, 58, 92, 0.4);
+}
+
+.wow-eh-history-list {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.wow-eh-history-empty {
+    font-size: 10px;
+    color: var(--wow-eh-text-muted);
+    text-align: center;
+    padding: 12px 0;
+    opacity: 0.6;
+}
+
+.wow-eh-history-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 5px 8px;
+    border-radius: 6px;
+    font-size: 11px;
+    background: rgba(15, 41, 64, 0.4);
+    transition: background var(--wow-eh-transition);
+}
+
+.wow-eh-history-item:hover {
+    background: rgba(15, 41, 64, 0.7);
+}
+
+.wow-eh-history-ok .wow-eh-hi-icon {
+    color: var(--wow-eh-ok);
+    font-weight: 700;
+}
+
+.wow-eh-history-error .wow-eh-hi-icon {
+    color: var(--wow-eh-crit);
+    font-weight: 700;
+}
+
+.wow-eh-hi-icon {
+    flex-shrink: 0;
+    width: 16px;
+    text-align: center;
+    font-size: 12px;
+}
+
+.wow-eh-hi-val {
+    flex: 1;
+    color: var(--wow-eh-text);
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.wow-eh-hi-time {
+    flex-shrink: 0;
+    color: var(--wow-eh-text-muted);
+    font-size: 10px;
+    font-variant-numeric: tabular-nums;
+    direction: ltr;
+}
+
+.wow-eh-hi-err {
+    flex-shrink: 0;
+    color: var(--wow-eh-crit);
+    font-size: 10px;
+    opacity: 0.8;
+}
+
+
+/* ═══ Skeleton / Ghost Loading ═══ */
+
+.wow-eh-skeleton {
+    position: absolute;
+    inset: 0;
+    z-index: 50;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--wow-eh-bg-start);
+}
+
+.wow-eh-skeleton::after {
+    content: '';
+    width: 50%;
+    height: 3px;
+    border-radius: 2px;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        var(--wow-eh-accent),
+        transparent
+    );
+    animation: wowEhShimmer 1.5s ease-in-out infinite;
+}
+
+@keyframes wowEhShimmer {
+    0%   { transform: translateX(-100%); opacity: 0.3; }
+    50%  { opacity: 1; }
+    100% { transform: translateX(100%); opacity: 0.3; }
+}
+
+
+/* ═══ Footer ═══ */
+
+.wow-eh-footer {
+    flex-shrink: 0;
+    padding: 4px 14px;
+    font-size: 9px;
+    color: var(--wow-eh-text-muted);
+    text-align: center;
+    border-top: 1px solid var(--wow-eh-border);
+}
+
+
+/* ═══ Responsive ═══ */
+
+@container (max-width: 350px) {
+    .wow-eh-input-row {
+        flex-direction: column;
+    }
+    .wow-eh-submit {
+        width: 100%;
+    }
+    .wow-eh-current-value {
+        font-size: 18px;
+    }
+}
+
+
+/* ═══ Print Media ═══ */
+
+@media print {
+    .wow-eh-root {
+        background: #FFFFFF !important;
+        color: #333 !important;
+        border: 1px solid #DDD;
+    }
+
+    .wow-eh-toolbar {
+        background: #F5F5F5 !important;
+        border-color: #DDD !important;
+    }
+
+    .wow-eh-toolbar-actions {
+        display: none !important;
+    }
+
+    .wow-eh-title {
+        color: #000 !important;
+        text-shadow: none !important;
+    }
+
+    .wow-eh-form {
+        background: #FAFAFA !important;
+        border-color: #DDD !important;
+        backdrop-filter: none !important;
+        box-shadow: none !important;
+    }
+
+    .wow-eh-input,
+    .wow-eh-submit {
+        display: none !important;
+    }
+
+    .wow-eh-current-value {
+        color: #000 !important;
+        text-shadow: none !important;
+    }
+
+    .wow-eh-lock {
+        display: none !important;
+    }
+
+    .wow-eh-stats,
+    .wow-eh-footer {
+        color: #666 !important;
+        border-color: #DDD !important;
+    }
+
+    .wow-eh-stat b {
+        color: #000 !important;
+    }
+
+    .wow-eh-history-item {
+        background: transparent !important;
+        border-bottom: 1px solid #EEE;
+    }
+}

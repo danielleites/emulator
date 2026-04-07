@@ -1,0 +1,359 @@
+<!--
+   ______                            __
+  / ____/___  ____ ___  ____  __  __/ /____  _____
+ / /   / __ \/ __ `__ \/ __ \/ / / / __/ _ \/ ___/
+/ /___/ /_/ / / / / / / /_/ / /_/ / /_/  __/ /
+\____/\____/_/ /_/ /_/ .___/\__,_/\__/\___/_/
+                    /_/
+        Created with Perplexity Computer
+        https://www.perplexity.ai/computer
+-->
+
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PI Vision QA — בדיקת סמלים מותאמים</title>
+  <!-- Perplexity Computer Attribution — moved inside <head> so the
+       parse5-based bundlers can parse the document. -->
+  <meta name="generator" content="Perplexity Computer">
+  <meta name="author" content="Perplexity Computer">
+  <meta property="og:see_also" content="https://www.perplexity.ai/computer">
+  <link rel="author" href="https://www.perplexity.ai/computer">
+  <meta name="description" content="כלי QA אוטומטי לסמלים מותאמים של PI Vision — ניתוח JS, HTML, CSS ובדיקות צלב-קובץ">
+  <!-- CSP — added in stage 1. QA tool reads symbol files locally and runs analysis workers. -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' blob:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https:; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self';">
+  
+  <!-- Fonts (local bundle for offline use; no CDN required) -->
+  <link rel="stylesheet" href="../fonts/heebo.css">
+
+  <!-- Stage 4: design tokens -->
+  <link rel="stylesheet" href="../css/tokens.css">
+
+  <!-- Security: SafeDOM (must load before any script that touches innerHTML) -->
+  <script type="module" src="../js/security/safe-dom.js"></script>
+
+  <!-- Stage 4 UX layer (theme, a11y, transitions) -->
+  <script type="module">
+    import { initTheme } from '../js/ux/theme.js';
+    import { injectSkipLink } from '../js/ux/a11y.js';
+    import '../js/ux/transitions.js';
+    initTheme();
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', () => injectSkipLink());
+    } else {
+      injectSkipLink();
+    }
+  </script>
+
+  <!-- JSZip (local vendor bundle for offline use) -->
+  <script src="../vendor/jszip.min.js"></script>
+
+  <!-- App Styles -->
+  <link rel="stylesheet" href="css/qa-app.css">
+  <link rel="stylesheet" href="css/qa-charts.css">
+  <link rel="stylesheet" href="css/qa-advanced.css">
+
+  <!-- Favicon SVG -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%230d1b2a'/><path d='M8 16 L13 21 L24 11' stroke='%2300d4ff' stroke-width='3' stroke-linecap='round' stroke-linejoin='round' fill='none'/></svg>">
+
+  <style>
+    /* ─── App Chrome ─── */
+    #app {
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      min-height: 100vh;
+    }
+    .app-main {
+      display: flex;
+      min-height: 0;
+      overflow: hidden;
+    }
+    #content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      min-width: 0;
+    }
+
+    /* ─── Sidebar toggle for mobile ─── */
+    .sidebar-toggle {
+      display: none;
+    }
+    @media (max-width: 768px) {
+      .sidebar-toggle { display: flex; }
+      .app-sidebar.collapsed { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<div id="app">
+
+  <!-- ═══════════════════════════════════════════════════
+       HEADER
+  ════════════════════════════════════════════════════ -->
+  <header class="app-header">
+    <div class="app-logo">
+      <!-- Logo SVG -->
+      <svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="PI Vision QA">
+        <rect width="36" height="36" rx="8" fill="#0f3460"/>
+        <rect x="4" y="4" width="28" height="28" rx="5" fill="#1a2744"/>
+        <!-- QA checkmark -->
+        <path d="M10 18 L15 23 L26 13" stroke="#00d4ff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        <!-- Shield hint -->
+        <path d="M18 6 L28 10 L28 18 C28 24 18 30 18 30 C18 30 8 24 8 18 L8 10 Z" stroke="#00d4ff" stroke-width="1.5" stroke-opacity="0.3" fill="none"/>
+      </svg>
+      <div class="app-logo-text">
+        <span class="app-title">PI Vision QA</span>
+        <span class="app-subtitle">ניתוח סמלים מותאמים</span>
+      </div>
+    </div>
+
+    <div class="header-controls">
+      <!-- Emulator URL -->
+      <div class="emulator-url-group">
+        <label for="emulator-url">אמולטור:</label>
+        <input type="url" 
+               id="emulator-url" 
+               class="input-sm" 
+               placeholder="https://emulator.example.com"
+               dir="ltr"
+               title="כתובת URL של אמולטור PI Vision">
+      </div>
+
+      <!-- Action buttons -->
+      <button id="export-json" class="btn btn-secondary btn-sm" title="ייצא דוח JSON">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M2 11v2a1 1 0 001 1h10a1 1 0 001-1v-2M8 2v8M5 9l3 3 3-3"/>
+        </svg>
+        JSON
+      </button>
+      <button id="export-html" class="btn btn-secondary btn-sm" title="ייצא דוח HTML">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M2 11v2a1 1 0 001 1h10a1 1 0 001-1v-2M8 2v8M5 9l3 3 3-3"/>
+        </svg>
+        HTML
+      </button>
+      <button id="print-btn" class="btn btn-ghost btn-sm" title="הדפס">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M4 6V2h8v4M4 12H3a1 1 0 01-1-1V7a1 1 0 011-1h10a1 1 0 011 1v4a1 1 0 01-1 1h-1M4 10h8v4H4z"/>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- ═══════════════════════════════════════════════════
+       MAIN AREA
+  ════════════════════════════════════════════════════ -->
+  <div class="app-main">
+
+    <!-- ─────────────────────────────────────────────
+         SIDEBAR (Right side — RTL)
+    ─────────────────────────────────────────────── -->
+    <aside class="app-sidebar" id="app-sidebar">
+
+      <!-- Source Selection -->
+      <div class="sidebar-section">
+        <div class="sidebar-section-title">מקור נתונים</div>
+        <div class="source-tabs">
+          <button class="source-tab active" data-source="github">
+            <svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
+            GitHub
+          </button>
+          <button class="source-tab" data-source="upload">
+            <svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12v2h12v-2M8 2v8M5 5l3-3 3 3"/></svg>
+            העלאה
+          </button>
+        </div>
+
+        <!-- GitHub Panel -->
+        <div id="github-panel">
+          <div class="github-form">
+            <div class="form-row">
+              <label class="form-label" for="repo-owner">בעלים (Owner)</label>
+              <input type="text" id="repo-owner" class="input-field" 
+                     value="danielleites" placeholder="danielleites" dir="ltr">
+            </div>
+            <div class="form-row">
+              <label class="form-label" for="repo-name">מאגר (Repository)</label>
+              <input type="text" id="repo-name" class="input-field" 
+                     value="Symbols-for-copy-28.02" placeholder="repo-name" dir="ltr">
+            </div>
+            <div class="form-row">
+              <label class="form-label" for="deploy-path">נתיב (Path)</label>
+              <input type="text" id="deploy-path" class="input-field" 
+                     value="deploy" placeholder="deploy" dir="ltr">
+            </div>
+            <div class="form-row">
+              <label class="form-label" for="github-token">
+                GitHub Token (אופציונלי — מגדיל מגבלת קצב)
+              </label>
+              <div class="token-input-wrapper">
+                <input type="password" id="github-token" class="input-field" 
+                       placeholder="ghp_xxxx..." dir="ltr" autocomplete="off">
+                <button class="token-toggle" id="token-toggle" type="button" title="הצג/הסתר">👁</button>
+              </div>
+            </div>
+            <button id="fetch-btn" class="btn btn-primary" style="width:100%;justify-content:center">
+              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="11" cy="11" r="4"/><path d="M7 7c.4-2.4 2.5-4 5-4m-6 9.5L2 17"/>
+              </svg>
+              נתח סמלים מ-GitHub
+            </button>
+            <div id="rate-limit-info" class="rate-limit-info hidden"></div>
+          </div>
+        </div>
+
+        <!-- Upload Panel -->
+        <div id="upload-panel" class="hidden">
+          <div id="drop-zone" class="drop-zone">
+            <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12"/>
+            </svg>
+            <div style="font-size:14px;font-weight:600;margin-bottom:4px">גרור קבצים לכאן</div>
+            <p>קובץ ZIP או קבצי סמל בודדים (.js, .html, .css)</p>
+            <p style="margin-top:8px;font-size:11px;opacity:0.7">או לחץ לבחירת קבצים</p>
+          </div>
+        </div>
+
+        <!-- Progress -->
+        <div id="progress-container" class="progress-container">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div class="progress-label">מתקדם...</div>
+            <div id="progress-label" class="progress-label">0%</div>
+          </div>
+          <div class="progress-bar-track">
+            <div id="progress-fill" class="progress-bar-fill"></div>
+          </div>
+          <div id="progress-status" class="progress-status"></div>
+        </div>
+      </div>
+
+      <!-- Filters -->
+      <div class="sidebar-section">
+        <div class="sidebar-section-title">סינון</div>
+        <div class="filter-group">
+          <input type="search" 
+                 id="search-box" 
+                 class="search-box" 
+                 placeholder="🔍 חפש לפי שם סמל..."
+                 dir="rtl">
+          <div class="filter-row">
+            <span class="filter-label">קטגוריה:</span>
+            <select id="filter-category" class="filter-select">
+              <option value="all">הכל</option>
+              <option value="v20">v20</option>
+              <option value="wow">WOW</option>
+            </select>
+          </div>
+          <div class="filter-row">
+            <span class="filter-label">סטטוס:</span>
+            <select id="filter-status" class="filter-select">
+              <option value="all">הכל</option>
+              <option value="error">שגיאות</option>
+              <option value="warning">אזהרות</option>
+              <option value="pass">עבר</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Runtime QA -->
+      <div class="sidebar-section">
+        <div class="sidebar-section-title">בדיקת Runtime (F12)</div>
+        <button id="run-runtime-qa" class="btn btn-accent btn-sm" style="width:100%;justify-content:center" disabled>
+          ▶ הרץ בדיקת שגיאות Runtime
+        </button>
+        <div id="runtime-status" class="text-xs text-muted" style="margin-top:6px;text-align:center;display:none"></div>
+        <div id="runtime-progress-bar" style="display:none;margin-top:6px;height:4px;background:var(--bg-tertiary);border-radius:2px;overflow:hidden">
+          <div id="runtime-progress-fill" style="height:100%;width:0%;background:var(--teal);transition:width 0.3s"></div>
+        </div>
+      </div>
+
+      <!-- Manual QA actions -->
+      <div class="sidebar-section">
+        <div class="sidebar-section-title">QA ידני</div>
+        <button id="clear-data" class="btn btn-danger btn-sm" style="width:100%;justify-content:center">
+          🗑 אפס נתוני QA ידני
+        </button>
+      </div>
+
+      <!-- About -->
+      <div class="sidebar-section" style="margin-top:auto;border-top:1px solid var(--border)">
+        <div class="text-xs text-muted" style="line-height:1.7">
+          <strong style="color:var(--text-secondary)">PI Vision Symbol QA</strong><br>
+          גרסה 1.0 | 63 סמלים<br>
+          בדיקות: JS, HTML, CSS, צלב-קובץ<br>
+          <a href="https://www.perplexity.ai/computer" target="_blank" rel="noopener" style="color:var(--teal);font-size:10px">Created with Perplexity Computer</a>
+        </div>
+      </div>
+
+    </aside>
+
+    <!-- ─────────────────────────────────────────────
+         CONTENT AREA
+    ─────────────────────────────────────────────── -->
+    <main id="content">
+      <!-- Content rendered by qa-ui.js -->
+    </main>
+
+  </div><!-- /app-main -->
+
+  <!-- ═══════════════════════════════════════════════════
+       FOOTER
+  ════════════════════════════════════════════════════ -->
+  <footer class="app-footer">
+    <span class="text-muted text-xs">
+      PI Vision Custom Symbol QA Tool &copy; 2026
+    </span>
+    <div class="footer-actions">
+      <span class="text-muted text-xs" id="analysis-meta"></span>
+      <a href="https://www.perplexity.ai/computer" 
+         target="_blank" 
+         rel="noopener noreferrer"
+         style="color:var(--text-muted);font-size:11px">
+        Created with Perplexity Computer
+      </a>
+    </div>
+  </footer>
+
+</div><!-- /app -->
+
+<!-- Toast container -->
+<div id="toast-container"></div>
+
+<!-- ─── Advanced QA Module (non-module, loaded before main) ─── -->
+<script src="js/qa-advanced.js"></script>
+
+<!-- ─── Main App Module ──────────────────────────────────────── -->
+<script type="module">
+  import QAUA from './js/qa-ui.js';
+  
+  // Initialize app when DOM is ready
+  document.addEventListener('DOMContentLoaded', () => {
+    QAUA.init();
+  });
+
+  // Handle emulator postMessage (if in iframe)
+  window.addEventListener('message', (event) => {
+    if (event.data?.type === 'piv-emulator-load-symbol') {
+      const sym = event.data.symbolName;
+      if (sym) {
+        // Auto-navigate to symbol if it exists
+        const searchBox = document.getElementById('search-box');
+        if (searchBox) {
+          searchBox.value = sym;
+          searchBox.dispatchEvent(new Event('input'));
+        }
+      }
+    }
+  });
+</script>
+
+</body>
+</html>

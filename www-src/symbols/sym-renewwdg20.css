@@ -1,0 +1,84 @@
+/* ================================================================
+   sym-renewablewidget20.css — Renewable Energy Monitor v20
+   ================================================================ */
+.rw20-root {
+    --rw20-bg: #060C18; --rw20-surface: #0B1D33; --rw20-border: rgba(46,139,192,0.15);
+    --rw20-accent: #5BC0EB; --rw20-text1: #FFFFFF; --rw20-text2: #C0D0E0; --rw20-text3: #8BACC4;
+    --rw20-solar: #f59e0b; --rw20-wind: #22c55e; --rw20-other: #a855f7;
+    --rw20-good: #2ecc71; --rw20-warn: #f39c12; --rw20-crit: #e74c3c;
+    position: relative; width: 100%; height: 100%; background: var(--rw20-bg);
+    color: var(--rw20-text2); font-family: 'Segoe UI', Arial, sans-serif; font-size: 12px;
+    direction: rtl; overflow: hidden; display: flex; flex-direction: column;
+}
+.rw20-hdr {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 6px 10px; background: var(--rw20-surface); border-bottom: 1px solid var(--rw20-border); flex-shrink: 0;
+}
+.rw20-ttl { font-size: 14px; font-weight: 600; color: var(--rw20-text1); }
+.rw20-btn {
+    background: rgba(91,192,235,0.08); border: 1px solid var(--rw20-border);
+    color: var(--rw20-text3); border-radius: 4px; padding: 4px 8px; font-size: 11px; cursor: pointer;
+}
+.rw20-btn:hover, .rw20-btn.active { background: rgba(91,192,235,0.2); color: var(--rw20-accent); }
+.rw20-views { display: flex; gap: 2px; }
+.rw20-live { font-size: 11px; color: var(--rw20-text3); display: flex; align-items: center; gap: 4px; }
+.rw20-live-dot { width: 6px; height: 6px; border-radius: 50%; background: #2ecc71; animation: rw20-pulse 2s infinite; }
+@keyframes rw20-pulse { 0%,100% { opacity:1 } 50% { opacity:0.4 } }
+
+/* Summary bar */
+.rw20-summary { display: flex; gap: 12px; padding: 4px 10px; background: rgba(11,29,51,0.6); border-bottom: 1px solid var(--rw20-border); font-size: 11px; color: var(--rw20-text3); flex-shrink: 0; flex-wrap: wrap; }
+.rw20-sum-item { white-space: nowrap; }
+
+.rw20-body { flex: 1; overflow-y: auto; overflow-x: hidden; position: relative; }
+.rw20-empty { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 200px; color: var(--rw20-text3); }
+
+/* Category cards */
+.rw20-cats { display: flex; gap: 8px; padding: 8px; flex-wrap: wrap; }
+.rw20-cat-card { background: var(--rw20-surface); border-radius: 6px; padding: 10px 14px; flex: 1; min-width: 140px; border-top: 3px solid var(--rw20-accent); }
+.rw20-cat-card.cat-solar { border-top-color: var(--rw20-solar); }
+.rw20-cat-card.cat-wind { border-top-color: var(--rw20-wind); }
+.rw20-cat-card.cat-other { border-top-color: var(--rw20-other); }
+.rw20-cat-icon { font-size: 20px; }
+.rw20-cat-label { font-size: 10px; color: var(--rw20-text3); }
+.rw20-cat-val { font-size: 22px; font-weight: 700; color: var(--rw20-text1); }
+.rw20-cat-sub { font-size: 10px; color: var(--rw20-text3); margin-top: 2px; }
+
+/* Penetration bar */
+.rw20-pen-bar { margin: 8px; height: 24px; background: rgba(91,192,235,0.1); border-radius: 6px; overflow: hidden; position: relative; }
+.rw20-pen-fill { height: 100%; border-radius: 6px; transition: width 0.5s ease; background: linear-gradient(90deg, #22c55e, #f59e0b); }
+.rw20-pen-label { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); font-size: 11px; font-weight: 600; color: var(--rw20-text1); }
+
+/* Intermittency metrics */
+.rw20-metrics { display: flex; gap: 8px; padding: 4px 8px; flex-wrap: wrap; }
+.rw20-metric { background: var(--rw20-surface); border-radius: 4px; padding: 4px 8px; font-size: 10px; }
+.rw20-metric-val { font-weight: 600; color: var(--rw20-text1); }
+
+/* Chart */
+.rw20-chart-wrap { padding: 8px; }
+.rw20-canvas { width: 100%; height: 180px; cursor: crosshair; }
+
+/* Stats panel */
+.rw20-stat-row { display: flex; justify-content: space-between; padding: 3px 8px; font-size: 11px; border-bottom: 1px solid rgba(46,139,192,0.08); }
+
+/* Table view */
+.rw20-table { width: 100%; border-collapse: collapse; font-size: 11px; }
+.rw20-table th { padding: 4px 6px; text-align: right; background: var(--rw20-surface); color: var(--rw20-text3); font-weight: 500; cursor: pointer; }
+.rw20-table td { padding: 3px 6px; border-bottom: 1px solid rgba(46,139,192,0.08); }
+
+/* Compact view */
+.rw20-compact { display: flex; flex-wrap: wrap; gap: 8px; padding: 12px; }
+.rw20-compact-item { background: var(--rw20-surface); border-right: 3px solid var(--rw20-accent); border-radius: 4px; padding: 6px 10px; min-width: 80px; }
+.rw20-compact-label { color: var(--rw20-text3); display: block; font-size: 10px; }
+.rw20-compact-val { color: var(--rw20-text1); font-weight: 600; font-size: 16px; }
+
+/* Side panel */
+.rw20-panel { position: absolute; top: 0; left: -280px; width: 270px; height: 100%; background: var(--rw20-surface); border-right: 1px solid var(--rw20-border); transition: left 0.3s; z-index: 100; overflow-y: auto; padding: 0 10px 10px; }
+.rw20-panel.open { left: 0; box-shadow: 4px 0 20px rgba(0,0,0,0.4); }
+.rw20-phd { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; }
+.rw20-phd h3 { margin: 0; font-size: 13px; color: var(--rw20-accent); }
+.rw20-pcl { background: none; border: none; color: var(--rw20-text3); font-size: 16px; cursor: pointer; }
+.rw20-ps { margin-bottom: 8px; }
+.rw20-ps label { display: block; font-size: 11px; color: var(--rw20-text3); margin-bottom: 3px; }
+.rw20-ps input[type=text], .rw20-ps input[type=number], .rw20-ps select { width: 100%; background: var(--rw20-bg); border: 1px solid var(--rw20-border); border-radius: 4px; padding: 5px 8px; color: var(--rw20-text1); font-size: 12px; }
+
+.rw20-ftr { padding: 3px 10px; font-size: 10px; color: rgba(139,172,196,0.4); text-align: center; border-top: 1px solid var(--rw20-border); flex-shrink: 0; }

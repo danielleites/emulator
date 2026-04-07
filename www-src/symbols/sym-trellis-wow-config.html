@@ -1,0 +1,145 @@
+<!-- ═══════════════════════════════════════════════════════
+     Executive Synchronized Trellis — Config Panel
+     WOW Trellis v100 — wc20 Pattern + Collapsible <details>
+     ═══════════════════════════════════════════════════════ -->
+
+<div class="wc20-config-panel" style="direction:rtl; font-family:'Segoe UI',Arial,sans-serif;">
+
+    <!-- ── General (open by default) ── -->
+    <details class="wc20-section" open>
+        <summary class="wc20-section-title">כללי</summary>
+
+        <div class="wc20-field">
+            <label class="wc20-label">כותרת</label>
+            <input type="text" class="wc20-input"
+                   ng-model="config.Title"
+                   placeholder="Executive Benchmarking Matrix">
+        </div>
+
+        <div class="wc20-field">
+            <label class="wc20-label">מצב הדגמה (Demo)</label>
+            <input type="checkbox" class="wc20-checkbox"
+                   ng-model="config.DemoMode">
+            <span class="wc20-hint">סימולציה: 6 נכסים עם גלי סינוס דינמיים</span>
+        </div>
+    </details>
+
+    <!-- ── Scale & Display (open by default) ── -->
+    <details class="wc20-section" open>
+        <summary class="wc20-section-title">קני מידה ותצוגה</summary>
+
+        <div class="wc20-field">
+            <label class="wc20-label">מצב קנה מידה (Scale)</label>
+            <select class="wc20-select" ng-model="config.ScaleMode">
+                <option value="independent">עצמאי — כל נכס בסקאלה משלו</option>
+                <option value="shared">משותף — ציר Y אחיד לכולם</option>
+            </select>
+            <span class="wc20-hint">עצמאי: מושלם להשוואת צורה. משותף: מושלם להשוואת גודל מוחלט</span>
+        </div>
+
+        <div class="wc20-field">
+            <label class="wc20-label">הצג קו ממוצע (Ghost Baseline)</label>
+            <input type="checkbox" class="wc20-checkbox"
+                   ng-model="config.ShowBaseline">
+            <span class="wc20-hint">קו מרוסק אופקי — ממוצע היסטורי לכל נכס</span>
+        </div>
+
+        <div class="wc20-field">
+            <label class="wc20-label">הארת מנצח/מפסיד (Winner/Loser)</label>
+            <input type="checkbox" class="wc20-checkbox"
+                   ng-model="config.ShowWinnerLoser">
+            <span class="wc20-hint">בועה זהב = ערך הגבוה ביותר, אדום = הנמוך ביותר</span>
+        </div>
+
+        <div class="wc20-field">
+            <label class="wc20-label">הצג סקאלה (Min/Max)</label>
+            <input type="checkbox" class="wc20-checkbox"
+                   ng-model="config.ShowScale">
+            <span class="wc20-hint">ערכי מינימום/מקסימום בפינת כל נתיב</span>
+        </div>
+
+        <div class="wc20-field">
+            <label class="wc20-label">עובי קו</label>
+            <input type="number" class="wc20-input wc20-input-sm"
+                   ng-model="config.LineWidth"
+                   ng-model-options="{ debounce: 500 }"
+                   min="0.5" max="4" step="0.5">
+        </div>
+
+        <div class="wc20-field">
+            <label class="wc20-label">עשרוניות</label>
+            <select class="wc20-select" ng-model="config.Decimals"
+                    ng-options="v as v for v in [0, 1, 2, 3]">
+            </select>
+        </div>
+    </details>
+
+    <!-- ── Theme ── -->
+    <details class="wc20-section">
+        <summary class="wc20-section-title">ערכת נושא</summary>
+
+        <div class="wc20-field">
+            <label class="wc20-label">גופן</label>
+            <select class="wc20-select" ng-model="config.fontFamily">
+                <option value="Segoe UI">Segoe UI</option>
+                <option value="Arial">Arial</option>
+                <option value="Tahoma">Tahoma</option>
+                <option value="Consolas">Consolas (Mono)</option>
+            </select>
+        </div>
+
+        <div class="wc20-field">
+            <label class="wc20-label">גודל גופן (px)</label>
+            <input type="number" class="wc20-input wc20-input-sm"
+                   ng-model="config.fontSize"
+                   ng-model-options="{ debounce: 500 }"
+                   min="8" max="16" step="1">
+        </div>
+    </details>
+
+    <!-- ── Info ── -->
+    <details class="wc20-section">
+        <summary class="wc20-section-title">מידע טכני</summary>
+
+        <div class="wc20-field wc20-readonly">
+            <span class="wc20-badge wc20-badge-blue">DataShape</span>
+            <span>TimeSeries (Multiple Datasources)</span>
+        </div>
+
+        <div class="wc20-field wc20-readonly">
+            <span class="wc20-badge wc20-badge-green">Architecture</span>
+            <span>Single Canvas — Small Multiples / Trellis</span>
+        </div>
+
+        <div class="wc20-field wc20-readonly">
+            <span class="wc20-badge wc20-badge-green">Crosshair</span>
+            <span>Global Sync — O(log N) Binary Search</span>
+        </div>
+
+        <div class="wc20-field wc20-readonly">
+            <span class="wc20-badge wc20-badge-orange">Winner/Loser</span>
+            <span>Dynamic Highlight — Gold(max) / Red(min)</span>
+        </div>
+
+        <div class="wc20-field wc20-readonly">
+            <span class="wc20-badge wc20-badge-purple">Ghost Baseline</span>
+            <span>Historical Average — Dashed Anchor Line</span>
+        </div>
+
+        <div class="wc20-field wc20-readonly">
+            <span class="wc20-badge wc20-badge-blue">DPR</span>
+            <span>Retina-Aware — window.devicePixelRatio Scaling</span>
+        </div>
+
+        <div class="wc20-field wc20-readonly">
+            <span class="wc20-badge wc20-badge-green">Preprocess</span>
+            <span>Parse-Once — Zero GC Pressure in Draw Loop</span>
+        </div>
+
+        <div class="wc20-field wc20-readonly" style="margin-top:8px;">
+            <span class="wc20-badge">WOW Trellis v100</span>
+            <span style="color:#8899AA;">Executive Synchronized Benchmarking Matrix</span>
+        </div>
+    </details>
+
+</div>

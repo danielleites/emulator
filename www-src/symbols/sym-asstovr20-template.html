@@ -1,0 +1,213 @@
+<link rel="stylesheet" href="/PIVision/Scripts/app/editor/symbols/ext/sym-asstovr20.css" />
+<link rel="stylesheet" href="/PIVision/Scripts/app/editor/symbols/ext/piv20-design-system.css">
+<link rel="stylesheet" href="/PIVision/Scripts/app/editor/symbols/ext/piv20-overrides.css">
+<script type="text/javascript" src="/PIVision/Scripts/app/editor/symbols/ext/piv20-plugins/piv20-core.js"></script>
+<script type="text/javascript" src="/PIVision/Scripts/app/editor/symbols/ext/piv20-plugins/piv20-assetoverview.js"></script>
+
+<div class="piv20 ao20-root">
+
+    <!-- Hidden widget mount -->
+    <div id="ao20-widget" style="display:none;"></div>
+
+    <!-- ═══ Toast ═══ -->
+    <div class="ao20-toast-wrap"></div>
+
+    <!-- ═══ Header ═══ -->
+    <div class="ao20-header" data-doc="header">
+        <div class="ao20-conn" ng-class="afConn.css" ng-show="afConn"
+             title="{{afConn.good}}/{{afConn.total}} &#1514;&#1511;&#1497;&#1504;&#1497;&#1501;{{afConn.stale?' | '+afConn.stale+' &#1497;&#1513;&#1504;&#1497;&#1501;':''}}">
+            <span class="ao20-conn-dot"></span>
+            {{afConn.status==='connected'?'&#1502;&#1495;&#1493;&#1489;&#1512;':afConn.status==='partial'?'&#1495;&#1500;&#1511;&#1497;':'&#1502;&#1504;&#1493;&#1514;&#1511;'}}
+        </div>
+        <div>
+            <div class="ao20-title">&#1505;&#1511;&#1497;&#1512;&#1514; &#1504;&#1499;&#1505;&#1497;&#1501;</div>
+            <div class="ao20-subtitle">&#1505;&#1511;&#1497;&#1512;&#1514; &#1504;&#1499;&#1505;&#1497;&#1501;</div>
+        </div>
+        <div class="ao20-toolbar">
+            <button class="ao20-btn secondary" data-doc="export" ng-click="exportData()" title="&#1497;&#1497;&#1510;&#1493;&#1488; CSV">&#x1F4E5;</button>
+            <button class="ao20-btn secondary" ng-click="toggleFullscreen()" title="&#1502;&#1505;&#1498; &#1502;&#1500;&#1488;">{{isFullscreen ? '&#x229E;' : '&#x26F6;'}}</button>
+            <button class="ao20-btn secondary" ng-click="showDocs()" title="&#1502;&#1491;&#1512;&#1497;&#1498;">&#x1F4D6;</button>
+            <button class="ao20-btn secondary" ng-click="togglePanel()">&#x2699;</button>
+            <div class="ao20-live"><div class="ao20-live-dot"></div>{{liveTime}}</div>
+        </div>
+    </div>
+
+    <!-- ═══ Side Panel ═══ -->
+    <div class="ao20-panel" data-doc="panel" ng-class="{closed: !panelOpen}">
+        <div class="ao20-panel-header">
+            <div class="ao20-panel-title">&#x2699; &#1492;&#1490;&#1491;&#1512;&#1493;&#1514;</div>
+            <button class="ao20-panel-close" ng-click="togglePanel()">&#x2715;</button>
+        </div>
+        <div class="ao20-panel-body">
+            <div class="ao20-panel-section" data-doc="thresholds">
+                <div class="ao20-panel-label">&#1505;&#1507; &#1488;&#1494;&#1492;&#1512;&#1492; (&#1489;&#1512;&#1497;&#1512;&#1514; &#1502;&#1495;&#1491;&#1500;)</div>
+                <input class="ao20-input" type="number" ng-model="config.warnThreshold" />
+            </div>
+            <div class="ao20-panel-section">
+                <div class="ao20-panel-label">&#1505;&#1507; &#1511;&#1512;&#1497;&#1496;&#1497; (&#1489;&#1512;&#1497;&#1512;&#1514; &#1502;&#1495;&#1491;&#1500;)</div>
+                <input class="ao20-input" type="number" ng-model="config.critThreshold" />
+            </div>
+            <div class="ao20-panel-section">
+                <div class="ao20-panel-label">&#1514;&#1510;&#1493;&#1490;&#1492;</div>
+                <label style="font-size:12px;color:var(--ao20-text2);cursor:pointer;">
+                    <input type="checkbox" ng-model="config.sparklineEnabled" ng-change="toggleSparklines()" />
+                    &#1492;&#1510;&#1490; &#1490;&#1512;&#1508;&#1497; &#1502;&#1490;&#1502;&#1492; (Sparklines)
+                </label>
+            </div>
+            <div class="ao20-panel-section" style="border-top:1px solid var(--ao20-border);padding-top:8px;">
+                <div class="ao20-panel-label">&#1496;&#1497;&#1508;</div>
+                <div style="font-size:11px;color:var(--ao20-text3);">
+                    &#1504;&#1497;&#1514;&#1503; &#1500;&#1492;&#1490;&#1491;&#1497;&#1512; &#1505;&#1508;&#1497;&#1501; &#1497;&#1497;&#1495;&#1493;&#1491;&#1497;&#1497;&#1501; &#1500;&#1499;&#1500; &#1504;&#1499;&#1505; &#1491;&#1512;&#1498; config.<br/>
+                    <code style="font-size:10px;">perAssetThresholds: {"Temp": {warn:70, crit:90}}</code>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══ Loading ═══ -->
+    <div class="ao20-loading" ng-show="loading">&#x23F3; &#1496;&#1493;&#1506;&#1503; &#1504;&#1514;&#1493;&#1504;&#1497;&#1501;...</div>
+
+    <!-- ═══ Stats Bar ═══ -->
+    <div class="ao20-stats" data-doc="statistics" ng-show="hasData">
+        <div class="ao20-stat"><div class="ao20-stat-label">&#1505;&#1492;"&#1499;</div><div class="ao20-stat-value">{{stats.total}}</div></div>
+        <div class="ao20-stat"><div class="ao20-stat-label">&#1502;&#1502;&#1493;&#1510;&#1506;</div><div class="ao20-stat-value">{{stats.avg | number:1}}</div></div>
+        <div class="ao20-stat"><div class="ao20-stat-label">&#1502;&#1497;&#1504;&#1497;&#1502;&#1493;&#1501;</div><div class="ao20-stat-value">{{stats.min | number:1}}</div></div>
+        <div class="ao20-stat"><div class="ao20-stat-label">&#1502;&#1511;&#1505;&#1497;&#1502;&#1493;&#1501;</div><div class="ao20-stat-value">{{stats.max | number:1}}</div></div>
+        <div class="ao20-stat"><div class="ao20-stat-label">&#1505;&#1499;&#1493;&#1501;</div><div class="ao20-stat-value">{{stats.sum | number:0}}</div></div>
+        <div class="ao20-stat" ng-show="stats.bad > 0">
+            <div class="ao20-stat-label">&#1514;&#1511;&#1500;&#1493;&#1514;</div>
+            <div class="ao20-stat-value" style="color:var(--ao20-crit);">{{stats.bad}}</div>
+        </div>
+        <div class="ao20-stat" ng-show="stats.stale > 0">
+            <div class="ao20-stat-label">&#1497;&#1513;&#1504;&#1497;&#1501;</div>
+            <div class="ao20-stat-value" style="color:var(--ao20-warn);">{{stats.stale}}</div>
+        </div>
+        <div class="ao20-stat" ng-show="stats.outlierCount > 0">
+            <div class="ao20-stat-label">&#1495;&#1512;&#1497;&#1490;&#1497;&#1501;</div>
+            <div class="ao20-stat-value" style="color:var(--ao20-warn);">{{stats.outlierCount}}</div>
+        </div>
+    </div>
+
+    <!-- ═══ Controls ═══ -->
+    <div class="ao20-controls" ng-show="hasData">
+        <input class="ao20-input" ng-model="searchText" ng-change="onFilterChange()" placeholder="&#x1F50D; &#1495;&#1497;&#1508;&#1493;&#1513;..." style="max-width:200px;" />
+        <span style="flex:1;"></span>
+        <button class="ao20-btn secondary" data-doc="sparklines" ng-click="toggleSparklines()" style="padding:4px 8px;font-size:10px;"
+                ng-class="{active: sparklineEnabled}" title="&#1490;&#1512;&#1508;&#1497; &#1502;&#1490;&#1502;&#1492;">&#x1F4C8;</button>
+        <button class="ao20-btn secondary" ng-click="setView('table')" ng-class="{active: viewMode==='table'}" style="padding:4px 10px;">&#x1F4CB;</button>
+        <button class="ao20-btn secondary" ng-click="setView('cards')" ng-class="{active: viewMode==='cards'}" style="padding:4px 10px;">&#x1F532;</button>
+    </div>
+
+    <div class="ao20-body" ng-show="hasData" data-doc="chart">
+
+        <!-- ═══ Selected Detail ═══ -->
+        <div class="ao20-detail" ng-show="selectedAsset">
+            <div class="ao20-detail-title">{{selectedAsset.label}}</div>
+            <div class="ao20-detail-row">
+                <span style="color:var(--ao20-text3);">&#1506;&#1512;&#1498;</span>
+                <span style="font-weight:600;" ng-style="{color:getValueColor(selectedAsset)}">
+                    {{selectedAsset.display}} <span style="font-size:11px;color:var(--ao20-text3);">{{selectedAsset.units}}</span>
+                </span>
+            </div>
+            <div class="ao20-detail-row">
+                <span style="color:var(--ao20-text3);">&#1488;&#1497;&#1499;&#1493;&#1514;</span>
+                <span class="ao20-qbadge" ng-class="getQualityClass(selectedAsset)">
+                    {{selectedAsset.qualityLabel}}{{selectedAsset.stale ? ' &#x23F1; '+selectedAsset.age : ''}}
+                </span>
+            </div>
+            <div class="ao20-detail-row">
+                <span style="color:var(--ao20-text3);">&#1502;&#1490;&#1502;&#1492;</span>
+                <span class="ao20-trend" ng-class="selectedAsset.trendCss">{{selectedAsset.trend}}</span>
+            </div>
+            <div class="ao20-detail-row">
+                <span style="color:var(--ao20-text3);">Tag</span>
+                <span style="direction:ltr;font-size:11px;">{{selectedAsset.path}}</span>
+            </div>
+            <div class="ao20-detail-row">
+                <span style="color:var(--ao20-text3);">&#1502;&#1497;&#1511;&#1493;&#1501; &#1497;&#1495;&#1505;&#1497;</span>
+                <div class="ao20-progress" style="width:150px;">
+                    <div class="ao20-progress-fill" ng-style="{'width':selectedAsset.progressPct+'%','background':getValueColor(selectedAsset)}"></div>
+                </div>
+            </div>
+            <button class="ao20-btn secondary" ng-click="clearSelection()" style="margin-top:8px;font-size:11px;">&#x2715; &#1505;&#1490;&#1493;&#1512;</button>
+        </div>
+
+        <!-- ═══ Table View ═══ -->
+        <table class="ao20-table" data-doc="table" ng-show="viewMode==='table'">
+            <thead><tr>
+                <th ng-click="setSort('label')">&#1513;&#1501; <span ng-show="sortCol==='label'">{{sortDir==='asc'?'&#x25B2;':'&#x25BC;'}}</span></th>
+                <th ng-click="setSort('value')">&#1506;&#1512;&#1498; <span ng-show="sortCol==='value'">{{sortDir==='asc'?'&#x25B2;':'&#x25BC;'}}</span></th>
+                <th>&#1497;&#1495;&#1497;&#1491;&#1493;&#1514;</th>
+                <th style="min-width:100px;">&#1502;&#1510;&#1489;</th>
+                <th>&#1488;&#1497;&#1499;&#1493;&#1514;</th>
+                <th ng-show="sparklineEnabled" style="min-width:70px;">&#1502;&#1490;&#1502;&#1492;</th>
+                <th>Tag</th>
+            </tr></thead>
+            <tbody>
+                <tr ng-repeat="a in filteredAssets track by a._idx" ng-click="selectAsset(a)"
+                    class="ao20-animate-in" style="animation-delay:{{$index*20}}ms"
+                    ng-class="{'ao20-data-stale': a.stale, 'ao20-outlier': a.isOutlier}">
+                    <td style="font-weight:500;">{{a.label}}</td>
+                    <td style="font-variant-numeric:tabular-nums;" ng-style="{color:getValueColor(a)}">{{a.display}}</td>
+                    <td style="font-size:11px;color:var(--ao20-text3);">{{a.units}}</td>
+                    <td>
+                        <div class="ao20-progress">
+                            <div class="ao20-progress-fill" ng-style="{'width':a.progressPct+'%','background':getValueColor(a)}"></div>
+                        </div>
+                    </td>
+                    <td>
+                        <span class="ao20-qbadge" ng-class="getQualityClass(a)">
+                            {{a.quality.ok ? (a.stale ? '&#x23F1;' : '&#x2713;') : '&#x2715;'}}
+                        </span>
+                    </td>
+                    <td ng-show="sparklineEnabled">
+                        <canvas class="ao20-spark-canvas" data-idx="{{a._idx}}" width="70" height="24" style="display:block;"></canvas>
+                    </td>
+                    <td style="font-size:10px;color:var(--ao20-text3);direction:ltr;max-width:120px;overflow:hidden;text-overflow:ellipsis;">{{a.path}}</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- ═══ Cards View ═══ -->
+        <div class="ao20-cards-grid" ng-show="viewMode==='cards'">
+            <div class="ao20-card ao20-animate-in" ng-repeat="a in filteredAssets track by a._idx"
+                 ng-class="{selected: selectedAsset._idx === a._idx, 'ao20-data-stale': a.stale, 'ao20-outlier': a.isOutlier, severe: a.outlierSeverity==='severe'}"
+                 ng-click="selectAsset(a)" style="animation-delay:{{$index*25}}ms">
+                <div class="ao20-card-header">
+                    <div class="ao20-card-name" title="{{a.label}}">{{a.label}}</div>
+                    <span class="ao20-qbadge" ng-class="getQualityClass(a)">
+                        {{a.quality.ok ? (a.stale ? '&#x23F1; '+a.age : '&#x2713;') : '&#x2715;'}}
+                    </span>
+                </div>
+                <div class="ao20-card-value" ng-style="{color:getValueColor(a)}">
+                    {{a.display}} <span class="ao20-card-units">{{a.units}}</span>
+                </div>
+                <div class="ao20-card-sparkline" ng-show="sparklineEnabled">
+                    <canvas class="ao20-spark-canvas" data-idx="{{a._idx}}" width="180" height="28" style="display:block;width:100%;height:28px;"></canvas>
+                </div>
+                <div class="ao20-progress">
+                    <div class="ao20-progress-fill" ng-style="{'width':a.progressPct+'%','background':getValueColor(a)}"></div>
+                </div>
+                <div class="ao20-card-path">{{a.path}}</div>
+            </div>
+        </div>
+
+        <!-- ═══ Empty State ═══ -->
+        <div class="ao20-empty" ng-show="!filteredAssets.length && hasData">
+            <div class="ao20-empty-icon">&#x1F50D;</div>
+            <div>&#1500;&#1488; &#1504;&#1502;&#1510;&#1488;&#1493; &#1514;&#1493;&#1510;&#1488;&#1493;&#1514;</div>
+        </div>
+    </div>
+
+    <!-- ═══ Waiting State ═══ -->
+    <div class="ao20-empty" ng-show="!hasData && !loading">
+        <div class="ao20-empty-icon">&#x1F4E6;</div>
+        <div>&#1502;&#1502;&#1514;&#1497;&#1503; &#1500;&#1504;&#1514;&#1493;&#1504;&#1497;&#1501;</div>
+    </div>
+
+    <!-- ═══ Footer ═══ -->
+    <div class="ao20-footer">
+        <span>&#1504;&#1493;&#1490;&#1492; &mdash; &#1502;&#1504;&#1492;&#1500; &#1502;&#1506;&#1512;&#1499;&#1514; &#1492;&#1495;&#1513;&#1502;&#1500; | PIV20 v20</span>
+        <span>{{filteredAssets.length}} / {{assets.length}} &#1504;&#1499;&#1505;&#1497;&#1501;</span>
+    </div>
+</div>

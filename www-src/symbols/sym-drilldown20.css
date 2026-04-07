@@ -1,0 +1,7 @@
+/* sym-slicer20.css — Slicer symbol container styles */
+.piv20-slicer-container {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+}

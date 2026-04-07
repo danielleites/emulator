@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <!-- Reservoir Level Monitor icon -->
+  <rect width="64" height="64" rx="10" fill="#071820"/>
+  <!-- Reservoir tank outline -->
+  <rect x="10" y="14" width="44" height="36" rx="4" fill="none" stroke="#00B4D8" stroke-width="2"/>
+  <!-- Water fill -->
+  <rect x="12" y="30" width="40" height="18" rx="2" fill="#0077B6" opacity="0.7"/>
+  <!-- Animated wave top (represented by wavy line) -->
+  <path d="M12 30 Q22 26 32 30 Q42 34 52 30" fill="none" stroke="#00CED1" stroke-width="1.5"/>
+  <!-- Level line marker (target level) -->
+  <line x1="8" y1="24" x2="12" y2="24" stroke="#f39c12" stroke-width="1.5"/>
+  <line x1="52" y1="24" x2="56" y2="24" stroke="#f39c12" stroke-width="1.5"/>
+  <!-- Tick marks on right -->
+  <line x1="54" y1="18" x2="57" y2="18" stroke="#00B4D8" stroke-width="1"/>
+  <line x1="54" y1="30" x2="57" y2="30" stroke="#00B4D8" stroke-width="1"/>
+  <line x1="54" y1="42" x2="57" y2="42" stroke="#00B4D8" stroke-width="1"/>
+  <!-- Level text area -->
+  <text x="32" y="42" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="9" font-weight="bold" fill="#CAE9F5">MCM</text>
+  <!-- Pipe at bottom -->
+  <rect x="28" y="50" width="8" height="6" rx="1" fill="#00B4D8" opacity="0.6"/>
+  <!-- Triangle indicator -->
+  <polygon points="32,8 36,14 28,14" fill="#00B4D8"/>
+</svg>

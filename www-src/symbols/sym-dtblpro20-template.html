@@ -1,0 +1,191 @@
+<link rel="stylesheet" href="/PIVision/Scripts/app/editor/symbols/ext/sym-dtblpro20.css">
+<link rel="stylesheet" href="/PIVision/Scripts/app/editor/symbols/ext/piv20-design-system.css">
+<link rel="stylesheet" href="/PIVision/Scripts/app/editor/symbols/ext/piv20-overrides.css">
+<script type="text/javascript" src="/PIVision/Scripts/app/editor/symbols/ext/piv20-plugins/piv20-core.js"></script>
+<script type="text/javascript" src="/PIVision/Scripts/app/editor/symbols/ext/piv20-plugins/piv20-datatablepro.js"></script>
+<div id="dtp20-widget" class="piv20 dtp20-widget" style="display:none;"
+     ng-style="{'font-family': config.fontFamily, 'font-size': config.fontSize + 'px'}">
+
+    <!-- Header -->
+    <div class="dtp20-header">
+        <div style="display:flex;align-items:center;gap:8px;">
+            <span class="dtp20-title">{{config.Title}}</span>
+            <span class="dtp20-conn" ng-class="'dtp20-conn-' + connectionStatus">
+                <span class="dtp20-conn-dot"></span>
+                <span>{{connectionText}}</span>
+            </span>
+        </div>
+        <div class="dtp20-toolbar">
+            <button ng-click="exportData()" title="ייצוא CSV">CSV</button>
+            <button ng-click="copyToClipboard()" title="העתק ללוח">&#128203;</button>
+            <button ng-click="openPanel()" title="הגדרות">&#9881;</button>
+            <button ng-click="showDocs()" title="תיעוד">?</button>
+        </div>
+    </div>
+
+    <!-- Filter Bar -->
+    <div class="dtp20-filter-bar">
+        <input class="dtp20-search" ng-model="searchText" ng-change="filterChanged()"
+               placeholder="&#128269; חיפוש...">
+        <div class="dtp20-quick-filters">
+            <span class="dtp20-qf" ng-class="{active: quickFilter==='all'}" ng-click="setQuickFilter('all')">הכל</span>
+            <span class="dtp20-qf" ng-class="{active: quickFilter==='crit'}" ng-click="setQuickFilter('crit')"
+                  style="color:#e74c3c;">&#9650; קריטי</span>
+            <span class="dtp20-qf" ng-class="{active: quickFilter==='bad'}" ng-click="setQuickFilter('bad')">&#9632; לא תקין</span>
+            <span class="dtp20-qf" ng-class="{active: quickFilter==='stale'}" ng-click="setQuickFilter('stale')">&#8987; ישן</span>
+        </div>
+        <span class="dtp20-filter-count" ng-show="activeFilterCount > 0">{{activeFilterCount}} פילטרים</span>
+        <button style="background:none;border:none;color:#5BC0EB;font-size:10px;cursor:pointer;"
+                ng-show="activeFilterCount > 0" ng-click="clearFilters()">&#10005; נקה</button>
+    </div>
+
+    <!-- Summary -->
+    <div class="dtp20-summary">
+        <div class="dtp20-sum-item">
+            <span class="dtp20-sum-val" style="color:#5BC0EB;">{{summary.total || 0}}</span>
+            <span class="dtp20-sum-label">סה"כ</span>
+        </div>
+        <div class="dtp20-sum-item">
+            <span class="dtp20-sum-val" style="color:#2ecc71;">{{summary.good || 0}}</span>
+            <span class="dtp20-sum-label">תקין</span>
+        </div>
+        <div class="dtp20-sum-item">
+            <span class="dtp20-sum-val" style="color:#f39c12;">{{summary.warn || 0}}</span>
+            <span class="dtp20-sum-label">אזהרה</span>
+        </div>
+        <div class="dtp20-sum-item">
+            <span class="dtp20-sum-val" style="color:#e74c3c;">{{summary.crit || 0}}</span>
+            <span class="dtp20-sum-label">קריטי</span>
+        </div>
+        <div class="dtp20-sum-item">
+            <span class="dtp20-sum-val" style="color:#808080;">{{summary.bad || 0}}</span>
+            <span class="dtp20-sum-label">לא תקין</span>
+        </div>
+        <div class="dtp20-sum-item">
+            <span class="dtp20-sum-val" style="color:#4A6A7F;">{{summary.stale || 0}}</span>
+            <span class="dtp20-sum-label">ישן</span>
+        </div>
+    </div>
+
+    <!-- Table Body -->
+    <div class="dtp20-body">
+        <!-- Group headers + table -->
+        <div ng-repeat="group in groups track by group.key">
+            <div class="dtp20-group-header" ng-click="toggleGroup(group)" ng-show="group.label">
+                <span class="dtp20-group-toggle" ng-class="{collapsed: group.collapsed}">&#9660;</span>
+                <span>{{group.label}}</span>
+                <span class="dtp20-group-count">({{group.items.length}})</span>
+                <span ng-show="group.summary" style="margin-right:auto;font-size:10px;color:#6B8FA8;">
+                    &#216; {{group.summary.avg}}
+                </span>
+            </div>
+            <table class="dtp20-table" ng-hide="group.collapsed">
+                <thead>
+                    <tr>
+                        <th ng-repeat="col in columns track by col.key"
+                            ng-show="isColumnVisible(col.key)"
+                            ng-click="sortBy(col.key)"
+                            ng-style="{'width': getColWidth(col.key)}">
+                            {{col.label}}
+                            <span class="dtp20-sort-icon">{{getSortIcon(col.key)}}</span>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr ng-repeat="item in getPagedItems() track by item.idx"
+                        ng-click="selectRow(item, $event)"
+                        ng-class="{'dtp20-selected': isSelected(item), 'dtp20-stale': item.stale}"
+                        ng-style="getHighlightStyle(item)">
+                        <td ng-show="isColumnVisible('index')">{{item.idx + 1}}</td>
+                        <td ng-show="isColumnVisible('name')">{{item.label}}</td>
+                        <td ng-show="isColumnVisible('value')" style="font-weight:600;">{{item.display}}</td>
+                        <td ng-show="isColumnVisible('unit')">{{item.unit}}</td>
+                        <td ng-show="isColumnVisible('status')">
+                            <span class="dtp20-status dtp20-status-{{item.statusLevel}}">
+                                {{item.statusShape}} {{item.statusText}}
+                            </span>
+                        </td>
+                        <td ng-show="isColumnVisible('quality')">
+                            <span ng-class="item.good ? 'dtp20-quality-good' : 'dtp20-quality-bad'">
+                                {{item.good ? '&#10003;' : '&#10007;'}}
+                            </span>
+                        </td>
+                        <td ng-show="isColumnVisible('age')">{{item.ageText}}</td>
+                        <td ng-show="isColumnVisible('trend')">
+                            <span ng-class="{'dtp20-trend-up': item.trend==='&#8599;', 'dtp20-trend-down': item.trend==='&#8600;', 'dtp20-trend-flat': item.trend==='&#8594;'}">
+                                {{item.trend}}
+                            </span>
+                        </td>
+                        <td ng-show="isColumnVisible('min')">{{item.statMin}}</td>
+                        <td ng-show="isColumnVisible('max')">{{item.statMax}}</td>
+                        <td ng-show="isColumnVisible('avg')">{{item.statAvg}}</td>
+                        <td ng-show="isColumnVisible('sparkline')">
+                            <canvas class="dtp20-sparkline" data-idx="{{item.idx}}" width="60" height="18"></canvas>
+                        </td>
+                        <td ng-show="isColumnVisible('path')" style="font-size:9px;color:#4A6A7F;">{{item.fullPath}}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Footer Stats -->
+    <div class="dtp20-footer" ng-show="config.ShowFooterStats && footerStats.count">
+        <div class="dtp20-footer-stat"><span class="dtp20-footer-label">N:</span> <span class="dtp20-footer-val">{{footerStats.count}}</span></div>
+        <div class="dtp20-footer-stat"><span class="dtp20-footer-label">&#931;:</span> <span class="dtp20-footer-val">{{footerStats.sum}}</span></div>
+        <div class="dtp20-footer-stat"><span class="dtp20-footer-label">&#216;:</span> <span class="dtp20-footer-val">{{footerStats.avg}}</span></div>
+        <div class="dtp20-footer-stat"><span class="dtp20-footer-label">Min:</span> <span class="dtp20-footer-val">{{footerStats.min}}</span></div>
+        <div class="dtp20-footer-stat"><span class="dtp20-footer-label">Max:</span> <span class="dtp20-footer-val">{{footerStats.max}}</span></div>
+    </div>
+
+    <!-- Pagination -->
+    <div class="dtp20-pagination" ng-show="totalPages() > 1">
+        <button ng-click="firstPage()" ng-disabled="currentPage === 0">&#171;</button>
+        <button ng-click="prevPage()" ng-disabled="currentPage === 0">&#8249;</button>
+        <span class="dtp20-page-info">{{pageInfo()}}</span>
+        <button ng-click="nextPage()" ng-disabled="currentPage >= totalPages() - 1">&#8250;</button>
+        <button ng-click="lastPage()" ng-disabled="currentPage >= totalPages() - 1">&#187;</button>
+    </div>
+
+    <!-- Detail Panel -->
+    <div class="dtp20-detail" ng-show="detailItem">
+        <div class="dtp20-detail-header">
+            <span style="font-weight:600;color:#5BC0EB;">{{detailItem.label}}</span>
+            <button class="dtp20-detail-close" ng-click="detailItem = null">&#10005;</button>
+        </div>
+        <div class="dtp20-detail-body">
+            <div class="dtp20-detail-row"><span class="dtp20-detail-label">ערך</span><span class="dtp20-detail-val">{{detailItem.display}}</span></div>
+            <div class="dtp20-detail-row"><span class="dtp20-detail-label">סטטוס</span><span class="dtp20-detail-val">{{detailItem.statusText}}</span></div>
+            <div class="dtp20-detail-row"><span class="dtp20-detail-label">איכות</span><span class="dtp20-detail-val">{{detailItem.good ? 'תקין' : 'לא תקין'}}</span></div>
+            <div class="dtp20-detail-row"><span class="dtp20-detail-label">גיל</span><span class="dtp20-detail-val">{{detailItem.ageText}}</span></div>
+            <div class="dtp20-detail-row"><span class="dtp20-detail-label">מינימום</span><span class="dtp20-detail-val">{{detailItem.statMin}}</span></div>
+            <div class="dtp20-detail-row"><span class="dtp20-detail-label">מקסימום</span><span class="dtp20-detail-val">{{detailItem.statMax}}</span></div>
+            <div class="dtp20-detail-row"><span class="dtp20-detail-label">ממוצע</span><span class="dtp20-detail-val">{{detailItem.statAvg}}</span></div>
+            <div class="dtp20-detail-row"><span class="dtp20-detail-label">נתיב</span><span class="dtp20-detail-val" style="font-size:9px;">{{detailItem.fullPath}}</span></div>
+        </div>
+    </div>
+
+    <!-- Side Panel -->
+    <div class="dtp20-side-panel" ng-show="panelOpen">
+        <div class="dtp20-panel-header">
+            <span style="font-weight:600;color:#5BC0EB;">הגדרות מתקדמות</span>
+            <button class="dtp20-panel-close" ng-click="closePanel()">&#10005;</button>
+        </div>
+        <div class="dtp20-panel-body">
+            <div style="font-size:11px;font-weight:600;color:#8BACC4;margin-bottom:4px;">עמודות גלויות</div>
+            <div ng-repeat="col in columns track by col.key" style="margin-bottom:3px;">
+                <label style="font-size:10px;color:#6B8FA8;display:flex;align-items:center;gap:4px;">
+                    <input type="checkbox" ng-checked="isColumnVisible(col.key)" ng-click="toggleColumn(col.key)">
+                    {{col.label}}
+                </label>
+            </div>
+            <div style="font-size:11px;font-weight:600;color:#8BACC4;margin-top:8px;margin-bottom:4px;">
+                שורות מוסתרות ({{hiddenCount()}})
+            </div>
+            <button ng-show="hiddenCount() > 0" ng-click="unhideAll()"
+                    style="background:rgba(91,192,235,.1);border:1px solid rgba(91,192,235,.2);color:#5BC0EB;border-radius:3px;padding:2px 8px;font-size:10px;cursor:pointer;">
+                הצג הכל
+            </button>
+        </div>
+    </div>
+</div>

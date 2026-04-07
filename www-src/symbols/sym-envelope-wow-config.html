@@ -1,0 +1,218 @@
+<!-- ═══════════════════════════════════════════════════════
+     Executive Dynamic Envelope — Config Panel
+     WOW Envelope v100 — wc20 Pattern + Collapsible <details>
+     ═══════════════════════════════════════════════════════ -->
+
+<div class="wc20-config-panel" style="direction:rtl; font-family:'Segoe UI',Arial,sans-serif;">
+
+    <!-- ── General (open by default) ── -->
+    <details class="wc20-section" open>
+        <summary class="wc20-section-title">כללי</summary>
+
+        <div class="wc20-field">
+            <label class="wc20-label">כותרת</label>
+            <input type="text" class="wc20-input"
+                   ng-model="config.Title"
+                   placeholder="מעטפת תפעול">
+        </div>
+
+        <div class="wc20-field">
+            <label class="wc20-label">מצב הדגמה (Demo)</label>
+            <input type="checkbox" class="wc20-checkbox"
+                   ng-model="config.DemoMode">
+            <span class="wc20-hint">סימולציה: מסלול ליסאז׳ו עם חריגות מחזוריות</span>
+        </div>
+    </details>
+
+    <!-- ── Axes (open by default) ── -->
+    <details class="wc20-section" open>
+        <summary class="wc20-section-title">צירים</summary>
+
+        <div class="wc20-field">
+            <label class="wc20-label">ציר X — מינימום</label>
+            <input type="number" class="wc20-input wc20-input-sm"
+                   ng-model="config.MinX"
+                   ng-model-options="{ debounce: 500 }">
+        </div>
+
+        <div class="wc20-field">
+            <label class="wc20-label">ציר X — מקסימום</label>
+            <input type="number" class="wc20-input wc20-input-sm"
+                   ng-model="config.MaxX"
+                   ng-model-options="{ debounce: 500 }">
+        </div>
+
+        <div class="wc20-field">
+            <label class="wc20-label">ציר Y — מינימום</label>
+            <input type="number" class="wc20-input wc20-input-sm"
+                   ng-model="config.MinY"
+                   ng-model-options="{ debounce: 500 }">
+        </div>
+
+        <div class="wc20-field">
+            <label class="wc20-label">ציר Y — מקסימום</label>
+            <input type="number" class="wc20-input wc20-input-sm"
+                   ng-model="config.MaxY"
+                   ng-model-options="{ debounce: 500 }">
+        </div>
+
+        <div class="wc20-field">
+            <label class="wc20-label">תווית ציר X</label>
+            <input type="text" class="wc20-input"
+                   ng-model="config.XLabel"
+                   placeholder="טמפרטורה (°C)">
+        </div>
+
+        <div class="wc20-field">
+            <label class="wc20-label">תווית ציר Y</label>
+            <input type="text" class="wc20-input"
+                   ng-model="config.YLabel"
+                   placeholder="לחץ (bar)">
+        </div>
+    </details>
+
+    <!-- ── Envelope ── -->
+    <details class="wc20-section">
+        <summary class="wc20-section-title">מעטפת (Envelope)</summary>
+
+        <div class="wc20-field">
+            <label class="wc20-label">נקודות מעטפת</label>
+            <input type="text" class="wc20-input"
+                   ng-model="config.EnvelopePoints"
+                   placeholder="50,20;300,20;280,80;70,80">
+            <span class="wc20-hint">פורמט: x1,y1;x2,y2;... — מצולע סגור אוטומטית</span>
+        </div>
+
+        <div class="wc20-field">
+            <label class="wc20-label">מרחק אזהרה (WarnDist)</label>
+            <input type="number" class="wc20-input wc20-input-sm"
+                   ng-model="config.WarnDist"
+                   ng-model-options="{ debounce: 500 }"
+                   min="1" max="100" step="1">
+            <span class="wc20-hint">יח׳ נתונים — מתחת למרחק זה: פולס אזהרה</span>
+        </div>
+    </details>
+
+    <!-- ── Display ── -->
+    <details class="wc20-section">
+        <summary class="wc20-section-title">תצוגה</summary>
+
+        <div class="wc20-field">
+            <label class="wc20-label">הצג רשת (Grid)</label>
+            <input type="checkbox" class="wc20-checkbox"
+                   ng-model="config.ShowGrid">
+        </div>
+
+        <div class="wc20-field">
+            <label class="wc20-label">הצג זנב שביט (Comet Tail)</label>
+            <input type="checkbox" class="wc20-checkbox"
+                   ng-model="config.ShowCometTail">
+            <span class="wc20-hint">היסטוריית תנועה — עד 50 נקודות אחרונות</span>
+        </div>
+
+        <div class="wc20-field">
+            <label class="wc20-label">הצג פולס קרבה (Proximity Pulse)</label>
+            <input type="checkbox" class="wc20-checkbox"
+                   ng-model="config.ShowProximityPulse">
+            <span class="wc20-hint">הילה פועמת — תדר עולה בקרבת שפת המעטפת</span>
+        </div>
+
+        <div class="wc20-field">
+            <label class="wc20-label">הצג אופק הקשר (Context Horizon)</label>
+            <input type="checkbox" class="wc20-checkbox"
+                   ng-model="config.ShowContextHorizon">
+            <span class="wc20-hint">קו מרוסק אנכי + אופקי דרך נקודה נוכחית</span>
+        </div>
+
+        <div class="wc20-field">
+            <label class="wc20-label">הצג ערכים</label>
+            <input type="checkbox" class="wc20-checkbox"
+                   ng-model="config.ShowValues">
+        </div>
+
+        <div class="wc20-field">
+            <label class="wc20-label">גודל היסטוריה</label>
+            <input type="number" class="wc20-input wc20-input-sm"
+                   ng-model="config.HistorySize"
+                   ng-model-options="{ debounce: 500 }"
+                   min="5" max="200" step="5">
+            <span class="wc20-hint">מספר נקודות בזנב השביט</span>
+        </div>
+
+        <div class="wc20-field">
+            <label class="wc20-label">עשרוניות</label>
+            <select class="wc20-select" ng-model="config.Decimals"
+                    ng-options="v as v for v in [0, 1, 2, 3]">
+            </select>
+        </div>
+    </details>
+
+    <!-- ── Theme ── -->
+    <details class="wc20-section">
+        <summary class="wc20-section-title">ערכת נושא</summary>
+
+        <div class="wc20-field">
+            <label class="wc20-label">גופן</label>
+            <select class="wc20-select" ng-model="config.fontFamily">
+                <option value="Segoe UI">Segoe UI</option>
+                <option value="Arial">Arial</option>
+                <option value="Tahoma">Tahoma</option>
+                <option value="Consolas">Consolas (Mono)</option>
+            </select>
+        </div>
+
+        <div class="wc20-field">
+            <label class="wc20-label">גודל גופן (px)</label>
+            <input type="number" class="wc20-input wc20-input-sm"
+                   ng-model="config.fontSize"
+                   ng-model-options="{ debounce: 500 }"
+                   min="8" max="16" step="1">
+        </div>
+    </details>
+
+    <!-- ── Info ── -->
+    <details class="wc20-section">
+        <summary class="wc20-section-title">מידע טכני</summary>
+
+        <div class="wc20-field wc20-readonly">
+            <span class="wc20-badge wc20-badge-blue">DataShape</span>
+            <span>Value (Multiple — X + Y Datasources)</span>
+        </div>
+
+        <div class="wc20-field wc20-readonly">
+            <span class="wc20-badge wc20-badge-green">Architecture</span>
+            <span>Single Canvas — Dynamic Polygon Envelope</span>
+        </div>
+
+        <div class="wc20-field wc20-readonly">
+            <span class="wc20-badge wc20-badge-green">Hit Testing</span>
+            <span>Ray-Casting Point-in-Polygon O(N)</span>
+        </div>
+
+        <div class="wc20-field wc20-readonly">
+            <span class="wc20-badge wc20-badge-orange">Proximity Pulse</span>
+            <span>Sine-Modulated Glow — Freq ∝ 1/Distance</span>
+        </div>
+
+        <div class="wc20-field wc20-readonly">
+            <span class="wc20-badge wc20-badge-purple">Comet Tail</span>
+            <span>Ring Buffer — 50-Point Fading History Trail</span>
+        </div>
+
+        <div class="wc20-field wc20-readonly">
+            <span class="wc20-badge wc20-badge-blue">Context Horizon</span>
+            <span>Dashed Crosshair — Axis Value Labels</span>
+        </div>
+
+        <div class="wc20-field wc20-readonly">
+            <span class="wc20-badge wc20-badge-green">DPR</span>
+            <span>Retina-Aware — window.devicePixelRatio Scaling</span>
+        </div>
+
+        <div class="wc20-field wc20-readonly" style="margin-top:8px;">
+            <span class="wc20-badge">WOW Envelope v100</span>
+            <span style="color:#8899AA;">Executive Dynamic Operating Envelope</span>
+        </div>
+    </details>
+
+</div>

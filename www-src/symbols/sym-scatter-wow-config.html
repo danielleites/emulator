@@ -1,0 +1,151 @@
+<!-- ═══════════════════════════════════════════════════════
+     Executive Anomaly Scatter — Config Panel
+     WOW SC v100 — wc20 Pattern + Collapsible <details>
+     ═══════════════════════════════════════════════════════ -->
+
+<div class="wc20-config-panel" style="direction:rtl; font-family:'Segoe UI',Arial,sans-serif;">
+
+    <!-- ── General (open by default) ── -->
+    <details class="wc20-section" open>
+        <summary class="wc20-section-title">כללי</summary>
+
+        <div class="wc20-field">
+            <label class="wc20-label">כותרת</label>
+            <input type="text" class="wc20-input"
+                   ng-model="config.Title"
+                   placeholder="ניתוח חריגות">
+        </div>
+
+        <div class="wc20-field">
+            <label class="wc20-label">מצב הדגמה (Demo)</label>
+            <input type="checkbox" class="wc20-checkbox"
+                   ng-model="config.DemoMode">
+            <span class="wc20-hint">נתוני גאוסיאן סינתטיים</span>
+        </div>
+
+        <div class="wc20-field" ng-if="config.DemoMode">
+            <label class="wc20-label">נקודות דמו</label>
+            <select class="wc20-select" ng-model="config.DemoPointCount"
+                    ng-options="v as v.toLocaleString() for v in [1000, 5000, 10000, 25000, 50000, 100000, 200000]">
+            </select>
+            <span class="wc20-hint">200K → OffscreenCanvas renders at 0ms UI cost</span>
+        </div>
+    </details>
+
+    <!-- ── Anomaly Detection (open by default) ── -->
+    <details class="wc20-section" open>
+        <summary class="wc20-section-title">זיהוי חריגות</summary>
+
+        <div class="wc20-field">
+            <label class="wc20-label">סף Z-Score</label>
+            <input type="number" class="wc20-input wc20-input-sm"
+                   ng-model="config.ZScoreThreshold"
+                   ng-model-options="{ debounce: 500 }"
+                   min="1" max="5" step="0.1">
+            <span class="wc20-hint">Z > סף = חריגה (ברירת מחדל 2.5σ)</span>
+        </div>
+
+        <div class="wc20-field">
+            <label class="wc20-label">הצג חריגות</label>
+            <input type="checkbox" class="wc20-checkbox"
+                   ng-model="config.ShowAnomalies">
+            <span class="wc20-hint">שכבת אדומה מעל ענן הצפיפות</span>
+        </div>
+    </details>
+
+    <!-- ── Display ── -->
+    <details class="wc20-section">
+        <summary class="wc20-section-title">תצוגה</summary>
+
+        <div class="wc20-field">
+            <label class="wc20-label">רדיוס נקודה (px)</label>
+            <input type="number" class="wc20-input wc20-input-sm"
+                   ng-model="config.PointRadius"
+                   ng-model-options="{ debounce: 500 }"
+                   min="0.5" max="10" step="0.5">
+        </div>
+
+        <div class="wc20-field">
+            <label class="wc20-label">מצב צפיפות (Density Glow)</label>
+            <input type="checkbox" class="wc20-checkbox"
+                   ng-model="config.DensityMode">
+            <span class="wc20-hint">globalCompositeOperation: lighter — צבירת בהירות</span>
+        </div>
+
+        <div class="wc20-field">
+            <label class="wc20-label">עשרוניות</label>
+            <select class="wc20-select" ng-model="config.Decimals"
+                    ng-options="v as v for v in [0, 1, 2, 3]">
+            </select>
+        </div>
+    </details>
+
+    <!-- ── Theme ── -->
+    <details class="wc20-section">
+        <summary class="wc20-section-title">ערכת נושא</summary>
+
+        <div class="wc20-field">
+            <label class="wc20-label">גופן</label>
+            <select class="wc20-select" ng-model="config.fontFamily">
+                <option value="Segoe UI">Segoe UI</option>
+                <option value="Arial">Arial</option>
+                <option value="Tahoma">Tahoma</option>
+                <option value="Consolas">Consolas (Mono)</option>
+            </select>
+        </div>
+
+        <div class="wc20-field">
+            <label class="wc20-label">גודל גופן ציר (px)</label>
+            <input type="number" class="wc20-input wc20-input-sm"
+                   ng-model="config.fontSize"
+                   ng-model-options="{ debounce: 500 }"
+                   min="8" max="16" step="1">
+        </div>
+    </details>
+
+    <!-- ── Info ── -->
+    <details class="wc20-section">
+        <summary class="wc20-section-title">מידע טכני</summary>
+
+        <div class="wc20-field wc20-readonly">
+            <span class="wc20-badge wc20-badge-blue">DataShape</span>
+            <span>XYPlot (Time-aligned Interpolation)</span>
+        </div>
+
+        <div class="wc20-field wc20-readonly">
+            <span class="wc20-badge wc20-badge-green">Render Engine</span>
+            <span>OffscreenCanvas — Zero UI Block</span>
+        </div>
+
+        <div class="wc20-field wc20-readonly">
+            <span class="wc20-badge wc20-badge-green">Data Transfer</span>
+            <span>Float32Array Transferable (Zero-Copy)</span>
+        </div>
+
+        <div class="wc20-field wc20-readonly">
+            <span class="wc20-badge wc20-badge-blue">Density Glow</span>
+            <span>globalCompositeOperation: lighter</span>
+        </div>
+
+        <div class="wc20-field wc20-readonly">
+            <span class="wc20-badge wc20-badge-orange">Anomaly Detection</span>
+            <span>Z-Score (Combined X+Y Euclidean)</span>
+        </div>
+
+        <div class="wc20-field wc20-readonly">
+            <span class="wc20-badge wc20-badge-blue">Brush & Select</span>
+            <span>Rectangle → Time Range Extraction</span>
+        </div>
+
+        <div class="wc20-field wc20-readonly">
+            <span class="wc20-badge wc20-badge-purple">Performance</span>
+            <span>200K+ points → 0ms Main Thread</span>
+        </div>
+
+        <div class="wc20-field wc20-readonly" style="margin-top:8px;">
+            <span class="wc20-badge">WOW SC v100</span>
+            <span style="color:#8899AA;">Executive Anomaly Scatter Plot</span>
+        </div>
+    </details>
+
+</div>

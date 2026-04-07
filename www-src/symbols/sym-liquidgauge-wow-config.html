@@ -1,0 +1,190 @@
+<!-- ═══════════════════════════════════════════════════════
+     Executive Kinetic Liquid Gauge — Config Panel
+     WOW Liquid Gauge v100 — wc20 Pattern + Collapsible <details>
+     ═══════════════════════════════════════════════════════ -->
+
+<div class="wc20-config-panel" style="direction:rtl; font-family:'Segoe UI',Arial,sans-serif;">
+
+    <!-- ── General (open by default) ── -->
+    <details class="wc20-section" open>
+        <summary class="wc20-section-title">כללי</summary>
+
+        <div class="wc20-field">
+            <label class="wc20-label">כותרת</label>
+            <input type="text" class="wc20-input"
+                   ng-model="config.Title"
+                   placeholder="Executive Liquid Gauge">
+        </div>
+
+        <div class="wc20-field">
+            <label class="wc20-label">מצב הדגמה (Demo)</label>
+            <input type="checkbox" class="wc20-checkbox"
+                   ng-model="config.DemoMode">
+            <span class="wc20-hint">מיכל 1000L — גלי סינוס עם סערה דינמית</span>
+        </div>
+    </details>
+
+    <!-- ── Capacity (open by default) ── -->
+    <details class="wc20-section" open>
+        <summary class="wc20-section-title">קיבולת</summary>
+
+        <div class="wc20-field">
+            <label class="wc20-label">קיבולת מקסימלית</label>
+            <input type="number" class="wc20-input wc20-input-sm"
+                   ng-model="config.MaxCapacity"
+                   ng-model-options="{ debounce: 500 }"
+                   min="1" step="1"
+                   placeholder="100">
+            <span class="wc20-hint">100% = ערך זה</span>
+        </div>
+
+        <div class="wc20-field">
+            <label class="wc20-label">יחידות</label>
+            <input type="text" class="wc20-input wc20-input-sm"
+                   ng-model="config.Unit"
+                   placeholder="%">
+        </div>
+
+        <div class="wc20-field">
+            <label class="wc20-label">עשרוניות</label>
+            <select class="wc20-select" ng-model="config.Decimals"
+                    ng-options="v as v for v in [0, 1, 2, 3]">
+            </select>
+        </div>
+    </details>
+
+    <!-- ── Thresholds ── -->
+    <details class="wc20-section">
+        <summary class="wc20-section-title">ספי התרעה</summary>
+
+        <div class="wc20-field">
+            <label class="wc20-label">סף אזהרה (%)</label>
+            <input type="number" class="wc20-input wc20-input-sm"
+                   ng-model="config.WarnPct"
+                   ng-model-options="{ debounce: 500 }"
+                   min="0" max="100" step="1"
+                   placeholder="30">
+            <span class="wc20-hint">מתחת לסף = צבע כתום</span>
+        </div>
+
+        <div class="wc20-field">
+            <label class="wc20-label">סף קריטי (%)</label>
+            <input type="number" class="wc20-input wc20-input-sm"
+                   ng-model="config.CritPct"
+                   ng-model-options="{ debounce: 500 }"
+                   min="0" max="100" step="1"
+                   placeholder="15">
+            <span class="wc20-hint">מתחת לסף = צבע אדום</span>
+        </div>
+
+        <div class="wc20-field">
+            <label class="wc20-label">היפוך צבעים (גבוה = רע)</label>
+            <input type="checkbox" class="wc20-checkbox"
+                   ng-model="config.InvertColors">
+            <span class="wc20-hint">מיכל פסולת, לחץ: מלא = קריטי</span>
+        </div>
+    </details>
+
+    <!-- ── Appearance ── -->
+    <details class="wc20-section">
+        <summary class="wc20-section-title">תצוגה</summary>
+
+        <div class="wc20-field">
+            <label class="wc20-label">צורת מיכל</label>
+            <select class="wc20-select" ng-model="config.ContainerShape">
+                <option value="circle">עיגול</option>
+                <option value="roundedRect">מלבן מעוגל</option>
+                <option value="pill">כמוסה (Pill)</option>
+            </select>
+        </div>
+
+        <div class="wc20-field">
+            <label class="wc20-label">ערכת צבעים</label>
+            <select class="wc20-select" ng-model="config.ColorScheme">
+                <option value="executive">Executive (ברירת מחדל)</option>
+                <option value="ocean">Ocean (כחול)</option>
+                <option value="thermal">Thermal (חם)</option>
+                <option value="neon">Neon (זוהר)</option>
+            </select>
+        </div>
+
+        <div class="wc20-field">
+            <label class="wc20-label">רגישות סערה (Turbulence Max)</label>
+            <input type="number" class="wc20-input wc20-input-sm"
+                   ng-model="config.TurbulenceMax"
+                   ng-model-options="{ debounce: 500 }"
+                   min="0.01" max="1" step="0.01"
+                   placeholder="0.1">
+            <span class="wc20-hint">0.1 = 10% שינוי/שנייה = סערה מקסימלית</span>
+        </div>
+    </details>
+
+    <!-- ── Theme ── -->
+    <details class="wc20-section">
+        <summary class="wc20-section-title">ערכת נושא</summary>
+
+        <div class="wc20-field">
+            <label class="wc20-label">גופן</label>
+            <select class="wc20-select" ng-model="config.fontFamily">
+                <option value="Segoe UI">Segoe UI</option>
+                <option value="Arial">Arial</option>
+                <option value="Tahoma">Tahoma</option>
+                <option value="Consolas">Consolas (Mono)</option>
+            </select>
+        </div>
+
+        <div class="wc20-field">
+            <label class="wc20-label">גודל גופן (px)</label>
+            <input type="number" class="wc20-input wc20-input-sm"
+                   ng-model="config.fontSize"
+                   ng-model-options="{ debounce: 500 }"
+                   min="8" max="16" step="1">
+        </div>
+    </details>
+
+    <!-- ── Info ── -->
+    <details class="wc20-section">
+        <summary class="wc20-section-title">מידע טכני</summary>
+
+        <div class="wc20-field wc20-readonly">
+            <span class="wc20-badge wc20-badge-blue">DataShape</span>
+            <span>Value (Single Datasource)</span>
+        </div>
+
+        <div class="wc20-field wc20-readonly">
+            <span class="wc20-badge wc20-badge-green">Rendering</span>
+            <span>Canvas 2D — Dual Sine Waves + LinearGradient</span>
+        </div>
+
+        <div class="wc20-field wc20-readonly">
+            <span class="wc20-badge wc20-badge-green">Animation</span>
+            <span>Lerp Fill + Trigonometry Phase — 60 FPS on GPU</span>
+        </div>
+
+        <div class="wc20-field wc20-readonly">
+            <span class="wc20-badge wc20-badge-orange">Turbulence</span>
+            <span>Rate-of-Change Derivative → Wave Amplitude</span>
+        </div>
+
+        <div class="wc20-field wc20-readonly">
+            <span class="wc20-badge wc20-badge-blue">3D Depth</span>
+            <span>Dynamic Gradient — Dark Bottom → Bright Surface</span>
+        </div>
+
+        <div class="wc20-field wc20-readonly">
+            <span class="wc20-badge wc20-badge-purple">Performance</span>
+            <span>0.1ms/frame · 0 SVG · 0 DOM cells · GPU accelerated</span>
+        </div>
+
+        <div class="wc20-field wc20-readonly">
+            <span class="wc20-badge wc20-badge-blue">Containers</span>
+            <span>Circle / Rounded Rect / Pill — Canvas Clip Path</span>
+        </div>
+
+        <div class="wc20-field wc20-readonly" style="margin-top:8px;">
+            <span class="wc20-badge">WOW Liquid Gauge v100</span>
+            <span style="color:#8899AA;">Executive Kinetic Liquid Gauge</span>
+        </div>
+    </details>
+
+</div>

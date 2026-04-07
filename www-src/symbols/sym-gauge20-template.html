@@ -1,0 +1,319 @@
+<!-- sym-gauge20-template.html  --  Performance Gauge v20 Template -->
+<!-- Extracted from v10 inline template, all classes prefixed ga20-. -->
+<!-- External CSS: sym-gauge20.css | Plugin: piv20-gauge.js -->
+
+<!-- ── External Dependencies ── -->
+<link rel="stylesheet" href="/PIVision/Scripts/app/editor/symbols/ext/sym-gauge20.css">
+<link rel="stylesheet" href="/PIVision/Scripts/app/editor/symbols/ext/piv20-design-system.css">
+<link rel="stylesheet" href="/PIVision/Scripts/app/editor/symbols/ext/piv20-overrides.css">
+<script type="text/javascript" src="/PIVision/Scripts/app/editor/symbols/ext/piv20-plugins/piv20-core.js"></script>
+<script type="text/javascript" src="/PIVision/Scripts/app/editor/symbols/ext/piv20-plugins/piv20-gauge.js"></script>
+
+<!-- ── Root Container ── -->
+<div class="piv20 ga20-root" dir="rtl">
+
+    <!-- Hidden widget mount point -->
+    <div id="ga20-widget" style="display:none"></div>
+
+    <!-- Toast container -->
+    <div class="ga20-toast-container"></div>
+
+    <!-- ════════════════════════════════════════ -->
+    <!--  HEADER                                  -->
+    <!-- ════════════════════════════════════════ -->
+    <div class="ga20-hdr">
+        <div style="display:flex;align-items:center;gap:10px">
+            <span class="ga20-ttl">&#9202; &#1502;&#1491; &#1489;&#1497;&#1510;&#1493;&#1506;&#1497;&#1501;</span>
+
+            <!-- Range badge -->
+            <span class="ga20-range-badge">
+                {{gaugeMin}} - {{gaugeMax}} {{engUnit}}
+            </span>
+
+            <!-- AF Connection badge -->
+            <span ng-show="afConn"
+                  ng-class="{'ga20-af-badge': true,
+                             'ga20-af-good': afConn.pct >= 80,
+                             'ga20-af-warn': afConn.pct >= 50 && afConn.pct < 80,
+                             'ga20-af-bad':  afConn.pct < 50}">
+                <span class="ga20-af-dot"></span>
+                AF {{afConn.pct}}%
+            </span>
+        </div>
+
+        <div class="ga20-toolbar">
+            <!-- View toggles -->
+            <button class="ga20-btn" ng-class="{active: viewMode==='gauges'}" ng-click="setView('gauges')"
+                    title="&#1514;&#1510;&#1493;&#1490;&#1514; &#1502;&#1491;&#1497;&#1501;">
+                &#9202; &#1502;&#1491;&#1497;&#1501;
+            </button>
+            <button class="ga20-btn" ng-class="{active: viewMode==='list'}" ng-click="setView('list')"
+                    title="&#1514;&#1510;&#1493;&#1490;&#1514; &#1512;&#1513;&#1497;&#1502;&#1492;">
+                &#9776; &#1512;&#1513;&#1497;&#1502;&#1492;
+            </button>
+            <span style="width:1px;height:18px;background:rgba(46,139,192,0.2)"></span>
+
+            <!-- Export -->
+            <button class="ga20-btn" ng-click="exportCSV()" title="&#1497;&#1497;&#1510;&#1493;&#1488; CSV">
+                &#9660; CSV
+            </button>
+            <button class="ga20-btn" ng-click="copyToClipboard()" title="&#1492;&#1506;&#1514;&#1511; &#1500;&#1500;&#1493;&#1495;">
+                {{copySuccess ? '&#10003;' : '&#128203;'}}
+            </button>
+            <span style="width:1px;height:18px;background:rgba(46,139,192,0.2)"></span>
+
+            <!-- Settings -->
+            <button class="ga20-btn" ng-click="toggleSidePanel()" title="&#1492;&#1490;&#1491;&#1512;&#1493;&#1514;">
+                &#9881;
+            </button>
+
+            <!-- Live indicator -->
+            <div class="ga20-live">
+                <span class="ga20-live-dot"></span>
+                <span>{{liveTime}}</span>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ════════════════════════════════════════ -->
+    <!--  CONTROLS BAR                            -->
+    <!-- ════════════════════════════════════════ -->
+    <div class="ga20-controls">
+        <input class="ga20-search" type="text" ng-model="searchText" ng-change="onSearchChange()"
+               placeholder="&#128269; &#1495;&#1497;&#1508;&#1493;&#1513; &#1502;&#1491;...">
+        <span style="flex:1"></span>
+        <span style="font-size:11px;color:var(--ga20-text3)" ng-show="hasHidden">
+            &#128065; &#1497;&#1513; &#1502;&#1491;&#1497;&#1501; &#1502;&#1493;&#1505;&#1514;&#1512;&#1497;&#1501;
+        </span>
+    </div>
+
+
+    <!-- ════════════════════════════════════════ -->
+    <!--  GAUGE CARDS VIEW                        -->
+    <!-- ════════════════════════════════════════ -->
+    <div class="ga20-body" ng-show="viewMode === 'gauges'">
+        <div class="ga20-cards">
+            <div class="ga20-card ga20-anim-in"
+                 ng-repeat="g in filteredGauges track by g.key"
+                 ng-style="{'animation-delay': ($index * 50) + 'ms'}"
+                 ng-class="{'ga20-stale': g.stale}">
+
+                <!-- Gear Button -->
+                <button class="ga20-card-gear" ng-click="openGear(g)"
+                        title="&#1508;&#1512;&#1496;&#1497; &#1502;&#1491;">&#128295;</button>
+                <!-- Hide Button -->
+                <button class="ga20-card-hide" ng-click="toggleGaugeVisibility(g.key)"
+                        title="&#1492;&#1505;&#1514;&#1512; &#1494;&#1502;&#1504;&#1497;&#1514;">&#128065;</button>
+
+                <!-- SVG Gauge -->
+                <svg class="ga20-svg" viewBox="0 0 200 150">
+                    <!-- Track (background arc) -->
+                    <path class="ga20-track" ng-attr-d="{{getTrackArc()}}" />
+                    <!-- Value arc -->
+                    <path class="ga20-arc" ng-attr-d="{{getGaugeArc(g.value)}}"
+                          ng-style="{'stroke': getGaugeColor(g.value)}" />
+                    <!-- Target dot -->
+                    <circle ng-show="showTarget && targetValue > 0" class="ga20-target-dot"
+                            ng-attr-cx="{{getTargetPos().x}}" ng-attr-cy="{{getTargetPos().y}}" r="5" />
+                    <!-- Value text -->
+                    <text x="100" y="100" text-anchor="middle" fill="white" font-size="26" font-weight="700">
+                        {{g.value | number: config.Decimals}}
+                    </text>
+                    <!-- Unit + Pct -->
+                    <text x="100" y="120" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="11">
+                        {{g.pct}}% {{engUnit}}
+                        <tspan ng-show="config.showTrend" font-size="13"> {{g.trend}}</tspan>
+                    </text>
+                </svg>
+
+                <div class="ga20-card-label" title="{{g.label}}">{{g.label}}</div>
+                <div class="ga20-card-site" ng-show="g.site">{{g.site}}</div>
+                <div class="ga20-card-quality" ng-show="g.quality && !g.quality.ok">
+                    &#9888; {{g.quality.status}}
+                </div>
+            </div>
+        </div>
+
+        <!-- Empty state -->
+        <div class="ga20-empty" ng-show="filteredGauges.length === 0">
+            <span style="font-size:36px">&#9202;</span>
+            <span>&#1502;&#1502;&#1514;&#1497;&#1503; &#1500;&#1504;&#1514;&#1493;&#1504;&#1497;&#1501; — &#1490;&#1512;&#1493;&#1512; &#1514;&#1490;&#1497;&#1493;&#1514; &#1502;-AF</span>
+        </div>
+    </div>
+
+
+    <!-- ════════════════════════════════════════ -->
+    <!--  LIST VIEW                               -->
+    <!-- ════════════════════════════════════════ -->
+    <div class="ga20-body" ng-show="viewMode === 'list'" style="padding:8px 16px">
+        <div class="ga20-list-item ga20-anim-in"
+             ng-repeat="g in filteredGauges track by g.key"
+             ng-style="{'animation-delay': ($index * 30) + 'ms'}"
+             ng-class="{'ga20-stale': g.stale}">
+            <div class="ga20-list-status"
+                 ng-style="{'background': g.status==='critical' ? config.criticalColor :
+                                          g.status==='warning' ? config.warningColor : config.goodColor}"></div>
+            <div class="ga20-list-label">{{g.label}}</div>
+            <div class="ga20-list-site">{{g.site}}</div>
+            <div class="ga20-list-bar">
+                <div class="ga20-list-bar-fill"
+                     ng-style="{'width': g.pct + '%', 'background': getGaugeColor(g.value)}"></div>
+            </div>
+            <div class="ga20-list-value" ng-style="{color: getGaugeColor(g.value)}">
+                {{g.value | number: config.Decimals}} {{engUnit}}
+            </div>
+            <div class="ga20-list-trend" ng-show="config.showTrend">{{g.trend}}</div>
+            <div class="ga20-list-actions">
+                <button class="ga20-btn" style="padding:2px 5px" ng-click="openGear(g)">&#128295;</button>
+            </div>
+        </div>
+        <div class="ga20-empty" ng-show="filteredGauges.length === 0">
+            <span>&#1488;&#1497;&#1503; &#1502;&#1491;&#1497;&#1501; &#1500;&#1492;&#1510;&#1490;&#1492;</span>
+        </div>
+    </div>
+
+
+    <!-- ════════════════════════════════════════ -->
+    <!--  SIDE PANEL                              -->
+    <!-- ════════════════════════════════════════ -->
+    <div class="ga20-panel" ng-class="{open: showSidePanel}">
+        <div class="ga20-phd">
+            <h3>&#9881; &#1492;&#1490;&#1491;&#1512;&#1493;&#1514; &#1502;&#1491; &#1489;&#1497;&#1510;&#1493;&#1506;&#1497;&#1501;</h3>
+            <button class="ga20-pcl" ng-click="toggleSidePanel()">&times;</button>
+        </div>
+
+        <!-- Range -->
+        <div class="ga20-ps">
+            <label>&#1496;&#1493;&#1493;&#1495;</label>
+            <div style="display:flex;flex-direction:column;gap:4px;margin-top:4px;font-size:12px">
+                <label style="cursor:pointer">
+                    <input type="checkbox" ng-model="config.AutoRange">
+                    &#1496;&#1493;&#1493;&#1495; &#1488;&#1493;&#1496;&#1493;&#1502;&#1496;&#1497; [EE-4]
+                </label>
+                <div style="display:flex;gap:8px;align-items:center">
+                    <span style="min-width:50px;font-size:11px">&#1502;&#1497;&#1504;&#1497;&#1502;&#1493;&#1501;</span>
+                    <input type="number" ng-model="config.GaugeMin"
+                           style="width:70px;background:var(--ga20-bg-input);border:1px solid var(--ga20-border);color:var(--ga20-text);padding:3px 6px;border-radius:3px;font-size:11px">
+                </div>
+                <div style="display:flex;gap:8px;align-items:center">
+                    <span style="min-width:50px;font-size:11px">&#1502;&#1511;&#1505;&#1497;&#1502;&#1493;&#1501;</span>
+                    <input type="number" ng-model="config.GaugeMax"
+                           style="width:70px;background:var(--ga20-bg-input);border:1px solid var(--ga20-border);color:var(--ga20-text);padding:3px 6px;border-radius:3px;font-size:11px">
+                </div>
+            </div>
+        </div>
+
+        <!-- Target -->
+        <div class="ga20-ps">
+            <label>&#1497;&#1506;&#1491;</label>
+            <div style="display:flex;flex-direction:column;gap:4px;margin-top:4px;font-size:12px">
+                <label style="cursor:pointer">
+                    <input type="checkbox" ng-model="config.ShowTarget">
+                    &#1492;&#1510;&#1490; &#1504;&#1511;&#1493;&#1491;&#1514; &#1497;&#1506;&#1491;
+                </label>
+                <div style="display:flex;gap:8px;align-items:center">
+                    <span style="min-width:50px;font-size:11px">&#1506;&#1512;&#1498; &#1497;&#1506;&#1491;</span>
+                    <input type="number" ng-model="config.TargetValue"
+                           style="width:70px;background:var(--ga20-bg-input);border:1px solid var(--ga20-border);color:var(--ga20-text);padding:3px 6px;border-radius:3px;font-size:11px">
+                </div>
+            </div>
+        </div>
+
+        <!-- Thresholds -->
+        <div class="ga20-ps">
+            <label>&#1505;&#1508;&#1497; &#1510;&#1489;&#1506; (% &#1502;&#1492;&#1496;&#1493;&#1493;&#1495;)</label>
+            <div style="display:flex;flex-direction:column;gap:4px;margin-top:4px;font-size:12px">
+                <div style="display:flex;gap:8px;align-items:center">
+                    <span style="min-width:80px;font-size:11px">&#1490;&#1489;&#1493;&#1500; &#1497;&#1512;&#1493;&#1511; (%)</span>
+                    <input type="number" ng-model="config.GreenMaxPct" min="0" max="100"
+                           style="width:60px;background:var(--ga20-bg-input);border:1px solid var(--ga20-border);color:var(--ga20-text);padding:3px 6px;border-radius:3px;font-size:11px">
+                </div>
+                <div style="display:flex;gap:8px;align-items:center">
+                    <span style="min-width:80px;font-size:11px">&#1490;&#1489;&#1493;&#1500; &#1510;&#1492;&#1493;&#1489; (%)</span>
+                    <input type="number" ng-model="config.YellowMaxPct" min="0" max="100"
+                           style="width:60px;background:var(--ga20-bg-input);border:1px solid var(--ga20-border);color:var(--ga20-text);padding:3px 6px;border-radius:3px;font-size:11px">
+                </div>
+            </div>
+        </div>
+
+        <!-- Hidden gauges -->
+        <div class="ga20-ps" ng-show="hasHidden">
+            <label>&#128065; &#1502;&#1493;&#1505;&#1514;&#1512;&#1497;&#1501; &#1494;&#1502;&#1504;&#1497;&#1514;</label>
+            <div ng-repeat="g in gauges" ng-show="hiddenGauges[g.key]"
+                 style="font-size:11px;padding:2px 0;display:flex;gap:6px;align-items:center;margin-top:4px">
+                <button class="ga20-btn" style="padding:1px 6px;font-size:10px"
+                        ng-click="toggleGaugeVisibility(g.key)">&#1492;&#1510;&#1490;</button>
+                <span>{{g.label}}</span>
+            </div>
+        </div>
+
+        <!-- AF Connection -->
+        <div class="ga20-ps" ng-show="afConn">
+            <label>&#1495;&#1497;&#1489;&#1493;&#1512; AF</label>
+            <div style="font-size:12px;margin-top:4px;color:var(--ga20-text2)">
+                &#1502;&#1495;&#1493;&#1489;&#1512;: {{afConn.connected}}/{{afConn.total}} ({{afConn.pct}}%)
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ════════════════════════════════════════ -->
+    <!--  GEAR MODAL                              -->
+    <!-- ════════════════════════════════════════ -->
+    <div class="ga20-modal-overlay" ng-show="showGearModal" ng-click="closeGearModal()">
+        <div class="ga20-modal" ng-click="$event.stopPropagation()">
+            <div class="ga20-modal-title">
+                <span>&#128295; {{gearUnit.label}} — &#1508;&#1512;&#1496;&#1497; &#1502;&#1491;</span>
+                <span style="cursor:pointer" ng-click="closeGearModal()">&#10005;</span>
+            </div>
+            <div ng-show="gearUnit">
+                <div class="ga20-modal-row">
+                    <span>&#1506;&#1512;&#1498; &#1504;&#1493;&#1499;&#1495;&#1497;</span>
+                    <strong ng-style="{'color': getGaugeColor(gearUnit.value)}">
+                        {{gearUnit.value | number: config.Decimals}} {{engUnit}}
+                    </strong>
+                </div>
+                <div class="ga20-modal-row">
+                    <span>&#1488;&#1495;&#1493;&#1494; &#1502;&#1492;&#1496;&#1493;&#1493;&#1495;</span>
+                    <strong>{{gearUnit.pct}}%</strong>
+                </div>
+                <div class="ga20-modal-row">
+                    <span>&#1502;&#1490;&#1502;&#1492;</span>
+                    <strong style="font-size:16px">{{gearUnit.trend}}</strong>
+                </div>
+                <div class="ga20-modal-row">
+                    <span>&#1502;&#1510;&#1489;</span>
+                    <span ng-style="{'color': gearUnit.status==='critical' ? config.criticalColor :
+                                              gearUnit.status==='warning' ? config.warningColor : config.goodColor}">
+                        {{gearUnit.status === 'normal' ? '&#1514;&#1511;&#1497;&#1503;' :
+                          gearUnit.status === 'warning' ? '&#1488;&#1494;&#1492;&#1512;&#1492;' : '&#1511;&#1512;&#1497;&#1496;&#1497;'}}
+                    </span>
+                </div>
+                <div class="ga20-modal-row">
+                    <span>&#1488;&#1514;&#1512;</span>
+                    <strong>{{gearUnit.site || '—'}}</strong>
+                </div>
+                <div class="ga20-modal-row" ng-show="gearUnit.quality">
+                    <span>&#1488;&#1497;&#1499;&#1493;&#1514; AF</span>
+                    <strong>{{gearUnit.quality.status}}</strong>
+                </div>
+                <div class="ga20-modal-row">
+                    <span>&#1504;&#1514;&#1497;&#1489; &#1514;&#1490;</span>
+                    <span style="direction:ltr;font-size:10px;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"
+                          title="{{gearUnit.tagPath}}">{{gearUnit.tagPath}}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ════════════════════════════════════════ -->
+    <!--  FOOTER                                  -->
+    <!-- ════════════════════════════════════════ -->
+    <div class="ga20-ftr">
+        <span>&#1504;&#1493;&#1490;&#1492; &#8212; &#1502;&#1491; &#1489;&#1497;&#1510;&#1493;&#1506;&#1497;&#1501; | PIV20 v20.0</span>
+        <span>{{filteredGauges.length}}/{{gauges.length}} &#1502;&#1491;&#1497;&#1501; | &#1496;&#1493;&#1493;&#1495;: {{gaugeMin}} - {{gaugeMax}} {{engUnit}}</span>
+    </div>
+
+</div>

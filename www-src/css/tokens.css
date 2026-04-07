@@ -1,0 +1,247 @@
+/*
+ * PIVISION Mobile — Design tokens
+ * Stage 4 of the modernization plan.
+ *
+ * Single source of truth for colors, spacing, typography, motion,
+ * and elevation. New UI built in stages 4+ should consume these
+ * variables; the legacy stylesheets in mobile-app.css / launcher.css
+ * etc. can migrate one rule at a time.
+ *
+ * The dark theme is the default (matching the legacy look). The
+ * light theme is opt-in via `<html data-theme="light">`. The
+ * `auto` setting honors `prefers-color-scheme`.
+ */
+
+:root,
+:root[data-theme='dark'] {
+  color-scheme: dark;
+
+  /* ── Brand ──────────────────────────────────────────────────────── */
+  --pi-brand-primary: #00b4d8;
+  --pi-brand-primary-hover: #00d4ff;
+  --pi-brand-primary-active: #0096b8;
+  --pi-brand-accent: #00d4ff;
+
+  /* ── Surface (background layers) ────────────────────────────────── */
+  --pi-bg-base: #060b18;
+  --pi-bg-surface: #0c1425;
+  --pi-bg-elevated: #111d30;
+  --pi-bg-overlay: rgba(6, 11, 24, 0.85);
+  --pi-bg-scrim: rgba(0, 0, 0, 0.6);
+
+  /* ── Text ───────────────────────────────────────────────────────── */
+  --pi-text-primary: #e6f1ff;
+  --pi-text-secondary: #9fb4cf;
+  --pi-text-muted: #6b809e;
+  --pi-text-inverse: #0c1425;
+
+  /* ── Borders & dividers ─────────────────────────────────────────── */
+  --pi-border-subtle: rgba(159, 180, 207, 0.12);
+  --pi-border-default: rgba(159, 180, 207, 0.24);
+  --pi-border-strong: rgba(159, 180, 207, 0.4);
+
+  /* ── Status ─────────────────────────────────────────────────────── */
+  --pi-status-success: #10b981;
+  --pi-status-success-bg: rgba(16, 185, 129, 0.14);
+  --pi-status-warning: #f59e0b;
+  --pi-status-warning-bg: rgba(245, 158, 11, 0.18);
+  --pi-status-danger: #ef4444;
+  --pi-status-danger-bg: rgba(239, 68, 68, 0.16);
+  --pi-status-info: #0ea5e9;
+  --pi-status-info-bg: rgba(14, 165, 233, 0.14);
+}
+
+:root[data-theme='light'] {
+  color-scheme: light;
+
+  --pi-brand-primary: #0096b8;
+  --pi-brand-primary-hover: #00b4d8;
+  --pi-brand-primary-active: #007a96;
+  --pi-brand-accent: #0096b8;
+
+  --pi-bg-base: #f7f9fc;
+  --pi-bg-surface: #ffffff;
+  --pi-bg-elevated: #ffffff;
+  --pi-bg-overlay: rgba(247, 249, 252, 0.9);
+  --pi-bg-scrim: rgba(12, 20, 37, 0.5);
+
+  --pi-text-primary: #0c1425;
+  --pi-text-secondary: #4a5568;
+  --pi-text-muted: #718096;
+  --pi-text-inverse: #ffffff;
+
+  --pi-border-subtle: rgba(12, 20, 37, 0.08);
+  --pi-border-default: rgba(12, 20, 37, 0.16);
+  --pi-border-strong: rgba(12, 20, 37, 0.32);
+
+  --pi-status-success: #047857;
+  --pi-status-success-bg: rgba(4, 120, 87, 0.12);
+  --pi-status-warning: #b45309;
+  --pi-status-warning-bg: rgba(180, 83, 9, 0.12);
+  --pi-status-danger: #b91c1c;
+  --pi-status-danger-bg: rgba(185, 28, 28, 0.1);
+  --pi-status-info: #0369a1;
+  --pi-status-info-bg: rgba(3, 105, 161, 0.1);
+}
+
+/*
+ * `auto` honors the OS-level preference. Implemented as cascading
+ * media query so it doesn't depend on JS being loaded.
+ */
+@media (prefers-color-scheme: light) {
+  :root[data-theme='auto'] {
+    color-scheme: light;
+    --pi-brand-primary: #0096b8;
+    --pi-brand-primary-hover: #00b4d8;
+    --pi-brand-primary-active: #007a96;
+    --pi-bg-base: #f7f9fc;
+    --pi-bg-surface: #ffffff;
+    --pi-bg-elevated: #ffffff;
+    --pi-text-primary: #0c1425;
+    --pi-text-secondary: #4a5568;
+    --pi-text-muted: #718096;
+    --pi-text-inverse: #ffffff;
+    --pi-border-subtle: rgba(12, 20, 37, 0.08);
+    --pi-border-default: rgba(12, 20, 37, 0.16);
+    --pi-border-strong: rgba(12, 20, 37, 0.32);
+  }
+}
+
+/* ── Spacing scale (4px grid) ─────────────────────────────────────── */
+:root {
+  --pi-space-0: 0;
+  --pi-space-1: 0.25rem; /* 4px  */
+  --pi-space-2: 0.5rem;  /* 8px  */
+  --pi-space-3: 0.75rem; /* 12px */
+  --pi-space-4: 1rem;    /* 16px */
+  --pi-space-5: 1.5rem;  /* 24px */
+  --pi-space-6: 2rem;    /* 32px */
+  --pi-space-7: 3rem;    /* 48px */
+  --pi-space-8: 4rem;    /* 64px */
+}
+
+/* ── Radius ───────────────────────────────────────────────────────── */
+:root {
+  --pi-radius-sm: 0.25rem;
+  --pi-radius-md: 0.5rem;
+  --pi-radius-lg: 0.75rem;
+  --pi-radius-xl: 1rem;
+  --pi-radius-pill: 9999px;
+}
+
+/* ── Typography ───────────────────────────────────────────────────── */
+:root {
+  --pi-font-family: 'Heebo', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --pi-font-mono: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  --pi-font-size-xs: 0.75rem;
+  --pi-font-size-sm: 0.875rem;
+  --pi-font-size-md: 1rem;
+  --pi-font-size-lg: 1.125rem;
+  --pi-font-size-xl: 1.25rem;
+  --pi-font-size-2xl: 1.5rem;
+  --pi-font-size-3xl: 2rem;
+  --pi-font-weight-regular: 400;
+  --pi-font-weight-medium: 500;
+  --pi-font-weight-semibold: 600;
+  --pi-font-weight-bold: 700;
+  --pi-line-height-tight: 1.2;
+  --pi-line-height-normal: 1.5;
+  --pi-line-height-relaxed: 1.7;
+}
+
+/* ── Elevation (shadows) ──────────────────────────────────────────── */
+:root {
+  --pi-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.16);
+  --pi-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.24);
+  --pi-shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.32);
+  --pi-shadow-focus: 0 0 0 3px rgba(0, 180, 216, 0.35);
+}
+
+/* ── Motion ───────────────────────────────────────────────────────── */
+:root {
+  --pi-motion-fast: 120ms;
+  --pi-motion-normal: 220ms;
+  --pi-motion-slow: 360ms;
+  --pi-motion-ease: cubic-bezier(0.4, 0, 0.2, 1);
+  --pi-motion-ease-out: cubic-bezier(0, 0, 0.2, 1);
+  --pi-motion-ease-in: cubic-bezier(0.4, 0, 1, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --pi-motion-fast: 0ms;
+    --pi-motion-normal: 0ms;
+    --pi-motion-slow: 0ms;
+  }
+}
+
+/* ── Z-index scale ────────────────────────────────────────────────── */
+:root {
+  --pi-z-base: 1;
+  --pi-z-dropdown: 100;
+  --pi-z-sticky: 200;
+  --pi-z-overlay: 800;
+  --pi-z-modal: 900;
+  --pi-z-popover: 950;
+  --pi-z-toast: 1000;
+}
+
+/* ── Container query breakpoints (informational) ──────────────────── */
+:root {
+  --pi-bp-sm: 480px;
+  --pi-bp-md: 768px;
+  --pi-bp-lg: 1024px;
+  --pi-bp-xl: 1280px;
+}
+
+/*
+ * Skip-to-content link styles. The link is injected by
+ * js/ux/a11y.js as the very first focusable element on the page.
+ */
+.pi-skip-link {
+  position: fixed;
+  top: -100px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: var(--pi-z-toast);
+  padding: var(--pi-space-3) var(--pi-space-5);
+  background: var(--pi-brand-primary);
+  color: var(--pi-text-inverse);
+  font-weight: var(--pi-font-weight-semibold);
+  border-radius: var(--pi-radius-md);
+  box-shadow: var(--pi-shadow-md);
+  text-decoration: none;
+  transition: top var(--pi-motion-fast) var(--pi-motion-ease);
+}
+.pi-skip-link:focus {
+  top: var(--pi-space-3);
+  outline: 3px solid var(--pi-brand-accent);
+  outline-offset: 2px;
+}
+
+/*
+ * Visually-hidden helper (for screen-reader-only labels).
+ * Use class="pi-sr-only" on any element you want present in the
+ * accessibility tree but invisible on screen.
+ */
+.pi-sr-only {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+/*
+ * Focus-visible polyfill rule: gives a clear focus ring to keyboard
+ * users without bothering mouse users.
+ */
+:focus-visible {
+  outline: 3px solid var(--pi-brand-accent);
+  outline-offset: 2px;
+  border-radius: var(--pi-radius-sm);
+}

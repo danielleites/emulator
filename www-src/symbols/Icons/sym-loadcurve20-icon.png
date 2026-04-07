@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+  <rect width="32" height="32" rx="4" fill="#1565C0" opacity="0.15"/>
+  <rect x="1" y="1" width="30" height="30" rx="3" fill="none" stroke="#1565C0" stroke-width="1.5"/>
+  <path d="M5 18 Q10 6 16 14 Q22 22 27 10" fill="none" stroke="#1565C0" stroke-width="2"/>
+  <text x="16" y="28" text-anchor="middle" font-family="Arial,sans-serif" font-size="6" fill="#1565C0" font-weight="bold">LOAD</text>
+</svg>

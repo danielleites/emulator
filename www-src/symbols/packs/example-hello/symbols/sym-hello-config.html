@@ -1,0 +1,22 @@
+<!--
+  sym-hello-config.html — config panel template for the Hello
+  World symbol. Used by the emulator's config side panel when
+  the user selects the symbol and clicks the gear icon. Bindings
+  use the mini-Angular-shim directives (ng-model, ng-click, etc.)
+  that emu-shims.js supports.
+-->
+<div class="sym-hello-config" style="padding:12px;font-family:system-ui,sans-serif;direction:rtl;color:#e6f1ff">
+  <div style="margin-bottom:12px">
+    <label for="sym-hello-title" style="display:block;font-size:12px;margin-bottom:4px;opacity:0.7">כותרת</label>
+    <input id="sym-hello-title" type="text" ng-model="config.Title"
+           style="width:100%;padding:6px 8px;background:#0a0f1e;border:1px solid #00b4d8;color:#e6f1ff;border-radius:4px">
+  </div>
+  <div style="margin-bottom:12px">
+    <label for="sym-hello-message" style="display:block;font-size:12px;margin-bottom:4px;opacity:0.7">הודעה</label>
+    <input id="sym-hello-message" type="text" ng-model="config.Message"
+           style="width:100%;padding:6px 8px;background:#0a0f1e;border:1px solid #00b4d8;color:#e6f1ff;border-radius:4px">
+  </div>
+  <div style="font-size:11px;opacity:0.55;margin-top:16px">
+    Example pack — drag into the canvas to preview.
+  </div>
+</div>

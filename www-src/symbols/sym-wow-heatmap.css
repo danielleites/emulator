@@ -1,0 +1,452 @@
+/**
+ * ═══════════════════════════════════════════════════════
+ *  sym-wow-heatmap.css  —  Shadow DOM Styles
+ * ═══════════════════════════════════════════════════════
+ *  Injected into Shadow DOM for full CSS isolation.
+ *  Canvas handles all cell rendering — CSS covers only
+ *  toolbar, tooltip, stats bar, skeleton, legend, print.
+ *
+ *  Version : WOW HM 100.0
+ *  Prefix  : wow-hm-
+ * ═══════════════════════════════════════════════════════
+ */
+
+/* ═══ CSS Custom Properties ═══ */
+
+:host {
+    --wow-hm-bg-start:     #060C18;
+    --wow-hm-bg-end:       #0D1F35;
+    --wow-hm-card-bg:      #0F2940;
+    --wow-hm-accent:       #5BC0EB;
+    --wow-hm-accent-glow:  rgba(91, 192, 235, 0.3);
+    --wow-hm-ok:           #2ECC71;
+    --wow-hm-ok-glow:      rgba(46, 204, 113, 0.2);
+    --wow-hm-warn:         #F39C12;
+    --wow-hm-warn-glow:    rgba(243, 156, 18, 0.2);
+    --wow-hm-crit:         #E74C3C;
+    --wow-hm-crit-glow:    rgba(231, 76, 60, 0.2);
+    --wow-hm-text:         #ECF0F1;
+    --wow-hm-text-muted:   #8899AA;
+    --wow-hm-border:       #1A3A5C;
+    --wow-hm-glass-bg:     rgba(15, 41, 64, 0.85);
+    --wow-hm-glass-border: rgba(91, 192, 235, 0.15);
+    --wow-hm-glass-blur:   10px;
+    --wow-hm-font:         'Segoe UI', Arial, sans-serif;
+    --wow-hm-font-size:    12px;
+    --wow-hm-radius:       8px;
+    --wow-hm-radius-sm:    4px;
+    --wow-hm-transition:   0.3s ease-out;
+    --wow-hm-shadow:       0 4px 24px rgba(0, 0, 0, 0.4);
+}
+
+
+/* ═══ Safe Reset ═══ */
+
+.wow-hm-root { box-sizing: border-box; }
+.wow-hm-root *, .wow-hm-root *::before, .wow-hm-root *::after { box-sizing: border-box; }
+
+
+/* ═══ Root Layout ═══ */
+
+.wow-hm-root {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    direction: rtl;
+    overflow: hidden;
+    background: linear-gradient(180deg, var(--wow-hm-bg-start), var(--wow-hm-bg-end));
+    color: var(--wow-hm-text);
+    font-family: var(--wow-hm-font);
+    font-size: var(--wow-hm-font-size);
+    position: relative;
+    -webkit-font-smoothing: antialiased;
+}
+
+
+/* ═══ TOOLBAR ═══ */
+
+.wow-hm-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    background: var(--wow-hm-card-bg);
+    border-bottom: 1px solid var(--wow-hm-border);
+    flex-shrink: 0;
+    flex-wrap: wrap;
+}
+
+.wow-hm-toolbar select {
+    padding: 4px 8px;
+    border: 1px solid var(--wow-hm-border);
+    border-radius: var(--wow-hm-radius-sm);
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--wow-hm-text);
+    font-size: 11px;
+    font-family: var(--wow-hm-font);
+    outline: none;
+    cursor: pointer;
+    transition: border-color var(--wow-hm-transition);
+}
+.wow-hm-toolbar select:focus {
+    border-color: var(--wow-hm-accent);
+    box-shadow: 0 0 0 2px var(--wow-hm-accent-glow);
+}
+
+.wow-hm-toolbar-sep {
+    width: 1px;
+    height: 20px;
+    background: var(--wow-hm-border);
+    flex-shrink: 0;
+}
+
+.wow-hm-filter-input {
+    flex: 1;
+    min-width: 80px;
+    max-width: 180px;
+    padding: 4px 10px;
+    border: 1px solid var(--wow-hm-border);
+    border-radius: var(--wow-hm-radius-sm);
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--wow-hm-text);
+    font-size: 11px;
+    font-family: var(--wow-hm-font);
+    outline: none;
+    transition: border-color var(--wow-hm-transition), box-shadow var(--wow-hm-transition);
+}
+.wow-hm-filter-input:focus {
+    border-color: var(--wow-hm-accent);
+    box-shadow: 0 0 0 2px var(--wow-hm-accent-glow);
+}
+.wow-hm-filter-input::placeholder {
+    color: var(--wow-hm-text-muted);
+    opacity: 0.7;
+}
+
+
+/* ═══ TOOLBAR BUTTONS ═══ */
+
+.wow-hm-btn {
+    padding: 4px 10px;
+    border: 1px solid var(--wow-hm-border);
+    border-radius: var(--wow-hm-radius-sm);
+    background: transparent;
+    color: var(--wow-hm-text-muted);
+    font-size: 11px;
+    font-family: var(--wow-hm-font);
+    cursor: pointer;
+    transition: all var(--wow-hm-transition);
+    white-space: nowrap;
+}
+.wow-hm-btn:hover {
+    background: rgba(91, 192, 235, 0.1);
+    color: var(--wow-hm-text);
+    border-color: var(--wow-hm-accent);
+}
+.wow-hm-btn--active {
+    background: var(--wow-hm-accent);
+    color: #000;
+    border-color: var(--wow-hm-accent);
+    font-weight: 600;
+}
+
+.wow-hm-zoom-btn {
+    width: 26px;
+    height: 26px;
+    padding: 0;
+    border: 1px solid var(--wow-hm-border);
+    border-radius: var(--wow-hm-radius-sm);
+    background: transparent;
+    color: var(--wow-hm-text-muted);
+    font-size: 14px;
+    cursor: pointer;
+    transition: all var(--wow-hm-transition);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.wow-hm-zoom-btn:hover {
+    background: rgba(91, 192, 235, 0.1);
+    color: var(--wow-hm-accent);
+    border-color: var(--wow-hm-accent);
+}
+
+.wow-hm-export-btn {
+    padding: 4px 10px;
+    border: 1px solid var(--wow-hm-accent);
+    border-radius: var(--wow-hm-radius-sm);
+    background: rgba(91, 192, 235, 0.08);
+    color: var(--wow-hm-accent);
+    font-size: 11px;
+    font-family: var(--wow-hm-font);
+    cursor: pointer;
+    transition: all var(--wow-hm-transition);
+    white-space: nowrap;
+}
+.wow-hm-export-btn:hover {
+    background: rgba(91, 192, 235, 0.2);
+}
+
+
+/* ═══ STATS BAR ═══ */
+
+.wow-hm-stats-bar {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 4px 12px;
+    background: rgba(15, 41, 64, 0.5);
+    border-bottom: 1px solid var(--wow-hm-border);
+    flex-shrink: 0;
+    font-size: 11px;
+}
+
+.wow-hm-stat {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.wow-hm-stat-label {
+    color: var(--wow-hm-text-muted);
+    font-size: 10px;
+}
+
+.wow-hm-stat-value {
+    font-weight: 700;
+    color: var(--wow-hm-text);
+}
+
+.wow-hm-stat--ok .wow-hm-stat-value    { color: var(--wow-hm-ok); }
+.wow-hm-stat--warn .wow-hm-stat-value  { color: var(--wow-hm-warn); }
+.wow-hm-stat--crit .wow-hm-stat-value  { color: var(--wow-hm-crit); }
+.wow-hm-stat--total .wow-hm-stat-value { color: var(--wow-hm-accent); }
+
+
+/* ═══ CANVAS WRAPPER ═══ */
+
+.wow-hm-canvas-wrap {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+    min-height: 0;
+}
+
+.wow-hm-canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+    cursor: crosshair;
+}
+
+
+/* ═══ TOOLTIP (Glassmorphism) ═══ */
+
+.wow-hm-tooltip {
+    position: absolute;
+    padding: 8px 12px;
+    background: var(--wow-hm-glass-bg);
+    border: 1px solid var(--wow-hm-glass-border);
+    border-radius: var(--wow-hm-radius-sm);
+    box-shadow: var(--wow-hm-shadow);
+    backdrop-filter: blur(var(--wow-hm-glass-blur));
+    -webkit-backdrop-filter: blur(var(--wow-hm-glass-blur));
+    color: var(--wow-hm-text);
+    font-size: 11px;
+    line-height: 1.5;
+    z-index: 50;
+    pointer-events: none;
+    max-width: 250px;
+    opacity: 0;
+    transition: opacity 0.15s ease-out;
+    direction: rtl;
+    text-align: right;
+}
+
+.wow-hm-tooltip--visible {
+    opacity: 1;
+}
+
+.wow-hm-tooltip-title {
+    font-weight: 600;
+    color: var(--wow-hm-accent);
+    margin-bottom: 2px;
+}
+
+.wow-hm-tooltip-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.wow-hm-tooltip-label {
+    color: var(--wow-hm-text-muted);
+}
+
+.wow-hm-tooltip-value {
+    font-weight: 600;
+    color: var(--wow-hm-text);
+}
+
+
+/* ═══ SKELETON LOADING ═══ */
+
+.wow-hm-skeleton {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    background: linear-gradient(180deg, var(--wow-hm-bg-start), var(--wow-hm-bg-end));
+    transition: opacity 0.4s ease-out;
+}
+
+.wow-hm-skeleton--hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.wow-hm-skeleton-shimmer {
+    width: 80%;
+    height: 60%;
+    background: linear-gradient(
+        90deg,
+        rgba(255, 255, 255, 0.03) 25%,
+        rgba(255, 255, 255, 0.08) 50%,
+        rgba(255, 255, 255, 0.03) 75%
+    );
+    background-size: 200% 100%;
+    animation: wow_hm_shimmer 1.5s ease-in-out infinite;
+    border-radius: var(--wow-hm-radius);
+}
+
+
+/* ═══ LEGEND ═══ */
+
+.wow-hm-legend-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 12px;
+    background: var(--wow-hm-card-bg);
+    border-top: 1px solid var(--wow-hm-border);
+    flex-shrink: 0;
+}
+
+.wow-hm-legend-canvas {
+    flex: 1;
+    height: 12px;
+    border-radius: 6px;
+    max-width: 300px;
+}
+
+.wow-hm-legend-labels {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    font-size: 10px;
+    color: var(--wow-hm-text-muted);
+    min-width: 80px;
+}
+
+.wow-hm-legend-min {
+    text-align: right;
+}
+.wow-hm-legend-max {
+    text-align: left;
+}
+
+
+/* ═══ SCROLLBAR (for future scrollable modes) ═══ */
+
+.wow-hm-canvas-wrap::-webkit-scrollbar {
+    width: 6px;
+}
+.wow-hm-canvas-wrap::-webkit-scrollbar-track {
+    background: transparent;
+}
+.wow-hm-canvas-wrap::-webkit-scrollbar-thumb {
+    background: var(--wow-hm-border);
+    border-radius: 3px;
+}
+.wow-hm-canvas-wrap::-webkit-scrollbar-thumb:hover {
+    background: var(--wow-hm-accent);
+}
+
+
+/* ═══ ANIMATIONS ═══ */
+
+@keyframes wow_hm_fadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+@keyframes wow_hm_shimmer {
+    0%   { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+@keyframes wow_hm_pulse {
+    0%, 100% { opacity: 1; }
+    50%      { opacity: 0.5; }
+}
+
+
+/* ═══ RESPONSIVE ═══ */
+
+@media (max-width: 600px) {
+    .wow-hm-toolbar {
+        padding: 4px 8px;
+        gap: 4px;
+    }
+    .wow-hm-filter-input {
+        max-width: 120px;
+    }
+    .wow-hm-stats-bar {
+        gap: 8px;
+        font-size: 10px;
+    }
+    .wow-hm-legend-wrap {
+        padding: 2px 8px;
+    }
+}
+
+
+/* ═══ PRINT ═══ */
+
+@media print {
+    .wow-hm-root {
+        background: #fff !important;
+        color: #000 !important;
+    }
+    .wow-hm-toolbar {
+        display: none !important;
+    }
+    .wow-hm-tooltip {
+        display: none !important;
+    }
+    .wow-hm-skeleton {
+        display: none !important;
+    }
+    .wow-hm-canvas-wrap {
+        flex: 1;
+    }
+    .wow-hm-canvas {
+        print-color-adjust: exact;
+        -webkit-print-color-adjust: exact;
+    }
+    .wow-hm-legend-wrap {
+        border-top: 1px solid #ccc;
+    }
+    .wow-hm-legend-canvas {
+        print-color-adjust: exact;
+        -webkit-print-color-adjust: exact;
+    }
+    .wow-hm-stats-bar {
+        background: #f5f5f5 !important;
+        color: #333 !important;
+        border-bottom: 1px solid #ccc;
+    }
+}

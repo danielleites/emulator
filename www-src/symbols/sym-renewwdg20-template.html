@@ -1,0 +1,141 @@
+<link rel="stylesheet" href="/PIVision/Scripts/app/editor/symbols/ext/sym-renewwdg20.css">
+<link rel="stylesheet" href="/PIVision/Scripts/app/editor/symbols/ext/piv20-design-system.css">
+<link rel="stylesheet" href="/PIVision/Scripts/app/editor/symbols/ext/piv20-overrides.css">
+<script type="text/javascript" src="/PIVision/Scripts/app/editor/symbols/ext/piv20-plugins/piv20-core.js"></script>
+<script type="text/javascript" src="/PIVision/Scripts/app/editor/symbols/ext/piv20-plugins/piv20-renewable.js"></script>
+
+<div class="piv20 rw20-root" ng-right-click="showContextMenu($event)">
+
+    <!-- Header -->
+    <div class="rw20-hdr">
+        <div style="display:flex;align-items:center;gap:8px">
+            <span class="rw20-ttl">{{config.Title || 'אנרגיה מתחדשת'}}</span>
+            <span class="rw20-live"><span class="rw20-live-dot"></span>חי</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:4px">
+            <div class="rw20-views">
+                <button class="rw20-btn" ng-class="{active: viewMode==='dashboard'}" ng-click="setView('dashboard')">לוח</button>
+                <button class="rw20-btn" ng-class="{active: viewMode==='chart'}" ng-click="setView('chart')">גרף</button>
+                <button class="rw20-btn" ng-class="{active: viewMode==='table'}" ng-click="setView('table')">טבלה</button>
+                <button class="rw20-btn" ng-class="{active: viewMode==='compact'}" ng-click="setView('compact')">קומפקט</button>
+            </div>
+            <button class="rw20-btn" ng-click="exportCSV()" title="ייצוא CSV">&#8681;</button>
+            <button class="rw20-btn" ng-click="showDocs()" title="תיעוד">?</button>
+            <button class="rw20-btn" ng-click="openPanel()" title="הגדרות">&#9881;</button>
+        </div>
+    </div>
+
+    <!-- Summary bar -->
+    <div class="rw20-summary" ng-show="totalRenewableMW > 0">
+        <span class="rw20-sum-item">סה"כ: {{totalRenewableMW | number:config.Decimals}} MW</span>
+        <span class="rw20-sum-item">חדירה: {{penetrationPct | number:1}}%</span>
+        <span class="rw20-sum-item" ng-show="curtailment.mw > 0">קיצוץ: {{curtailment.mw | number:1}} MW</span>
+        <span class="rw20-sum-item" ng-show="intermittency.rampRate">רמפה: {{intermittency.rampRate | number:1}} MW/min</span>
+    </div>
+
+    <!-- Body -->
+    <div class="rw20-body">
+
+        <!-- Empty state -->
+        <div class="rw20-empty" ng-show="!allItems.length">
+            <div style="font-size:32px;opacity:0.3">&#9728;</div>
+            <div>הוסף תגיות אנרגיה מתחדשת</div>
+        </div>
+
+        <!-- Dashboard view -->
+        <div ng-show="viewMode==='dashboard' && allItems.length">
+            <!-- Category cards -->
+            <div class="rw20-cats">
+                <div class="rw20-cat-card cat-solar" ng-show="categories.solar">
+                    <div class="rw20-cat-icon">&#9728;</div>
+                    <div class="rw20-cat-label">סולרי</div>
+                    <div class="rw20-cat-val">{{categories.solar.mw | number:config.Decimals}}</div>
+                    <div class="rw20-cat-sub" ng-show="config.ShowCF !== 'false'">CF: {{categories.solar.cf | number:1}}%</div>
+                </div>
+                <div class="rw20-cat-card cat-wind" ng-show="categories.wind">
+                    <div class="rw20-cat-icon">&#127744;</div>
+                    <div class="rw20-cat-label">רוח</div>
+                    <div class="rw20-cat-val">{{categories.wind.mw | number:config.Decimals}}</div>
+                    <div class="rw20-cat-sub" ng-show="config.ShowCF !== 'false'">CF: {{categories.wind.cf | number:1}}%</div>
+                </div>
+                <div class="rw20-cat-card cat-other" ng-show="categories.other">
+                    <div class="rw20-cat-icon">&#9889;</div>
+                    <div class="rw20-cat-label">אחר</div>
+                    <div class="rw20-cat-val">{{categories.other.mw | number:config.Decimals}}</div>
+                </div>
+            </div>
+
+            <!-- Penetration bar -->
+            <div class="rw20-pen-bar">
+                <div class="rw20-pen-fill" ng-style="{'width': (penetrationPct > 100 ? 100 : penetrationPct) + '%'}"></div>
+                <div class="rw20-pen-label">חדירה: {{penetrationPct | number:1}}%</div>
+            </div>
+
+            <!-- Intermittency metrics -->
+            <div class="rw20-metrics" ng-show="config.ShowIntermittency !== 'false'">
+                <div class="rw20-metric">תנודתיות: <span class="rw20-metric-val">{{intermittency.variability | number:1}}%</span></div>
+                <div class="rw20-metric">EWMA: <span class="rw20-metric-val">{{intermittency.ewmaValue | number:1}} MW</span></div>
+                <div class="rw20-metric">אירועי רמפה: <span class="rw20-metric-val">{{intermittency.rampEvents}}</span></div>
+            </div>
+
+            <!-- Curtailment -->
+            <div class="rw20-metrics" ng-show="config.ShowCurtailment !== 'false' && hasCurtailTag">
+                <div class="rw20-metric">קיצוץ: <span class="rw20-metric-val">{{curtailment.mw | number:1}} MW</span></div>
+                <div class="rw20-metric">MWh היום: <span class="rw20-metric-val">{{curtailment.mwhToday | number:0}}</span></div>
+                <div class="rw20-metric">עלות: <span class="rw20-metric-val">{{curtailment.costToday | number:0}} ILS</span></div>
+            </div>
+        </div>
+
+        <!-- Chart view -->
+        <div class="rw20-chart-wrap" ng-show="viewMode==='chart' && allItems.length">
+            <canvas class="rw20-canvas"></canvas>
+        </div>
+
+        <!-- Table view -->
+        <div ng-show="viewMode==='table' && allItems.length" style="overflow-y:auto;height:100%;padding:4px">
+            <table class="rw20-table">
+                <thead><tr>
+                    <th>שם</th><th>קטגוריה</th><th>MW</th><th>CF%</th><th>סטטוס</th>
+                </tr></thead>
+                <tbody>
+                    <tr ng-repeat="it in allItems">
+                        <td>{{it.label}}</td>
+                        <td>{{it.catLabel}}</td>
+                        <td>{{it.numeric | number:config.Decimals}}</td>
+                        <td>{{it.cf | number:1}}</td>
+                        <td ng-style="{'color': it.statusColor}">{{it.statusText}}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Compact view -->
+        <div class="rw20-compact" ng-show="viewMode==='compact' && allItems.length">
+            <div class="rw20-compact-item"><span class="rw20-compact-label">סה"כ MW</span><span class="rw20-compact-val">{{totalRenewableMW | number:config.Decimals}}</span></div>
+            <div class="rw20-compact-item"><span class="rw20-compact-label">חדירה</span><span class="rw20-compact-val">{{penetrationPct | number:1}}%</span></div>
+            <div class="rw20-compact-item"><span class="rw20-compact-label">שיא</span><span class="rw20-compact-val">{{stats.max | number:config.Decimals}}</span></div>
+            <div class="rw20-compact-item"><span class="rw20-compact-label">ממוצע</span><span class="rw20-compact-val">{{stats.avg | number:config.Decimals}}</span></div>
+            <div class="rw20-compact-item"><span class="rw20-compact-label">P95</span><span class="rw20-compact-val">{{stats.p95 | number:config.Decimals}}</span></div>
+        </div>
+
+    </div>
+
+    <!-- Side panel -->
+    <div class="rw20-panel" ng-class="{open: panelOpen}">
+        <div class="rw20-phd">
+            <h3>הגדרות אנרגיה מתחדשת</h3>
+            <button class="rw20-pcl" ng-click="closePanel()">&times;</button>
+        </div>
+        <div class="rw20-ps"><label>כותרת</label><input type="text" ng-model="config.Title"></div>
+        <div class="rw20-ps"><label>סולרי מותקן (MW)</label><input type="number" ng-model="config.SolarInstalledMW" step="any"></div>
+        <div class="rw20-ps"><label>רוח מותקן (MW)</label><input type="number" ng-model="config.WindInstalledMW" step="any"></div>
+        <div class="rw20-ps"><label>חדירה גבוהה (%)</label><input type="number" ng-model="config.HighPenetrationPct" min="0" max="100"></div>
+        <div class="rw20-ps"><label>עלות קיצוץ (ILS/MWh)</label><input type="number" ng-model="config.CurtailmentCostPerMWh" step="10"></div>
+    </div>
+
+    <!-- Footer -->
+    <div class="rw20-ftr">PIV20 Renewable</div>
+
+    <!-- Widget container -->
+    <div id="rw20-widget" style="display:none"></div>
+</div>

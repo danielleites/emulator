@@ -1,0 +1,18 @@
+{
+  "id": "example-hello",
+  "displayName": "Example: Hello",
+  "version": "1.0.0",
+  "symbols": [
+    {
+      "name": "hello",
+      "displayName": "Hello World",
+      "category": "דוגמאות",
+      "dataShape": "Value",
+      "files": {
+        "js": "symbols/sym-hello.js",
+        "template": "symbols/sym-hello-template.html",
+        "config": "symbols/sym-hello-config.html"
+      }
+    }
+  ]
+}

@@ -1,0 +1,142 @@
+<!-- ═══════════════════════════════════════════════════════
+     Executive Virtual Table — Config Panel
+     WOW TBL v100 — wc20 Pattern + Collapsible <details>
+     ═══════════════════════════════════════════════════════ -->
+
+<div class="wc20-config-panel" style="direction:rtl; font-family:'Segoe UI',Arial,sans-serif;">
+
+    <!-- ── General (open by default) ── -->
+    <details class="wc20-section" open>
+        <summary class="wc20-section-title">כללי</summary>
+
+        <div class="wc20-field">
+            <label class="wc20-label">כותרת</label>
+            <input type="text" class="wc20-input"
+                   ng-model="config.Title">
+        </div>
+
+        <div class="wc20-field">
+            <label class="wc20-label">מצב הדגמה (Demo)</label>
+            <input type="checkbox" class="wc20-checkbox"
+                   ng-model="config.DemoMode">
+        </div>
+
+        <div class="wc20-field" ng-show="config.DemoMode">
+            <label class="wc20-label">מספר שורות דמו</label>
+            <select class="wc20-select" ng-model="config.DemoRowCount">
+                <option value="100">100</option>
+                <option value="1000">1,000</option>
+                <option value="5000">5,000</option>
+                <option value="10000">10,000</option>
+                <option value="50000">50,000</option>
+                <option value="100000">100,000</option>
+            </select>
+        </div>
+
+        <div class="wc20-field">
+            <label class="wc20-label">נקודות עשרוניות</label>
+            <input type="number" class="wc20-input wc20-input-sm"
+                   ng-model="config.Decimals"
+                   ng-model-options="{ debounce: 500 }"
+                   min="0" max="3" step="1">
+        </div>
+    </details>
+
+    <!-- ── Thresholds (open by default) ── -->
+    <details class="wc20-section" open>
+        <summary class="wc20-section-title">ספים</summary>
+
+        <div class="wc20-field">
+            <label class="wc20-label">סף אזהרה (%)</label>
+            <input type="number" class="wc20-input wc20-input-sm"
+                   ng-model="config.WarningPct"
+                   ng-model-options="{ debounce: 500 }"
+                   min="0" max="100" step="5">
+        </div>
+
+        <div class="wc20-field">
+            <label class="wc20-label">סף קריטי (%)</label>
+            <input type="number" class="wc20-input wc20-input-sm"
+                   ng-model="config.CriticalPct"
+                   ng-model-options="{ debounce: 500 }"
+                   min="0" max="100" step="5">
+        </div>
+    </details>
+
+    <!-- ── Display ── -->
+    <details class="wc20-section">
+        <summary class="wc20-section-title">תצוגה</summary>
+
+        <div class="wc20-field">
+            <label class="wc20-label">הצג שורת חיפוש</label>
+            <input type="checkbox" class="wc20-checkbox"
+                   ng-model="config.ShowSearch">
+        </div>
+
+        <div class="wc20-field">
+            <label class="wc20-label">הצג כפתור ייצוא CSV</label>
+            <input type="checkbox" class="wc20-checkbox"
+                   ng-model="config.ShowExport">
+        </div>
+    </details>
+
+    <!-- ── Theme ── -->
+    <details class="wc20-section">
+        <summary class="wc20-section-title">ערכת נושא</summary>
+
+        <div class="wc20-field">
+            <label class="wc20-label">גופן</label>
+            <select class="wc20-select" ng-model="config.fontFamily">
+                <option value="Segoe UI">Segoe UI</option>
+                <option value="Arial">Arial</option>
+                <option value="Rubik">Rubik</option>
+                <option value="Heebo">Heebo</option>
+                <option value="Consolas">Consolas (Mono)</option>
+            </select>
+        </div>
+
+        <div class="wc20-field">
+            <label class="wc20-label">גודל גופן (px)</label>
+            <input type="number" class="wc20-input wc20-input-sm"
+                   ng-model="config.fontSize"
+                   ng-model-options="{ debounce: 500 }"
+                   min="8" max="20" step="1">
+        </div>
+    </details>
+
+    <!-- ── Info ── -->
+    <details class="wc20-section">
+        <summary class="wc20-section-title">מידע טכני</summary>
+
+        <div class="wc20-field wc20-readonly">
+            <span class="wc20-badge wc20-badge-blue">DataShape</span>
+            <span>Table</span>
+        </div>
+
+        <div class="wc20-field wc20-readonly">
+            <span class="wc20-badge wc20-badge-green">Rendering</span>
+            <span>Virtual Scrolling (DOM Recycling)</span>
+        </div>
+
+        <div class="wc20-field wc20-readonly">
+            <span class="wc20-badge wc20-badge-green">Architecture</span>
+            <span>Shadow DOM + Web Worker</span>
+        </div>
+
+        <div class="wc20-field wc20-readonly">
+            <span class="wc20-badge wc20-badge-blue">DOM Rows</span>
+            <span>~25 — Fixed Pool</span>
+        </div>
+
+        <div class="wc20-field wc20-readonly">
+            <span class="wc20-badge wc20-badge-blue">Sort / Filter</span>
+            <span>Web Worker — Off UI Thread</span>
+        </div>
+
+        <div class="wc20-field wc20-readonly" style="margin-top:8px;">
+            <span class="wc20-badge">WOW TBL v100</span>
+            <span style="color:#8899AA;">Executive Virtual Table</span>
+        </div>
+    </details>
+
+</div>

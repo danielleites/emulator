@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48">
+  <rect width="48" height="48" rx="8" fill="#0B1520"/>
+  <rect x="2" y="2" width="44" height="44" rx="6" fill="none" stroke="#00C87A" stroke-width="1.5" stroke-dasharray="4 2"/>
+  <text x="24" y="30" text-anchor="middle" dominant-baseline="middle"
+        font-family="'Segoe UI', Arial, sans-serif" font-size="15" font-weight="700"
+        fill="#00C87A" letter-spacing="0.5">SW</text>
+</svg>

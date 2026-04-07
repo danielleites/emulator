@@ -1,0 +1,173 @@
+<link rel="stylesheet" href="/PIVision/Scripts/app/editor/symbols/ext/sym-evtwrtr20.css">
+<link rel="stylesheet" href="/PIVision/Scripts/app/editor/symbols/ext/piv20-design-system.css">
+<link rel="stylesheet" href="/PIVision/Scripts/app/editor/symbols/ext/piv20-overrides.css">
+<script type="text/javascript" src="/PIVision/Scripts/app/editor/symbols/ext/piv20-plugins/piv20-core.js"></script>
+<script type="text/javascript" src="/PIVision/Scripts/app/editor/symbols/ext/piv20-plugins/piv20-authguard.js"></script>
+<script type="text/javascript" src="/PIVision/Scripts/app/editor/symbols/ext/piv20-plugins/piv20-eventwriter.js"></script>
+<div id="ew20-widget" class="piv20 ew20-widget" style="display:none;"
+     ng-style="{'font-family': config.fontFamily || 'Segoe UI', 'font-size': (config.fontSize || 12) + 'px'}">
+
+    <!-- Header -->
+    <div class="ew20-header">
+        <span class="ew20-title">{{config.Title || 'כותב אירועים'}}</span>
+        <div class="ew20-toolbar">
+            <button ng-click="openPanel()" title="מידע">&#9776;</button>
+            <button ng-click="showDocs()" title="תיעוד">?</button>
+        </div>
+    </div>
+
+    <!-- Auth Status -->
+    <div class="ew20-auth-bar">
+        <span class="ew20-auth-dot" ng-class="authStatus"></span>
+        <span style="color:#8BACC4;">{{authStatusText}}</span>
+        <span style="color:#4A6A7F;margin-right:auto;">{{currentUser}}</span>
+    </div>
+
+    <!-- Tabs -->
+    <div class="ew20-tabs">
+        <div class="ew20-tab" ng-class="{active: activeTab==='write'}" ng-click="setTab('write')">&#9998; כתיבה</div>
+        <div class="ew20-tab" ng-class="{active: activeTab==='templates'}" ng-click="setTab('templates')">&#128196; תבניות</div>
+        <div class="ew20-tab" ng-class="{active: activeTab==='history'}" ng-click="setTab('history')" ng-show="config.keepHistory">&#128340; היסטוריה</div>
+    </div>
+
+    <!-- Body -->
+    <div class="ew20-body">
+
+        <!-- WRITE VIEW -->
+        <div ng-show="activeTab==='write'">
+
+            <!-- Event Frame form -->
+            <div class="ew20-form-group">
+                <label class="ew20-label">שם אירוע</label>
+                <input class="ew20-input" ng-model="eventForm.name" placeholder="שם האירוע...">
+            </div>
+
+            <div class="ew20-form-group">
+                <label class="ew20-label">סוג אירוע</label>
+                <select class="ew20-select" ng-model="eventForm.type">
+                    <option value="">בחר סוג...</option>
+                    <option value="shutdown">כיבוי</option>
+                    <option value="startup">הנעה</option>
+                    <option value="trip">טריפ</option>
+                    <option value="maintenance">תחזוקה</option>
+                    <option value="alarm">אזעקה</option>
+                    <option value="inspection">בדיקה</option>
+                    <option value="other">אחר</option>
+                </select>
+            </div>
+
+            <div style="display:flex;gap:8px;">
+                <div class="ew20-form-group" style="flex:1;">
+                    <label class="ew20-label">התחלה</label>
+                    <input class="ew20-input" type="datetime-local" ng-model="eventForm.startTime">
+                </div>
+                <div class="ew20-form-group" style="flex:1;">
+                    <label class="ew20-label">סיום (אופציונלי)</label>
+                    <input class="ew20-input" type="datetime-local" ng-model="eventForm.endTime">
+                </div>
+            </div>
+
+            <div class="ew20-form-group">
+                <label class="ew20-label">חומרה</label>
+                <select class="ew20-select" ng-model="eventForm.severity">
+                    <option value="1">נמוך</option>
+                    <option value="2">אזהרה</option>
+                    <option value="3">גבוה</option>
+                    <option value="4">קריטי</option>
+                </select>
+            </div>
+
+            <div class="ew20-form-group">
+                <label class="ew20-label">תיאור</label>
+                <textarea class="ew20-textarea" ng-model="eventForm.description" placeholder="תיאור האירוע..."></textarea>
+            </div>
+
+            <div class="ew20-form-group" ng-show="eventForm.templateName">
+                <label class="ew20-label">תבנית EF</label>
+                <span style="font-size:11px;color:#5BC0EB;">{{eventForm.templateName}}</span>
+            </div>
+
+            <div style="display:flex;gap:8px;margin-top:8px;">
+                <button class="ew20-btn ew20-btn-primary" ng-click="submitEvent()" ng-disabled="!canWrite || writing">
+                    {{writing ? 'כותב...' : 'שלח אירוע'}}
+                </button>
+                <button class="ew20-btn" ng-click="clearForm()" style="background:rgba(91,192,235,.05);color:#6B8FA8;border-color:rgba(91,192,235,.15);">
+                    נקה
+                </button>
+            </div>
+
+            <div ng-show="writeError" style="margin-top:8px;font-size:10px;color:#e74c3c;">
+                &#10060; {{writeError}}
+            </div>
+            <div ng-show="writeSuccess" style="margin-top:8px;font-size:10px;color:#2ecc71;">
+                &#10004; {{writeSuccess}}
+            </div>
+        </div>
+
+        <!-- TEMPLATES VIEW -->
+        <div ng-show="activeTab==='templates'" class="ew20-template-grid">
+            <div ng-repeat="tmpl in templates track by tmpl.key"
+                 class="ew20-template-card" ng-class="{selected: selectedTemplate === tmpl.key}"
+                 ng-click="selectTemplate(tmpl)">
+                <div class="ew20-template-icon">{{tmpl.icon}}</div>
+                <div class="ew20-template-name">{{tmpl.name}}</div>
+                <div class="ew20-template-desc">{{tmpl.description}}</div>
+            </div>
+        </div>
+
+        <!-- HISTORY VIEW -->
+        <div ng-show="activeTab==='history'">
+            <div ng-repeat="item in history track by $index" class="ew20-history-item">
+                <span class="ew20-history-icon" ng-style="{'color': item.success ? '#2ecc71' : '#e74c3c'}">
+                    {{item.success ? '&#10004;' : '&#10060;'}}
+                </span>
+                <span class="ew20-history-time">{{item.timeText}}</span>
+                <span class="ew20-history-text">
+                    <strong>{{item.name}}</strong> ({{item.type}})
+                    <span ng-show="item.error" style="color:#e74c3c;"> — {{item.error}}</span>
+                </span>
+                <span class="ew20-history-status" ng-class="item.success ? 'ew20-status-success' : 'ew20-status-failed'">
+                    {{item.success ? 'הצלחה' : 'נכשל'}}
+                </span>
+            </div>
+            <div ng-show="!history.length" style="color:#4A6A7F;font-size:11px;text-align:center;padding:30px;">
+                אין היסטוריה
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirmation Dialog -->
+    <div class="ew20-confirm-overlay" ng-show="confirmVisible">
+        <div class="ew20-confirm-box">
+            <div class="ew20-confirm-title">&#9888; אישור כתיבה</div>
+            <div class="ew20-confirm-msg">{{confirmMessage}}</div>
+            <div class="ew20-confirm-actions">
+                <button class="ew20-btn ew20-btn-primary" ng-click="confirmWrite()">&#10004; אשר</button>
+                <button class="ew20-btn ew20-btn-danger" ng-click="cancelWrite()">&#10060; בטל</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Side Panel -->
+    <div class="ew20-side-panel" ng-show="panelOpen">
+        <div class="ew20-panel-header">
+            <span style="color:#5BC0EB;font-weight:600;">כותב אירועים</span>
+            <button class="ew20-panel-close" ng-click="closePanel()">&#10005;</button>
+        </div>
+        <div class="ew20-panel-body">
+            <div style="font-size:10px;color:#6B8FA8;margin-bottom:6px;">
+                משתמש: <span style="color:#D0E4F5;">{{currentUser || '---'}}</span>
+            </div>
+            <div style="font-size:10px;color:#6B8FA8;margin-bottom:6px;">
+                הרשאה: <span ng-style="{'color': canWrite ? '#2ecc71' : '#e74c3c'}">{{canWrite ? 'כתיבה מותרת' : 'קריאה בלבד'}}</span>
+            </div>
+            <div style="font-size:10px;color:#6B8FA8;margin-bottom:6px;">
+                אירועים שנכתבו: <span style="color:#D0E4F5;">{{writeCount || 0}}</span>
+            </div>
+            <button ng-click="showDocs()" style="margin-top:12px;width:100%;background:rgba(91,192,235,.1);border:1px solid rgba(91,192,235,.2);color:#5BC0EB;border-radius:4px;padding:5px;font-size:11px;cursor:pointer;">
+                תיעוד
+            </button>
+        </div>
+    </div>
+
+</div>

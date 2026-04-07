@@ -1,0 +1,197 @@
+<!-- ═══════════════════════════════════════════════════════
+     Executive Action Hub — Config Panel
+     WOW Action Hub v100 — wc20 Pattern + Collapsible <details>
+     ═══════════════════════════════════════════════════════ -->
+
+<div class="wc20-config-panel" style="direction:rtl; font-family:'Segoe UI',Arial,sans-serif;">
+
+    <!-- ── General (open by default) ── -->
+    <details class="wc20-section" open>
+        <summary class="wc20-section-title">כללי</summary>
+
+        <div class="wc20-field">
+            <label class="wc20-label">כותרת</label>
+            <input type="text" class="wc20-input"
+                   ng-model="config.Title"
+                   placeholder="Executive Action Hub">
+        </div>
+
+        <div class="wc20-field">
+            <label class="wc20-label">מצב הדגמה (Demo)</label>
+            <input type="checkbox" class="wc20-checkbox"
+                   ng-model="config.DemoMode">
+            <span class="wc20-hint">טמפ׳ טורבינה: 85°C, טווח 50–120, גל סינוס</span>
+        </div>
+    </details>
+
+    <!-- ── Connection (open by default) ── -->
+    <details class="wc20-section" open>
+        <summary class="wc20-section-title">חיבור PI Web API</summary>
+
+        <div class="wc20-field">
+            <label class="wc20-label">כתובת PI Web API</label>
+            <input type="text" class="wc20-input"
+                   ng-model="config.PIWebApiUrl"
+                   placeholder="https://piserver/piwebapi"
+                   dir="ltr">
+        </div>
+
+        <div class="wc20-field">
+            <label class="wc20-label">WebId יעד</label>
+            <input type="text" class="wc20-input"
+                   ng-model="config.TargetWebId"
+                   placeholder="P0HkOiWBxkSku..."
+                   dir="ltr">
+            <span class="wc20-hint">WebId של Attribute או Point לכתיבה</span>
+        </div>
+
+        <div class="wc20-field">
+            <label class="wc20-label">שם Attribute</label>
+            <input type="text" class="wc20-input"
+                   ng-model="config.AttributeName"
+                   placeholder="טמפ׳ טורבינה">
+            <span class="wc20-hint">תווית תצוגה מעל הערך הנוכחי</span>
+        </div>
+    </details>
+
+    <!-- ── Validation ── -->
+    <details class="wc20-section">
+        <summary class="wc20-section-title">וולידציה</summary>
+
+        <div class="wc20-field">
+            <label class="wc20-label">סוג קלט</label>
+            <select class="wc20-select" ng-model="config.InputType">
+                <option value="number">מספרי</option>
+                <option value="text">טקסט</option>
+            </select>
+        </div>
+
+        <div class="wc20-field">
+            <label class="wc20-label">ערך מינימום</label>
+            <input type="number" class="wc20-input wc20-input-sm"
+                   ng-model="config.MinValue"
+                   ng-model-options="{ debounce: 500 }"
+                   placeholder="50">
+            <span class="wc20-hint">רלוונטי לקלט מספרי בלבד</span>
+        </div>
+
+        <div class="wc20-field">
+            <label class="wc20-label">ערך מקסימום</label>
+            <input type="number" class="wc20-input wc20-input-sm"
+                   ng-model="config.MaxValue"
+                   ng-model-options="{ debounce: 500 }"
+                   placeholder="120">
+        </div>
+
+        <div class="wc20-field">
+            <label class="wc20-label">יחידות</label>
+            <input type="text" class="wc20-input wc20-input-sm"
+                   ng-model="config.Unit"
+                   placeholder="°C">
+        </div>
+    </details>
+
+    <!-- ── Display ── -->
+    <details class="wc20-section">
+        <summary class="wc20-section-title">תצוגה</summary>
+
+        <div class="wc20-field">
+            <label class="wc20-label">הצג היסטוריית כתיבות</label>
+            <input type="checkbox" class="wc20-checkbox"
+                   ng-model="config.ShowHistory">
+        </div>
+
+        <div class="wc20-field">
+            <label class="wc20-label">מספר רשומות בהיסטוריה</label>
+            <input type="number" class="wc20-input wc20-input-sm"
+                   ng-model="config.HistoryLimit"
+                   ng-model-options="{ debounce: 500 }"
+                   min="1" max="50" step="1">
+        </div>
+
+        <div class="wc20-field">
+            <label class="wc20-label">עשרוניות</label>
+            <select class="wc20-select" ng-model="config.Decimals"
+                    ng-options="v as v for v in [0, 1, 2, 3]">
+            </select>
+        </div>
+
+        <div class="wc20-field">
+            <label class="wc20-label">Timestamp כתיבה</label>
+            <input type="text" class="wc20-input wc20-input-sm"
+                   ng-model="config.WriteTimestamp"
+                   placeholder="*"
+                   dir="ltr">
+            <span class="wc20-hint">* = שרת קובע, או ISO 8601 ידני</span>
+        </div>
+    </details>
+
+    <!-- ── Theme ── -->
+    <details class="wc20-section">
+        <summary class="wc20-section-title">ערכת נושא</summary>
+
+        <div class="wc20-field">
+            <label class="wc20-label">גופן</label>
+            <select class="wc20-select" ng-model="config.fontFamily">
+                <option value="Segoe UI">Segoe UI</option>
+                <option value="Arial">Arial</option>
+                <option value="Tahoma">Tahoma</option>
+                <option value="Consolas">Consolas (Mono)</option>
+            </select>
+        </div>
+
+        <div class="wc20-field">
+            <label class="wc20-label">גודל גופן (px)</label>
+            <input type="number" class="wc20-input wc20-input-sm"
+                   ng-model="config.fontSize"
+                   ng-model-options="{ debounce: 500 }"
+                   min="8" max="16" step="1">
+        </div>
+    </details>
+
+    <!-- ── Info ── -->
+    <details class="wc20-section">
+        <summary class="wc20-section-title">מידע טכני</summary>
+
+        <div class="wc20-field wc20-readonly">
+            <span class="wc20-badge wc20-badge-blue">DataShape</span>
+            <span>Value (Single Datasource)</span>
+        </div>
+
+        <div class="wc20-field wc20-readonly">
+            <span class="wc20-badge wc20-badge-green">Input</span>
+            <span>Vanilla JS — 0ms Keystroke Latency</span>
+        </div>
+
+        <div class="wc20-field wc20-readonly">
+            <span class="wc20-badge wc20-badge-green">Write</span>
+            <span>Fetch API + credentials: include (Kerberos)</span>
+        </div>
+
+        <div class="wc20-field wc20-readonly">
+            <span class="wc20-badge wc20-badge-orange">UX</span>
+            <span>Optimistic UI — Button Morphing Micro-interactions</span>
+        </div>
+
+        <div class="wc20-field wc20-readonly">
+            <span class="wc20-badge wc20-badge-blue">Resilience</span>
+            <span>Write Queue + FIFO Retry on Failure</span>
+        </div>
+
+        <div class="wc20-field wc20-readonly">
+            <span class="wc20-badge wc20-badge-purple">Performance</span>
+            <span>0 Angular Bindings · 0 $digest · 0ms Lag</span>
+        </div>
+
+        <div class="wc20-field wc20-readonly">
+            <span class="wc20-badge wc20-badge-blue">Security</span>
+            <span>Permission-aware Feature Toggling</span>
+        </div>
+
+        <div class="wc20-field wc20-readonly" style="margin-top:8px;">
+            <span class="wc20-badge">WOW Action Hub v100</span>
+            <span style="color:#8899AA;">Executive Action Hub</span>
+        </div>
+    </details>
+
+</div>

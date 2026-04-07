@@ -1,0 +1,205 @@
+<link rel="stylesheet" href="/PIVision/Scripts/app/editor/symbols/ext/sym-genblock20.css">
+<link rel="stylesheet" href="/PIVision/Scripts/app/editor/symbols/ext/piv20-design-system.css">
+<link rel="stylesheet" href="/PIVision/Scripts/app/editor/symbols/ext/piv20-overrides.css">
+<script type="text/javascript" src="/PIVision/Scripts/app/editor/symbols/ext/piv20-plugins/piv20-core.js"></script>
+<script type="text/javascript" src="/PIVision/Scripts/app/editor/symbols/ext/piv20-ultra.js"></script>
+<script type="text/javascript" src="/PIVision/Scripts/app/editor/symbols/ext/piv20-plugins/piv20-generatorblock.js"></script>
+
+<div id="gb20-widget" class="piv20 gb20-widget" style="display:none;">
+
+    <!-- Header -->
+    <div class="gb20-header">
+        <div style="display:flex;align-items:center;gap:8px">
+            <span class="gb20-title">{{config.Title || 'בלוק גנרטורים'}}</span>
+            <span class="gb20-demo-badge" ng-show="demoMode" ng-click="toggleDemo()">DEMO</span>
+        </div>
+        <div class="gb20-toolbar">
+            <input class="gb20-search" type="text" ng-model="searchText"
+                   placeholder="חיפוש..." ng-change="filterChanged()">
+            <button ng-click="setTab('cards')" ng-class="{active: activeTab==='cards'}" title="1">כרטיסים</button>
+            <button ng-click="setTab('table')" ng-class="{active: activeTab==='table'}" title="2">טבלה</button>
+            <button ng-click="setTab('alerts')" ng-class="{active: activeTab==='alerts'}" title="3">התראות</button>
+            <button ng-click="exportCSV()" title="יצוא CSV">CSV</button>
+            <button ng-click="openPanel()" title="מידע נוסף (Esc לסגירה)">&#9776;</button>
+        </div>
+    </div>
+
+    <!-- Fleet Summary -->
+    <div class="gb20-fleet">
+        <div class="gb20-fleet-item">
+            <span class="gb20-fleet-val">{{summary.total || 0}}</span>
+            <span class="gb20-fleet-label">סה"כ יחידות</span>
+        </div>
+        <div class="gb20-fleet-item">
+            <span class="gb20-fleet-val" style="color:var(--gb20-good,#2ecc71)">{{summary.active || 0}}</span>
+            <span class="gb20-fleet-label">פעיל</span>
+        </div>
+        <div class="gb20-fleet-item">
+            <span class="gb20-fleet-val" style="color:var(--gb20-warn,#f39c12)">{{summary.starting || 0}}</span>
+            <span class="gb20-fleet-label">התנעה</span>
+        </div>
+        <div class="gb20-fleet-item">
+            <span class="gb20-fleet-val" style="color:var(--gb20-accent,#5BC0EB)">{{summary.standby || 0}}</span>
+            <span class="gb20-fleet-label">המתנה</span>
+        </div>
+        <div class="gb20-fleet-item">
+            <span class="gb20-fleet-val" style="color:var(--gb20-crit,#e74c3c)">{{summary.fault || 0}}</span>
+            <span class="gb20-fleet-label">תקלה</span>
+        </div>
+        <div class="gb20-fleet-item">
+            <span class="gb20-fleet-val" style="color:#9b59b6">{{summary.maint || 0}}</span>
+            <span class="gb20-fleet-label">תחזוקה</span>
+        </div>
+        <div class="gb20-fleet-item">
+            <span class="gb20-fleet-val">{{summary.totalGeneration || '---'}}</span>
+            <span class="gb20-fleet-label">סה"כ MW</span>
+        </div>
+        <div class="gb20-fleet-item">
+            <span class="gb20-fleet-val">{{summary.utilization || 0}}%</span>
+            <span class="gb20-fleet-label">ניצולת</span>
+        </div>
+    </div>
+
+    <!-- Filter Chips -->
+    <div class="gb20-filters">
+        <span class="gb20-filter-chip" ng-class="{active: filterState==='all'}" ng-click="setFilter('all')">הכל</span>
+        <span class="gb20-filter-chip" ng-class="{active: filterState==='active'}" ng-click="setFilter('active')">פעיל</span>
+        <span class="gb20-filter-chip" ng-class="{active: filterState==='starting'}" ng-click="setFilter('starting')">התנעה</span>
+        <span class="gb20-filter-chip" ng-class="{active: filterState==='standby'}" ng-click="setFilter('standby')">המתנה</span>
+        <span class="gb20-filter-chip" ng-class="{active: filterState==='fault'}" ng-click="setFilter('fault')">תקלה</span>
+        <span class="gb20-filter-chip" ng-class="{active: filterState==='off'}" ng-click="setFilter('off')">כבוי</span>
+    </div>
+
+    <!-- Body -->
+    <div class="gb20-body">
+
+        <!-- Card View -->
+        <div ng-if="activeTab==='cards'" class="gb20-grid">
+            <div ng-repeat="u in filteredUnits track by $index"
+                 class="gb20-card gb20-state-{{u.stateId}}">
+                <div class="gb20-card-header">
+                    <span class="gb20-card-name">{{u.label}}</span>
+                    <span class="gb20-card-state gb20-st-{{u.stateId}}">{{u.stateLabel}}</span>
+                </div>
+                <div class="gb20-mw-row">
+                    <span class="gb20-trend">{{u.trend}}</span>
+                    <span class="gb20-mw-val" ng-style="{'color': u.stateColor}">{{u.displayMW}}</span>
+                    <span class="gb20-mw-unit">MW</span>
+                </div>
+                <div class="gb20-cap-bar">
+                    <div class="gb20-cap-fill"
+                         ng-style="{'width': u.capPct + '%', 'background': u.inEconomicRange ? (config.accentColor||'#5BC0EB') : (config.warningColor||'#f39c12')}">
+                    </div>
+                    <div class="gb20-cap-marker" ng-style="{'right': (100-u.pminPct) + '%'}" title="Pmin"></div>
+                    <div class="gb20-cap-marker" ng-style="{'right': (100-u.pmaxPct) + '%'}" title="Pmax"></div>
+                </div>
+                <div class="gb20-ramp" ng-class="{'gb20-ramp-exceed': u.rampExceeds}">
+                    <span>Ramp:</span>
+                    <span class="gb20-ramp-val">{{u.rampRate}} MW/min</span>
+                    <span ng-if="u.rampExceeds" style="color:var(--gb20-crit,#e74c3c)">!</span>
+                    <span>{{u.rampDir}}</span>
+                </div>
+                <canvas class="gb20-spark gb20-spark-canvas" data-unit="{{u.label}}" data-color="{{u.stateColor}}" height="24"></canvas>
+            </div>
+        </div>
+
+        <!-- Table View -->
+        <table ng-if="activeTab==='table'" class="gb20-table">
+            <thead>
+                <tr>
+                    <th ng-click="sortBy('label')">שם</th>
+                    <th ng-click="sortBy('mw')">MW</th>
+                    <th ng-click="sortBy('stateOrder')">מצב</th>
+                    <th ng-click="sortBy('capPct')">ניצולת %</th>
+                    <th ng-click="sortBy('rampRate')">Ramp</th>
+                    <th>מגמה</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr ng-repeat="u in filteredUnits track by $index">
+                    <td>{{u.label}}</td>
+                    <td ng-style="{'color': u.stateColor}">{{u.displayMW}}</td>
+                    <td><span class="gb20-card-state gb20-st-{{u.stateId}}">{{u.stateLabel}}</span></td>
+                    <td>{{u.capPct}}%</td>
+                    <td ng-class="{'gb20-ramp-exceed': u.rampExceeds}">{{u.rampRate}}</td>
+                    <td>{{u.trend}}</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <!-- Alerts View -->
+        <div ng-if="activeTab==='alerts'" class="gb20-alert-view">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+                <span style="color:var(--gb20-accent,#5BC0EB);font-weight:600;font-size:12px;">התראות</span>
+                <button class="gb20-clear-btn" ng-click="alerts.length=0">נקה</button>
+            </div>
+            <div ng-repeat="a in alerts track by $index" class="gb20-alert-item">
+                <span class="gb20-alert-time">{{a.time}}</span>
+                <span class="gb20-alert-icon" ng-style="{'color': a.color}">{{a.icon || '\⚠'}}</span>
+                <span>{{a.text}}</span>
+            </div>
+            <div ng-if="!alerts.length" class="gb20-empty-msg">אין התראות</div>
+        </div>
+
+    </div>
+
+    <!-- Side Panel -->
+    <div class="gb20-side-panel" ng-class="{open: panelOpen}">
+        <div class="gb20-panel-header">
+            <span style="color:var(--gb20-accent,#5BC0EB);font-weight:600;">סטטיסטיקות צי</span>
+            <button class="gb20-panel-close" ng-click="closePanel()">&times;</button>
+        </div>
+        <div class="gb20-panel-body">
+            <div ng-if="fleetStats" class="gb20-stats-grid">
+                <div class="gb20-stat-item">
+                    <div class="gb20-stat-val">{{fleetStats.avgMW}}</div>
+                    <div class="gb20-stat-label">ממוצע MW</div>
+                </div>
+                <div class="gb20-stat-item">
+                    <div class="gb20-stat-val">{{fleetStats.minMW}}</div>
+                    <div class="gb20-stat-label">מינימום</div>
+                </div>
+                <div class="gb20-stat-item">
+                    <div class="gb20-stat-val">{{fleetStats.maxMW}}</div>
+                    <div class="gb20-stat-label">מקסימום</div>
+                </div>
+                <div class="gb20-stat-item">
+                    <div class="gb20-stat-val">{{fleetStats.stddev}}</div>
+                    <div class="gb20-stat-label">סטיית תקן</div>
+                </div>
+                <div class="gb20-stat-item">
+                    <div class="gb20-stat-val">{{fleetStats.totalMW}}</div>
+                    <div class="gb20-stat-label">סה"כ MW</div>
+                </div>
+                <div class="gb20-stat-item">
+                    <div class="gb20-stat-val">{{fleetStats.outlierCount}}</div>
+                    <div class="gb20-stat-label">חריגים</div>
+                </div>
+            </div>
+            <div ng-if="!fleetStats" style="color:#6B8FA8;font-size:11px;text-align:center;padding:20px;">
+                אין מספיק נתונים
+            </div>
+
+            <div class="gb20-panel-section">
+                <div class="gb20-ps-title">הגדרות מתקדמות</div>
+                <div style="margin-bottom:6px;">
+                    <label style="font-size:10px;color:#8BACC4"><input type="checkbox" ng-model="config.DemoMode" ng-change="toggleDemo()"> מצב דמו</label>
+                </div>
+                <div style="display:flex;gap:4px;">
+                    <button class="gb20-action-btn" ng-click="exportConfig()">&#8681; ייצוא</button>
+                    <button class="gb20-action-btn" ng-click="importConfig()">&#8679; ייבוא</button>
+                </div>
+            </div>
+
+            <button class="gb20-action-btn" ng-click="showDocs()" style="margin-top:12px;width:100%;">
+                תיעוד
+            </button>
+        </div>
+    </div>
+
+    <!-- Keyboard hints -->
+    <div class="gb20-kbd-hints" ng-show="panelOpen">
+        <span>1 כרטיסים</span> <span>2 טבלה</span> <span>3 התראות</span> <span>Esc סגירה</span>
+    </div>
+
+</div>

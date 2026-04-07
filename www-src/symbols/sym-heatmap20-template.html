@@ -1,0 +1,199 @@
+<div class="piv20 hm20-root" ng-style="{'font-family': config.fontFamily, 'font-size': config.fontSize + 'px', 'font-weight': config.fontBold ? 'bold' : 'normal', 'font-style': config.fontItalic ? 'italic' : 'normal'}">
+
+<!-- External CSS + JS -->
+<link rel="stylesheet" href="/PIVision/Scripts/app/editor/symbols/ext/sym-heatmap20.css">
+<link rel="stylesheet" href="/PIVision/Scripts/app/editor/symbols/ext/piv20-design-system.css">
+<link rel="stylesheet" href="/PIVision/Scripts/app/editor/symbols/ext/piv20-overrides.css">
+<script type="text/javascript" src="/PIVision/Scripts/app/editor/symbols/ext/piv20-plugins/piv20-core.js"></script>
+<script type="text/javascript" src="/PIVision/Scripts/app/editor/symbols/ext/piv20-plugins/piv20-heatmap.js"></script>
+
+<!-- Hidden widget mount -->
+<div id="hm20-widget" style="display:none;"></div>
+
+<!-- ═══ HEADER ═══ -->
+<div class="hm20-header">
+    <div class="hm20-title-area">
+        <span class="hm20-af-badge" ng-class="afConn.css" ng-show="afConn" title="{{afConn.good}}/{{afConn.total}} תקינים">
+            <span class="hm20-af-dot"></span>
+            {{afConn.status==='connected'?'מחובר':afConn.status==='partial'?'חלקי':'מנותק'}}
+        </span>
+        <span class="hm20-title">מפת חום</span>
+        <span class="hm20-subtitle" ng-show="hasData">{{cells.length}} פריטים</span>
+    </div>
+    <div class="hm20-toolbar">
+        <button class="hm20-btn" ng-click="enterPlayback()" ng-show="!playback && snapCount > 1" title="הפעלה חוזרת">&#9198;</button>
+        <span class="hm20-pb-badge" ng-show="playback">&#9198; הפעלה חוזרת</span>
+        <button class="hm20-btn" ng-click="exportData()" title="ייצוא CSV">&#128229;</button>
+        <button class="hm20-btn" ng-click="showDocs()" title="מדריך">&#128214;</button>
+        <button class="hm20-btn" ng-click="togglePanel()">&#9881;</button>
+        <div class="hm20-live"><div class="hm20-live-dot"></div>{{liveTime}}</div>
+    </div>
+</div>
+
+<!-- ═══ PLAYBACK BAR ═══ -->
+<div class="hm20-pb-bar" ng-show="playback">
+    <button class="hm20-pb-btn" ng-click="playPlaying ? playPause() : playStart()">{{playPlaying ? '&#9208;' : '&#9654;'}}</button>
+    <button class="hm20-pb-btn" ng-click="playStep(-1)">&#9664;</button>
+    <input class="hm20-pb-slider" type="range" min="0" ng-attr-max="{{snapCount-1}}" ng-model="playIndex" ng-change="playSeek(playIndex)">
+    <button class="hm20-pb-btn" ng-click="playStep(1)">&#9654;</button>
+    <span class="hm20-pb-time">{{playTime}}</span>
+    <span style="font-size:10px;color:var(--hm20-text3);">{{playIndex+1}}/{{snapCount}}</span>
+    <button class="hm20-pb-btn exit" ng-click="exitPlayback()">&#10005; חי</button>
+</div>
+
+<!-- ═══ STATS BAR ═══ -->
+<div class="hm20-stats" ng-show="hasData">
+    <div class="hm20-stat"><div class="hm20-stat-label">מינימום</div><div class="hm20-stat-value">{{stats.min | number:1}}</div></div>
+    <div class="hm20-stat"><div class="hm20-stat-label">ממוצע</div><div class="hm20-stat-value">{{stats.avg | number:1}}</div></div>
+    <div class="hm20-stat"><div class="hm20-stat-label">מקסימום</div><div class="hm20-stat-value">{{stats.max | number:1}}</div></div>
+    <div class="hm20-stat"><div class="hm20-stat-label">פריטים</div><div class="hm20-stat-value">{{stats.count}}</div></div>
+    <div class="hm20-stat" ng-show="stats.outlierCount"><div class="hm20-stat-label">חריגים</div><div class="hm20-stat-value" style="color:var(--hm20-warn);">{{stats.outlierCount}}</div></div>
+</div>
+
+<!-- ═══ CONTROLS BAR ═══ -->
+<div class="hm20-controls" ng-show="hasData">
+    <div class="hm20-view-toggle">
+        <button class="hm20-view-btn" ng-class="{active: viewMode==='grid'}" ng-click="setView('grid')">רשת</button>
+        <button class="hm20-view-btn" ng-class="{active: viewMode==='calendar'}" ng-click="setView('calendar')">לוח שנה</button>
+    </div>
+    <span class="hm20-sep"></span>
+    <span style="font-size:11px;color:var(--hm20-text3);">סכמה:</span>
+    <button class="hm20-scheme-btn" ng-class="{active: colorScheme==='thermal'}" ng-click="setScheme('thermal')">תרמי</button>
+    <button class="hm20-scheme-btn" ng-class="{active: colorScheme==='green'}" ng-click="setScheme('green')">ירוק</button>
+    <button class="hm20-scheme-btn" ng-class="{active: colorScheme==='blue'}" ng-click="setScheme('blue')">כחול</button>
+    <span class="hm20-sep" ng-show="viewMode==='calendar'"></span>
+    <div class="hm20-bucket-sel" ng-show="viewMode==='calendar'">
+        <button class="hm20-bucket-btn" ng-class="{active: config.CalendarBucket==='hour'}" ng-click="setBucket('hour')">שעה</button>
+        <button class="hm20-bucket-btn" ng-class="{active: config.CalendarBucket==='day'}" ng-click="setBucket('day')">יום</button>
+        <button class="hm20-bucket-btn" ng-class="{active: config.CalendarBucket==='week'}" ng-click="setBucket('week')">שבוע</button>
+        <button class="hm20-bucket-btn" ng-class="{active: config.CalendarBucket==='month'}" ng-click="setBucket('month')">חודש</button>
+    </div>
+</div>
+
+<!-- ═══ GRADIENT BAR ═══ -->
+<div ng-show="hasData">
+    <div class="hm20-gradient-bar" ng-class="{'hm20-grad-thermal': colorScheme==='thermal', 'hm20-grad-green': colorScheme==='green', 'hm20-grad-blue': colorScheme==='blue'}"></div>
+    <div class="hm20-gradient-labels">
+        <span>{{viewMode==='calendar' ? (calMin | number:1) : (stats.min | number:1)}}</span>
+        <span>{{viewMode==='calendar' ? (calMax | number:1) : (stats.max | number:1)}}</span>
+    </div>
+</div>
+
+<!-- ═══ BODY ═══ -->
+<div class="hm20-body">
+
+    <!-- Loading -->
+    <div class="hm20-loading" ng-show="loading">
+        <span>&#8987;</span> טוען נתונים...
+    </div>
+
+    <!-- Empty -->
+    <div class="hm20-empty" ng-show="!loading && !hasData">
+        <div class="hm20-empty-icon">&#127777;</div>
+        <div>ממתין לנתונים</div>
+        <div style="font-size:11px;opacity:0.5;">גרור תגים או הגדר מקורות נתונים</div>
+    </div>
+
+    <!-- Selected cell detail -->
+    <div class="hm20-detail" ng-show="selectedCell !== null && cells[selectedCell]">
+        <div class="hm20-detail-title">{{cells[selectedCell].label}}</div>
+        <div class="hm20-detail-row"><span style="color:var(--hm20-text3);">ערך</span><span style="font-weight:600;">{{cells[selectedCell].value | number:2}}</span></div>
+        <div class="hm20-detail-row"><span style="color:var(--hm20-text3);">אחוז</span><span>{{cells[selectedCell].pct}}%</span></div>
+        <div class="hm20-detail-row" ng-show="cells[selectedCell].path"><span style="color:var(--hm20-text3);">Tag</span><span style="direction:ltr;">{{cells[selectedCell].path}}</span></div>
+        <div class="hm20-detail-row" ng-show="cells[selectedCell].isOutlier"><span style="color:var(--hm20-text3);">חריג</span><span style="color:var(--hm20-warn);">{{cells[selectedCell].outlierSeverity}}</span></div>
+        <button class="hm20-btn" ng-click="selectCell(null)" style="margin-top:6px;font-size:11px;">&#10005; סגור</button>
+    </div>
+
+    <!-- ═══ GRID VIEW ═══ -->
+    <div ng-show="!loading && hasData && viewMode==='grid'">
+        <div class="hm20-grid">
+            <div class="hm20-cell hm20-anim-in"
+                 ng-repeat="cell in cells track by $index"
+                 ng-style="{'background': getColor(cell.value, stats.min, stats.max, colorScheme)}"
+                 ng-class="{selected: selectedCell === $index, outlier: cell.isOutlier}"
+                 ng-click="selectCell($index)"
+                 style="animation-delay:{{$index * 30}}ms">
+                <div class="hm20-cell-label" ng-show="showLabels" ng-style="{color: getTextColor(cell.value, stats.min, stats.max)}">{{cell.label}}</div>
+                <div class="hm20-cell-value" ng-show="showValues" ng-style="{color: getTextColor(cell.value, stats.min, stats.max)}">{{cell.value | number:1}}</div>
+                <div class="hm20-cell-pct" ng-style="{color: getTextColor(cell.value, stats.min, stats.max)}">{{cell.pct}}%</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══ CALENDAR VIEW ═══ -->
+    <div ng-show="!loading && hasData && viewMode==='calendar'">
+        <div class="hm20-cal-grid" ng-show="calendarDays.length">
+            <div class="hm20-cal-cell"
+                 ng-repeat="day in calendarDays track by $index"
+                 ng-style="{'background': getColor(day.value, calMin, calMax, colorScheme)}"
+                 ng-click="selectCell($index)">
+                <div class="hm20-cal-label" ng-style="{color: getTextColor(day.value, calMin, calMax)}">{{day.label}}</div>
+                <div class="hm20-cal-val" ng-style="{color: getTextColor(day.value, calMin, calMax)}">{{day.value | number:1}}</div>
+                <div class="hm20-cal-count" ng-style="{color: getTextColor(day.value, calMin, calMax)}">{{day.count}} דגימות</div>
+            </div>
+        </div>
+        <div class="hm20-cal-empty" ng-show="!calendarDays.length">
+            <div style="font-size:28px;opacity:0.4;">&#128197;</div>
+            <div>צובר נתוני זמן...</div>
+            <div style="font-size:10px;opacity:0.5;">הנתונים יצטברו עם כל עדכון מחזורי</div>
+        </div>
+    </div>
+</div>
+
+<!-- ═══ SIDE PANEL ═══ -->
+<div class="hm20-panel" ng-class="{closed: !panelOpen}">
+    <div class="hm20-panel-header">
+        <span class="hm20-panel-title">הגדרות תצוגה</span>
+        <button class="hm20-panel-close" ng-click="togglePanel()">&#10005;</button>
+    </div>
+    <div class="hm20-panel-body">
+        <!-- Display -->
+        <div class="hm20-panel-section">
+            <div class="hm20-panel-label">תצוגה</div>
+            <label style="font-size:12px;display:flex;align-items:center;gap:8px;cursor:pointer;">
+                <input type="checkbox" ng-model="showValues" ng-change="doToggleValues()"> הצג ערכים
+            </label>
+            <label style="font-size:12px;display:flex;align-items:center;gap:8px;cursor:pointer;">
+                <input type="checkbox" ng-model="showLabels" ng-change="doToggleLabels()"> הצג תוויות
+            </label>
+            <select style="background:var(--hm20-bg-input);border:1px solid var(--hm20-border);color:var(--hm20-text);padding:5px 8px;border-radius:4px;font-size:12px;width:100%;"
+                    ng-model="sortBy" ng-change="doSort(sortBy)">
+                <option value="none">ללא מיון</option>
+                <option value="value-asc">ערך עולה</option>
+                <option value="value-desc">ערך יורד</option>
+                <option value="name">שם</option>
+            </select>
+        </div>
+        <!-- Stats -->
+        <div class="hm20-panel-section" ng-show="stats.stddev">
+            <div class="hm20-panel-label">סטטיסטיקה מתקדמת</div>
+            <div style="font-size:11px;color:var(--hm20-text2);line-height:1.8;">
+                סטיית תקן: {{stats.stddev | number:2}}<br>
+                חציון: {{stats.median | number:2}}<br>
+                P95: {{stats.p95 | number:2}}<br>
+                חריגים: {{stats.outlierCount}}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ═══ FOOTER ═══ -->
+<div class="hm20-footer">
+    <div style="display:flex;align-items:center;gap:10px;">
+        <span class="hm20-ftr-status">
+            <span class="hm20-ftr-dot" ng-class="playback ? 'pb' : 'live'"></span>
+            {{playback ? 'Playback' : 'Live'}}
+        </span>
+        <span class="hm20-ftr-sep"></span>
+        <span>{{cells.length}} פריטים</span>
+        <span class="hm20-ftr-sep" ng-show="viewMode==='calendar'"></span>
+        <span ng-show="viewMode==='calendar'">{{calendarDays.length}} תקופות</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;">
+        <button class="hm20-ftr-btn" ng-click="exportData()" title="ייצוא">CSV</button>
+        <span class="hm20-ftr-sep"></span>
+        <span style="font-size:9px;opacity:0.5;">נגה — מנהל מערכת החשמל | PIV20</span>
+    </div>
+</div>
+
+</div>

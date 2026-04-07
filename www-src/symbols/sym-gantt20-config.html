@@ -1,0 +1,73 @@
+<div dir="rtl" style="font-family:'Segoe UI',Arial,sans-serif;color:#c0d0e0;padding:12px;font-size:12px;">
+<style>.cr20{margin-bottom:8px}.cr20 label{display:block;font-size:11px;color:#8BACC4;margin-bottom:3px}.cr20 input[type=text],.cr20 input[type=number],.cr20 select{width:100%;background:#0B1D33;border:1px solid rgba(46,139,192,.2);border-radius:4px;padding:5px 8px;color:#fff;font-size:12px}.cr20 input:focus,.cr20 select:focus{border-color:#5BC0EB;outline:none}.cr20 input[type=color]{width:40px;height:26px;border:1px solid rgba(46,139,192,.2);border-radius:4px;cursor:pointer}.cr20 input[type=checkbox]{margin-left:6px}.ch20{color:#5BC0EB;font-size:13px;margin:10px 0 6px;padding-bottom:4px;border-bottom:1px solid rgba(91,192,235,.2)}</style>
+<style>/* PIV20 Config Premium */.cr20{margin-bottom:10px;transition:opacity 0.2s}.cr20 label{color:#64748B!important;text-transform:uppercase;letter-spacing:0.3px;font-weight:500;font-size:10px!important;margin-bottom:4px}.cr20 input[type=text],.cr20 input[type=number],.cr20 select{background:rgba(6,12,24,0.6)!important;border:1px solid rgba(91,192,235,0.08)!important;border-radius:6px!important;padding:6px 10px;transition:all 0.25s cubic-bezier(0.4,0,0.2,1)}.cr20 input[type=text]:focus,.cr20 input[type=number]:focus,.cr20 select:focus{border-color:#3B82F6!important;box-shadow:0 0 0 3px rgba(59,130,246,0.12),0 0 12px rgba(59,130,246,0.1)!important}.cr20 input[type=color]{border-radius:6px!important;transition:border-color 0.2s}.cr20 input[type=color]:hover{border-color:rgba(59,130,246,0.3)}.cr20 input[type=checkbox]{accent-color:#3B82F6}.ch20{background:linear-gradient(135deg,#3B82F6,#22D3EE)!important;-webkit-background-clip:text!important;-webkit-text-fill-color:transparent!important;background-clip:text;font-weight:600!important;margin:14px 0 8px!important;padding-bottom:5px!important;border-bottom:1px solid rgba(59,130,246,0.15)!important;letter-spacing:-0.01em}</style>
+
+<div class="ch20">&#1499;&#1500;&#1500;&#1497;</div>
+<div class="cr20"><label>&#1499;&#1493;&#1514;&#1512;&#1514;</label><input type="text" ng-model="config.Title"></div>
+<div class="cr20"><label>&#1505;&#1508;&#1512;&#1493;&#1514; &#1506;&#1513;&#1512;&#1493;&#1504;&#1497;&#1493;&#1514;</label><input type="number" ng-model="config.Decimals" min="0" max="6" step="1"></div>
+
+<div class="ch20">&#1505;&#1508;&#1497;&#1501;</div>
+<div class="cr20"><label>&#1505;&#1507; &#1488;&#1494;&#1492;&#1512;&#1492;</label><input type="number" ng-model="config.WarnThreshold" step="any"></div>
+<div class="cr20"><label>&#1505;&#1507; &#1511;&#1512;&#1497;&#1496;&#1497;</label><input type="number" ng-model="config.CritThreshold" step="any"></div>
+<div style="font-size:10px;color:#5A7A94;margin-bottom:8px">&#1506;&#1512;&#1498; >= &#1505;&#1507; = &#1513;&#1497;&#1504;&#1493;&#1497; &#1502;&#1510;&#1489; | 0 = &#1499;&#1489;&#1493;&#1497;</div>
+
+<div class="ch20">&#1514;&#1510;&#1493;&#1490;&#1492;</div>
+<div class="cr20"><label><input type="checkbox" ng-model="config.ShowToday"> &#1492;&#1510;&#1490; &#1514;&#1488;&#1512;&#1497;&#1498; &#1492;&#1497;&#1493;&#1501;</label></div>
+<div class="cr20"><label>&#1490;&#1493;&#1489;&#1492; &#1508;&#1505; (px)</label><input type="number" ng-model="config.BarHeight" min="8" max="48" step="2"></div>
+
+<div class="ch20">&#1502;&#1497;&#1493;&#1503;</div>
+<div class="cr20">
+    <label>&#1502;&#1497;&#1497;&#1503; &#1500;&#1508;&#1497;</label>
+    <select ng-model="config.sortBy">
+        <option value="value">&#1506;&#1512;&#1498;</option>
+        <option value="label">&#1514;&#1493;&#1493;&#1497;&#1514;</option>
+        <option value="status">&#1502;&#1510;&#1489;</option>
+    </select>
+</div>
+<div class="cr20"><label><input type="checkbox" ng-model="config.sortDesc"> &#1505;&#1491;&#1512; &#1497;&#1493;&#1512;&#1491;</label></div>
+
+<div class="ch20">&#1490;&#1493;&#1508;&#1504;&#1497;&#1501;</div>
+<div class="cr20">
+    <label>&#1502;&#1513;&#1508;&#1495;&#1514; &#1490;&#1493;&#1508;&#1503;</label>
+    <select ng-model="config.fontFamily">
+        <option value="Segoe UI">Segoe UI</option>
+        <option value="Arial">Arial</option>
+        <option value="Times New Roman">Times New Roman</option>
+        <option value="Courier New">Courier New</option>
+        <option value="Tahoma">Tahoma</option>
+        <option value="Verdana">Verdana</option>
+        <option value="David">David</option>
+        <option value="Miriam">Miriam</option>
+        <option value="Narkisim">Narkisim</option>
+        <option value="FrankRuehl">FrankRuehl</option>
+        <option value="Calibri">Calibri</option>
+        <option value="Consolas">Consolas</option>
+    </select>
+</div>
+<div class="cr20"><label>&#1490;&#1493;&#1491;&#1500; &#1490;&#1493;&#1508;&#1503; (px)</label><input type="number" ng-model="config.fontSize" min="8" max="24" step="1"></div>
+<div class="cr20"><label>&#1490;&#1493;&#1491;&#1500; &#1499;&#1493;&#1514;&#1512;&#1514; (px)</label><input type="number" ng-model="config.headerFontSize" min="10" max="28" step="1"></div>
+<div class="cr20"><label><input type="checkbox" ng-model="config.fontBold"> &#1502;&#1493;&#1491;&#1490;&#1513;</label></div>
+<div class="cr20"><label><input type="checkbox" ng-model="config.fontItalic"> &#1504;&#1496;&#1493;&#1497;</label></div>
+
+<div class="ch20">&#1510;&#1489;&#1506;&#1497;&#1501;</div>
+<div class="cr20" style="display:flex;gap:8px;align-items:center"><label style="margin:0;min-width:70px">&#1499;&#1493;&#1514;&#1512;&#1514;</label><input type="color" ng-model="config.headerBg"></div>
+<div class="cr20" style="display:flex;gap:8px;align-items:center"><label style="margin:0;min-width:70px">&#1513;&#1493;&#1512;&#1492;</label><input type="color" ng-model="config.rowBg"></div>
+<div class="cr20" style="display:flex;gap:8px;align-items:center"><label style="margin:0;min-width:70px">&#1514;&#1511;&#1497;&#1503;</label><input type="color" ng-model="config.goodColor"></div>
+<div class="cr20" style="display:flex;gap:8px;align-items:center"><label style="margin:0;min-width:70px">&#1488;&#1494;&#1492;&#1512;&#1492;</label><input type="color" ng-model="config.warningColor"></div>
+<div class="cr20" style="display:flex;gap:8px;align-items:center"><label style="margin:0;min-width:70px">&#1511;&#1512;&#1497;&#1496;&#1497;</label><input type="color" ng-model="config.criticalColor"></div>
+<div class="cr20" style="display:flex;gap:8px;align-items:center"><label style="margin:0;min-width:70px">&#1492;&#1491;&#1490;&#1513;&#1492;</label><input type="color" ng-model="config.accentColor"></div>
+
+<div class="ch20">&#1488;&#1504;&#1497;&#1502;&#1510;&#1497;&#1492;</div>
+<div class="cr20">
+    <label>&#1505;&#1493;&#1490; &#1488;&#1504;&#1497;&#1502;&#1510;&#1497;&#1492;</label>
+    <select ng-model="config.animationType">
+        <option value="fade">Fade</option>
+        <option value="slide">Slide</option>
+        <option value="none">&#1500;&#1500;&#1488;</option>
+    </select>
+</div>
+<div class="cr20"><label>&#1502;&#1492;&#1497;&#1512;&#1493;&#1514; &#1488;&#1504;&#1497;&#1502;&#1510;&#1497;&#1492; (ms)</label><input type="number" ng-model="config.animationSpeed" min="100" max="2000" step="100"></div>
+
+<div class="ch20">AF / &#1495;&#1497;&#1489;&#1493;&#1512;</div>
+<div class="cr20"><label>&#1505;&#1507; &#1504;&#1514;&#1493;&#1503; &#1497;&#1513;&#1503; (&#1513;&#1504;&#1497;&#1493;&#1514;)</label><input type="number" ng-model="config.StaleThreshold" min="30" max="3600" step="30"></div>
+</div>

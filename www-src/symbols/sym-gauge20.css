@@ -1,0 +1,217 @@
+/**
+ * ================================================================
+ *  sym-gauge20.css  --  Performance Gauge v20 Stylesheet
+ * ================================================================
+ *  External CSS for SVG gauge cards & list view.
+ *  All classes prefixed ga20-, custom properties prefixed --ga20-.
+ *  Flat CSS | RTL-first layout
+ * ================================================================
+ */
+
+/* ── Custom Properties ── */
+.ga20-root {
+    --ga20-bg-deep: #060C18;
+    --ga20-bg1: #0A1628;
+    --ga20-bg2: #0D1F35;
+    --ga20-bg-card: #0F2940;
+    --ga20-bg-card-hover: #153858;
+    --ga20-bg-input: #0B1D33;
+    --ga20-accent: #1E5A8A;
+    --ga20-accent-lt: #2E8BC0;
+    --ga20-cyan: #5BC0EB;
+    --ga20-ok: #2ECC71;
+    --ga20-ok-dim: rgba(46,204,113,0.15);
+    --ga20-warn: #F39C12;
+    --ga20-warn-dim: rgba(243,156,18,0.15);
+    --ga20-crit: #E74C3C;
+    --ga20-crit-dim: rgba(231,76,60,0.15);
+    --ga20-text: #FFFFFF;
+    --ga20-text2: #8BACC4;
+    --ga20-text3: #5A7A94;
+    --ga20-border: rgba(46,139,192,0.2);
+    --ga20-border-active: rgba(91,192,235,0.45);
+    --ga20-shadow: 0 4px 24px rgba(0,0,0,0.4);
+    --ga20-shadow-lg: 0 8px 40px rgba(0,0,0,0.5);
+    --ga20-glass-bg: rgba(10,22,40,0.7);
+    --ga20-glass-border: rgba(91,192,235,0.12);
+    --ga20-radius: 10px;
+    --ga20-radius-sm: 6px;
+    --ga20-font: 'Segoe UI','Arial',sans-serif;
+    --ga20-ease: all 0.25s cubic-bezier(0.4,0,0.2,1);
+}
+
+/* ── Root ── */
+.ga20-root {
+    background: linear-gradient(160deg, var(--ga20-bg-deep), var(--ga20-bg1), var(--ga20-bg2));
+    color: var(--ga20-text);
+    display: flex;
+    flex-direction: column;
+    width: 100%; height: 100%;
+    position: relative;
+    overflow: hidden;
+    font-family: var(--ga20-font);
+}
+.ga20-root * { box-sizing: border-box; margin: 0; padding: 0; }
+.ga20-root ::-webkit-scrollbar { width: 6px; }
+.ga20-root ::-webkit-scrollbar-track { background: var(--ga20-bg-deep); }
+.ga20-root ::-webkit-scrollbar-thumb { background: var(--ga20-accent); border-radius: 3px; }
+
+/* ── Header ── */
+.ga20-hdr {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 10px 16px;
+    background: linear-gradient(135deg, var(--ga20-bg2), var(--ga20-bg-card));
+    border-bottom: 1px solid var(--ga20-border);
+    flex-shrink: 0;
+}
+.ga20-ttl { font-size: 15px; font-weight: 700; }
+.ga20-range-badge {
+    font-size: 12px; font-weight: 700;
+    padding: 3px 10px; border-radius: 12px;
+    background: rgba(91,192,235,0.15); color: var(--ga20-cyan);
+}
+
+/* ── Toolbar ── */
+.ga20-toolbar { display: flex; gap: 6px; align-items: center; }
+.ga20-btn {
+    background: var(--ga20-bg-card);
+    border: 1px solid var(--ga20-border);
+    color: var(--ga20-text2);
+    padding: 4px 10px; border-radius: var(--ga20-radius-sm);
+    cursor: pointer; font-size: 11px; font-family: var(--ga20-font);
+    transition: var(--ga20-ease);
+}
+.ga20-btn:hover { border-color: var(--ga20-border-active); background: var(--ga20-bg-card-hover); color: var(--ga20-text); }
+.ga20-btn.active { background: rgba(91,192,235,0.25); border-color: rgba(91,192,235,0.5); color: var(--ga20-cyan); }
+
+/* ── Controls Bar ── */
+.ga20-controls {
+    display: flex; align-items: center; gap: 8px;
+    padding: 6px 16px;
+    border-bottom: 1px solid var(--ga20-border);
+}
+.ga20-search {
+    background: var(--ga20-bg-input);
+    border: 1px solid var(--ga20-border);
+    color: var(--ga20-text);
+    padding: 4px 10px; border-radius: 4px;
+    width: 180px; font-size: 11px;
+    direction: rtl; outline: none;
+}
+.ga20-search:focus { border-color: var(--ga20-cyan); }
+
+/* ── AF Badge ── */
+.ga20-af-badge { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 10px; font-size: 11px; }
+.ga20-af-good { background: var(--ga20-ok-dim); color: var(--ga20-ok); }
+.ga20-af-warn { background: var(--ga20-warn-dim); color: var(--ga20-warn); }
+.ga20-af-bad  { background: var(--ga20-crit-dim); color: var(--ga20-crit); }
+.ga20-af-dot  { width: 6px; height: 6px; border-radius: 50%; background: currentColor; box-shadow: 0 0 4px currentColor; }
+
+/* ── Live indicator ── */
+.ga20-live { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--ga20-text3); }
+.ga20-live-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--ga20-ok); box-shadow: 0 0 8px var(--ga20-ok); animation: ga20-pulse 2s infinite; }
+@keyframes ga20-pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+/* ── Toast ── */
+.ga20-toast-container { position: absolute; top: 12px; left: 50%; transform: translateX(-50%); z-index: 9999; display: flex; flex-direction: column; gap: 8px; pointer-events: none; }
+.ga20-toast { background: var(--ga20-bg-card); border: 1px solid var(--ga20-border-active); border-radius: var(--ga20-radius-sm); padding: 10px 20px; color: var(--ga20-cyan); font-size: 13px; box-shadow: var(--ga20-shadow-lg); animation: ga20-tin 0.35s ease; pointer-events: auto; }
+.ga20-toast.out { animation: ga20-tout 0.3s ease forwards; }
+@keyframes ga20-tin  { from { opacity: 0; transform: translateY(-16px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes ga20-tout { to   { opacity: 0; transform: translateY(-16px); } }
+
+/* ── Body (scrollable) ── */
+.ga20-body { overflow-y: auto; flex: 1; padding: 12px 16px; }
+
+/* ── Gauge Card Grid ── */
+.ga20-cards { display: flex; flex-wrap: wrap; justify-content: center; gap: 16px; align-content: flex-start; }
+.ga20-card {
+    background: var(--ga20-bg-card);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: var(--ga20-radius);
+    padding: 14px; text-align: center;
+    min-width: 200px; max-width: 240px;
+    transition: var(--ga20-ease);
+    position: relative;
+}
+.ga20-card:hover { border-color: var(--ga20-border-active); transform: translateY(-2px); box-shadow: var(--ga20-shadow-lg); }
+.ga20-card-gear { position: absolute; top: 6px; left: 6px; background: none; border: none; cursor: pointer; font-size: 14px; opacity: 0.4; transition: opacity 0.2s; padding: 2px 4px; color: var(--ga20-text); }
+.ga20-card-gear:hover { opacity: 1; }
+.ga20-card-hide { position: absolute; top: 6px; right: 6px; background: none; border: none; cursor: pointer; font-size: 12px; opacity: 0.3; transition: opacity 0.2s; padding: 2px 4px; color: var(--ga20-text); }
+.ga20-card-hide:hover { opacity: 0.8; }
+
+/* ── SVG Gauge ── */
+.ga20-svg { width: 180px; height: 140px; margin: 0 auto; }
+.ga20-track { fill: none; stroke: rgba(255,255,255,0.08); stroke-width: 12; stroke-linecap: round; }
+.ga20-arc   { fill: none; stroke-width: 12; stroke-linecap: round; transition: d 0.8s ease, stroke 0.5s ease; }
+.ga20-target-dot { fill: var(--ga20-cyan); }
+
+.ga20-card-label { font-size: 12px; opacity: 0.6; margin-top: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ga20-card-site  { font-size: 10px; opacity: 0.35; margin-top: 1px; }
+.ga20-card-quality { font-size: 9px; margin-top: 2px; color: var(--ga20-warn); }
+
+/* ── List View ── */
+.ga20-list-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 8px 12px; margin-bottom: 4px;
+    background: var(--ga20-bg-card);
+    border-radius: var(--ga20-radius-sm);
+    border: 1px solid rgba(255,255,255,0.05);
+    transition: transform 0.2s;
+}
+.ga20-list-item:hover { transform: translateX(3px); }
+.ga20-list-item:nth-child(even) { background: var(--ga20-bg1); }
+.ga20-list-status { width: 8px; height: 8px; border-radius: 50%; }
+.ga20-list-label { flex: 1; font-size: 13px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ga20-list-site  { width: 80px; font-size: 10px; opacity: 0.5; }
+.ga20-list-bar   { flex: 2; height: 10px; background: rgba(255,255,255,0.08); border-radius: 5px; overflow: hidden; }
+.ga20-list-bar-fill { height: 100%; border-radius: 5px; transition: width 0.6s ease, background 0.3s; }
+.ga20-list-value { font-size: 14px; font-weight: 600; font-variant-numeric: tabular-nums; min-width: 80px; text-align: left; }
+.ga20-list-trend { font-size: 14px; width: 20px; text-align: center; }
+.ga20-list-actions { width: 30px; }
+
+/* ── Side Panel ── */
+.ga20-panel {
+    position: absolute; left: 0; top: 0;
+    width: 300px; height: 100%;
+    background: var(--ga20-glass-bg);
+    backdrop-filter: blur(16px);
+    border-right: 1px solid var(--ga20-glass-border);
+    z-index: 100;
+    transform: translateX(-100%);
+    transition: transform 0.35s cubic-bezier(0.4,0,0.2,1);
+    overflow-y: auto;
+}
+.ga20-panel.open { transform: translateX(0); }
+.ga20-phd { padding: 16px; border-bottom: 1px solid var(--ga20-border); display: flex; justify-content: space-between; align-items: center; }
+.ga20-phd h3 { font-size: 15px; font-weight: 600; color: var(--ga20-cyan); margin: 0; }
+.ga20-pcl { background: none; border: none; color: var(--ga20-text3); font-size: 18px; cursor: pointer; padding: 4px 8px; border-radius: 4px; transition: var(--ga20-ease); }
+.ga20-pcl:hover { background: var(--ga20-bg-card); color: var(--ga20-text); }
+.ga20-ps { padding: 12px 16px; border-bottom: 1px solid var(--ga20-border); }
+.ga20-ps label { display: block; font-size: 11px; color: var(--ga20-text3); margin-bottom: 4px; }
+
+/* ── Gear Modal ── */
+.ga20-modal-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.7); z-index: 200; display: flex; align-items: center; justify-content: center; }
+.ga20-modal { background: var(--ga20-bg1); border-radius: var(--ga20-radius); padding: 20px; min-width: 400px; border: 1px solid var(--ga20-border-active); direction: rtl; }
+.ga20-modal-title { font-size: 15px; font-weight: 700; color: var(--ga20-cyan); margin-bottom: 14px; display: flex; justify-content: space-between; }
+.ga20-modal-row { display: flex; align-items: center; justify-content: space-between; padding: 4px 0; font-size: 12px; }
+
+/* ── Empty State ── */
+.ga20-empty { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px; color: var(--ga20-text3); font-size: 13px; gap: 8px; }
+
+/* ── Footer ── */
+.ga20-ftr {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 6px 16px;
+    background: var(--ga20-bg-deep);
+    border-top: 1px solid var(--ga20-border);
+    font-size: 10px; color: var(--ga20-text3);
+    flex-shrink: 0;
+}
+
+/* ── Animation ── */
+@keyframes ga20-fade-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+.ga20-anim-in { animation: ga20-fade-in 0.3s ease both; }
+
+/* ── Stale data indicator ── */
+.ga20-stale { position: relative; }
+.ga20-stale::after { content: '\u23F1'; position: absolute; top: -2px; right: -12px; font-size: 9px; opacity: 0.7; }

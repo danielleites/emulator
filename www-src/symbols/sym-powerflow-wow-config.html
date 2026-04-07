@@ -1,0 +1,134 @@
+<!-- ═══════════════════════════════════════════════════════
+     Executive Power Flow — Config Panel
+     WOW PF v100 — wc20 Pattern + Collapsible <details>
+     ═══════════════════════════════════════════════════════ -->
+
+<div class="wc20-config-panel" style="direction:rtl; font-family:'Segoe UI',Arial,sans-serif;">
+
+    <!-- ── General (open by default) ── -->
+    <details class="wc20-section" open>
+        <summary class="wc20-section-title">כללי</summary>
+
+        <div class="wc20-field">
+            <label class="wc20-label">כותרת</label>
+            <input type="text" class="wc20-input"
+                   ng-model="config.Title">
+        </div>
+
+        <div class="wc20-field">
+            <label class="wc20-label">מצב הדגמה (Demo)</label>
+            <input type="checkbox" class="wc20-checkbox"
+                   ng-model="config.DemoMode">
+        </div>
+
+        <div class="wc20-field">
+            <label class="wc20-label">נקודות עשרוניות</label>
+            <input type="number" class="wc20-input wc20-input-sm"
+                   ng-model="config.Decimals"
+                   ng-model-options="{ debounce: 500 }"
+                   min="0" max="3" step="1">
+        </div>
+    </details>
+
+    <!-- ── Capacity & Thresholds (open by default) ── -->
+    <details class="wc20-section" open>
+        <summary class="wc20-section-title">קיבולת וספים</summary>
+
+        <div class="wc20-field">
+            <label class="wc20-label">קיבולת מקס (MW)</label>
+            <input type="number" class="wc20-input wc20-input-sm"
+                   ng-model="config.MaxCapacity"
+                   ng-model-options="{ debounce: 500 }"
+                   min="1" step="10">
+            <span class="wc20-hint">מגדיר את מהירות האנימציה ועובי הקו</span>
+        </div>
+
+        <div class="wc20-field">
+            <label class="wc20-label">סף אזהרה (%)</label>
+            <input type="number" class="wc20-input wc20-input-sm"
+                   ng-model="config.Warning"
+                   ng-model-options="{ debounce: 500 }"
+                   min="0" max="100" step="5">
+        </div>
+
+        <div class="wc20-field">
+            <label class="wc20-label">סף קריטי (%)</label>
+            <input type="number" class="wc20-input wc20-input-sm"
+                   ng-model="config.Critical"
+                   ng-model-options="{ debounce: 500 }"
+                   min="0" max="100" step="5">
+        </div>
+    </details>
+
+    <!-- ── Visual ── -->
+    <details class="wc20-section">
+        <summary class="wc20-section-title">ויזואלי</summary>
+
+        <div class="wc20-field">
+            <label class="wc20-label">מצב Neon / Cyberpunk (זוהר)</label>
+            <input type="checkbox" class="wc20-checkbox"
+                   ng-model="config.NeonMode">
+        </div>
+
+        <div class="wc20-field">
+            <label class="wc20-label">הצג ערכי MW על הקווים</label>
+            <input type="checkbox" class="wc20-checkbox"
+                   ng-model="config.ShowValues">
+        </div>
+    </details>
+
+    <!-- ── Theme ── -->
+    <details class="wc20-section">
+        <summary class="wc20-section-title">ערכת נושא</summary>
+
+        <div class="wc20-field">
+            <label class="wc20-label">גופן</label>
+            <select class="wc20-select" ng-model="config.fontFamily">
+                <option value="Segoe UI">Segoe UI</option>
+                <option value="Arial">Arial</option>
+                <option value="Rubik">Rubik</option>
+                <option value="Heebo">Heebo</option>
+                <option value="Consolas">Consolas (Mono)</option>
+            </select>
+        </div>
+
+        <div class="wc20-field">
+            <label class="wc20-label">גודל גופן (px)</label>
+            <input type="number" class="wc20-input wc20-input-sm"
+                   ng-model="config.fontSize"
+                   ng-model-options="{ debounce: 500 }"
+                   min="8" max="20" step="1">
+        </div>
+    </details>
+
+    <!-- ── Info ── -->
+    <details class="wc20-section">
+        <summary class="wc20-section-title">מידע טכני</summary>
+
+        <div class="wc20-field wc20-readonly">
+            <span class="wc20-badge wc20-badge-blue">DataShape</span>
+            <span>Value / Multiple</span>
+        </div>
+
+        <div class="wc20-field wc20-readonly">
+            <span class="wc20-badge wc20-badge-green">Animation</span>
+            <span>CSS GPU Compositor</span>
+        </div>
+
+        <div class="wc20-field wc20-readonly">
+            <span class="wc20-badge wc20-badge-green">Architecture</span>
+            <span>Shadow DOM + CSS Variables</span>
+        </div>
+
+        <div class="wc20-field wc20-readonly">
+            <span class="wc20-badge wc20-badge-blue">CPU in Animation</span>
+            <span>0% — GPU Only</span>
+        </div>
+
+        <div class="wc20-field wc20-readonly" style="margin-top:8px;">
+            <span class="wc20-badge">WOW PF v100</span>
+            <span style="color:#8899AA;">Executive Power Flow</span>
+        </div>
+    </details>
+
+</div>

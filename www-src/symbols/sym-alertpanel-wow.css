@@ -1,0 +1,519 @@
+/**
+ * ═══════════════════════════════════════════════════════
+ *  sym-alertpanel-wow.css — Executive Triage Panel Styles
+ * ═══════════════════════════════════════════════════════
+ *  Glassmorphism alert cards with FLIP animation support.
+ *  All card transitions use `transform` exclusively —
+ *  never `top`, `margin`, or `height` — to guarantee
+ *  GPU Compositor rendering at 60fps.
+ *
+ *  The Pulse of Death animation uses box-shadow (also
+ *  GPU-composited) for a subtle urgency cue that doesn't
+ *  cause alarm fatigue like full-background blinking.
+ *
+ *  Version : WOW Triage Panel v100
+ *  Prefix  : wow-ap-
+ * ═══════════════════════════════════════════════════════
+ */
+
+
+/* ═══ CSS Custom Properties ═══ */
+
+:host {
+    --wow-ap-bg-start:     #0A0F1C;
+    --wow-ap-bg-end:       #111B2E;
+    --wow-ap-surface:      #0F2940;
+    --wow-ap-accent:       #5BC0EB;
+    --wow-ap-accent-glow:  rgba(91, 192, 235, 0.3);
+    --wow-ap-ok:           #00F5D4;
+    --wow-ap-warn:         #FF9500;
+    --wow-ap-crit:         #FF3B30;
+    --wow-ap-info:         #5BC0EB;
+    --wow-ap-text:         #ECF0F1;
+    --wow-ap-text-muted:   #8899AA;
+    --wow-ap-border:       #1A3A5C;
+    --wow-ap-font:         'Segoe UI', Arial, sans-serif;
+    --wow-ap-font-size:    12px;
+    --wow-ap-radius:       8px;
+    --wow-ap-card-radius:  10px;
+    --wow-ap-transition:   0.2s ease-out;
+}
+
+
+/* ═══ Safe Reset ═══ */
+
+.wow-ap-root { box-sizing: border-box; }
+.wow-ap-root *, .wow-ap-root *::before, .wow-ap-root *::after {
+    box-sizing: border-box;
+}
+
+
+/* ═══ Root Layout ═══ */
+
+.wow-ap-root {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    background: linear-gradient(180deg, var(--wow-ap-bg-start), var(--wow-ap-bg-end));
+    font-family: var(--wow-ap-font);
+    font-size: var(--wow-ap-font-size);
+    color: var(--wow-ap-text);
+    direction: rtl;
+    overflow: hidden;
+    border-radius: var(--wow-ap-radius);
+}
+
+
+/* ═══ Toolbar ═══ */
+
+.wow-ap-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 14px;
+    min-height: 40px;
+    flex-shrink: 0;
+    border-bottom: 1px solid var(--wow-ap-border);
+    background: rgba(10, 15, 28, 0.6);
+    gap: 10px;
+}
+
+.wow-ap-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--wow-ap-text);
+    letter-spacing: 0.3px;
+    text-shadow: 0 0 12px var(--wow-ap-accent-glow);
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.wow-ap-toolbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    direction: ltr;
+}
+
+.wow-ap-btn {
+    padding: 5px 12px;
+    border: 1px solid var(--wow-ap-border);
+    border-radius: 6px;
+    background: rgba(91, 192, 235, 0.08);
+    color: var(--wow-ap-accent);
+    font-size: 11px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all var(--wow-ap-transition);
+    white-space: nowrap;
+}
+
+.wow-ap-btn:hover {
+    background: rgba(91, 192, 235, 0.18);
+    border-color: var(--wow-ap-accent);
+}
+
+.wow-ap-btn-active {
+    background: rgba(91, 192, 235, 0.20);
+    border-color: var(--wow-ap-accent);
+    color: var(--wow-ap-text);
+}
+
+
+/* ═══ Stats Bar ═══ */
+
+.wow-ap-stats {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 4px 14px;
+    flex-shrink: 0;
+    font-size: 10px;
+    color: var(--wow-ap-text-muted);
+    border-bottom: 1px solid rgba(26, 58, 92, 0.5);
+    direction: rtl;
+}
+
+.wow-ap-stat {
+    white-space: nowrap;
+}
+
+.wow-ap-stat b {
+    color: var(--wow-ap-text);
+    font-weight: 600;
+}
+
+.wow-ap-stat-crit b {
+    color: var(--wow-ap-crit);
+}
+
+.wow-ap-stat-warn b {
+    color: var(--wow-ap-warn);
+}
+
+.wow-ap-stat-info b {
+    color: var(--wow-ap-info);
+}
+
+
+/* ═══ Cards Container ═══ */
+
+.wow-ap-cards-wrap {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    position: relative;
+}
+
+.wow-ap-cards {
+    padding: 8px 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+
+/* ═══════════════════════════════════════════════════
+ *  Alert Card — Glassmorphism Style
+ *
+ *  Each card is a frosted-glass panel with a colored
+ *  left border indicating severity. Cards are laid out
+ *  as flex rows: icon | content | time | badge.
+ *
+ *  CRITICAL: No `top`, `margin-top`, or `height`
+ *  transitions are defined here. All positional
+ *  animation is handled by FLIP in JavaScript using
+ *  `transform` exclusively (GPU Compositor path).
+ * ═══════════════════════════════════════════════════ */
+
+.wow-ap-card {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    border-radius: var(--wow-ap-card-radius);
+    background: rgba(15, 41, 64, 0.50);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    border: 1px solid rgba(26, 58, 92, 0.4);
+    border-inline-start: 4px solid var(--wow-ap-border);
+    cursor: pointer;
+    /* FLIP uses inline styles for transform transitions.
+       This base will-change hints the browser to promote
+       the card to its own composite layer preemptively. */
+    will-change: transform, opacity;
+}
+
+.wow-ap-card:hover {
+    background: rgba(15, 41, 64, 0.70);
+}
+
+
+/* ── Severity Left Border ── */
+
+.wow-ap-card-critical {
+    border-inline-start-color: var(--wow-ap-crit);
+    background: rgba(255, 59, 48, 0.06);
+}
+
+.wow-ap-card-warning {
+    border-inline-start-color: var(--wow-ap-warn);
+    background: rgba(255, 149, 0, 0.05);
+}
+
+.wow-ap-card-info {
+    border-inline-start-color: var(--wow-ap-info);
+    background: rgba(91, 192, 235, 0.05);
+}
+
+
+/* ═══════════════════════════════════════════════════
+ *  Pulse of Death — Subtle Urgency
+ *
+ *  Instead of flashing the entire card background
+ *  (which causes alarm fatigue after hours), we pulse
+ *  only the box-shadow. The glow catches peripheral
+ *  vision without being visually aggressive.
+ *
+ *  box-shadow is GPU-composited — zero Layout cost.
+ *  The 2s cycle is slow enough to avoid "crying wolf"
+ *  but fast enough to maintain situational awareness.
+ * ═══════════════════════════════════════════════════ */
+
+.wow-ap-card-pulse {
+    animation: wowApPulse 2s ease-in-out infinite;
+}
+
+@keyframes wowApPulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(255, 59, 48, 0); }
+    50%      { box-shadow: 0 0 15px 3px rgba(255, 59, 48, 0.25); }
+}
+
+
+/* ── Acknowledged Card ── */
+
+.wow-ap-card-ack {
+    opacity: 0.5;
+    animation: none !important;
+    border-inline-start-color: var(--wow-ap-border) !important;
+}
+
+
+/* ── Group Summary Card ── */
+
+.wow-ap-card-group {
+    border-style: dashed;
+    background: rgba(15, 41, 64, 0.35);
+}
+
+
+/* ── Card Icon ── */
+
+.wow-ap-card-icon {
+    font-size: 20px;
+    flex-shrink: 0;
+    width: 28px;
+    text-align: center;
+    line-height: 1;
+}
+
+
+/* ── Card Content ── */
+
+.wow-ap-card-content {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.wow-ap-card-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--wow-ap-text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.wow-ap-card-value {
+    font-size: 11px;
+    color: var(--wow-ap-text-muted);
+    font-variant-numeric: tabular-nums;
+}
+
+
+/* ── Time Badge ── */
+
+.wow-ap-card-time {
+    font-size: 10px;
+    color: var(--wow-ap-text-muted);
+    white-space: nowrap;
+    flex-shrink: 0;
+    font-variant-numeric: tabular-nums;
+    direction: ltr;
+}
+
+
+/* ── Severity Badge ── */
+
+.wow-ap-card-badge {
+    font-size: 9px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-weight: 600;
+    white-space: nowrap;
+    flex-shrink: 0;
+    letter-spacing: 0.2px;
+}
+
+.wow-ap-badge-critical {
+    color: var(--wow-ap-crit);
+    background: rgba(255, 59, 48, 0.12);
+}
+
+.wow-ap-badge-warning {
+    color: var(--wow-ap-warn);
+    background: rgba(255, 149, 0, 0.12);
+}
+
+.wow-ap-badge-info {
+    color: var(--wow-ap-info);
+    background: rgba(91, 192, 235, 0.12);
+}
+
+
+/* ═══ Empty State ═══ */
+
+.wow-ap-no-alerts {
+    display: none;
+    flex: 1;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: var(--wow-ap-ok);
+    font-size: 14px;
+    font-weight: 600;
+    padding: 30px;
+    opacity: 0.7;
+}
+
+
+/* ═══ Skeleton / Initial Loading ═══ */
+
+.wow-ap-skeleton {
+    position: absolute;
+    inset: 0;
+    z-index: 50;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--wow-ap-bg-start);
+}
+
+.wow-ap-skeleton::after {
+    content: '';
+    width: 50%;
+    height: 3px;
+    border-radius: 2px;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        var(--wow-ap-accent),
+        transparent
+    );
+    animation: wowApShimmer 1.5s ease-in-out infinite;
+}
+
+@keyframes wowApShimmer {
+    0%   { transform: translateX(-100%); opacity: 0.3; }
+    50%  { opacity: 1; }
+    100% { transform: translateX(100%); opacity: 0.3; }
+}
+
+
+/* ═══ Footer ═══ */
+
+.wow-ap-footer {
+    flex-shrink: 0;
+    padding: 4px 14px;
+    font-size: 9px;
+    color: var(--wow-ap-text-muted);
+    text-align: center;
+    border-top: 1px solid var(--wow-ap-border);
+}
+
+
+/* ═══ Scrollbar ═══ */
+
+.wow-ap-cards-wrap::-webkit-scrollbar {
+    width: 6px;
+}
+
+.wow-ap-cards-wrap::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.wow-ap-cards-wrap::-webkit-scrollbar-thumb {
+    background: var(--wow-ap-border);
+    border-radius: 3px;
+}
+
+.wow-ap-cards-wrap::-webkit-scrollbar-thumb:hover {
+    background: var(--wow-ap-accent);
+}
+
+
+/* ═══ Responsive ═══ */
+
+@container (max-width: 300px) {
+    .wow-ap-card {
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+    .wow-ap-card-time {
+        display: none;
+    }
+    .wow-ap-stats {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+}
+
+
+/* ═══ Print Media ═══ */
+
+@media print {
+    .wow-ap-root {
+        background: #FFFFFF !important;
+        color: #333 !important;
+        border: 1px solid #DDD;
+    }
+
+    .wow-ap-toolbar {
+        background: #F5F5F5 !important;
+        border-color: #DDD !important;
+    }
+
+    .wow-ap-toolbar-actions {
+        display: none !important;
+    }
+
+    .wow-ap-title {
+        color: #000 !important;
+        text-shadow: none !important;
+    }
+
+    .wow-ap-card {
+        background: #FFFFFF !important;
+        backdrop-filter: none !important;
+        border-color: #DDD !important;
+        will-change: auto !important;
+    }
+
+    .wow-ap-card-critical {
+        border-inline-start-color: #FF3B30 !important;
+        background: #FFF5F5 !important;
+    }
+
+    .wow-ap-card-warning {
+        border-inline-start-color: #FF9500 !important;
+        background: #FFF8F0 !important;
+    }
+
+    .wow-ap-card-info {
+        border-inline-start-color: #2196F3 !important;
+        background: #F0F7FF !important;
+    }
+
+    .wow-ap-card-pulse {
+        animation: none !important;
+        box-shadow: none !important;
+    }
+
+    .wow-ap-card-title {
+        color: #333 !important;
+    }
+
+    .wow-ap-stats,
+    .wow-ap-footer {
+        color: #666 !important;
+        border-color: #DDD !important;
+    }
+
+    .wow-ap-stat b {
+        color: #000 !important;
+    }
+
+    .wow-ap-stat-crit b {
+        color: #CC0000 !important;
+    }
+
+    .wow-ap-stat-warn b {
+        color: #CC7700 !important;
+    }
+}

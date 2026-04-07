@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40" width="40" height="40">
+  <rect width="40" height="40" rx="8" fill="#0B1525"/>
+  <!-- Table icon: rows and columns -->
+  <rect x="4" y="6" width="32" height="5" rx="1" fill="#2A7FC1"/>
+  <rect x="4" y="13" width="32" height="4" rx="1" fill="#122440"/>
+  <rect x="4" y="19" width="32" height="4" rx="1" fill="#0F1E35"/>
+  <rect x="4" y="25" width="32" height="4" rx="1" fill="#122440"/>
+  <!-- column separators -->
+  <line x1="14" y1="6" x2="14" y2="29" stroke="#2A7FC1" stroke-width="0.5" opacity="0.4"/>
+  <line x1="24" y1="6" x2="24" y2="29" stroke="#2A7FC1" stroke-width="0.5" opacity="0.4"/>
+  <!-- CM% value indicator -->
+  <rect x="25" y="14" width="8" height="3" rx="1" fill="#27AE60" opacity="0.8"/>
+  <rect x="25" y="20" width="5" height="3" rx="1" fill="#E74C3C" opacity="0.8"/>
+  <rect x="25" y="26" width="7" height="3" rx="1" fill="#27AE60" opacity="0.8"/>
+  <text x="20" y="38" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="5" fill="#5BA8E0">CONTRIB</text>
+</svg>

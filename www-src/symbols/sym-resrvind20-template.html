@@ -1,0 +1,305 @@
+<div class="piv20 ri20-root" role="region" aria-label="מד עתודה תפעולית">
+
+<!-- External Resources -->
+<link rel="stylesheet" href="/PIVision/Scripts/app/editor/symbols/ext/sym-resrvind20.css">
+<link rel="stylesheet" href="/PIVision/Scripts/app/editor/symbols/ext/piv20-design-system.css">
+<link rel="stylesheet" href="/PIVision/Scripts/app/editor/symbols/ext/piv20-overrides.css">
+<script type="text/javascript" src="/PIVision/Scripts/app/editor/symbols/ext/piv20-plugins/piv20-core.js"></script>
+<script type="text/javascript" src="/PIVision/Scripts/app/editor/symbols/ext/piv20-plugins/piv20-reserveindicator.js"></script>
+
+<!-- Hidden widget mount -->
+<div id="ri20-widget" style="display:none"></div>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!--  HEADER                                        -->
+<!-- ═══════════════════════════════════════════════ -->
+<div class="ri20-hdr">
+    <div>
+        <span class="ri20-ttl">{{config.Title || 'עתודה תפעולית'}}</span>
+        <span class="ri20-sub" style="margin-right:8px" ng-show="connSummary">
+            {{connSummary.good}}/{{connSummary.total}} תקינים
+        </span>
+    </div>
+    <div style="display:flex;gap:6px;align-items:center">
+        <div class="ri20-views">
+            <button class="ri20-btn secondary" ng-class="{'active':viewMode==='gauge'}" ng-click="setView('gauge')" title="לוח מחוונים">&#9638;</button>
+            <button class="ri20-btn secondary" ng-class="{'active':viewMode==='table'}" ng-click="setView('table')" title="טבלה">&#9776;</button>
+            <button class="ri20-btn secondary" ng-class="{'active':viewMode==='compact'}" ng-click="setView('compact')" title="תצוגה מצומצמת">&#9644;</button>
+        </div>
+        <div class="ri20-live"><span class="ri20-live-dot"></span>{{liveTime}}</div>
+        <button class="ri20-btn secondary" ng-click="exportData()" style="padding:4px 8px;font-size:11px" title="ייצוא CSV">&#128229;</button>
+        <button class="ri20-btn secondary" ng-click="showDocs()" style="padding:4px 8px;font-size:11px" title="מדריך">&#128214;</button>
+        <button class="ri20-btn secondary" ng-click="togglePanel()" style="padding:4px 8px;font-size:11px" title="הגדרות">&#9881;</button>
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!--  LOADING STATE                                  -->
+<!-- ═══════════════════════════════════════════════ -->
+<div class="ri20-empty" ng-show="loading">
+    <div style="font-size:28px;opacity:.4">&#9889;</div>
+    <div>טוען נתוני עתודה...</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!--  BODY                                          -->
+<!-- ═══════════════════════════════════════════════ -->
+<div class="ri20-body" ng-show="!loading">
+
+    <!-- ═══ GAUGE / DASHBOARD VIEW ═══ -->
+    <div ng-show="viewMode==='gauge'">
+
+        <!-- Reserve Margin Hero -->
+        <div class="ri20-margin-hero">
+            <div class="ri20-margin-value" ng-style="{'color': stage.color}">{{marginDisplay}}</div>
+            <div class="ri20-margin-label">עתודה תפעולית | Reserve Margin</div>
+            <div style="margin-top:8px">
+                <span class="ri20-stage-badge"
+                      ng-class="{'ri20-stage-adequate':stage.key==='adequate','ri20-stage-monitor':stage.key==='monitor','ri20-stage-alert':stage.key==='alert','ri20-stage-emergency':stage.key==='emergency'}">
+                    &#9679; {{stage.label}} ({{stage.labelEn}})
+                </span>
+            </div>
+            <div class="ri20-stage-bar">
+                <div class="ri20-stage-fill" ng-style="{'width': getStageProgress()+'%', 'background': stage.color}"></div>
+            </div>
+        </div>
+
+        <!-- N-1 Contingency -->
+        <div style="text-align:center;margin-bottom:8px" ng-show="config.ShowN1">
+            <span class="ri20-n1" ng-class="{'ri20-n1-pass':n1Pass,'ri20-n1-fail':!n1Pass}">
+                <span ng-show="n1Pass">&#10003; N-1 עובר</span>
+                <span ng-show="!n1Pass">&#10007; N-1 נכשל</span>
+                <span style="font-size:10px;opacity:0.8">({{n1GapDisplay}})</span>
+            </span>
+        </div>
+
+        <!-- Tank + Legend -->
+        <div class="ri20-tank-wrap">
+            <div style="display:flex;flex-direction:column;align-items:center">
+                <div class="ri20-tank">
+                    <div class="ri20-tank-segment ri20-tank-cold" ng-style="{'height': coldFill+'%'}"></div>
+                    <div class="ri20-tank-segment ri20-tank-quick" ng-style="{'height': quickFill+'%','bottom':coldFill+'%'}"></div>
+                    <div class="ri20-tank-segment ri20-tank-spin" ng-style="{'height': spinFill+'%','bottom':(coldFill+quickFill)+'%'}"></div>
+                    <div class="ri20-tank-demand" ng-style="{'bottom': (demand > 0 && available > 0 ? (demand/available)*100 : 0)+'%'}"></div>
+                </div>
+                <div class="ri20-tank-label">מילוי מיכל: {{tankFill | number:0}}%</div>
+            </div>
+            <div class="ri20-tank-legend">
+                <div class="ri20-tank-legend-item">
+                    <span class="ri20-tank-legend-dot" style="background:rgba(46,204,113,0.6)"></span>
+                    <span>סובבת (Spinning): {{spinningDisplay}} MW</span>
+                </div>
+                <div class="ri20-tank-legend-item">
+                    <span class="ri20-tank-legend-dot" style="background:rgba(91,192,235,0.5)"></span>
+                    <span>התנעה מהירה: {{planningReserveDisplay}} MW</span>
+                </div>
+                <div class="ri20-tank-legend-item">
+                    <span class="ri20-tank-legend-dot" style="background:rgba(96,125,139,0.4)"></span>
+                    <span>עתודה קרה</span>
+                </div>
+                <div class="ri20-tank-legend-item">
+                    <span class="ri20-tank-legend-dot" style="background:var(--ri20-crit)"></span>
+                    <span>קו ביקוש: {{demandDisplay}} MW</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- KPI Cards Row -->
+        <div class="ri20-kpi-row">
+            <div class="ri20-kpi">
+                <div class="ri20-kpi-val" style="color:var(--ri20-cyan)">{{availableDisplay}}</div>
+                <div class="ri20-kpi-label">זמין MW</div>
+            </div>
+            <div class="ri20-kpi">
+                <div class="ri20-kpi-val" style="color:var(--ri20-warn)">{{demandDisplay}}</div>
+                <div class="ri20-kpi-label">ביקוש MW</div>
+            </div>
+            <div class="ri20-kpi">
+                <div class="ri20-kpi-val" ng-style="{'color': stage.color}">{{planningReserveDisplay}}</div>
+                <div class="ri20-kpi-label">עתודה MW</div>
+            </div>
+            <div class="ri20-kpi">
+                <div class="ri20-kpi-val" style="color:var(--ri20-ok)">{{spinningDisplay}}</div>
+                <div class="ri20-kpi-label">סובבת MW</div>
+            </div>
+            <div class="ri20-kpi" ng-show="config.ShowN1">
+                <div class="ri20-kpi-val" style="color:var(--ri20-text2)">{{largestUnit | number:0}}</div>
+                <div class="ri20-kpi-label">יחידה גדולה MW</div>
+            </div>
+        </div>
+
+        <!-- Sparkline with EWMA overlay -->
+        <div class="ri20-spark-wrap" ng-show="config.ShowTrend && sparkPath">
+            <div class="ri20-spark-title">
+                <span>מגמת עתודה (30 דקות)</span>
+                <span ng-class="{'ri20-dir-up':forecast.direction==='up','ri20-dir-down':forecast.direction==='down','ri20-dir-stable':forecast.direction==='stable'}">
+                    <span ng-show="forecast.direction==='up'">&#9650;</span>
+                    <span ng-show="forecast.direction==='down'">&#9660;</span>
+                    <span ng-show="forecast.direction==='stable'">&#9644;</span>
+                    {{forecast.slopeDisplay}}
+                </span>
+            </div>
+            <svg class="ri20-spark-svg" viewBox="0 0 280 60" preserveAspectRatio="none" style="height:60px">
+                <line x1="0" y1="15" x2="280" y2="15" stroke="var(--ri20-ok)" stroke-width="0.5" stroke-dasharray="4,4" opacity="0.3"/>
+                <line x1="0" y1="30" x2="280" y2="30" stroke="var(--ri20-warn)" stroke-width="0.5" stroke-dasharray="4,4" opacity="0.3"/>
+                <line x1="0" y1="45" x2="280" y2="45" stroke="var(--ri20-crit)" stroke-width="0.5" stroke-dasharray="4,4" opacity="0.3"/>
+                <path ng-attr-d="{{sparkEwmaPath}}" fill="none" stroke="var(--ri20-warn)" stroke-width="1" opacity="0.5"/>
+                <path ng-attr-d="{{sparkTrendPath}}" fill="none" stroke="var(--ri20-text3)" stroke-width="1" stroke-dasharray="4,2" opacity="0.6"/>
+                <path ng-attr-d="{{sparkPath}}" fill="none" stroke="var(--ri20-cyan)" stroke-width="1.5"/>
+            </svg>
+            <div style="display:flex;justify-content:space-between;font-size:9px;color:var(--ri20-text3);margin-top:2px">
+                <span>מגמה</span>
+                <span style="display:flex;gap:10px">
+                    <span style="color:var(--ri20-cyan)">&#9644; עתודה</span>
+                    <span style="color:var(--ri20-warn)">&#9644; EWMA</span>
+                    <span style="color:var(--ri20-text3)">- - טרנד</span>
+                </span>
+            </div>
+        </div>
+
+        <!-- Time-to-Threshold Forecast -->
+        <div ng-show="config.ShowForecast">
+            <div class="ri20-section">תחזית זמן לסף</div>
+            <div class="ri20-forecast">
+                <div class="ri20-forecast-item">
+                    <div class="ri20-forecast-label" style="color:var(--ri20-warn)">&#9670; ניטור ({{config.MonitorPct}}%)</div>
+                    <div class="ri20-forecast-val">{{forecast.toMonitor}}</div>
+                </div>
+                <div class="ri20-forecast-item">
+                    <div class="ri20-forecast-label" style="color:#E67E22">&#9650; התרעה ({{config.AlertPct}}%)</div>
+                    <div class="ri20-forecast-val">{{forecast.toAlert}}</div>
+                </div>
+                <div class="ri20-forecast-item">
+                    <div class="ri20-forecast-label" style="color:var(--ri20-crit)">&#9632; חירום ({{config.EmergencyPct}}%)</div>
+                    <div class="ri20-forecast-val">{{forecast.toEmergency}}</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Statistics -->
+        <div>
+            <div class="ri20-section">
+                <span>סטטיסטיקה</span>
+                <span style="font-size:10px;color:var(--ri20-text3)">{{marginHistory.length}} דגימות</span>
+            </div>
+            <div class="ri20-stats-grid">
+                <div class="ri20-stat"><div class="ri20-stat-label">נוכחי</div><div class="ri20-stat-val">{{stats.current}}</div></div>
+                <div class="ri20-stat"><div class="ri20-stat-label">מינימום</div><div class="ri20-stat-val">{{stats.min}}</div></div>
+                <div class="ri20-stat"><div class="ri20-stat-label">מקסימום</div><div class="ri20-stat-val">{{stats.max}}</div></div>
+                <div class="ri20-stat"><div class="ri20-stat-label">ממוצע</div><div class="ri20-stat-val">{{stats.avg}}</div></div>
+                <div class="ri20-stat"><div class="ri20-stat-label">סטיית תקן</div><div class="ri20-stat-val">{{stats.stddev}}</div></div>
+                <div class="ri20-stat"><div class="ri20-stat-label">שעות מתחת סף</div><div class="ri20-stat-val">{{stats.hoursBelowMin}}</div></div>
+                <div class="ri20-stat"><div class="ri20-stat-label">גרוע 24ש</div><div class="ri20-stat-val">{{stats.worst24h}}</div></div>
+            </div>
+        </div>
+
+        <!-- Alert Events Log -->
+        <div ng-show="alertEvents.length">
+            <div class="ri20-section">
+                <span>יומן אירועים</span>
+                <button class="ri20-btn secondary" ng-click="clearAlerts()" style="padding:2px 8px;font-size:10px">נקה</button>
+            </div>
+            <div class="ri20-alerts">
+                <div class="ri20-alert-row" ng-repeat="evt in alertEvents track by $index">
+                    <span class="ri20-alert-time">{{evt.time}}</span>
+                    <span class="ri20-alert-badge" ng-style="{'color': evt.color, 'background': evt.color + '22'}">{{evt.label}}</span>
+                    <span style="font-size:10px;color:var(--ri20-text3)">{{evt.marginPct}}%</span>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ═══ TABLE VIEW ═══ -->
+    <div ng-show="viewMode==='table'">
+        <table class="ri20-table">
+            <thead><tr><th>פרמטר</th><th>ערך</th><th>סטטוס</th></tr></thead>
+            <tbody>
+                <tr>
+                    <td>עתודה תפעולית</td>
+                    <td style="font-weight:700" ng-style="{'color': stage.color}">{{marginDisplay}}</td>
+                    <td><span class="ri20-stage-badge" ng-class="{'ri20-stage-adequate':stage.key==='adequate','ri20-stage-monitor':stage.key==='monitor','ri20-stage-alert':stage.key==='alert','ri20-stage-emergency':stage.key==='emergency'}" style="font-size:11px;padding:2px 8px">{{stage.label}}</span></td>
+                </tr>
+                <tr><td>זמין כולל</td><td>{{availableDisplay}} MW</td><td></td></tr>
+                <tr><td>ביקוש נוכחי</td><td>{{demandDisplay}} MW</td><td></td></tr>
+                <tr><td>עתודה תכנונית</td><td>{{planningReserveDisplay}} MW</td><td></td></tr>
+                <tr><td>עתודה סובבת</td><td>{{spinningDisplay}} MW</td><td></td></tr>
+                <tr ng-show="config.ShowN1"><td>יחידה גדולה</td><td>{{largestUnit | number:0}} MW</td><td></td></tr>
+                <tr ng-show="config.ShowN1">
+                    <td>בדיקת N-1</td><td>{{n1GapDisplay}}</td>
+                    <td><span class="ri20-n1" ng-class="{'ri20-n1-pass':n1Pass,'ri20-n1-fail':!n1Pass}" style="font-size:10px;padding:2px 8px"><span ng-show="n1Pass">עובר</span><span ng-show="!n1Pass">נכשל</span></span></td>
+                </tr>
+                <tr><td>מינימום</td><td>{{stats.min}}</td><td></td></tr>
+                <tr><td>מקסימום</td><td>{{stats.max}}</td><td></td></tr>
+                <tr><td>ממוצע</td><td>{{stats.avg}}</td><td></td></tr>
+                <tr><td>סטיית תקן</td><td>{{stats.stddev}}</td><td></td></tr>
+                <tr ng-show="config.ShowForecast">
+                    <td>שיפוע</td><td>{{forecast.slopeDisplay}}</td>
+                    <td><span ng-class="{'ri20-dir-up':forecast.direction==='up','ri20-dir-down':forecast.direction==='down','ri20-dir-stable':forecast.direction==='stable'}"><span ng-show="forecast.direction==='up'">&#9650;</span><span ng-show="forecast.direction==='down'">&#9660;</span><span ng-show="forecast.direction==='stable'">&#9644;</span></span></td>
+                </tr>
+                <tr ng-show="config.ShowForecast"><td>זמן לניטור</td><td>{{forecast.toMonitor}}</td><td></td></tr>
+                <tr ng-show="config.ShowForecast"><td>זמן להתרעה</td><td>{{forecast.toAlert}}</td><td></td></tr>
+                <tr ng-show="config.ShowForecast"><td>זמן לחירום</td><td>{{forecast.toEmergency}}</td><td></td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- ═══ COMPACT VIEW ═══ -->
+    <div ng-show="viewMode==='compact'">
+        <div class="ri20-compact">
+            <div class="ri20-compact-margin" ng-style="{'color': stage.color}">{{marginDisplay}}</div>
+            <div class="ri20-compact-info">
+                <span class="ri20-stage-badge" ng-class="{'ri20-stage-adequate':stage.key==='adequate','ri20-stage-monitor':stage.key==='monitor','ri20-stage-alert':stage.key==='alert','ri20-stage-emergency':stage.key==='emergency'}" style="font-size:10px;padding:2px 8px">{{stage.label}}</span>
+                <span>{{availableDisplay}} / {{demandDisplay}} MW</span>
+                <span ng-show="config.ShowN1">N-1: <span ng-style="{'color': n1Pass ? 'var(--ri20-ok)' : 'var(--ri20-crit)'}"><span ng-show="n1Pass">&#10003;</span><span ng-show="!n1Pass">&#10007;</span></span></span>
+                <div class="ri20-compact-mini-bar">
+                    <div class="ri20-compact-mini-fill" ng-style="{'width': getStageProgress()+'%', 'background': stage.color}"></div>
+                </div>
+            </div>
+            <svg ng-show="config.ShowTrend && sparkPath" viewBox="0 0 280 60" preserveAspectRatio="none" style="width:100px;height:30px;flex-shrink:0">
+                <path ng-attr-d="{{sparkPath}}" fill="none" stroke="var(--ri20-cyan)" stroke-width="1.5"/>
+            </svg>
+        </div>
+    </div>
+
+</div>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!--  SIDE PANEL                                    -->
+<!-- ═══════════════════════════════════════════════ -->
+<div class="ri20-panel" ng-class="{'open':panelOpen}">
+    <div class="ri20-phd"><h3>&#9881; הגדרות עתודה</h3><button class="ri20-pcl" ng-click="togglePanel()">&#10005;</button></div>
+
+    <div class="ri20-ps" style="font-size:11px;color:var(--ri20-cyan);font-weight:600;padding-bottom:6px">כללי</div>
+    <div class="ri20-ps"><label>כותרת</label><input type="text" ng-model="config.Title"></div>
+    <div class="ri20-ps"><label>ספרות עשרוניות</label><input type="number" ng-model="config.Decimals" min="0" max="4"></div>
+    <div class="ri20-ps"><label>יחידה גדולה (MW)</label><input type="number" ng-model="config.LargestUnitMW" step="1"></div>
+
+    <div class="ri20-ps" style="font-size:11px;color:var(--ri20-cyan);font-weight:600;padding-bottom:6px">ספים</div>
+    <div class="ri20-ps"><label>תקין (%)</label><input type="number" ng-model="config.AdequatePct" step="1"></div>
+    <div class="ri20-ps"><label>ניטור (%)</label><input type="number" ng-model="config.MonitorPct" step="1"></div>
+    <div class="ri20-ps"><label>התרעה (%)</label><input type="number" ng-model="config.AlertPct" step="1"></div>
+    <div class="ri20-ps"><label>חירום (%)</label><input type="number" ng-model="config.EmergencyPct" step="1"></div>
+
+    <div class="ri20-ps" style="font-size:11px;color:var(--ri20-cyan);font-weight:600;padding-bottom:6px">תצוגה</div>
+    <div class="ri20-ps"><label><input type="checkbox" ng-model="config.ShowN1"> הצג בדיקת N-1</label></div>
+    <div class="ri20-ps"><label><input type="checkbox" ng-model="config.ShowTrend"> הצג מגמה + EWMA</label></div>
+    <div class="ri20-ps"><label><input type="checkbox" ng-model="config.ShowForecast"> הצג תחזית</label></div>
+
+    <div class="ri20-ps" style="font-size:11px;color:var(--ri20-cyan);font-weight:600;padding-bottom:6px">צבעים</div>
+    <div class="ri20-ps" style="display:flex;gap:8px;align-items:center"><label style="margin:0;min-width:60px">מבטא</label><input type="color" ng-model="config.accentColor" style="width:40px;height:26px"></div>
+    <div class="ri20-ps" style="display:flex;gap:8px;align-items:center"><label style="margin:0;min-width:60px">תקין</label><input type="color" ng-model="config.goodColor" style="width:40px;height:26px"></div>
+    <div class="ri20-ps" style="display:flex;gap:8px;align-items:center"><label style="margin:0;min-width:60px">אזהרה</label><input type="color" ng-model="config.warningColor" style="width:40px;height:26px"></div>
+    <div class="ri20-ps" style="display:flex;gap:8px;align-items:center"><label style="margin:0;min-width:60px">קריטי</label><input type="color" ng-model="config.criticalColor" style="width:40px;height:26px"></div>
+
+    <div class="ri20-ps" style="font-size:11px;color:var(--ri20-cyan);font-weight:600;padding-bottom:6px">גופן</div>
+    <div class="ri20-ps"><label>משפחת גופן</label><input type="text" ng-model="config.fontFamily"></div>
+    <div class="ri20-ps"><label>גודל גופן (px)</label><input type="number" ng-model="config.fontSize" min="8" max="24" step="1"></div>
+    <div class="ri20-ps"><label>גודל כותרת (px)</label><input type="number" ng-model="config.headerFontSize" min="10" max="24" step="1"></div>
+</div>
+
+<!-- ═══════════════════════════════════════════════ -->
+<!--  FOOTER                                        -->
+<!-- ═══════════════════════════════════════════════ -->
+<div class="ri20-ftr">נוגה — מנהל מערכת החשמל | PIV20 v20</div>
+</div>

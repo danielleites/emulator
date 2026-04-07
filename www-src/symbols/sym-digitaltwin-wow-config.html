@@ -1,0 +1,180 @@
+<!-- ═══════════════════════════════════════════════════════
+     Executive Digital Twin — Config Panel
+     WOW Digital Twin v100 — wc20 Pattern + Collapsible <details>
+     ═══════════════════════════════════════════════════════ -->
+
+<div class="wc20-config-panel" style="direction:rtl; font-family:'Segoe UI',Arial,sans-serif;">
+
+    <!-- ── General (open by default) ── -->
+    <details class="wc20-section" open>
+        <summary class="wc20-section-title">כללי</summary>
+
+        <div class="wc20-field">
+            <label class="wc20-label">כותרת</label>
+            <input type="text" class="wc20-input"
+                   ng-model="config.Title"
+                   placeholder="Executive Digital Twin">
+        </div>
+
+        <div class="wc20-field">
+            <label class="wc20-label">מצב הדגמה (Demo)</label>
+            <input type="checkbox" class="wc20-checkbox"
+                   ng-model="config.DemoMode">
+            <span class="wc20-hint">תחנת כוח סינתטית (8 תגיות, אוסצילציה חיה)</span>
+        </div>
+    </details>
+
+    <!-- ── Display (open by default) ── -->
+    <details class="wc20-section" open>
+        <summary class="wc20-section-title">תצוגה</summary>
+
+        <div class="wc20-field">
+            <label class="wc20-label">הפעל עמעום חכם (Dimming)</label>
+            <input type="checkbox" class="wc20-checkbox"
+                   ng-model="config.EnableDimming">
+            <span class="wc20-hint">Even-Odd Clip: אזורים תקינים מעומעמים, חריגות מוארות</span>
+        </div>
+
+        <div class="wc20-field">
+            <label class="wc20-label">הפעל פעימת אזעקה (Pulse)</label>
+            <input type="checkbox" class="wc20-checkbox"
+                   ng-model="config.EnablePulse">
+            <span class="wc20-hint">Math.sin הילה פועמת לתגיות קריטיות</span>
+        </div>
+
+        <div class="wc20-field">
+            <label class="wc20-label">הצג ערכים על Canvas</label>
+            <input type="checkbox" class="wc20-checkbox"
+                   ng-model="config.ShowValues">
+        </div>
+
+        <div class="wc20-field">
+            <label class="wc20-label">עשרוניות</label>
+            <select class="wc20-select" ng-model="config.Decimals"
+                    ng-options="v as v for v in [0, 1, 2, 3]">
+            </select>
+        </div>
+    </details>
+
+    <!-- ── Thresholds ── -->
+    <details class="wc20-section">
+        <summary class="wc20-section-title">ספי צבע</summary>
+
+        <div class="wc20-field">
+            <label class="wc20-label">% אזהרה (Warn)</label>
+            <input type="number" class="wc20-input wc20-input-sm"
+                   ng-model="config.WarnPct"
+                   ng-model-options="{ debounce: 500 }"
+                   min="1" max="99" step="1">
+            <span class="wc20-hint">תג ≥ ערך זה → כתום + badge מוזהר</span>
+        </div>
+
+        <div class="wc20-field">
+            <label class="wc20-label">% קריטי (Critical)</label>
+            <input type="number" class="wc20-input wc20-input-sm"
+                   ng-model="config.CritPct"
+                   ng-model-options="{ debounce: 500 }"
+                   min="1" max="100" step="1">
+            <span class="wc20-hint">תג ≥ ערך זה → אדום + פעימה</span>
+        </div>
+    </details>
+
+    <!-- ── Image ── -->
+    <details class="wc20-section">
+        <summary class="wc20-section-title">תמונת רקע</summary>
+
+        <div class="wc20-field">
+            <label class="wc20-label">URL תמונת רקע</label>
+            <input type="text" class="wc20-input"
+                   ng-model="config.BackgroundImageUrl"
+                   placeholder="https://... או /path/to/schematic.png">
+            <span class="wc20-hint">ריק = סכמה סינתטית (Demo); PNG/SVG/JPG</span>
+        </div>
+    </details>
+
+    <!-- ── Data Mappings ── -->
+    <details class="wc20-section">
+        <summary class="wc20-section-title">מיפוי תגיות</summary>
+
+        <div class="wc20-field">
+            <label class="wc20-label">DataMappings (JSON)</label>
+            <textarea class="wc20-input" style="height:120px; font-family:Consolas,monospace; font-size:11px;"
+                      ng-model="config.DataMappingsJSON"
+                      placeholder='[{"label":"טמפ׳","xPct":0.25,"yPct":0.35,"unit":"°C","warnHi":85,"critHi":95}]'>
+            </textarea>
+            <span class="wc20-hint">
+                JSON מערך: label, xPct, yPct (0-1), unit, warnHi, critHi<br>
+                ריק = הגדרות Demo (8 תגיות תחנת כוח)
+            </span>
+        </div>
+    </details>
+
+    <!-- ── Theme ── -->
+    <details class="wc20-section">
+        <summary class="wc20-section-title">ערכת נושא</summary>
+
+        <div class="wc20-field">
+            <label class="wc20-label">גופן</label>
+            <select class="wc20-select" ng-model="config.fontFamily">
+                <option value="Segoe UI">Segoe UI</option>
+                <option value="Arial">Arial</option>
+                <option value="Tahoma">Tahoma</option>
+                <option value="Consolas">Consolas (Mono)</option>
+            </select>
+        </div>
+
+        <div class="wc20-field">
+            <label class="wc20-label">גודל גופן (px)</label>
+            <input type="number" class="wc20-input wc20-input-sm"
+                   ng-model="config.fontSize"
+                   ng-model-options="{ debounce: 500 }"
+                   min="8" max="16" step="1">
+        </div>
+    </details>
+
+    <!-- ── Info ── -->
+    <details class="wc20-section">
+        <summary class="wc20-section-title">מידע טכני</summary>
+
+        <div class="wc20-field wc20-readonly">
+            <span class="wc20-badge wc20-badge-blue">DataShape</span>
+            <span>Table (Label + Value Rows)</span>
+        </div>
+
+        <div class="wc20-field wc20-readonly">
+            <span class="wc20-badge wc20-badge-green">Rendering</span>
+            <span>Canvas 2D — Image + Overlays on Single Bitmap</span>
+        </div>
+
+        <div class="wc20-field wc20-readonly">
+            <span class="wc20-badge wc20-badge-green">Dimming</span>
+            <span>Even-Odd Fill Rule — Spotlight on Anomalies</span>
+        </div>
+
+        <div class="wc20-field wc20-readonly">
+            <span class="wc20-badge wc20-badge-orange">Pulse</span>
+            <span>Math.sin(t) Modulated RadialGradient Halo</span>
+        </div>
+
+        <div class="wc20-field wc20-readonly">
+            <span class="wc20-badge wc20-badge-blue">Hit Testing</span>
+            <span>Distance-Based — O(n) Nearest Badge</span>
+        </div>
+
+        <div class="wc20-field wc20-readonly">
+            <span class="wc20-badge wc20-badge-purple">Performance</span>
+            <span>50 fillText = &lt;1ms — 200x vs DOM reflow</span>
+        </div>
+
+        <div class="wc20-field wc20-readonly">
+            <span class="wc20-badge wc20-badge-blue">Background</span>
+            <span>Image Caching — GPU Texture, 0 Re-decode</span>
+        </div>
+
+        <div class="wc20-field wc20-readonly" style="margin-top:8px;">
+            <span class="wc20-badge">WOW Digital Twin v100</span>
+            <span style="color:#8899AA;">Executive Digital Twin</span>
+        </div>
+    </details>
+
+</div>

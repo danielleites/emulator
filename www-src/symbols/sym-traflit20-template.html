@@ -1,0 +1,183 @@
+<!-- sym-trafficlight20-template.html  --  Traffic Light v20 Template -->
+<!-- External CSS: sym-traflit20.css | Plugin: piv20-trafficlight.js -->
+
+<!-- ── External Dependencies ── -->
+<link rel="stylesheet" href="/PIVision/Scripts/app/editor/symbols/ext/sym-traflit20.css">
+<link rel="stylesheet" href="/PIVision/Scripts/app/editor/symbols/ext/piv20-design-system.css">
+<link rel="stylesheet" href="/PIVision/Scripts/app/editor/symbols/ext/piv20-overrides.css">
+<script type="text/javascript" src="/PIVision/Scripts/app/editor/symbols/ext/piv20-plugins/piv20-core.js"></script>
+<script type="text/javascript" src="/PIVision/Scripts/app/editor/symbols/ext/piv20-plugins/piv20-trafficlight.js"></script>
+
+<!-- ── Root Container ── -->
+<div class="piv20 tl20-root" dir="rtl">
+
+    <!-- Hidden widget mount point -->
+    <div id="tl20-widget" style="display:none"></div>
+
+    <!-- Toast container -->
+    <div class="tl20-toast-container"></div>
+
+    <!-- ════════════════════════════════════════ -->
+    <!--  HEADER                                  -->
+    <!-- ════════════════════════════════════════ -->
+    <div class="tl20-hdr">
+        <div style="display:flex;align-items:center;gap:10px">
+            <span class="tl20-ttl">\ר\מ\ז\ו\ר \מ\צ\ב\י\ם</span>
+
+            <!-- AF Connection badge -->
+            <span ng-show="afConn"
+                  ng-class="{'tl20-af-badge': true,
+                             'tl20-af-good': afConn.pct >= 80,
+                             'tl20-af-warn': afConn.pct >= 50 && afConn.pct < 80,
+                             'tl20-af-bad':  afConn.pct < 50}">
+                <span class="tl20-af-dot"></span>
+                AF {{afConn.pct}}%
+            </span>
+
+            <!-- Adaptive threshold badge -->
+            <span class="tl20-adaptive-badge" ng-show="adaptiveStats">
+                \μ={{adaptiveStats.mean | number:1}} \σ={{adaptiveStats.stddev | number:2}} n={{adaptiveStats.n}}
+            </span>
+        </div>
+
+        <div class="tl20-toolbar">
+            <button class="tl20-btn" ng-class="{active: historyView}" ng-click="toggleHistory()"
+                    title="\ה\י\ס\ט\ו\ר\י\ה">
+                {{historyView ? '\◀' : '\☰'}}
+            </button>
+            <button class="tl20-btn" ng-click="showDocs()" title="\מ\ד\ר\י\ך">?</button>
+            <button class="tl20-btn" ng-click="toggleSidePanel()" title="\ה\ג\ד\ר\ו\ת">&#9881;</button>
+            <div class="tl20-live">
+                <span class="tl20-live-dot"></span>
+                <span>{{liveTime}}</span>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ════════════════════════════════════════ -->
+    <!--  TRAFFIC LIGHT BODY                      -->
+    <!-- ════════════════════════════════════════ -->
+    <div class="tl20-body" ng-hide="historyView">
+        <div class="tl20-display" ng-class="layout">
+            <!-- Traffic light housing -->
+            <div class="tl20-housing" ng-class="layout">
+                <div class="tl20-light red" ng-class="{active: state.cls === 'crit'}"
+                     role="status"
+                     aria-label="{{state.cls === 'crit' ? state.name : '\ל\א \פ\ע\י\ל'}}"></div>
+                <div class="tl20-light yellow" ng-class="{active: state.cls === 'warn'}"
+                     role="status"
+                     aria-label="{{state.cls === 'warn' ? state.name : '\ל\א \פ\ע\י\ל'}}"></div>
+                <div class="tl20-light green" ng-class="{active: state.cls === 'ok'}"
+                     role="status"
+                     aria-label="{{state.cls === 'ok' ? state.name : '\ל\א \פ\ע\י\ל'}}"></div>
+
+                <!-- ISA-101 Shape indicator (color-blind support) -->
+                <div class="tl20-shape" ng-show="state.shape">
+                    <span ng-style="{'color': 'var(' + state.colorVar + ')'}">{{state.shape}}</span>
+                    <span class="tl20-shape-label">{{state.name}}</span>
+                </div>
+            </div>
+
+            <!-- Value + State info -->
+            <div class="tl20-info">
+                <div class="tl20-value" ng-style="{'color': 'var(' + state.colorVar + ')'}">
+                    {{currentValue != null ? (currentValue | number:config.Decimals) : '---'}}
+                </div>
+                <div class="tl20-state-label" ng-class="state.cls">
+                    {{state.name}} | {{state.nameEn}}
+                </div>
+                <div class="tl20-tag-label" ng-show="showLabel">{{currentLabel}}</div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ════════════════════════════════════════ -->
+    <!--  HISTORY VIEW                            -->
+    <!-- ════════════════════════════════════════ -->
+    <div class="tl20-history" ng-show="historyView">
+        <div class="tl20-history-actions">
+            <button class="tl20-btn" ng-click="exportHistory()">\⬇ \י\י\צ\ו\א CSV</button>
+            <button class="tl20-btn danger" ng-click="clearHistory()">\נ\י\ק\ו\י</button>
+            <span style="flex:1;text-align:left;color:var(--tl20-text3);font-size:11px;">
+                {{history.length}} \ר\ש\ו\מ\ו\ת
+            </span>
+        </div>
+        <div class="tl20-history-list">
+            <div class="tl20-history-item tl20-anim-in"
+                 ng-repeat="h in history track by $index"
+                 style="animation-delay:{{$index * 30}}ms">
+                <span>{{h.time}}</span>
+                <span style="font-weight:600;font-variant-numeric:tabular-nums;">{{h.value}}</span>
+                <span class="tl20-badge" ng-class="h.cls">{{h.state}}</span>
+            </div>
+            <div class="tl20-empty" ng-show="!history.length">
+                <span style="font-size:32px;opacity:0.4">\⬡</span>
+                <span>\א\י\ן \ה\י\ס\ט\ו\ר\י\ה</span>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ════════════════════════════════════════ -->
+    <!--  SIDE PANEL                              -->
+    <!-- ════════════════════════════════════════ -->
+    <div class="tl20-panel" ng-class="{open: showSidePanel}">
+        <div class="tl20-phd">
+            <h3>\ה\ג\ד\ר\ו\ת \ר\מ\ז\ו\ר</h3>
+            <button class="tl20-pcl" ng-click="toggleSidePanel()">&times;</button>
+        </div>
+
+        <!-- Layout section -->
+        <div class="tl20-ps">
+            <label>\פ\ר\י\ס\ה</label>
+            <div class="tl20-ps-row">
+                <button class="tl20-btn" ng-class="{active: layout === 'vertical'}" ng-click="setLayout('vertical')">
+                    \א\נ\כ\י
+                </button>
+                <button class="tl20-btn" ng-class="{active: layout === 'horizontal'}" ng-click="setLayout('horizontal')">
+                    \א\ו\פ\ק\י
+                </button>
+            </div>
+        </div>
+
+        <!-- Threshold section -->
+        <div class="tl20-ps">
+            <label>\ס\פ\י\ם</label>
+            <div style="font-size:12px;color:var(--tl20-text2);margin-top:4px">
+                \מ\צ\ב: {{thresholds.mode === 'high_only' ? '\ג\ב\ו\ה \ב\ל\ב\ד' :
+                                      thresholds.mode === 'dual' ? '\כ\פ\ו\ל (\ג\ב\ו\ה+\נ\מ\ו\ך)' :
+                                      '\נ\מ\ו\ך \ב\ל\ב\ד'}}
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px 10px;margin-top:6px;font-size:11px;color:var(--tl20-text3)">
+                <span ng-show="thresholds.mode !== 'low_only'">\א\ז\ה\ר\ה: {{thresholds.warn}}</span>
+                <span ng-show="thresholds.mode !== 'low_only'">\ק\ר\י\ט\י: {{thresholds.crit}}</span>
+                <span ng-show="thresholds.mode !== 'high_only'">\א\ז\ה\ר\ה\↓: {{thresholds.warnLo}}</span>
+                <span ng-show="thresholds.mode !== 'high_only'">\ק\ר\י\ט\י\↓: {{thresholds.critLo}}</span>
+            </div>
+        </div>
+
+        <!-- AF Connection -->
+        <div class="tl20-ps" ng-show="afConn">
+            <label>\ח\י\ב\ו\ר AF</label>
+            <div style="font-size:12px;margin-top:4px;color:var(--tl20-text2)">
+                {{afConn.good}}/{{afConn.total}} \ת\ק\י\נ\י\ם
+                <span ng-show="afConn.stale"> | {{afConn.stale}} \י\ש\נ\י\ם</span>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ════════════════════════════════════════ -->
+    <!--  FOOTER                                  -->
+    <!-- ════════════════════════════════════════ -->
+    <div class="tl20-ftr">
+        <span>\נ\ו\ג\ה \— \ר\מ\ז\ו\ר \מ\צ\ב\י\ם | PIV20 v20.0</span>
+        <div style="display:flex;align-items:center;gap:6px">
+            <span class="tl20-ftr-dot" ng-class="state.cls || 'off'"></span>
+            <span>{{state.name || '---'}}</span>
+        </div>
+    </div>
+
+</div>

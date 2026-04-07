@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" role="img" aria-label="safetyfunction118">
+  <title>safetyfunction118 W118</title>
+  <rect width="24" height="24" rx="4" fill="hsl(345,35%,22%)"/>
+  <rect x="4" y="11" width="16" height="2" rx="1" fill="hsl(345,60%,58%)"/>
+  <rect x="10" y="5" width="4" height="14" rx="1" fill="hsl(345,60%,68%)" opacity="0.7"/>
+  <circle cx="12" cy="12" r="3" fill="none" stroke="hsl(345,70%,72%)" stroke-width="1.5"/>
+  <text x="12" y="22" font-size="3" text-anchor="middle" fill="hsl(345,40%,60%)" font-family="monospace">W118</text>
+</svg>

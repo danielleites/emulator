@@ -1,0 +1,302 @@
+/**
+ * sym-alertpanel20.css -- Alert Panel v20 Styles
+ * ================================================
+ * ISA-18.2 Alarm Management Panel stylesheet.
+ * Extracted from v10 inline CSS, all classes prefixed ap20-.
+ *
+ * CSS custom properties: --ap20-*
+ * Flat CSS (no nesting)
+ */
+
+/* ── Root & Custom Properties ── */
+:host, .ap20-root {
+    --ap20-bg-deep: #060C18;
+    --ap20-bg-primary: #0A1628;
+    --ap20-bg-secondary: #0D1F35;
+    --ap20-bg-card: #0F2940;
+    --ap20-bg-card-hover: #153858;
+    --ap20-bg-input: #0B1D33;
+    --ap20-accent: #1E5A8A;
+    --ap20-accent-light: #2E8BC0;
+    --ap20-cyan: #5BC0EB;
+    --ap20-glow: #3DA5D9;
+    --ap20-ok: #2ECC71;
+    --ap20-ok-dim: rgba(46,204,113,0.15);
+    --ap20-warn: #F39C12;
+    --ap20-warn-dim: rgba(243,156,18,0.15);
+    --ap20-crit: #E74C3C;
+    --ap20-crit-dim: rgba(231,76,60,0.15);
+    --ap20-off: #607D8B;
+    --ap20-text: #FFF;
+    --ap20-text2: #8BACC4;
+    --ap20-text3: #5A7A94;
+    --ap20-border: rgba(46,139,192,0.2);
+    --ap20-border-active: rgba(91,192,235,0.45);
+    --ap20-shadow: 0 4px 24px rgba(0,0,0,0.4);
+    --ap20-radius: 10px;
+    --ap20-radius-sm: 6px;
+    --ap20-font: 'Segoe UI','Arial',sans-serif;
+    --ap20-transition: all 0.25s cubic-bezier(0.4,0,0.2,1);
+}
+
+/* ── Root Container ── */
+.ap20-root {
+    background: linear-gradient(160deg, var(--ap20-bg-deep), var(--ap20-bg-primary), var(--ap20-bg-secondary));
+    color: var(--ap20-text);
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    position: relative;
+    overflow: hidden;
+    font-family: var(--ap20-font);
+    direction: rtl;
+}
+.ap20-root * { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* ── Scrollbar ── */
+.ap20-root ::-webkit-scrollbar { width: 6px; height: 6px; }
+.ap20-root ::-webkit-scrollbar-track { background: var(--ap20-bg-deep); }
+.ap20-root ::-webkit-scrollbar-thumb { background: var(--ap20-accent); border-radius: 3px; }
+
+/* ── Toast Notifications ── */
+.ap20-toast-container {
+    position: absolute; top: 12px; left: 50%; transform: translateX(-50%);
+    z-index: 9999; display: flex; flex-direction: column; gap: 8px; pointer-events: none;
+}
+.ap20-toast {
+    background: var(--ap20-bg-card); border: 1px solid var(--ap20-border-active);
+    border-radius: var(--ap20-radius-sm); padding: 10px 20px;
+    color: var(--ap20-cyan); font-size: 13px; font-family: var(--ap20-font);
+    box-shadow: var(--ap20-shadow); animation: ap20ti .35s ease; pointer-events: auto;
+}
+.ap20-toast.out { animation: ap20to .3s ease forwards; }
+.ap20-toast-info { border-color: var(--ap20-cyan); color: var(--ap20-cyan); }
+.ap20-toast-warn { border-color: #f59e0b; color: #f59e0b; }
+.ap20-toast-error { border-color: #ef4444; color: #ef4444; }
+@keyframes ap20ti { from { opacity: 0; transform: translateY(-16px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes ap20to { to { opacity: 0; transform: translateY(-16px); } }
+
+/* ── Live Indicator ── */
+.ap20-live { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--ap20-text3); }
+.ap20-live-dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--ap20-ok); box-shadow: 0 0 8px var(--ap20-ok);
+    animation: ap20p 2s infinite;
+}
+@keyframes ap20p { 0%, 100% { opacity: 1; } 50% { opacity: .4; } }
+
+/* ── Empty State ── */
+.ap20-empty {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 40px; color: var(--ap20-text3); font-size: 14px; gap: 12px;
+}
+
+/* ── Buttons ── */
+.ap20-btn {
+    background: linear-gradient(135deg, var(--ap20-accent), var(--ap20-accent-light));
+    color: var(--ap20-text); border: none; padding: 7px 16px;
+    border-radius: var(--ap20-radius-sm); cursor: pointer;
+    font-size: 12px; font-family: var(--ap20-font);
+    transition: var(--ap20-transition);
+    display: inline-flex; align-items: center; gap: 6px;
+}
+.ap20-btn:hover { filter: brightness(1.15); transform: translateY(-1px); }
+.ap20-btn.secondary { background: var(--ap20-bg-card); border: 1px solid var(--ap20-border); }
+.ap20-btn.active { background: var(--ap20-cyan); color: var(--ap20-bg-deep); }
+
+/* ── Header ── */
+.ap20-hdr {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 16px; border-bottom: 1px solid var(--ap20-border); flex-shrink: 0;
+}
+.ap20-ttl { font-size: 16px; font-weight: 600; color: var(--ap20-cyan); }
+.ap20-sub { font-size: 11px; color: var(--ap20-text3); }
+
+/* ── Body & Footer ── */
+.ap20-body { flex: 1; overflow: auto; padding: 12px; }
+.ap20-ftr {
+    padding: 6px 16px; font-size: 10px; color: var(--ap20-text3);
+    text-align: center; border-top: 1px solid var(--ap20-border); flex-shrink: 0;
+}
+
+/* ── Side Panel ── */
+.ap20-panel {
+    position: absolute; top: 0; right: 0; width: 280px; height: 100%;
+    background: var(--ap20-bg-primary); border-right: 1px solid var(--ap20-border-active);
+    z-index: 100; transform: translateX(100%); transition: transform .3s ease;
+    overflow-y: auto; direction: rtl;
+}
+.ap20-panel.open { transform: translateX(0); }
+.ap20-phd {
+    padding: 14px 16px; border-bottom: 1px solid var(--ap20-border);
+    display: flex; align-items: center; justify-content: space-between;
+}
+.ap20-phd h3 { font-size: 14px; color: var(--ap20-cyan); font-weight: 600; }
+.ap20-pcl { background: none; border: none; color: var(--ap20-text3); cursor: pointer; font-size: 18px; }
+.ap20-ps { padding: 12px 16px; border-bottom: 1px solid rgba(255,255,255,.04); }
+.ap20-ps label { display: block; font-size: 11px; color: var(--ap20-text3); margin-bottom: 4px; }
+.ap20-ps input, .ap20-ps select {
+    width: 100%; background: var(--ap20-bg-input); border: 1px solid var(--ap20-border);
+    border-radius: var(--ap20-radius-sm); padding: 6px 10px;
+    color: var(--ap20-text); font-size: 12px; font-family: var(--ap20-font);
+}
+.ap20-ps input:focus, .ap20-ps select:focus { border-color: var(--ap20-cyan); outline: none; }
+
+
+/* ═══════════════════════════════════════════════
+ *  ALERT PANEL 20 SPECIFIC STYLES
+ * ═══════════════════════════════════════════════ */
+
+/* ── Critical Alarm Banner ── */
+.ap20-crit-banner {
+    background: var(--ap20-crit-dim); border-bottom: 2px solid var(--ap20-crit);
+    padding: 4px 16px; font-size: 12px; font-weight: 600;
+    color: var(--ap20-crit); text-align: center;
+    animation: ap20pulse 1.5s ease-in-out infinite; flex-shrink: 0;
+}
+
+/* ── Summary Bar ── */
+.ap20-summary {
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 16px; border-bottom: 1px solid var(--ap20-border);
+    flex-shrink: 0; flex-wrap: wrap;
+}
+.ap20-sum-badge {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 3px 12px; border-radius: 12px; font-size: 11px; font-weight: 600;
+}
+.ap20-sum-total   { background: rgba(91,192,235,0.12); color: var(--ap20-cyan); }
+.ap20-sum-crit    { background: var(--ap20-crit-dim); color: var(--ap20-crit); }
+.ap20-sum-warn    { background: var(--ap20-warn-dim); color: var(--ap20-warn); }
+.ap20-sum-info    { background: rgba(96,125,139,0.2); color: var(--ap20-text2); }
+.ap20-sum-unack   { background: rgba(231,76,60,0.2); color: #ff6b6b; }
+.ap20-sum-shelved { background: rgba(96,125,139,0.15); color: var(--ap20-off); }
+
+/* ── Filter Bar ── */
+.ap20-filter-bar {
+    display: flex; align-items: center; gap: 8px;
+    padding: 6px 16px; border-bottom: 1px solid rgba(255,255,255,.03);
+    flex-shrink: 0; flex-wrap: wrap;
+}
+.ap20-filter-group { display: flex; gap: 3px; }
+.ap20-filter-btn {
+    background: var(--ap20-bg-card); border: 1px solid var(--ap20-border);
+    color: var(--ap20-text3); padding: 3px 10px; border-radius: 4px;
+    cursor: pointer; font-size: 11px; font-family: var(--ap20-font);
+    transition: var(--ap20-transition);
+}
+.ap20-filter-btn:hover { border-color: var(--ap20-border-active); color: var(--ap20-text2); }
+.ap20-filter-btn.active { background: var(--ap20-cyan); color: var(--ap20-bg-deep); border-color: var(--ap20-cyan); }
+.ap20-filter-btn.ap20-f-crit.active { background: var(--ap20-crit); border-color: var(--ap20-crit); color: #fff; }
+.ap20-filter-btn.ap20-f-warn.active { background: var(--ap20-warn); border-color: var(--ap20-warn); color: #000; }
+.ap20-filter-btn.ap20-f-info.active { background: var(--ap20-off); border-color: var(--ap20-off); color: #fff; }
+.ap20-search {
+    flex: 1; min-width: 120px;
+    background: var(--ap20-bg-input); border: 1px solid var(--ap20-border);
+    border-radius: var(--ap20-radius-sm); padding: 4px 10px;
+    color: var(--ap20-text); font-size: 12px; font-family: var(--ap20-font);
+}
+.ap20-search:focus { border-color: var(--ap20-cyan); outline: none; }
+
+/* ── Bulk Actions Bar ── */
+.ap20-actions {
+    display: flex; gap: 6px; padding: 6px 16px;
+    border-bottom: 1px solid rgba(255,255,255,.03); flex-shrink: 0;
+}
+
+/* ── View Toggle ── */
+.ap20-views { display: flex; gap: 4px; }
+.ap20-views button { padding: 3px 8px; font-size: 11px; border-radius: 4px; }
+
+/* ── Alarm List ── */
+.ap20-alarm-list { display: flex; flex-direction: column; gap: 2px; }
+.ap20-alarm-row {
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 12px; border-radius: var(--ap20-radius-sm);
+    transition: var(--ap20-transition); border: 1px solid transparent;
+}
+.ap20-alarm-row:hover { background: var(--ap20-bg-card-hover); border-color: var(--ap20-border); }
+
+/* Priority-based row styles */
+.ap20-alarm-row.ap20-alarm-crit    { background: var(--ap20-crit-dim); border-color: rgba(231,76,60,0.3); }
+.ap20-alarm-row.ap20-alarm-warn    { background: var(--ap20-warn-dim); border-color: rgba(243,156,18,0.2); }
+.ap20-alarm-row.ap20-alarm-info    { background: rgba(96,125,139,0.08); border-color: rgba(96,125,139,0.15); }
+.ap20-alarm-row.ap20-alarm-ack     { background: rgba(46,204,113,0.06); border-color: rgba(46,204,113,0.15); }
+.ap20-alarm-row.ap20-alarm-rtn     { background: rgba(91,192,235,0.06); border-color: rgba(91,192,235,0.12); }
+.ap20-alarm-row.ap20-alarm-shelved { background: rgba(96,125,139,0.06); border-color: rgba(96,125,139,0.1); opacity: 0.7; }
+
+/* ── Alarm Row Cells ── */
+.ap20-priority-icon { width: 22px; text-align: center; font-size: 14px; font-weight: 700; flex-shrink: 0; }
+.ap20-tag { flex: 1; font-size: 13px; color: var(--ap20-text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 80px; }
+.ap20-value { font-size: 14px; font-weight: 700; color: var(--ap20-cyan); min-width: 70px; text-align: left; }
+.ap20-state {
+    font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 10px;
+    min-width: 70px; text-align: center; flex-shrink: 0;
+}
+.ap20-state-unack   { background: rgba(231,76,60,0.2); color: #ff6b6b; }
+.ap20-state-ack     { background: var(--ap20-ok-dim); color: var(--ap20-ok); }
+.ap20-state-rtn     { background: rgba(91,192,235,0.15); color: var(--ap20-cyan); }
+.ap20-state-shelved { background: rgba(96,125,139,0.15); color: var(--ap20-off); }
+.ap20-duration { font-size: 11px; color: var(--ap20-text3); min-width: 60px; text-align: left; }
+
+/* ── Per-Alarm Action Buttons ── */
+.ap20-alarm-actions { display: flex; gap: 4px; flex-shrink: 0; }
+.ap20-alarm-actions button {
+    font-size: 10px; padding: 2px 8px; border-radius: 4px;
+    cursor: pointer; font-family: var(--ap20-font); transition: var(--ap20-transition);
+}
+.ap20-btn-ack { background: rgba(46,204,113,0.15); border: 1px solid rgba(46,204,113,0.3); color: var(--ap20-ok); }
+.ap20-btn-ack:hover { background: rgba(46,204,113,0.3); }
+.ap20-btn-shelve { background: rgba(96,125,139,0.15); border: 1px solid rgba(96,125,139,0.3); color: var(--ap20-off); }
+.ap20-btn-shelve:hover { background: rgba(96,125,139,0.3); }
+
+/* ── List Header Row ── */
+.ap20-list-hdr {
+    display: flex; align-items: center; gap: 10px;
+    padding: 6px 12px; font-size: 11px; color: var(--ap20-text3);
+    font-weight: 600; border-bottom: 2px solid var(--ap20-border);
+}
+.ap20-list-hdr .ap20-priority-icon { font-size: 11px; }
+
+/* ── Critical Unack Pulse Animation ── */
+.ap20-pulse-crit { animation: ap20pulse 1.5s ease-in-out infinite; }
+@keyframes ap20pulse {
+    0%, 100% { box-shadow: 0 0 4px rgba(231,76,60,0.3); }
+    50% { box-shadow: 0 0 16px rgba(231,76,60,0.7), 0 0 30px rgba(231,76,60,0.3); }
+}
+
+/* ── History Log ── */
+.ap20-history-list { display: flex; flex-direction: column; gap: 1px; }
+.ap20-history-row {
+    display: flex; align-items: center; gap: 10px;
+    padding: 6px 12px; font-size: 12px;
+    border-bottom: 1px solid rgba(255,255,255,.03);
+    transition: var(--ap20-transition);
+}
+.ap20-history-row:hover { background: var(--ap20-bg-card-hover); }
+.ap20-hist-time { font-size: 11px; color: var(--ap20-text3); min-width: 70px; flex-shrink: 0; }
+.ap20-hist-action { font-size: 11px; font-weight: 600; min-width: 80px; flex-shrink: 0; }
+.ap20-hist-action-trigger { color: var(--ap20-crit); }
+.ap20-hist-action-ack, .ap20-hist-action-ack_rtn, .ap20-hist-action-ack_all { color: var(--ap20-ok); }
+.ap20-hist-action-rtn { color: var(--ap20-cyan); }
+.ap20-hist-action-shelve, .ap20-hist-action-unshelve { color: var(--ap20-off); }
+.ap20-hist-action-clear { color: var(--ap20-text3); }
+.ap20-hist-tag { flex: 1; color: var(--ap20-text2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ap20-hist-detail { font-size: 11px; color: var(--ap20-text3); max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ap20-hist-priority { width: 18px; text-align: center; font-size: 12px; flex-shrink: 0; }
+
+/* ── Stats Grid ── */
+.ap20-stats { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 8px; margin-bottom: 12px; }
+.ap20-stat-card { background: var(--ap20-bg-card); border: 1px solid var(--ap20-border); border-radius: var(--ap20-radius-sm); padding: 10px 12px; }
+.ap20-stat-label { font-size: 10px; color: var(--ap20-text3); margin-bottom: 2px; }
+.ap20-stat-val { font-size: 18px; font-weight: 700; color: var(--ap20-text); }
+
+/* ── Summary Count Cards (summary view) ── */
+.ap20-count-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; margin-bottom: 16px; }
+.ap20-count-card {
+    background: var(--ap20-bg-card); border: 1px solid var(--ap20-border);
+    border-radius: var(--ap20-radius); padding: 16px; text-align: center;
+}
+.ap20-count-val { font-size: 32px; font-weight: 800; }
+.ap20-count-label { font-size: 11px; color: var(--ap20-text3); }

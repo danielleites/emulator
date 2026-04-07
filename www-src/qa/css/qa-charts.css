@@ -1,0 +1,241 @@
+/* ============================================================
+   qa-charts.css — Chart styles and data visualization helpers
+   ============================================================ */
+
+/* ─── Chart Wrapper ──────────────────────────────────────────── */
+.chart-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.chart-wrapper canvas {
+  display: block;
+  width: 100% !important;
+}
+
+/* Responsive canvas sizing */
+.chart-donut-wrap {
+  width: 100%;
+  max-width: 240px;
+  margin: 0 auto;
+  aspect-ratio: 1;
+}
+
+.chart-donut-wrap canvas {
+  width: 100% !important;
+  height: auto !important;
+  aspect-ratio: 1;
+}
+
+/* ─── Dashboard Row ──────────────────────────────────────────── */
+.charts-row {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 16px;
+  align-items: start;
+}
+
+.charts-row-3 {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 16px;
+}
+
+/* ─── Chart Loading Skeleton ─────────────────────────────────── */
+.chart-skeleton {
+  background: linear-gradient(90deg, 
+    var(--bg-elevated) 25%, 
+    var(--bg-hover) 50%, 
+    var(--bg-elevated) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 8px;
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* ─── Health Score Ring ──────────────────────────────────────── */
+.health-ring-container {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100px;
+  height: 100px;
+}
+
+.health-ring-svg {
+  transform: rotate(-90deg);
+  position: absolute;
+}
+
+.health-ring-bg {
+  fill: none;
+  stroke: var(--bg-elevated);
+  stroke-width: 8;
+}
+
+.health-ring-fill {
+  fill: none;
+  stroke-width: 8;
+  stroke-linecap: round;
+  transition: stroke-dasharray 1s ease;
+}
+
+.health-ring-label {
+  text-align: center;
+  position: relative;
+  z-index: 1;
+}
+
+.health-ring-value {
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.health-ring-unit {
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+/* ─── Mini Score Indicators ──────────────────────────────────── */
+.score-indicators {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.score-indicator {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 8px;
+  background: var(--bg-surface);
+  border-radius: 6px;
+  border: 1px solid var(--border);
+}
+
+.score-indicator-value {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.score-indicator-label {
+  font-size: 10px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+/* ─── Trend indicator ────────────────────────────────────────── */
+.trend-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.trend-indicator.up { color: var(--green); }
+.trend-indicator.down { color: var(--red); }
+.trend-indicator.flat { color: var(--text-muted); }
+
+/* ─── Legend items ───────────────────────────────────────────── */
+.chart-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 12px;
+  justify-content: center;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+.legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.legend-dot.error { background: var(--red); }
+.legend-dot.warning { background: var(--orange); }
+.legend-dot.pass { background: var(--teal); }
+.legend-dot.info { background: var(--text-muted); }
+
+/* ─── Issue counter chips ────────────────────────────────────── */
+.issue-chips {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+.issue-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 8px;
+}
+
+.issue-chip.errors {
+  background: rgba(230,57,70,0.15);
+  color: var(--red);
+}
+
+.issue-chip.warnings {
+  background: rgba(255,107,53,0.15);
+  color: var(--orange);
+}
+
+.issue-chip.passes {
+  background: rgba(0,212,255,0.1);
+  color: var(--teal);
+}
+
+/* ─── Score color classes ────────────────────────────────────── */
+.score-high { color: var(--teal); }
+.score-medium { color: var(--orange); }
+.score-low { color: var(--red); }
+
+.bg-score-high { background: rgba(0,212,255,0.12); }
+.bg-score-medium { background: rgba(255,107,53,0.12); }
+.bg-score-low { background: rgba(230,57,70,0.12); }
+
+/* ─── Animated counter ───────────────────────────────────────── */
+.count-animate {
+  display: inline-block;
+  transition: opacity 0.3s ease;
+}
+
+/* ─── Responsive charts ──────────────────────────────────────── */
+@media (max-width: 768px) {
+  .charts-row {
+    grid-template-columns: 1fr;
+  }
+  .charts-row-3 {
+    grid-template-columns: 1fr 1fr;
+  }
+  .chart-donut-wrap {
+    max-width: 180px;
+  }
+}
+
+@media (max-width: 480px) {
+  .charts-row-3 {
+    grid-template-columns: 1fr;
+  }
+}

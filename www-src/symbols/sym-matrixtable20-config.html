@@ -1,0 +1,24 @@
+<div class="config-form">
+  <div class="config-group">
+    <label>כותרת</label>
+    <input type="text" ng-model="config.Title">
+  </div>
+  <div class="config-group">
+    <label>ערך מינימום</label>
+    <input type="number" ng-model="config.minVal">
+    <label>ערך מקסימום</label>
+    <input type="number" ng-model="config.maxVal">
+  </div>
+  <div class="config-group">
+    <label>סף אזהרה</label>
+    <input type="number" ng-model="config.warnThreshold">
+    <label>סף קריטי</label>
+    <input type="number" ng-model="config.critThreshold">
+  </div>
+  <div class="config-group">
+    <label><input type="checkbox" ng-model="config.enableCrossFilter"> סינון צולב</label>
+  </div>
+  <div class="config-group">
+    <label><input type="checkbox" ng-model="config.enableDrillthrough"> ניווט פרטים</label>
+  </div>
+</div>

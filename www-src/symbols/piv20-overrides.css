@@ -1,0 +1,11 @@
+/* piv20-overrides.css — Emulator-specific style overrides */
+/* Ensures symbols render correctly outside of PI Vision */
+.piv20-symbol-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  font-family: var(--piv-font, 'Heebo', sans-serif);
+  color: var(--piv-text, #ccd6f6);
+  direction: rtl;
+}

@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40" width="40" height="40">
+  <rect width="40" height="40" rx="8" fill="#0B1525"/>
+  <!-- Cost walk: rising bridge bars in red/orange tones -->
+  <rect x="4" y="16" width="8" height="8" rx="2" fill="#2A7FC1"/>
+  <rect x="12" y="12" width="5" height="4" rx="1" fill="#E74C3C"/>
+  <rect x="17" y="10" width="5" height="4" rx="1" fill="#E74C3C"/>
+  <rect x="22" y="8" width="5" height="4" rx="1" fill="#E74C3C"/>
+  <rect x="27" y="13" width="5" height="4" rx="1" fill="#27AE60"/>
+  <rect x="4" y="26" width="28" height="6" rx="2" fill="#1A5A8A"/>
+  <text x="20" y="36" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="6" fill="#5BA8E0">COST WALK</text>
+</svg>

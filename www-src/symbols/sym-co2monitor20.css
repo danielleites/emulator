@@ -1,0 +1,80 @@
+/* ================================================================
+   sym-co2monitor20.css — CO2 Monitor / Quota Tracker v20
+   ================================================================ */
+.cm20-root {
+    --cm20-bg: #060C18; --cm20-surface: #0B1D33; --cm20-border: rgba(46,139,192,0.15);
+    --cm20-accent: #5BC0EB; --cm20-text1: #FFFFFF; --cm20-text2: #C0D0E0; --cm20-text3: #8BACC4;
+    --cm20-good: #2ecc71; --cm20-warn: #f39c12; --cm20-crit: #e74c3c; --cm20-co2: #e74c3c;
+    position: relative; width: 100%; height: 100%; background: var(--cm20-bg);
+    color: var(--cm20-text2); font-family: 'Segoe UI', Arial, sans-serif; font-size: 12px;
+    direction: rtl; overflow: hidden; display: flex; flex-direction: column;
+}
+.cm20-hdr {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 6px 10px; background: var(--cm20-surface); border-bottom: 1px solid var(--cm20-border); flex-shrink: 0;
+}
+.cm20-ttl { font-size: 14px; font-weight: 600; color: var(--cm20-text1); }
+.cm20-btn {
+    background: rgba(91,192,235,0.08); border: 1px solid var(--cm20-border);
+    color: var(--cm20-text3); border-radius: 4px; padding: 4px 8px; font-size: 11px; cursor: pointer;
+}
+.cm20-btn:hover, .cm20-btn.active { background: rgba(91,192,235,0.2); color: var(--cm20-accent); }
+.cm20-tabs { display: flex; gap: 2px; }
+.cm20-live { font-size: 11px; color: var(--cm20-text3); display: flex; align-items: center; gap: 4px; }
+.cm20-live-dot { width: 6px; height: 6px; border-radius: 50%; background: #2ecc71; animation: cm20-pulse 2s infinite; }
+@keyframes cm20-pulse { 0%,100% { opacity:1 } 50% { opacity:0.4 } }
+
+/* Quota progress bars */
+.cm20-quotas { padding: 8px 10px; display: flex; flex-direction: column; gap: 8px; }
+.cm20-quota { background: var(--cm20-surface); border-radius: 6px; padding: 8px 12px; }
+.cm20-quota-hdr { display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 4px; }
+.cm20-quota-label { color: var(--cm20-text3); }
+.cm20-quota-pct { font-weight: 600; }
+.cm20-quota-pct.ok { color: var(--cm20-good); }
+.cm20-quota-pct.warn { color: var(--cm20-warn); }
+.cm20-quota-pct.crit { color: var(--cm20-crit); }
+.cm20-quota-bar { height: 8px; background: rgba(91,192,235,0.1); border-radius: 4px; overflow: hidden; }
+.cm20-quota-fill { height: 100%; border-radius: 4px; transition: width 0.5s ease; }
+.cm20-quota-fill.ok { background: var(--cm20-good); }
+.cm20-quota-fill.warn { background: var(--cm20-warn); }
+.cm20-quota-fill.crit { background: var(--cm20-crit); }
+.cm20-quota-sub { display: flex; justify-content: space-between; font-size: 10px; color: var(--cm20-text3); margin-top: 2px; }
+
+/* Summary strip */
+.cm20-summary { display: flex; gap: 12px; padding: 4px 10px; background: rgba(11,29,51,0.6); border-bottom: 1px solid var(--cm20-border); font-size: 11px; color: var(--cm20-text3); flex-shrink: 0; flex-wrap: wrap; }
+.cm20-sum-item { white-space: nowrap; }
+
+.cm20-body { flex: 1; overflow-y: auto; overflow-x: hidden; position: relative; }
+.cm20-empty { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 200px; color: var(--cm20-text3); }
+
+/* Unit rows */
+.cm20-unit-row { display: flex; align-items: center; gap: 8px; padding: 5px 8px; border-bottom: 1px solid rgba(46,139,192,0.08); font-size: 11px; }
+.cm20-unit-name { min-width: 80px; color: var(--cm20-text1); font-weight: 500; }
+.cm20-unit-val { min-width: 60px; text-align: left; }
+.cm20-unit-fuel { display: inline-block; padding: 1px 6px; border-radius: 3px; font-size: 10px; }
+.cm20-unit-status { font-size: 10px; font-weight: 600; }
+
+/* Chart */
+.cm20-chart-wrap { padding: 8px; }
+.cm20-canvas { width: 100%; height: 160px; }
+
+/* Alerts */
+.cm20-alert { display: flex; gap: 6px; padding: 4px 8px; font-size: 11px; border-bottom: 1px solid rgba(46,139,192,0.08); }
+
+/* Compact cards */
+.cm20-compact { display: flex; flex-wrap: wrap; gap: 8px; padding: 12px; }
+.cm20-compact-item { background: var(--cm20-surface); border-right: 3px solid var(--cm20-accent); border-radius: 4px; padding: 6px 10px; min-width: 80px; }
+.cm20-compact-label { color: var(--cm20-text3); display: block; font-size: 10px; }
+.cm20-compact-val { color: var(--cm20-text1); font-weight: 600; font-size: 16px; }
+
+/* Side panel */
+.cm20-panel { position: absolute; top: 0; left: -280px; width: 270px; height: 100%; background: var(--cm20-surface); border-right: 1px solid var(--cm20-border); transition: left 0.3s; z-index: 100; overflow-y: auto; padding: 0 10px 10px; }
+.cm20-panel.open { left: 0; box-shadow: 4px 0 20px rgba(0,0,0,0.4); }
+.cm20-phd { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; }
+.cm20-phd h3 { margin: 0; font-size: 13px; color: var(--cm20-accent); }
+.cm20-pcl { background: none; border: none; color: var(--cm20-text3); font-size: 16px; cursor: pointer; }
+.cm20-ps { margin-bottom: 8px; }
+.cm20-ps label { display: block; font-size: 11px; color: var(--cm20-text3); margin-bottom: 3px; }
+.cm20-ps input[type=text], .cm20-ps input[type=number], .cm20-ps select { width: 100%; background: var(--cm20-bg); border: 1px solid var(--cm20-border); border-radius: 4px; padding: 5px 8px; color: var(--cm20-text1); font-size: 12px; }
+
+.cm20-ftr { padding: 3px 10px; font-size: 10px; color: rgba(139,172,196,0.4); text-align: center; border-top: 1px solid var(--cm20-border); flex-shrink: 0; }

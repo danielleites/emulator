@@ -1,0 +1,245 @@
+<!-- sym-trendchart20-template.html  --  Canvas Trend Chart v20 Template -->
+<!-- Extracted from v10 inline template, all classes prefixed tc20-. -->
+<!-- External CSS: sym-trendchart20.css | Plugin: piv20-trendchart.js -->
+
+<!-- ── External Dependencies ── -->
+<link rel="stylesheet" href="/PIVision/Scripts/app/editor/symbols/ext/sym-trendchart20.css">
+<link rel="stylesheet" href="/PIVision/Scripts/app/editor/symbols/ext/piv20-design-system.css">
+<link rel="stylesheet" href="/PIVision/Scripts/app/editor/symbols/ext/piv20-overrides.css">
+<script type="text/javascript" src="/PIVision/Scripts/app/editor/symbols/ext/piv20-plugins/piv20-core.js"></script>
+<script type="text/javascript" src="/PIVision/Scripts/app/editor/symbols/ext/piv20-plugins/piv20-trendchart.js"></script>
+
+<!-- ── Root Container ── -->
+<div class="piv20 tc20-root" dir="rtl">
+
+    <!-- Hidden widget mount point -->
+    <div id="tc20-widget" style="display:none"></div>
+
+    <!-- Toast container -->
+    <div class="tc20-toast-container"></div>
+
+    <!-- ════════════════════════════════════════ -->
+    <!--  HEADER                                  -->
+    <!-- ════════════════════════════════════════ -->
+    <div class="tc20-hdr">
+        <div style="display:flex;align-items:center;gap:10px">
+            <span class="tc20-ttl">{{config.Title || '\ג\ר\ף \מ\ג\מ\ו\ת'}}</span>
+
+            <!-- Playback badge -->
+            <span class="tc20-playback-badge" ng-show="playbackMode">
+                &#9654; \ה\פ\ע\ל\ה
+            </span>
+
+            <!-- AF Connection badge -->
+            <span ng-show="afConn"
+                  ng-class="{'tc20-af-badge': true,
+                             'tc20-af-good': afConn.pct >= 80,
+                             'tc20-af-warn': afConn.pct >= 50 && afConn.pct < 80,
+                             'tc20-af-bad':  afConn.pct < 50}">
+                <span class="tc20-af-dot"></span>
+                AF {{afConn.pct}}%
+            </span>
+        </div>
+
+        <div class="tc20-toolbar">
+            <!-- Analysis overlays -->
+            <button class="tc20-btn" ng-class="{active: showTrendLine}" ng-click="toggleTrendLine()"
+                    title="\ק\ו \מ\ג\מ\ה">
+                \↗ Trend
+            </button>
+            <button class="tc20-btn" ng-class="{active: showEWMA}" ng-click="toggleEWMA()"
+                    title="\ה\ח\ל\ק\ה \א\ק\ס\פ\ו\נ\נ\צ\י\א\ל\י\ת">
+                \∿ EWMA
+            </button>
+            <span style="width:1px;height:18px;background:rgba(46,139,192,0.2)"></span>
+
+            <!-- Playback toggle -->
+            <button class="tc20-btn" ng-show="!playbackMode" ng-click="enterPlayback()"
+                    title="\כ\נ\י\ס\ה \ל\מ\צ\ב \ה\פ\ע\ל\ה">
+                &#9654; \ה\פ\ע\ל\ה
+            </button>
+            <button class="tc20-btn" style="color:var(--tc20-crit)" ng-show="playbackMode" ng-click="exitPlayback()"
+                    title="\ח\ז\ר\ה \ל\ש\י\ד\ו\ר \ח\י">
+                &#10005; \צ\א \מ\ה\פ\ע\ל\ה
+            </button>
+            <span style="width:1px;height:18px;background:rgba(46,139,192,0.2)"></span>
+
+            <!-- Export -->
+            <button class="tc20-btn" ng-click="exportData()" title="\י\י\צ\ו\א CSV">
+                &#9660; CSV
+            </button>
+
+            <!-- Side panel toggle -->
+            <button class="tc20-btn" ng-click="toggleSidePanel()" title="\ה\ג\ד\ר\ו\ת">
+                &#9881;
+            </button>
+
+            <!-- Live indicator -->
+            <div class="tc20-live" ng-show="!playbackMode">
+                <span class="tc20-live-dot"></span>
+                <span>{{liveTime}}</span>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ════════════════════════════════════════ -->
+    <!--  TIME RANGE CONTROLS                     -->
+    <!-- ════════════════════════════════════════ -->
+    <div class="tc20-controls" ng-show="!playbackMode">
+        <span style="font-size:11px;color:var(--tc20-text3)">\ט\ו\ו\ח:</span>
+        <button class="tc20-range-btn" ng-class="{active: timeRange==='1m'}" ng-click="setTimeRange('1m')">1\ד'</button>
+        <button class="tc20-range-btn" ng-class="{active: timeRange==='5m'}" ng-click="setTimeRange('5m')">5\ד'</button>
+        <button class="tc20-range-btn" ng-class="{active: timeRange==='15m'}" ng-click="setTimeRange('15m')">15\ד'</button>
+        <button class="tc20-range-btn" ng-class="{active: timeRange==='1h'}" ng-click="setTimeRange('1h')">1\ש'</button>
+        <button class="tc20-range-btn" ng-class="{active: timeRange==='4h'}" ng-click="setTimeRange('4h')">4\ש'</button>
+    </div>
+
+
+    <!-- ════════════════════════════════════════ -->
+    <!--  PLAYBACK BAR                            -->
+    <!-- ════════════════════════════════════════ -->
+    <div class="tc20-playback-bar" ng-show="playbackMode">
+        <!-- Play / Pause -->
+        <button class="tc20-pb-btn" ng-show="!playbackPlaying" ng-click="playbackPlay()">&#9654;</button>
+        <button class="tc20-pb-btn" ng-show="playbackPlaying" ng-click="playbackPause()">&#10074;&#10074;</button>
+
+        <!-- Step controls -->
+        <button class="tc20-pb-btn" ng-click="playbackStep(-10)" title="-10">&laquo;</button>
+        <button class="tc20-pb-btn" ng-click="playbackStep(-1)" title="-1">&lsaquo;</button>
+        <button class="tc20-pb-btn" ng-click="playbackStep(1)" title="+1">&rsaquo;</button>
+        <button class="tc20-pb-btn" ng-click="playbackStep(10)" title="+10">&raquo;</button>
+
+        <!-- Slider -->
+        <input type="range" class="tc20-pb-slider" min="0"
+               ng-attr-max="{{playbackMaxSteps}}"
+               ng-model="playbackIndex"
+               ng-change="onPlaybackSlider()">
+
+        <!-- Time display -->
+        <span class="tc20-pb-time">{{playbackTime}}</span>
+
+        <!-- Speed buttons -->
+        <div class="tc20-pb-speed">
+            <button class="tc20-pb-speed-btn" ng-class="{active: playbackSpeed===2000}" ng-click="playbackSetSpeed(2000)">0.5x</button>
+            <button class="tc20-pb-speed-btn" ng-class="{active: playbackSpeed===1000}" ng-click="playbackSetSpeed(1000)">1x</button>
+            <button class="tc20-pb-speed-btn" ng-class="{active: playbackSpeed===500}" ng-click="playbackSetSpeed(500)">2x</button>
+            <button class="tc20-pb-speed-btn" ng-class="{active: playbackSpeed===250}" ng-click="playbackSetSpeed(250)">4x</button>
+        </div>
+
+        <!-- Exit playback -->
+        <button class="tc20-pb-btn exit" ng-click="exitPlayback()">&#10005; \ח\י</button>
+    </div>
+
+
+    <!-- ════════════════════════════════════════ -->
+    <!--  CHART CANVAS                            -->
+    <!-- ════════════════════════════════════════ -->
+    <div class="tc20-canvas-wrap">
+        <!-- Loading state -->
+        <div class="tc20-empty" ng-show="loading && seriesCount === 0">
+            <span style="font-size:32px">\⬡</span>
+            <span>\מ\מ\ת\י\ן \ל\נ\ת\ו\נ\י\ם...</span>
+            <span style="font-size:11px">\ג\ר\ו\ר \ת\ג\י\ו\ת \ל\ס\מ\ל</span>
+        </div>
+
+        <!-- Canvas element -->
+        <canvas class="tc20-canvas"></canvas>
+    </div>
+
+
+    <!-- ════════════════════════════════════════ -->
+    <!--  LEGEND                                  -->
+    <!-- ════════════════════════════════════════ -->
+    <div class="tc20-legend" ng-show="legendItems.length > 0">
+        <div class="tc20-legend-item"
+             ng-repeat="item in legendItems track by item.key"
+             ng-class="{hidden: hiddenSeries[item.key]}"
+             ng-click="toggleSeries(item.key)">
+            <span class="tc20-legend-dot" ng-style="{'background-color': item.color}"></span>
+            <span>{{item.key}}</span>
+            <span class="tc20-legend-value">{{item.last}}</span>
+        </div>
+    </div>
+
+
+    <!-- ════════════════════════════════════════ -->
+    <!--  SIDE PANEL                              -->
+    <!-- ════════════════════════════════════════ -->
+    <div class="tc20-panel" ng-class="{open: showSidePanel}">
+        <div class="tc20-phd">
+            <h3>\ה\ג\ד\ר\ו\ת \ג\ר\ף</h3>
+            <button class="tc20-pcl" ng-click="toggleSidePanel()">&times;</button>
+        </div>
+
+        <!-- Chart Options -->
+        <div class="tc20-ps">
+            <label>\א\פ\ש\ר\ו\י\ו\ת \ת\צ\ו\ג\ה</label>
+            <div style="display:flex;flex-direction:column;gap:6px;margin-top:4px">
+                <label style="font-size:12px;cursor:pointer">
+                    <input type="checkbox" ng-model="showArea" ng-change="setShowArea(showArea)">
+                    \מ\י\ל\ו\י \ש\ט\ח (Area)
+                </label>
+                <label style="font-size:12px;cursor:pointer">
+                    <input type="checkbox" ng-model="showDots" ng-change="setShowDots(showDots)">
+                    \נ\ק\ו\ד\ו\ת (Dots)
+                </label>
+                <label style="font-size:12px;cursor:pointer">
+                    <input type="checkbox" ng-model="showGrid" ng-change="setShowGrid(showGrid)">
+                    \ר\ש\ת (Grid)
+                </label>
+                <label style="font-size:12px;cursor:pointer">
+                    <input type="checkbox" ng-model="showTrendLine" ng-change="toggleTrendLine()">
+                    \ק\ו \מ\ג\מ\ה (Trend)
+                </label>
+                <label style="font-size:12px;cursor:pointer">
+                    <input type="checkbox" ng-model="showEWMA" ng-change="toggleEWMA()">
+                    \ה\ח\ל\ק\ה EWMA
+                </label>
+            </div>
+        </div>
+
+        <!-- Statistics -->
+        <div class="tc20-ps" ng-show="stats && legendItems.length > 0">
+            <label>\ס\ט\ט\י\ס\ט\י\ק\ה</label>
+            <div ng-repeat="item in legendItems track by item.key" style="margin-top:8px">
+                <div style="font-size:12px;color:var(--tc20-cyan);margin-bottom:3px">{{item.key}}</div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:2px 12px;font-size:11px;color:var(--tc20-text2)" ng-show="stats[item.key]">
+                    <span>\מ\י\נ\י\מ\ו\ם: {{stats[item.key].min | number:config.Decimals}}</span>
+                    <span>\מ\ק\ס\י\מ\ו\ם: {{stats[item.key].max | number:config.Decimals}}</span>
+                    <span>\מ\מ\ו\צ\ע: {{stats[item.key].avg | number:config.Decimals}}</span>
+                    <span>\א\ח\ר\ו\ן: {{stats[item.key].last | number:config.Decimals}}</span>
+                    <span>\מ\ג\מ\ה: {{stats[item.key].trend}}</span>
+                    <span>n={{stats[item.key].n}}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- AF Connection -->
+        <div class="tc20-ps" ng-show="afConn">
+            <label>\ח\י\ב\ו\ר AF</label>
+            <div style="font-size:12px;margin-top:4px;color:var(--tc20-text2)">
+                \מ\ח\ו\ב\ר: {{afConn.connected}}/{{afConn.total}} ({{afConn.pct}}%)
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ════════════════════════════════════════ -->
+    <!--  FOOTER                                  -->
+    <!-- ════════════════════════════════════════ -->
+    <div class="tc20-ftr">
+        <span>\נ\ו\ג\ה \— \ג\ר\ף \מ\ג\מ\ו\ת | PIV20 v20.0</span>
+        <div style="display:flex;align-items:center;gap:8px">
+            <span class="tc20-ftr-status" ng-show="!playbackMode">
+                <span class="tc20-ftr-dot ok"></span>
+                <span>\ח\י | {{seriesCount}} \ס\ד\ר\ו\ת</span>
+            </span>
+            <span class="tc20-ftr-status" ng-show="playbackMode">
+                <span class="tc20-ftr-dot pb"></span>
+                <span>\ה\פ\ע\ל\ה | {{playbackTime}}</span>
+            </span>
+        </div>
+    </div>
+
+</div>

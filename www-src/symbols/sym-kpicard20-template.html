@@ -1,0 +1,195 @@
+<link rel="stylesheet" href="/PIVision/Scripts/app/editor/symbols/ext/sym-kpicard20.css">
+<link rel="stylesheet" href="/PIVision/Scripts/app/editor/symbols/ext/piv20-design-system.css">
+<link rel="stylesheet" href="/PIVision/Scripts/app/editor/symbols/ext/piv20-overrides.css">
+<script type="text/javascript" src="/PIVision/Scripts/app/editor/symbols/ext/piv20-plugins/piv20-core.js"></script>
+<script type="text/javascript" src="/PIVision/Scripts/app/editor/symbols/ext/piv20-plugins/piv20-kpicard.js"></script>
+
+<div class="piv20 kpi20-root" role="region" aria-label="לוח כרטיסי KPI">
+
+<!-- Widget container (jQuery widget attaches here) -->
+<div id="kpi20-widget" style="display:none"></div>
+
+<!-- HEADER -->
+<div class="kpi20-hdr">
+    <div>
+        <span class="kpi20-ttl">{{config.Title || 'מדדי KPI'}}</span>
+    </div>
+    <div style="display:flex;gap:6px;align-items:center">
+        <div class="kpi20-views">
+            <button class="kpi20-btn secondary" ng-class="{'active':viewMode==='cards'}" ng-click="setView('cards')" title="תצוגת כרטיסים">&#9638;</button>
+            <button class="kpi20-btn secondary" ng-class="{'active':viewMode==='list'}" ng-click="setView('list')" title="תצוגת רשימה">&#9776;</button>
+        </div>
+        <!-- Status filter buttons (v20 enhancement) -->
+        <div class="kpi20-filters" ng-show="cards.length">
+            <button class="kpi20-filter-btn" ng-class="{'active':activeFilter==='all'}" ng-click="setFilter('all')">הכל ({{summary.total}})</button>
+            <button class="kpi20-filter-btn" ng-class="{'active':activeFilter==='ok'}" ng-click="setFilter('ok')" ng-show="summary.ok">&#9679; {{summary.ok}}</button>
+            <button class="kpi20-filter-btn" ng-class="{'active':activeFilter==='warn'}" ng-click="setFilter('warn')" ng-show="summary.warn">&#9670; {{summary.warn}}</button>
+            <button class="kpi20-filter-btn" ng-class="{'active':activeFilter==='crit'}" ng-click="setFilter('crit')" ng-show="summary.crit">&#9650; {{summary.crit}}</button>
+        </div>
+        <div class="kpi20-live"><span class="kpi20-live-dot"></span>{{liveTime}}</div>
+        <button class="kpi20-btn secondary" ng-click="exportData()" style="padding:4px 8px;font-size:11px" title="ייצוא CSV">&#128229;</button>
+        <button class="kpi20-btn secondary" ng-click="showDocs()" style="padding:4px 8px;font-size:11px" title="מדריך">&#128214;</button>
+        <button class="kpi20-btn secondary" ng-click="togglePanel()" style="padding:4px 8px;font-size:11px" title="הגדרות">&#9881;</button>
+    </div>
+</div>
+
+<!-- SUMMARY BAR -->
+<div class="kpi20-summary" ng-show="cards.length">
+    <span class="kpi20-sum-badge kpi20-sum-ok" ng-show="summary.ok">&#9679; {{summary.ok}} תקין</span>
+    <span class="kpi20-sum-badge kpi20-sum-warn" ng-show="summary.warn">&#9670; {{summary.warn}} אזהרה</span>
+    <span class="kpi20-sum-badge kpi20-sum-crit" ng-show="summary.crit">&#9650; {{summary.crit}} קריטי</span>
+    <span class="kpi20-sum-msg">{{summary.message}}</span>
+    <span style="font-size:11px;color:var(--kpi20-text3)">{{summary.total}} כרטיסים</span>
+</div>
+
+<!-- BODY -->
+<div class="kpi20-body">
+
+    <!-- Empty state -->
+    <div class="kpi20-empty" ng-show="!cards.length">
+        <div style="font-size:40px;opacity:0.3">&#128202;</div>
+        <div>גרור תגים להצגת כרטיסי KPI</div>
+    </div>
+
+    <!-- ═══ CARDS VIEW ═══ -->
+    <div class="kpi20-grid" ng-show="viewMode==='cards' && cards.length">
+        <div class="kpi20-card size-{{config.CardSize || 'medium'}}"
+             ng-class="{'kpi20-crit': c.statusLevel==='crit'}"
+             ng-repeat="c in getFilteredCards() track by c.idx"
+             ng-click="expandCard(c.idx)"
+             title="{{c.fullPath}} | {{c.quality.label}} | {{c.timestamp}}">
+
+            <!-- Status bar -->
+            <div class="kpi20-status-bar" ng-style="{'background': c.statusColor}"></div>
+
+            <!-- Title with ISA-101 shape -->
+            <div class="kpi20-card-title">
+                <span class="kpi20-shape" ng-style="{'color': c.statusColor}">{{c.statusShape}}</span>
+                <span>{{c.label}}</span>
+                <span ng-show="c.stale" style="color:var(--kpi20-warn);font-size:9px" title="נתון ישן">&#9888;</span>
+            </div>
+
+            <!-- Value + Unit -->
+            <div class="kpi20-val-row">
+                <span class="kpi20-val" ng-style="{'color': c.statusLevel==='crit' ? config.criticalColor : c.statusLevel==='warn' ? config.warningColor : config.accentColor}">{{c.display}}</span>
+                <span class="kpi20-unit">{{c.unit}}</span>
+            </div>
+
+            <!-- Trend + Delta -->
+            <div class="kpi20-meta-row">
+                <span class="kpi20-trend" ng-show="config.ShowTrend"
+                      ng-style="{'color': c.trendColor, 'background': c.trendDir==='up' ? 'var(--kpi20-ok-dim)' : c.trendDir==='down' ? 'var(--kpi20-crit-dim)' : 'rgba(90,122,148,0.15)'}">
+                    {{c.trendArrow}} {{c.trendPct}}%
+                </span>
+                <span class="kpi20-delta" ng-show="config.ShowDelta && c.deltaStr"
+                      ng-style="{'color': c.deltaColor, 'background': c.delta > 0 ? 'var(--kpi20-ok-dim)' : c.delta < 0 ? 'var(--kpi20-crit-dim)' : 'transparent'}">
+                    {{c.deltaStr}}
+                </span>
+                <span class="kpi20-outlier" ng-show="c.isOutlier" title="ערך חריג סטטיסטי">&#x26A0; חריג</span>
+            </div>
+
+            <!-- Min / Max -->
+            <div class="kpi20-minmax" ng-show="config.ShowMinMax">
+                <span>&#9660; {{c.statMin}}</span>
+                <span>&#9650; {{c.statMax}}</span>
+                <span>&#216; {{c.statAvg}}</span>
+            </div>
+
+            <!-- Sparkline Canvas -->
+            <div class="kpi20-spark" ng-show="config.ShowSparkline">
+                <canvas class="kpi20-spark-canvas" data-card-idx="{{c.idx}}"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══ LIST VIEW ═══ -->
+    <div ng-show="viewMode==='list' && cards.length">
+        <div class="kpi20-list-row" style="font-weight:600;font-size:11px;color:var(--kpi20-text3);cursor:default;border-bottom:2px solid var(--kpi20-border)">
+            <span class="kpi20-list-shape"></span>
+            <span class="kpi20-list-label">שם</span>
+            <span class="kpi20-list-val" style="font-size:11px;font-weight:600">ערך</span>
+            <span class="kpi20-list-unit">יחידה</span>
+            <span class="kpi20-list-trend">מגמה</span>
+            <span class="kpi20-list-delta">שינוי</span>
+            <span class="kpi20-list-status">סטטוס</span>
+        </div>
+        <div class="kpi20-list-row" ng-repeat="c in getFilteredCards() track by c.idx" ng-click="expandCard(c.idx)">
+            <span class="kpi20-list-shape" ng-style="{'color': c.statusColor}">{{c.statusShape}}</span>
+            <span class="kpi20-list-label">{{c.label}}</span>
+            <span class="kpi20-list-val" ng-style="{'color': c.statusLevel==='crit' ? config.criticalColor : c.statusLevel==='warn' ? config.warningColor : config.accentColor}">{{c.display}}</span>
+            <span class="kpi20-list-unit">{{c.unit}}</span>
+            <span class="kpi20-list-trend" ng-style="{'color': c.trendColor}">{{c.trendArrow}}</span>
+            <span class="kpi20-list-delta" ng-style="{'color': c.deltaColor}">{{c.deltaStr}}</span>
+            <span class="kpi20-list-status" ng-style="{'color': c.statusColor, 'background': c.statusLevel==='crit' ? 'var(--kpi20-crit-dim)' : c.statusLevel==='warn' ? 'var(--kpi20-warn-dim)' : 'var(--kpi20-ok-dim)'}">{{c.statusLabel}}</span>
+        </div>
+    </div>
+
+    <!-- ═══ DETAIL VIEW ═══ -->
+    <div class="kpi20-detail" ng-show="viewMode==='detail' && expandedIdx >= 0 && cards[expandedIdx]">
+        <div class="kpi20-detail-back" ng-click="collapseDetail()">&#8594; חזרה לכרטיסים</div>
+        <div class="kpi20-detail-header">
+            <div class="kpi20-card-title" style="font-size:14px;margin-bottom:8px">
+                <span class="kpi20-shape" ng-style="{'color': cards[expandedIdx].statusColor}">{{cards[expandedIdx].statusShape}}</span>
+                {{cards[expandedIdx].label}}
+                <span style="color:var(--kpi20-text3);font-size:11px">{{cards[expandedIdx].fullPath}}</span>
+            </div>
+            <div style="display:flex;align-items:baseline;gap:8px">
+                <span class="kpi20-detail-val" ng-style="{'color': cards[expandedIdx].statusLevel==='crit' ? config.criticalColor : cards[expandedIdx].statusLevel==='warn' ? config.warningColor : config.accentColor}">{{cards[expandedIdx].display}}</span>
+                <span class="kpi20-detail-unit">{{cards[expandedIdx].unit}}</span>
+            </div>
+            <div class="kpi20-meta-row" style="margin-top:8px">
+                <span class="kpi20-trend" ng-style="{'color': cards[expandedIdx].trendColor, 'background': cards[expandedIdx].trendDir==='up' ? 'var(--kpi20-ok-dim)' : cards[expandedIdx].trendDir==='down' ? 'var(--kpi20-crit-dim)' : 'rgba(90,122,148,0.15)'}">
+                    {{cards[expandedIdx].trendArrow}} {{cards[expandedIdx].trendPct}}%
+                </span>
+                <span class="kpi20-delta" ng-style="{'color': cards[expandedIdx].deltaColor}">{{cards[expandedIdx].deltaStr}}</span>
+                <span class="kpi20-outlier" ng-show="cards[expandedIdx].isOutlier">&#x26A0; ערך חריג</span>
+                <span style="font-size:11px;color:var(--kpi20-text3)">{{cards[expandedIdx].statusLabel}} | {{cards[expandedIdx].quality.label}} | {{cards[expandedIdx].timestamp}}</span>
+            </div>
+        </div>
+        <!-- Stats grid -->
+        <div class="kpi20-detail-stats">
+            <div class="kpi20-stat-cell"><div class="kpi20-stat-label">מינ'</div><div class="kpi20-stat-val">{{cards[expandedIdx].statMin}}</div></div>
+            <div class="kpi20-stat-cell"><div class="kpi20-stat-label">מקס'</div><div class="kpi20-stat-val">{{cards[expandedIdx].statMax}}</div></div>
+            <div class="kpi20-stat-cell"><div class="kpi20-stat-label">ממוצע</div><div class="kpi20-stat-val">{{cards[expandedIdx].statAvg}}</div></div>
+            <div class="kpi20-stat-cell"><div class="kpi20-stat-label">סטיית תקן</div><div class="kpi20-stat-val">{{cards[expandedIdx].statStdDev}}</div></div>
+            <div class="kpi20-stat-cell"><div class="kpi20-stat-label">P5</div><div class="kpi20-stat-val">{{cards[expandedIdx].statP5}}</div></div>
+            <div class="kpi20-stat-cell"><div class="kpi20-stat-label">P50 (חציון)</div><div class="kpi20-stat-val">{{cards[expandedIdx].statP50}}</div></div>
+            <div class="kpi20-stat-cell"><div class="kpi20-stat-label">P95</div><div class="kpi20-stat-val">{{cards[expandedIdx].statP95}}</div></div>
+            <div class="kpi20-stat-cell"><div class="kpi20-stat-label">EWMA</div><div class="kpi20-stat-val">{{cards[expandedIdx].statEwma}}</div></div>
+            <div class="kpi20-stat-cell"><div class="kpi20-stat-label">דגימות</div><div class="kpi20-stat-val">{{cards[expandedIdx].statN}}</div></div>
+        </div>
+        <!-- Detail sparkline (larger) -->
+        <div class="kpi20-detail-spark">
+            <canvas class="kpi20-spark-canvas" data-card-idx="{{expandedIdx}}"></canvas>
+        </div>
+    </div>
+
+</div>
+
+<!-- SIDE PANEL -->
+<div class="kpi20-panel" ng-class="{'open':panelOpen}">
+    <div class="kpi20-phd"><h3>&#9881; הגדרות KPI</h3><button class="kpi20-pcl" ng-click="togglePanel()">&#10005;</button></div>
+    <div class="kpi20-ps"><label>כותרת</label><input type="text" ng-model="config.Title"></div>
+    <div class="kpi20-ps"><label>יחידת מידה</label><input type="text" ng-model="config.Unit"></div>
+    <div class="kpi20-ps"><label>ספרות עשרוניות</label><input type="number" ng-model="config.Decimals" min="0" max="6"></div>
+    <div class="kpi20-ps"><label>גודל כרטיס</label>
+        <select ng-model="config.CardSize"><option value="small">קטן</option><option value="medium">בינוני</option><option value="large">גדול</option></select>
+    </div>
+    <div class="kpi20-ps"><label>סף אזהרה</label><input type="number" ng-model="config.WarnThreshold" step="any"></div>
+    <div class="kpi20-ps"><label>סף קריטי</label><input type="number" ng-model="config.CritThreshold" step="any"></div>
+    <div class="kpi20-ps"><label>מצב סף</label>
+        <select ng-model="config.ThresholdMode"><option value="high">גבוה (מעל = אזהרה)</option><option value="low">נמוך (מתחת = אזהרה)</option><option value="dual">דו-כיווני</option></select>
+    </div>
+    <div class="kpi20-ps"><label>נקודות ספרקליין</label><input type="number" ng-model="config.SparklinePoints" min="10" max="200"></div>
+    <div class="kpi20-ps"><label><input type="checkbox" ng-model="config.ShowSparkline"> הצג ספרקליין</label></div>
+    <div class="kpi20-ps"><label><input type="checkbox" ng-model="config.ShowTrend"> הצג מגמה</label></div>
+    <div class="kpi20-ps"><label><input type="checkbox" ng-model="config.ShowDelta"> הצג שינוי</label></div>
+    <div class="kpi20-ps"><label><input type="checkbox" ng-model="config.ShowMinMax"> הצג מינ'/מקס'</label></div>
+    <div class="kpi20-ps"><label>צבע מבטא</label><input type="color" ng-model="config.accentColor" style="width:50px;height:28px"></div>
+    <div class="kpi20-ps"><label>צבע תקין</label><input type="color" ng-model="config.goodColor" style="width:50px;height:28px"></div>
+    <div class="kpi20-ps"><label>צבע אזהרה</label><input type="color" ng-model="config.warningColor" style="width:50px;height:28px"></div>
+    <div class="kpi20-ps"><label>צבע קריטי</label><input type="color" ng-model="config.criticalColor" style="width:50px;height:28px"></div>
+</div>
+
+<div class="kpi20-ftr">נוגה — מנהל מערכת החשמל | PIV20 v20.0</div>
+</div>

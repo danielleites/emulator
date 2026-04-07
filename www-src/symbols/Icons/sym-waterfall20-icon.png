@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+  <rect width="32" height="32" rx="4" fill="#FF9800" opacity="0.15"/>
+  <rect x="1" y="1" width="30" height="30" rx="3" fill="none" stroke="#FF9800" stroke-width="1.5"/>
+  <rect x="5" y="8" width="4" height="12" fill="#FF9800"/><rect x="10" y="12" width="4" height="8" fill="#FF9800" opacity="0.8"/><rect x="15" y="6" width="4" height="14" fill="#FF9800" opacity="0.6"/><rect x="20" y="10" width="4" height="10" fill="#FF9800" opacity="0.9"/>
+  <text x="16" y="28" text-anchor="middle" font-family="Arial,sans-serif" font-size="6" fill="#FF9800" font-weight="bold">WFALL</text>
+</svg>

@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+  <rect width="32" height="32" rx="4" fill="#E91E63" opacity="0.15"/>
+  <rect x="1" y="1" width="30" height="30" rx="3" fill="none" stroke="#E91E63" stroke-width="1.5"/>
+  <circle cx="16" cy="13" r="8" fill="none" stroke="#E91E63" stroke-width="1.5"/><path d="M16 5 L16 13 L23 10" fill="#E91E63" opacity="0.4"/>
+  <text x="16" y="28" text-anchor="middle" font-family="Arial,sans-serif" font-size="6" fill="#E91E63" font-weight="bold">PIE</text>
+</svg>

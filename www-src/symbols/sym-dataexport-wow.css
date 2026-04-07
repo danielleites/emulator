@@ -1,0 +1,458 @@
+/**
+ * ═══════════════════════════════════════════════════════
+ *  sym-dataexport-wow.css — Executive Data Exporter Styles
+ * ═══════════════════════════════════════════════════════
+ *  Glassmorphism UI for the Big Data Exporter.
+ *  Features an SVG circular progress ring with
+ *  stroke-dashoffset animation, action buttons with
+ *  hover/active states, and a form section for
+ *  date range inputs.
+ *
+ *  The SVG ring transition is CSS-driven (transition
+ *  on stroke-dashoffset) — no JavaScript animation
+ *  loop needed.  GPU composited at 60fps.
+ *
+ *  Version : WOW Data Exporter v100
+ *  Prefix  : wow-de-
+ * ═══════════════════════════════════════════════════════
+ */
+
+
+/* ═══ CSS Custom Properties ═══ */
+
+:host {
+    --wow-de-bg-start:     #0A0F1C;
+    --wow-de-bg-end:       #111B2E;
+    --wow-de-surface:      #0F2940;
+    --wow-de-accent:       #5BC0EB;
+    --wow-de-accent-glow:  rgba(91, 192, 235, 0.3);
+    --wow-de-ok:           #00F5D4;
+    --wow-de-warn:         #FF9500;
+    --wow-de-crit:         #FF3B30;
+    --wow-de-text:         #ECF0F1;
+    --wow-de-text-muted:   #8899AA;
+    --wow-de-border:       #1A3A5C;
+    --wow-de-font:         'Segoe UI', Arial, sans-serif;
+    --wow-de-font-size:    12px;
+    --wow-de-radius:       8px;
+    --wow-de-transition:   0.2s ease-out;
+}
+
+
+/* ═══ Safe Reset ═══ */
+
+.wow-de-root { box-sizing: border-box; }
+.wow-de-root *, .wow-de-root *::before, .wow-de-root *::after {
+    box-sizing: border-box;
+}
+
+
+/* ═══ Root Layout ═══ */
+
+.wow-de-root {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    background: linear-gradient(180deg, var(--wow-de-bg-start), var(--wow-de-bg-end));
+    font-family: var(--wow-de-font);
+    font-size: var(--wow-de-font-size);
+    color: var(--wow-de-text);
+    direction: rtl;
+    overflow: hidden;
+    border-radius: var(--wow-de-radius);
+}
+
+
+/* ═══ Toolbar ═══ */
+
+.wow-de-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 14px;
+    min-height: 40px;
+    flex-shrink: 0;
+    border-bottom: 1px solid var(--wow-de-border);
+    background: rgba(10, 15, 28, 0.6);
+    gap: 10px;
+}
+
+.wow-de-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--wow-de-text);
+    letter-spacing: 0.3px;
+    text-shadow: 0 0 12px var(--wow-de-accent-glow);
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.wow-de-toolbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    direction: ltr;
+}
+
+
+/* ═══ Form Section ═══ */
+
+.wow-de-form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 12px 14px;
+    border-bottom: 1px solid rgba(26, 58, 92, 0.5);
+}
+
+.wow-de-field {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1;
+    min-width: 180px;
+}
+
+.wow-de-label {
+    font-size: 10px;
+    color: var(--wow-de-text-muted);
+    font-weight: 600;
+    letter-spacing: 0.2px;
+}
+
+.wow-de-input {
+    padding: 6px 10px;
+    border: 1px solid var(--wow-de-border);
+    border-radius: 6px;
+    background: rgba(15, 41, 64, 0.5);
+    color: var(--wow-de-text);
+    font-family: inherit;
+    font-size: 11px;
+    outline: none;
+    transition: border-color var(--wow-de-transition);
+    direction: ltr;
+}
+
+.wow-de-input:focus {
+    border-color: var(--wow-de-accent);
+    box-shadow: 0 0 0 2px var(--wow-de-accent-glow);
+}
+
+/* Webkit datetime-local color fix */
+.wow-de-input::-webkit-calendar-picker-indicator {
+    filter: invert(0.7);
+}
+
+
+/* ═══════════════════════════════════════════════════
+ *  Progress Ring Section
+ *
+ *  The SVG circle progress uses CSS transition on
+ *  stroke-dashoffset for smooth animation.  The
+ *  percentage text is absolutely positioned at the
+ *  center of the ring.
+ * ═══════════════════════════════════════════════════ */
+
+.wow-de-progress {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px 14px;
+    gap: 12px;
+    flex: 1;
+    min-height: 0;
+}
+
+.wow-de-ring-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.wow-de-ring-svg {
+    filter: drop-shadow(0 0 8px var(--wow-de-accent-glow));
+}
+
+.wow-de-ring-progress {
+    transition: stroke-dashoffset 0.5s ease-out, stroke 0.5s ease;
+}
+
+.wow-de-ring-pct {
+    position: absolute;
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--wow-de-text);
+    font-variant-numeric: tabular-nums;
+    text-shadow: 0 0 10px var(--wow-de-accent-glow);
+}
+
+.wow-de-ring-status {
+    font-size: 12px;
+    color: var(--wow-de-text-muted);
+    text-align: center;
+    min-height: 18px;
+    transition: color 0.3s ease;
+}
+
+.wow-de-status-active {
+    color: var(--wow-de-accent);
+}
+
+.wow-de-status-success {
+    color: var(--wow-de-ok);
+}
+
+.wow-de-status-warning {
+    color: var(--wow-de-warn);
+}
+
+.wow-de-status-error {
+    color: var(--wow-de-crit);
+}
+
+.wow-de-ring-rows {
+    font-size: 11px;
+    color: var(--wow-de-text-muted);
+    font-variant-numeric: tabular-nums;
+    text-align: center;
+}
+
+
+/* ═══ Buttons ═══ */
+
+.wow-de-buttons {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 10px 14px;
+    flex-shrink: 0;
+}
+
+.wow-de-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 20px;
+    border: 1px solid var(--wow-de-border);
+    border-radius: 8px;
+    background: rgba(91, 192, 235, 0.08);
+    color: var(--wow-de-accent);
+    font-size: 12px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all var(--wow-de-transition);
+    white-space: nowrap;
+}
+
+.wow-de-btn:hover {
+    background: rgba(91, 192, 235, 0.18);
+    border-color: var(--wow-de-accent);
+    transform: translateY(-1px);
+}
+
+.wow-de-btn:active {
+    transform: translateY(0);
+}
+
+/* Primary — Export button */
+.wow-de-btn-primary {
+    background: rgba(91, 192, 235, 0.15);
+    border-color: var(--wow-de-accent);
+    color: var(--wow-de-text);
+    box-shadow: 0 0 12px rgba(91, 192, 235, 0.15);
+}
+
+.wow-de-btn-primary:hover {
+    background: rgba(91, 192, 235, 0.25);
+    box-shadow: 0 0 20px rgba(91, 192, 235, 0.25);
+}
+
+/* Danger — Cancel button */
+.wow-de-btn-danger {
+    border-color: rgba(255, 59, 48, 0.4);
+    background: rgba(255, 59, 48, 0.08);
+    color: var(--wow-de-crit);
+}
+
+.wow-de-btn-danger:hover {
+    background: rgba(255, 59, 48, 0.18);
+    border-color: var(--wow-de-crit);
+}
+
+/* Success — Download button */
+.wow-de-btn-success {
+    border-color: rgba(0, 245, 212, 0.4);
+    background: rgba(0, 245, 212, 0.08);
+    color: var(--wow-de-ok);
+}
+
+.wow-de-btn-success:hover {
+    background: rgba(0, 245, 212, 0.18);
+    border-color: var(--wow-de-ok);
+}
+
+
+/* ═══ Stats Bar ═══ */
+
+.wow-de-stats {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 4px 14px;
+    flex-shrink: 0;
+    font-size: 10px;
+    color: var(--wow-de-text-muted);
+    border-bottom: 1px solid rgba(26, 58, 92, 0.5);
+    direction: rtl;
+    min-height: 22px;
+}
+
+.wow-de-stat {
+    white-space: nowrap;
+}
+
+.wow-de-stat b {
+    color: var(--wow-de-text);
+    font-weight: 600;
+}
+
+
+/* ═══ Skeleton / Loading ═══ */
+
+.wow-de-skeleton {
+    position: absolute;
+    inset: 0;
+    z-index: 50;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--wow-de-bg-start);
+}
+
+.wow-de-skeleton::after {
+    content: '';
+    width: 50%;
+    height: 3px;
+    border-radius: 2px;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        var(--wow-de-accent),
+        transparent
+    );
+    animation: wowDeShimmer 1.5s ease-in-out infinite;
+}
+
+@keyframes wowDeShimmer {
+    0%   { transform: translateX(-100%); opacity: 0.3; }
+    50%  { opacity: 1; }
+    100% { transform: translateX(100%); opacity: 0.3; }
+}
+
+
+/* ═══ Footer ═══ */
+
+.wow-de-footer {
+    flex-shrink: 0;
+    padding: 4px 14px;
+    font-size: 9px;
+    color: var(--wow-de-text-muted);
+    text-align: center;
+    border-top: 1px solid var(--wow-de-border);
+}
+
+
+/* ═══ Responsive ═══ */
+
+@container (max-width: 360px) {
+    .wow-de-form {
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .wow-de-field {
+        min-width: unset;
+    }
+
+    .wow-de-ring-pct {
+        font-size: 18px;
+    }
+
+    .wow-de-buttons {
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .wow-de-btn {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+
+/* ═══ Print Media ═══ */
+
+@media print {
+    .wow-de-root {
+        background: #FFFFFF !important;
+        color: #333 !important;
+        border: 1px solid #DDD;
+    }
+
+    .wow-de-toolbar {
+        background: #F5F5F5 !important;
+        border-color: #DDD !important;
+    }
+
+    .wow-de-title {
+        color: #000 !important;
+        text-shadow: none !important;
+    }
+
+    .wow-de-form {
+        border-color: #DDD !important;
+    }
+
+    .wow-de-input {
+        background: #FFF !important;
+        color: #333 !important;
+        border-color: #CCC !important;
+    }
+
+    .wow-de-label {
+        color: #666 !important;
+    }
+
+    .wow-de-buttons {
+        display: none !important;
+    }
+
+    .wow-de-ring-pct {
+        color: #333 !important;
+        text-shadow: none !important;
+    }
+
+    .wow-de-ring-status {
+        color: #666 !important;
+    }
+
+    .wow-de-ring-svg {
+        filter: none !important;
+    }
+
+    .wow-de-stats,
+    .wow-de-footer {
+        color: #666 !important;
+        border-color: #DDD !important;
+    }
+
+    .wow-de-stat b {
+        color: #000 !important;
+    }
+}

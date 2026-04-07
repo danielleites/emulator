@@ -1,0 +1,216 @@
+<link rel="stylesheet" href="/PIVision/Scripts/app/editor/symbols/ext/sym-afbrowser20.css">
+<link rel="stylesheet" href="/PIVision/Scripts/app/editor/symbols/ext/piv20-design-system.css">
+<link rel="stylesheet" href="/PIVision/Scripts/app/editor/symbols/ext/piv20-overrides.css">
+<script type="text/javascript" src="/PIVision/Scripts/app/editor/symbols/ext/piv20-plugins/piv20-core.js"></script>
+<script type="text/javascript" src="/PIVision/Scripts/app/editor/symbols/ext/piv20-plugins/piv20-afbrowser.js"></script>
+<div id="af20-widget" class="piv20 af20-widget" style="display:none;"
+     ng-style="{'font-family': config.fontFamily || 'Segoe UI', 'font-size': (config.fontSize || 12) + 'px'}">
+
+    <!-- Header -->
+    <div class="af20-header">
+        <span class="af20-title">{{config.Title || 'AF Browser'}}</span>
+        <div class="af20-toolbar">
+            <button ng-click="openPanel()" title="מידע">&#9776;</button>
+            <button ng-click="showDocs()" title="תיעוד">?</button>
+        </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="af20-tabs">
+        <div class="af20-tab" ng-class="{active: activeTab==='browse'}" ng-click="setTab('browse')">&#128193; עיון</div>
+        <div class="af20-tab" ng-class="{active: activeTab==='search'}" ng-click="setTab('search')">&#128269; חיפוש</div>
+        <div class="af20-tab" ng-class="{active: activeTab==='favorites'}" ng-click="setTab('favorites')" ng-show="config.showFavorites">&#11088; מועדפים</div>
+        <div class="af20-tab" ng-class="{active: activeTab==='recent'}" ng-click="setTab('recent')" ng-show="config.showRecent">&#128340; אחרונים</div>
+        <div class="af20-tab" ng-class="{active: activeTab==='cart'}" ng-click="setTab('cart')" ng-show="config.showCart">
+            &#128722; סל <span ng-show="cart.length" class="af20-tree-badge">{{cart.length}}</span>
+        </div>
+    </div>
+
+    <!-- Breadcrumb (browse mode) -->
+    <div class="af20-breadcrumb" ng-show="activeTab==='browse' && breadcrumb.length">
+        <span class="af20-crumb" ng-click="goHome()">&#127968;</span>
+        <span ng-repeat="crumb in breadcrumb track by $index">
+            <span class="af20-crumb-sep">&laquo;</span>
+            <span class="af20-crumb" ng-class="{current: $last}" ng-click="goToBreadcrumb($index)">{{crumb.name}}</span>
+        </span>
+    </div>
+
+    <!-- Search Bar (search mode) -->
+    <div class="af20-search-bar" ng-show="activeTab==='search'">
+        <input class="af20-search-input" ng-model="searchQuery" ng-keydown="onSearchKey($event)" placeholder="&#128269; חיפוש אלמנט או Attribute...">
+        <button class="af20-search-btn" ng-click="doSearch()">חפש</button>
+    </div>
+
+    <!-- Body -->
+    <div class="af20-body">
+
+        <!-- BROWSE VIEW -->
+        <div ng-show="activeTab==='browse'">
+            <!-- Loading -->
+            <div ng-show="loading" class="af20-loading">
+                <div class="af20-spinner"></div>
+                <div>טוען...</div>
+            </div>
+
+            <!-- Tree Items -->
+            <div ng-hide="loading">
+                <div ng-repeat="item in tree track by item.id"
+                     class="af20-tree-item" ng-class="{selected: selectedNode.id === item.id, 'af20-draggable': config.enableDragDrop && item.draggable}"
+                     ng-click="navigateTo(item)"
+                     draggable="{{config.enableDragDrop && item.draggable ? 'true' : 'false'}}"
+                     ng-attr-data-af-path="{{item.path}}">
+                    <span class="af20-tree-icon">{{item.icon}}</span>
+                    <span class="af20-tree-name">{{item.name}}</span>
+                    <span class="af20-tree-type" ng-show="item.template">{{item.template}}</span>
+                    <span class="af20-fav-star" ng-class="{active: isFavorite(item)}" ng-click="toggleFavorite(item); $event.stopPropagation();" ng-show="config.showFavorites">
+                        {{isFavorite(item) ? '&#9733;' : '&#9734;'}}
+                    </span>
+                    <span class="af20-tree-badge" ng-show="item.childCount">{{item.childCount}}</span>
+                    <span class="af20-tree-arrow" ng-show="item.hasChildren">&#9664;</span>
+                </div>
+                <div ng-show="!tree.length && !loading" class="af20-empty">
+                    אין פריטים להצגה
+                </div>
+            </div>
+        </div>
+
+        <!-- SEARCH VIEW -->
+        <div ng-show="activeTab==='search'">
+            <div ng-show="searching" class="af20-loading">
+                <div class="af20-spinner"></div>
+                <div>מחפש...</div>
+            </div>
+            <div ng-hide="searching">
+                <div ng-repeat="item in searchResults track by item.id"
+                     class="af20-tree-item af20-draggable"
+                     ng-click="navigateToResult(item)"
+                     draggable="{{config.enableDragDrop ? 'true' : 'false'}}"
+                     ng-attr-data-af-path="{{item.path}}">
+                    <span class="af20-tree-icon">{{item.icon}}</span>
+                    <span class="af20-tree-name">{{item.name}}</span>
+                    <span class="af20-tree-type">{{item.path}}</span>
+                    <span class="af20-fav-star" ng-class="{active: isFavorite(item)}" ng-click="toggleFavorite(item); $event.stopPropagation();" ng-show="config.showFavorites">
+                        {{isFavorite(item) ? '&#9733;' : '&#9734;'}}
+                    </span>
+                </div>
+                <div ng-show="searchDone && !searchResults.length" class="af20-empty">
+                    לא נמצאו תוצאות
+                </div>
+            </div>
+        </div>
+
+        <!-- FAVORITES VIEW -->
+        <div ng-show="activeTab==='favorites'">
+            <div ng-repeat="item in favorites track by item.id"
+                 class="af20-tree-item af20-draggable"
+                 ng-click="navigateToResult(item)"
+                 draggable="{{config.enableDragDrop ? 'true' : 'false'}}"
+                 ng-attr-data-af-path="{{item.path}}">
+                <span class="af20-tree-icon">{{item.icon}}</span>
+                <span class="af20-tree-name">{{item.name}}</span>
+                <span class="af20-tree-type">{{item.path}}</span>
+                <span class="af20-fav-star active" ng-click="toggleFavorite(item); $event.stopPropagation();">&#9733;</span>
+            </div>
+            <div ng-show="!favorites.length" class="af20-empty">
+                אין מועדפים
+            </div>
+        </div>
+
+        <!-- RECENT VIEW -->
+        <div ng-show="activeTab==='recent'">
+            <div ng-repeat="item in recent track by item.id"
+                 class="af20-tree-item af20-draggable"
+                 ng-click="navigateToResult(item)"
+                 draggable="{{config.enableDragDrop ? 'true' : 'false'}}"
+                 ng-attr-data-af-path="{{item.path}}">
+                <span class="af20-tree-icon">{{item.icon}}</span>
+                <span class="af20-tree-name">{{item.name}}</span>
+                <span class="af20-recent-time">{{item.visitedAt}}</span>
+            </div>
+            <div ng-show="!recent.length" class="af20-empty">
+                אין היסטוריה
+            </div>
+        </div>
+
+        <!-- CART VIEW -->
+        <div ng-show="activeTab==='cart'">
+            <div ng-repeat="item in cart track by item.id" class="af20-cart-item">
+                <span class="af20-cart-item-path" title="{{item.path}}">{{item.name}}</span>
+                <span class="af20-cart-remove" ng-click="removeFromCart(item)">&#10005;</span>
+            </div>
+            <div ng-show="!cart.length" class="af20-empty">
+                הסל ריק — הוסף Attributes מהעץ
+            </div>
+        </div>
+    </div>
+
+    <!-- Attribute Panel (when element selected) -->
+    <div class="af20-attr-panel" ng-show="activeTab==='browse' && selectedAttrs.length">
+        <div class="af20-attr-header">
+            <span>Attributes ({{selectedAttrs.length}})</span>
+            <button class="af20-cart-btn" ng-click="addAllAttrsToCart()" ng-show="config.showCart" style="font-size:9px;">
+                הוסף הכל לסל
+            </button>
+        </div>
+        <div ng-repeat="attr in selectedAttrs track by attr.id" class="af20-attr-item"
+             ng-click="selectAttribute(attr)"
+             draggable="{{config.enableDragDrop ? 'true' : 'false'}}"
+             ng-attr-data-af-path="{{attr.path}}">
+            <span class="af20-attr-name">{{attr.name}}</span>
+            <span>
+                <span class="af20-attr-val" ng-show="attr.value !== undefined">{{attr.displayValue}}</span>
+                <span class="af20-attr-unit">{{attr.uom}}</span>
+            </span>
+        </div>
+    </div>
+
+    <!-- Preview Box -->
+    <div class="af20-preview-box" ng-show="previewData && config.showPreview">
+        <div class="af20-preview-label">{{previewData.name}}</div>
+        <div class="af20-preview-val">{{previewData.displayValue}} <span style="font-size:10px;color:#6B8FA8;">{{previewData.uom}}</span></div>
+        <div class="af20-preview-path">{{previewData.path}}</div>
+    </div>
+
+    <!-- Cart Bar -->
+    <div class="af20-cart-bar" ng-show="config.showCart && cart.length">
+        <span class="af20-cart-count">&#128722; {{cart.length}} פריטים בסל</span>
+        <div class="af20-cart-actions">
+            <button class="af20-cart-btn" ng-click="exportCart('csv')">CSV</button>
+            <button class="af20-cart-btn" ng-click="exportCart('json')">JSON</button>
+            <button class="af20-cart-btn" ng-click="exportCart('clipboard')">&#128203;</button>
+            <button class="af20-cart-btn danger" ng-click="clearCart()">נקה</button>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div class="af20-toast" ng-class="{show: toastVisible}">{{toastText}}</div>
+
+    <!-- Side Panel -->
+    <div class="af20-side-panel" ng-show="panelOpen">
+        <div class="af20-panel-header">
+            <span style="color:#5BC0EB;font-weight:600;">AF Browser</span>
+            <button class="af20-panel-close" ng-click="closePanel()">&#10005;</button>
+        </div>
+        <div class="af20-panel-body">
+            <div style="font-size:10px;color:#6B8FA8;margin-bottom:6px;">
+                חיבור: <span style="color:#D0E4F5;">{{connectionStatus}}</span>
+            </div>
+            <div style="font-size:10px;color:#6B8FA8;margin-bottom:6px;">
+                שרת: <span style="color:#D0E4F5;">{{currentServer || '---'}}</span>
+            </div>
+            <div style="font-size:10px;color:#6B8FA8;margin-bottom:6px;">
+                DB: <span style="color:#D0E4F5;">{{currentDb || '---'}}</span>
+            </div>
+            <div style="font-size:10px;color:#6B8FA8;margin-bottom:6px;">
+                מועדפים: <span style="color:#D0E4F5;">{{favorites.length}}</span>
+            </div>
+            <div style="font-size:10px;color:#6B8FA8;margin-bottom:6px;">
+                סל: <span style="color:#D0E4F5;">{{cart.length}}</span>
+            </div>
+            <button ng-click="showDocs()" style="margin-top:12px;width:100%;background:rgba(91,192,235,.1);border:1px solid rgba(91,192,235,.2);color:#5BC0EB;border-radius:4px;padding:5px;font-size:11px;cursor:pointer;">
+                תיעוד
+            </button>
+        </div>
+    </div>
+
+</div>

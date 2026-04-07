@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+  <rect width="32" height="32" rx="4" fill="#43A047" opacity="0.15"/>
+  <rect x="1" y="1" width="30" height="30" rx="3" fill="none" stroke="#43A047" stroke-width="1.5"/>
+  <text x="16" y="16" text-anchor="middle" font-family="Arial" font-size="10" fill="#43A047" font-weight="bold">CO₂</text>
+  <text x="16" y="28" text-anchor="middle" font-family="Arial,sans-serif" font-size="6" fill="#43A047" font-weight="bold">CO2</text>
+</svg>

@@ -1,0 +1,223 @@
+<!-- sym-dataexport20-template.html  --  Data Export v20 Template -->
+<!-- Extracted from v10 inline template, all classes prefixed dx20-. -->
+<!-- External CSS: sym-dataexport20.css | Plugin: piv20-dataexport.js -->
+
+<!-- ── External Dependencies ── -->
+<link rel="stylesheet" href="/PIVision/Scripts/app/editor/symbols/ext/sym-dataexport20.css">
+<link rel="stylesheet" href="/PIVision/Scripts/app/editor/symbols/ext/piv20-design-system.css">
+<link rel="stylesheet" href="/PIVision/Scripts/app/editor/symbols/ext/piv20-overrides.css">
+<script type="text/javascript" src="/PIVision/Scripts/app/editor/symbols/ext/piv20-plugins/piv20-core.js"></script>
+<script type="text/javascript" src="/PIVision/Scripts/app/editor/symbols/ext/piv20-plugins/piv20-dataexport.js"></script>
+
+<!-- ── Root Container ── -->
+<div class="piv20 dx20-root" dir="rtl">
+
+    <!-- Hidden widget mount point -->
+    <div id="dx20-widget" style="display:none"></div>
+
+    <!-- Toast container -->
+    <div class="dx20-toast-container"></div>
+
+    <!-- ════════════════════════════════════════ -->
+    <!--  HEADER                                  -->
+    <!-- ════════════════════════════════════════ -->
+    <div class="dx20-hdr">
+        <div style="display:flex;align-items:center;gap:10px">
+            <span class="dx20-ttl">\י\י\צ\ו\א \נ\ת\ו\נ\י\ם</span>
+
+            <!-- AF Connection badge -->
+            <span ng-show="afConn"
+                  ng-class="{'dx20-af-badge': true,
+                             'dx20-af-good': afConn.pct >= 80,
+                             'dx20-af-warn': afConn.pct >= 50 && afConn.pct < 80,
+                             'dx20-af-bad':  afConn.pct < 50}">
+                <span class="dx20-af-dot"></span>
+                AF {{afConn.pct}}%
+            </span>
+        </div>
+
+        <div class="dx20-toolbar">
+            <!-- Side panel toggle -->
+            <button class="dx20-btn" ng-click="toggleSidePanel()" title="\ה\ג\ד\ר\ו\ת">
+                &#9881;
+            </button>
+
+            <!-- Live indicator -->
+            <div class="dx20-live">
+                <span class="dx20-live-dot"></span>
+                <span>{{liveTime}}</span>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ════════════════════════════════════════ -->
+    <!--  TABS                                    -->
+    <!-- ════════════════════════════════════════ -->
+    <div class="dx20-tabs">
+        <button class="dx20-tab" ng-class="{active: viewTab==='live'}" ng-click="setTab('live')">
+            \ח\י ({{currentValues.length}})
+        </button>
+        <button class="dx20-tab" ng-class="{active: viewTab==='records'}" ng-click="setTab('records')">
+            \⏺ \ה\ק\ל\ט\ה ({{recordCount}})
+        </button>
+        <button class="dx20-tab" ng-class="{active: viewTab==='snapshots'}" ng-click="setTab('snapshots')">
+            \צ\י\ל\ו\מ\י \מ\צ\ב ({{snapshotCount}})
+        </button>
+    </div>
+
+
+    <!-- ════════════════════════════════════════ -->
+    <!--  LIVE TAB                                -->
+    <!-- ════════════════════════════════════════ -->
+    <div class="dx20-body" ng-show="viewTab==='live'">
+        <div style="margin-bottom:12px;display:flex;gap:8px">
+            <button class="dx20-btn primary" ng-click="exportLive()">\▼ \י\י\צ\ו\א \נ\ת\ו\נ\י\ם \ח\י\י\ם</button>
+            <button class="dx20-btn" ng-click="takeSnapshot()">\צ\י\ל\ו\ם \מ\צ\ב</button>
+        </div>
+
+        <div class="dx20-live-grid" ng-show="currentValues.length > 0">
+            <div class="dx20-live-card dx20-animate-in"
+                 ng-repeat="v in currentValues track by v.idx"
+                 ng-style="{'animation-delay': ($index * 30) + 'ms'}">
+                <div class="dx20-live-label" title="{{v.label}}">{{v.label}}</div>
+                <div class="dx20-live-value">{{v.value}}</div>
+                <div class="dx20-live-path" title="{{v.path}}">{{v.path}}</div>
+            </div>
+        </div>
+
+        <!-- Empty state -->
+        <div class="dx20-empty" ng-show="currentValues.length === 0">
+            <span style="font-size:32px">&#128225;</span>
+            <span>\מ\מ\ת\י\ן \ל\נ\ת\ו\נ\י\ם</span>
+            <span style="font-size:11px">\ג\ר\ו\ר \ת\ג\י\ו\ת \ל\ס\מ\ל</span>
+        </div>
+    </div>
+
+
+    <!-- ════════════════════════════════════════ -->
+    <!--  RECORDS TAB                             -->
+    <!-- ════════════════════════════════════════ -->
+    <div class="dx20-body" ng-show="viewTab==='records'">
+        <div class="dx20-rec-controls">
+            <div class="dx20-rec-status">
+                <div class="dx20-rec-dot" ng-class="{active: recording, inactive: !recording}"></div>
+                <span>{{recording ? '\מ\ק\ל\י\ט...' : '\ל\א \מ\ק\ל\י\ט'}}</span>
+            </div>
+            <button class="dx20-btn primary" ng-click="startRecording()" ng-show="!recording">
+                \⏺ \ה\ת\ח\ל \ה\ק\ל\ט\ה
+            </button>
+            <button class="dx20-btn danger" ng-click="stopRecording()" ng-show="recording">
+                \⏹ \ע\צ\ו\ר
+            </button>
+            <button class="dx20-btn" ng-click="exportRecords()" ng-disabled="recordCount === 0">
+                \▼ \י\י\צ\ו\א ({{recordCount}})
+            </button>
+            <button class="dx20-btn" ng-click="clearRecords()" ng-disabled="recordCount === 0">
+                \✖ \נ\ק\ה
+            </button>
+        </div>
+
+        <div style="font-size:12px;color:var(--dx20-text3)">{{recordCount}} / {{maxRecords}} \ר\ש\ו\מ\ו\ת</div>
+        <div class="dx20-rec-progress">
+            <div class="dx20-rec-progress-bar"
+                 ng-style="{'width': (recordCount / maxRecords * 100) + '%',
+                            'background': recordCount > maxRecords * 0.9 ? 'var(--dx20-crit)' : 'var(--dx20-cyan)'}">
+            </div>
+        </div>
+
+        <div ng-show="autoExport" style="font-size:11px;color:var(--dx20-text3);margin-top:8px">
+            \י\י\צ\ו\א \א\ו\ט\ו\מ\ט\י \כ\ל {{autoExportCount}} \ר\ש\ו\מ\ו\ת
+        </div>
+    </div>
+
+
+    <!-- ════════════════════════════════════════ -->
+    <!--  SNAPSHOTS TAB                           -->
+    <!-- ════════════════════════════════════════ -->
+    <div class="dx20-body" ng-show="viewTab==='snapshots'">
+        <div ng-show="snapshots.length > 0">
+            <div class="dx20-snap-card dx20-animate-in"
+                 ng-repeat="snap in snapshots track by snap.id"
+                 ng-style="{'animation-delay': ($index * 40) + 'ms'}">
+                <div class="dx20-snap-hdr">
+                    <div class="dx20-snap-time">\⏰ {{snap.time}}</div>
+                    <div style="display:flex;gap:4px">
+                        <button class="dx20-btn" ng-click="exportSnapshot($index)" style="padding:3px 8px;font-size:11px">
+                            \▼ \י\י\צ\ו\א
+                        </button>
+                        <button class="dx20-btn danger" ng-click="deleteSnapshot($index)" style="padding:3px 8px;font-size:11px">
+                            \✖
+                        </button>
+                    </div>
+                </div>
+                <div class="dx20-snap-data">{{snap.data.length}} \ע\ר\כ\י\ם</div>
+            </div>
+        </div>
+
+        <!-- Empty state -->
+        <div class="dx20-empty" ng-show="snapshots.length === 0">
+            <span style="font-size:32px">&#128247;</span>
+            <span>\א\י\ן \צ\י\ל\ו\מ\י \מ\צ\ב</span>
+            <span style="font-size:11px">\ל\ח\ץ "\צ\י\ל\ו\ם \מ\צ\ב" \ל\ש\מ\י\ר\ה</span>
+        </div>
+    </div>
+
+
+    <!-- ════════════════════════════════════════ -->
+    <!--  SIDE PANEL                              -->
+    <!-- ════════════════════════════════════════ -->
+    <div class="dx20-panel" ng-class="{open: showSidePanel}">
+        <div class="dx20-phd">
+            <h3>\ה\ג\ד\ר\ו\ת</h3>
+            <button class="dx20-pcl" ng-click="toggleSidePanel()">&times;</button>
+        </div>
+
+        <!-- Recording settings -->
+        <div class="dx20-ps">
+            <label>\ה\ק\ל\ט\ה</label>
+            <div style="font-size:12px;color:var(--dx20-text2);margin-top:4px">
+                <div>\מ\ק\ס\י\מ\ו\ם: {{maxRecords}} \ר\ש\ו\מ\ו\ת</div>
+                <div ng-show="autoExport">\י\י\צ\ו\א \א\ו\ט\ו\מ\ט\י: \כ\ל {{autoExportCount}}</div>
+            </div>
+        </div>
+
+        <!-- AF Connection -->
+        <div class="dx20-ps" ng-show="afConn">
+            <label>\ח\י\ב\ו\ר AF</label>
+            <div style="font-size:12px;margin-top:4px;color:var(--dx20-text2)">
+                \מ\ח\ו\ב\ר: {{afConn.connected}}/{{afConn.total}} ({{afConn.pct}}%)
+            </div>
+        </div>
+
+        <!-- Status -->
+        <div class="dx20-ps">
+            <label>\מ\צ\ב</label>
+            <div style="font-size:12px;color:var(--dx20-text2);margin-top:4px">
+                <div>\ת\ג\י\ם: {{currentValues.length}}</div>
+                <div>\ר\ש\ו\מ\ו\ת: {{recordCount}}</div>
+                <div>\צ\י\ל\ו\מ\י\ם: {{snapshotCount}}</div>
+                <div>\ה\ק\ל\ט\ה: {{recording ? '\פ\ע\י\ל' : '\כ\ב\ו\י'}}</div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ════════════════════════════════════════ -->
+    <!--  FOOTER                                  -->
+    <!-- ════════════════════════════════════════ -->
+    <div class="dx20-ftr">
+        <span>\נ\ו\ג\ה \— \י\י\צ\ו\א \נ\ת\ו\נ\י\ם | PIV20 v20.0</span>
+        <div style="display:flex;align-items:center;gap:8px">
+            <span class="dx20-ftr-status" ng-show="recording">
+                <span class="dx20-ftr-dot rec"></span>
+                <span>REC | {{recordCount}} \ר\ש\ו\מ\ו\ת</span>
+            </span>
+            <span class="dx20-ftr-status" ng-show="!recording">
+                <span class="dx20-ftr-dot ok"></span>
+                <span>\ח\י | {{currentValues.length}} \ת\ג\י\ם</span>
+            </span>
+        </div>
+    </div>
+
+</div>

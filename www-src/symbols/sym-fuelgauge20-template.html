@@ -1,0 +1,113 @@
+<link rel="stylesheet" href="/PIVision/Scripts/app/editor/symbols/ext/sym-fuelgauge20.css">
+<link rel="stylesheet" href="/PIVision/Scripts/app/editor/symbols/ext/piv20-design-system.css">
+<link rel="stylesheet" href="/PIVision/Scripts/app/editor/symbols/ext/piv20-overrides.css">
+<script type="text/javascript" src="/PIVision/Scripts/app/editor/symbols/ext/piv20-plugins/piv20-core.js"></script>
+<script type="text/javascript" src="/PIVision/Scripts/app/editor/symbols/ext/piv20-plugins/piv20-fuelgauge.js"></script>
+
+<div class="piv20 fg20-root" ng-right-click="showContextMenu($event)">
+
+    <!-- Header -->
+    <div class="fg20-hdr">
+        <div style="display:flex;align-items:center;gap:8px">
+            <span class="fg20-ttl">{{config.Title || 'מאגר דלק'}}</span>
+            <span class="fg20-live"><span class="fg20-live-dot"></span>חי</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:4px">
+            <div class="fg20-views">
+                <button class="fg20-btn" ng-class="{active: viewMode==='tanks'}" ng-click="setView('tanks')">מיכלים</button>
+                <button class="fg20-btn" ng-class="{active: viewMode==='table'}" ng-click="setView('table')">טבלה</button>
+                <button class="fg20-btn" ng-class="{active: viewMode==='cards'}" ng-click="setView('cards')">כרטיסים</button>
+            </div>
+            <button class="fg20-btn" ng-click="exportCSV()" title="ייצוא CSV">&#8681;</button>
+            <button class="fg20-btn" ng-click="showDocs()" title="תיעוד">?</button>
+            <button class="fg20-btn" ng-click="openPanel()" title="הגדרות">&#9881;</button>
+        </div>
+    </div>
+
+    <!-- Summary bar -->
+    <div class="fg20-summary" ng-show="summary.tankCount">
+        <span class="fg20-sum-item">מיכלים: {{summary.tankCount}}</span>
+        <span class="fg20-sum-item" ng-style="{'color': summary.avgPctColor}">ממוצע: {{summary.avgPct | number:1}}%</span>
+        <span class="fg20-sum-item" ng-style="{'color': summary.lowestPctColor}">נמוך: {{summary.lowestPct | number:1}}%</span>
+        <span class="fg20-sum-item" ng-show="summary.lowestHours < 9999" ng-style="{'color': summary.lowestHoursColor}">שעות מינ׳: {{summary.lowestHours | number:1}}</span>
+    </div>
+
+    <!-- Body -->
+    <div class="fg20-body">
+
+        <!-- Empty state -->
+        <div class="fg20-empty" ng-show="!tanks.length">
+            <div style="font-size:32px;opacity:0.3">&#9981;</div>
+            <div>הוסף תגיות דלק לתצוגה</div>
+        </div>
+
+        <!-- Tanks (SVG) view -->
+        <div class="fg20-tanks-wrap" ng-show="viewMode==='tanks' && tanks.length">
+            <div class="fg20-tank-item" ng-repeat="tank in tanks">
+                <div ng-bind-html="tank._svg"></div>
+                <canvas class="fg20-spark-canvas" data-idx="{{tank.idx}}" ng-show="config.ShowSparkline"
+                        width="100" height="30" style="width:80px;height:24px;margin-top:2px"></canvas>
+            </div>
+        </div>
+
+        <!-- Table view -->
+        <div ng-show="viewMode==='table' && tanks.length" style="padding:8px">
+            <div class="fg20-tbl-row fg20-tbl-hdr">
+                <span class="fg20-tbl-c" style="flex:2">שם</span>
+                <span class="fg20-tbl-c">סוג</span>
+                <span class="fg20-tbl-c">רמה (%)</span>
+                <span class="fg20-tbl-c">שריפה/שעה</span>
+                <span class="fg20-tbl-c">שעות נותרו</span>
+            </div>
+            <div class="fg20-tbl-row" ng-repeat="tank in tanks">
+                <span class="fg20-tbl-c" style="flex:2">
+                    <span class="fg20-color-swatch" ng-style="{'background': tank.fuelType.color}"></span>
+                    {{tank.shortName}}
+                </span>
+                <span class="fg20-tbl-c">{{tank.fuelType.label}}</span>
+                <span class="fg20-tbl-c" ng-style="{'color': tank.pct <= config.CritLevelPct ? (config.criticalColor || '#e74c3c') : tank.pct <= config.WarnLevelPct ? (config.warningColor || '#f39c12') : '#2ecc71'}">
+                    {{tank.pct | number:1}}%
+                </span>
+                <span class="fg20-tbl-c">{{tank.burnRate | number:2}}</span>
+                <span class="fg20-tbl-c">{{tank.hoursRemain < 9999 ? (tank.hoursRemain | number:1) : '---'}}</span>
+            </div>
+        </div>
+
+        <!-- Cards view -->
+        <div class="fg20-cards" ng-show="viewMode==='cards' && tanks.length">
+            <div class="fg20-card" ng-repeat="tank in tanks"
+                 ng-style="{'border-right-color': tank.fuelType.color}">
+                <div class="fg20-card-name">{{tank.shortName}}</div>
+                <div class="fg20-card-type">{{tank.fuelType.label}}</div>
+                <div class="fg20-card-pct" ng-style="{'color': tank.pct <= config.CritLevelPct ? '#e74c3c' : tank.pct <= config.WarnLevelPct ? '#f39c12' : '#2ecc71'}">
+                    {{tank.pct | number:1}}%
+                </div>
+                <div class="fg20-card-hours" ng-show="config.ShowHoursRemain && tank.hoursRemain < 9999">
+                    {{tank.hoursRemain | number:1}} שעות
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Side panel -->
+    <div class="fg20-panel" ng-class="{open: panelOpen}">
+        <div class="fg20-phd">
+            <h3>הגדרות מאגר דלק</h3>
+            <button class="fg20-pcl" ng-click="closePanel()">&times;</button>
+        </div>
+        <div class="fg20-ps"><label>כותרת</label><input type="text" ng-model="config.Title"></div>
+        <div class="fg20-ps"><label>קיבולת מיכל</label><input type="number" ng-model="config.TankCapacity" min="0"></div>
+        <div class="fg20-ps"><label>סף אזהרה (%)</label><input type="number" ng-model="config.WarnLevelPct" min="0" max="100"></div>
+        <div class="fg20-ps"><label>סף קריטי (%)</label><input type="number" ng-model="config.CritLevelPct" min="0" max="100"></div>
+        <div class="fg20-ps"><label><input type="checkbox" ng-model="config.ShowBurnRate"> הצג קצב שריפה</label></div>
+        <div class="fg20-ps"><label><input type="checkbox" ng-model="config.ShowHoursRemain"> הצג שעות נותרו</label></div>
+        <div class="fg20-ps"><label><input type="checkbox" ng-model="config.ShowSparkline"> הצג גרף מיני</label></div>
+    </div>
+
+    <!-- Footer -->
+    <div class="fg20-ftr">PIV20 FuelGauge</div>
+
+    <!-- Widget container -->
+    <div id="fg20-widget" style="display:none"></div>
+</div>

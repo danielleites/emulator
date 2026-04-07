@@ -1,0 +1,382 @@
+/**
+ * ═══════════════════════════════════════════════════════
+ *  sym-scatter-wow.css  —  Executive Anomaly Scatter Styles
+ * ═══════════════════════════════════════════════════════
+ *  Structural styling only — all point/grid/axis rendering
+ *  happens on OffscreenCanvas in the Worker. CSS handles
+ *  toolbar, brush overlay, tooltip, stats bar, skeleton,
+ *  and print media.
+ *
+ *  Version : WOW SC 100.0
+ *  Prefix  : wow-sc-
+ * ═══════════════════════════════════════════════════════
+ */
+
+
+/* ═══ CSS Custom Properties ═══ */
+
+:host {
+    --wow-sc-bg-start:     #0A0F1C;
+    --wow-sc-bg-end:       #111B2E;
+    --wow-sc-surface:      #0F2940;
+    --wow-sc-accent:       #00F5D4;
+    --wow-sc-accent-glow:  rgba(0, 245, 212, 0.3);
+    --wow-sc-anomaly:      #FF3B30;
+    --wow-sc-anomaly-glow: rgba(255, 59, 48, 0.3);
+    --wow-sc-warn:         #FFCC00;
+    --wow-sc-text:         #ECF0F1;
+    --wow-sc-text-muted:   #8899AA;
+    --wow-sc-border:       #1A3A5C;
+    --wow-sc-glass-bg:     rgba(15, 41, 64, 0.92);
+    --wow-sc-glass-border: rgba(0, 245, 212, 0.15);
+    --wow-sc-brush-border: rgba(0, 245, 212, 0.7);
+    --wow-sc-brush-bg:     rgba(0, 245, 212, 0.06);
+    --wow-sc-font:         'Segoe UI', Arial, sans-serif;
+    --wow-sc-font-size:    12px;
+    --wow-sc-radius:       8px;
+    --wow-sc-transition:   0.2s ease-out;
+}
+
+
+/* ═══ Safe Reset ═══ */
+
+.wow-sc-root { box-sizing: border-box; }
+.wow-sc-root *, .wow-sc-root *::before, .wow-sc-root *::after {
+    box-sizing: border-box;
+}
+
+
+/* ═══ Root Layout ═══ */
+
+.wow-sc-root {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    background: linear-gradient(180deg, var(--wow-sc-bg-start), var(--wow-sc-bg-end));
+    font-family: var(--wow-sc-font);
+    font-size: var(--wow-sc-font-size);
+    color: var(--wow-sc-text);
+    overflow: hidden;
+    border-radius: var(--wow-sc-radius);
+}
+
+
+/* ═══ Toolbar ═══ */
+
+.wow-sc-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 14px;
+    min-height: 40px;
+    flex-shrink: 0;
+    border-bottom: 1px solid var(--wow-sc-border);
+    background: rgba(10, 15, 28, 0.6);
+}
+
+.wow-sc-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--wow-sc-text);
+    letter-spacing: 0.3px;
+    text-shadow: 0 0 12px var(--wow-sc-accent-glow);
+}
+
+.wow-sc-toolbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    direction: ltr;
+}
+
+.wow-sc-btn {
+    padding: 5px 12px;
+    border: 1px solid var(--wow-sc-border);
+    border-radius: 6px;
+    background: rgba(0, 245, 212, 0.06);
+    color: var(--wow-sc-accent);
+    font-size: 11px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all var(--wow-sc-transition);
+    white-space: nowrap;
+}
+
+.wow-sc-btn:hover {
+    background: rgba(0, 245, 212, 0.15);
+    border-color: var(--wow-sc-accent);
+}
+
+
+/* ── Active Toggle State ── */
+
+.wow-sc-btn-active {
+    background: rgba(0, 245, 212, 0.2);
+    border-color: var(--wow-sc-accent);
+    box-shadow: 0 0 8px var(--wow-sc-accent-glow),
+                inset 0 0 6px rgba(0, 245, 212, 0.1);
+}
+
+.wow-sc-btn-active::before {
+    content: '●';
+    margin-right: 4px;
+    font-size: 8px;
+    color: var(--wow-sc-accent);
+    vertical-align: middle;
+}
+
+
+/* ═══ Stats Bar ═══ */
+
+.wow-sc-stats {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 4px 14px;
+    flex-shrink: 0;
+    font-size: 10px;
+    color: var(--wow-sc-text-muted);
+    border-bottom: 1px solid rgba(26, 58, 92, 0.5);
+    direction: ltr;
+}
+
+.wow-sc-stat {
+    white-space: nowrap;
+}
+
+.wow-sc-stat b {
+    color: var(--wow-sc-text);
+    font-weight: 600;
+}
+
+
+/* ═══ Canvas Container ═══ */
+
+.wow-sc-canvas-wrap {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+}
+
+.wow-sc-canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+    cursor: crosshair;
+}
+
+
+/* ═══ Brush & Select Overlay ═══ */
+
+.wow-sc-brush {
+    position: absolute;
+    z-index: 10;
+    border: 2px dashed var(--wow-sc-brush-border);
+    background: var(--wow-sc-brush-bg);
+    border-radius: 3px;
+    pointer-events: none;
+    box-shadow: 0 0 12px rgba(0, 245, 212, 0.12);
+    animation: wowScBrushPulse 1.2s ease-in-out infinite;
+}
+
+@keyframes wowScBrushPulse {
+    0%, 100% { border-color: var(--wow-sc-brush-border); }
+    50%      { border-color: rgba(0, 245, 212, 0.4); }
+}
+
+
+/* ═══ Tooltip (Glassmorphism) ═══ */
+
+.wow-sc-tooltip {
+    position: absolute;
+    z-index: 20;
+    padding: 10px 14px;
+    min-width: 140px;
+    background: var(--wow-sc-glass-bg);
+    border: 1px solid var(--wow-sc-glass-border);
+    border-radius: 8px;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    pointer-events: none;
+    font-family: var(--wow-sc-font);
+    will-change: left, top;
+}
+
+.wow-sc-tt-time {
+    font-size: 10px;
+    color: var(--wow-sc-text-muted);
+    margin-bottom: 4px;
+    font-variant-numeric: tabular-nums;
+    direction: ltr;
+}
+
+.wow-sc-tt-values {
+    font-size: 12px;
+    color: var(--wow-sc-text);
+    font-variant-numeric: tabular-nums;
+    direction: ltr;
+}
+
+.wow-sc-tt-values b {
+    color: var(--wow-sc-accent);
+    font-weight: 700;
+}
+
+
+/* ── Anomaly Tag ── */
+
+.wow-sc-tt-anomaly {
+    display: inline-block;
+    margin-top: 6px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    background: rgba(255, 59, 48, 0.15);
+    border: 1px solid rgba(255, 59, 48, 0.4);
+    color: var(--wow-sc-anomaly);
+    font-size: 10px;
+    font-weight: 700;
+    direction: rtl;
+}
+
+
+/* ── Brush Result Title ── */
+
+.wow-sc-tt-brush-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--wow-sc-accent);
+    margin-bottom: 4px;
+    direction: rtl;
+}
+
+
+/* ═══ Footer ═══ */
+
+.wow-sc-footer {
+    flex-shrink: 0;
+    padding: 4px 14px;
+    font-size: 9px;
+    color: var(--wow-sc-text-muted);
+    text-align: center;
+    border-top: 1px solid var(--wow-sc-border);
+    direction: ltr;
+    font-variant-numeric: tabular-nums;
+}
+
+
+/* ═══ Empty State ═══ */
+
+.wow-sc-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 200px;
+    color: var(--wow-sc-text-muted);
+    font-size: 14px;
+    gap: 8px;
+}
+
+.wow-sc-empty-icon {
+    font-size: 32px;
+    opacity: 0.5;
+}
+
+
+/* ═══ Skeleton / Ghost Loading ═══ */
+
+.wow-sc-skeleton {
+    position: absolute;
+    inset: 0;
+    z-index: 50;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--wow-sc-bg-start);
+}
+
+.wow-sc-skeleton::after {
+    content: '';
+    width: 60%;
+    height: 3px;
+    border-radius: 2px;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        var(--wow-sc-accent),
+        transparent
+    );
+    animation: wowScShimmer 1.5s ease-in-out infinite;
+}
+
+@keyframes wowScShimmer {
+    0%   { transform: translateX(-100%); opacity: 0.3; }
+    50%  { opacity: 1; }
+    100% { transform: translateX(100%); opacity: 0.3; }
+}
+
+
+/* ═══ Responsive ═══ */
+
+@container (max-width: 500px) {
+    .wow-sc-toolbar {
+        flex-direction: column;
+        gap: 6px;
+        align-items: stretch;
+    }
+    .wow-sc-toolbar-actions {
+        justify-content: flex-end;
+    }
+    .wow-sc-stats {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+}
+
+
+/* ═══ Print Media ═══ */
+
+@media print {
+    .wow-sc-root {
+        background: #FFFFFF !important;
+        color: #333 !important;
+        border: 1px solid #DDD;
+    }
+
+    .wow-sc-toolbar {
+        background: #F5F5F5 !important;
+        border-color: #DDD !important;
+    }
+
+    .wow-sc-toolbar-actions {
+        display: none !important;
+    }
+
+    .wow-sc-title {
+        color: #000 !important;
+        text-shadow: none !important;
+    }
+
+    .wow-sc-tooltip,
+    .wow-sc-brush {
+        display: none !important;
+    }
+
+    .wow-sc-canvas {
+        cursor: default;
+    }
+
+    .wow-sc-stats,
+    .wow-sc-footer {
+        color: #666 !important;
+        border-color: #DDD !important;
+    }
+
+    .wow-sc-stat b {
+        color: #000 !important;
+    }
+}

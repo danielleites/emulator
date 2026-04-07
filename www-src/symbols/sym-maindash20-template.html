@@ -1,0 +1,255 @@
+<link rel="stylesheet" href="/PIVision/Scripts/app/editor/symbols/ext/sym-maindash20.css">
+<link rel="stylesheet" href="/PIVision/Scripts/app/editor/symbols/ext/piv20-design-system.css">
+<link rel="stylesheet" href="/PIVision/Scripts/app/editor/symbols/ext/piv20-overrides.css">
+<script type="text/javascript" src="/PIVision/Scripts/app/editor/symbols/ext/piv20-plugins/piv20-core.js"></script>
+<script type="text/javascript" src="/PIVision/Scripts/app/editor/symbols/ext/piv20-ultra.js"></script>
+<script type="text/javascript" src="/PIVision/Scripts/app/editor/symbols/ext/piv20-plugins/piv20-maindashboard.js"></script>
+<div id="md20-widget" class="piv20 md20-widget" style="display:none;">
+
+    <!-- Header -->
+    <div class="md20-header">
+        <div style="display:flex;align-items:center;gap:8px">
+            <span class="md20-title">{{config.Title || 'לוח ראשי'}}</span>
+            <span class="md20-demo-badge" ng-show="demoMode" ng-click="toggleDemo()">DEMO</span>
+        </div>
+        <div class="md20-toolbar">
+            <button ng-click="setView('grid')" ng-class="{active: viewMode==='grid'}" title="1">רשת</button>
+            <button ng-click="setView('heatmap')" ng-class="{active: viewMode==='heatmap'}" ng-show="config.showHeatmap" title="2">חום</button>
+            <button ng-click="setView('table')" ng-class="{active: viewMode==='table'}" title="3">טבלה</button>
+            <button ng-click="exportCSV()" title="ייצוא">CSV</button>
+            <button ng-click="openPanel()" title="מידע (Esc לסגירה)">&#9776;</button>
+        </div>
+    </div>
+
+    <!-- System Status Bar -->
+    <div class="md20-status-bar">
+        <div class="md20-status-indicator" ng-class="systemColor"></div>
+        <span class="md20-status-text" ng-style="{'color': systemStatusColor}">{{systemStatusText}}</span>
+        <span style="font-size:10px;color:#6B8FA8;margin-right:auto;">
+            רזרבה: <span ng-style="{'color': reservePct < config.reserveCritical ? 'var(--md20-crit,#e74c3c)' : reservePct < config.reserveWarning ? 'var(--md20-warn,#f39c12)' : 'var(--md20-good,#2ecc71)', 'font-weight':'700'}">{{reservePct | number:1}}%</span>
+        </span>
+        <span style="font-size:10px;color:#6B8FA8;">
+            {{activeUnits}}/{{totalUnits}} יחידות פעילות
+        </span>
+    </div>
+
+    <!-- Summary Bar -->
+    <div class="md20-summary" ng-show="config.showSummaryBar">
+        <div class="md20-sum-item">
+            <span class="md20-sum-val" style="color:var(--md20-accent,#5BC0EB);">{{totalProduction | number:0}}</span>
+            <span class="md20-sum-label">ייצור</span>
+            <span class="md20-sum-unit">MW</span>
+        </div>
+        <div class="md20-sum-item">
+            <span class="md20-sum-val" style="color:var(--md20-warn,#f39c12);">{{totalDemand | number:0}}</span>
+            <span class="md20-sum-label">ביקוש</span>
+            <span class="md20-sum-unit">MW</span>
+        </div>
+        <div class="md20-sum-item">
+            <span class="md20-sum-val" ng-style="{'color': reserve > 0 ? 'var(--md20-good,#2ecc71)' : 'var(--md20-crit,#e74c3c)'}">{{reserve | number:0}}</span>
+            <span class="md20-sum-label">רזרבה</span>
+            <span class="md20-sum-unit">MW</span>
+        </div>
+        <div class="md20-sum-item">
+            <span class="md20-sum-val">{{totalCapacity | number:0}}</span>
+            <span class="md20-sum-label">קיבולת</span>
+            <span class="md20-sum-unit">MW</span>
+        </div>
+        <div class="md20-sum-item">
+            <span class="md20-sum-val">{{avgEfficiency | number:1}}</span>
+            <span class="md20-sum-label">נצילות ממוצעת</span>
+            <span class="md20-sum-unit">%</span>
+        </div>
+        <div class="md20-sum-item">
+            <span class="md20-sum-val">{{totalCO2 | number:1}}</span>
+            <span class="md20-sum-label">CO2</span>
+            <span class="md20-sum-unit">t/h</span>
+        </div>
+    </div>
+
+    <!-- Filter Bar -->
+    <div class="md20-filter-bar">
+        <input class="md20-search" ng-model="filterText" ng-change="filterChanged()" placeholder="חיפוש אתר...">
+        <select class="md20-select" ng-model="filterStatus" ng-change="filterChanged()">
+            <option value="">כל המצבים</option>
+            <option value="normal">תקין</option>
+            <option value="warning">אזהרה</option>
+            <option value="critical">קריטי</option>
+        </select>
+        <span style="font-size:10px;color:#6B8FA8;">{{filteredSites.length}} אתרים</span>
+    </div>
+
+    <!-- Body -->
+    <div class="md20-body">
+
+        <!-- GRID VIEW -->
+        <div ng-show="viewMode==='grid'" class="md20-grid">
+            <div ng-repeat="site in filteredSites track by $index"
+                 class="md20-site-card" ng-class="{'md20-alert': site.hasAlert, 'md20-warn': site.hasWarning && !site.hasAlert}">
+                <div class="md20-site-header">
+                    <span class="md20-site-name">{{site.name}}</span>
+                    <span class="md20-site-status"
+                          ng-style="{'background': getSiteStatusBg(site.status), 'color': getSiteStatusColor(site.status)}">
+                        {{getSiteStatusText(site.status)}}
+                    </span>
+                </div>
+                <div class="md20-site-body">
+                    <div class="md20-site-kpi">
+                        <div class="md20-kpi">
+                            <span class="md20-kpi-val" style="color:var(--md20-accent,#5BC0EB);">{{site.totalMW | number:0}}</span>
+                            <span class="md20-kpi-label">ייצור MW</span>
+                        </div>
+                        <div class="md20-kpi">
+                            <span class="md20-kpi-val">{{site.avgEfficiency | number:1}}</span>
+                            <span class="md20-kpi-label">נצילות %</span>
+                        </div>
+                        <div class="md20-kpi">
+                            <span class="md20-kpi-val" ng-style="{'color': site.avgStress > 80 ? 'var(--md20-crit,#e74c3c)' : site.avgStress > 60 ? 'var(--md20-warn,#f39c12)' : 'var(--md20-text2,#D0E4F5)'}">{{site.avgStress | number:0}}</span>
+                            <span class="md20-kpi-label">עומס %</span>
+                        </div>
+                        <div class="md20-kpi">
+                            <span class="md20-kpi-val" style="font-size:11px;">{{site.co2Total | number:1}}</span>
+                            <span class="md20-kpi-label">CO2 t/h</span>
+                        </div>
+                    </div>
+
+                    <div class="md20-load-bar">
+                        <div class="md20-load-fill"
+                             ng-style="{'width': (site.loadPct || 0) + '%', 'background': site.loadPct > 90 ? 'var(--md20-crit,#e74c3c)' : site.loadPct > 70 ? 'var(--md20-warn,#f39c12)' : 'var(--md20-accent,#5BC0EB)'}">
+                        </div>
+                    </div>
+
+                    <div style="font-size:9px;color:#4A6A7F;margin-top:2px;">
+                        {{site.activeCount}}/{{site.unitCount}} פעילות | עומס: {{site.loadPct | number:0}}%
+                    </div>
+
+                    <!-- Units within site card -->
+                    <div class="md20-units-grid" ng-show="config.showUnitsInCards && site.units.length">
+                        <div ng-repeat="u in site.units track by $index" class="md20-unit-mini"
+                             ng-style="{'border-right': '2px solid ' + getUnitStatusColor(u.status)}">
+                            <div class="md20-unit-mini-name">{{u.name}}</div>
+                            <div class="md20-unit-mini-val" style="color:var(--md20-accent,#5BC0EB);">{{u.productionMW | number:0}}</div>
+                            <div class="md20-unit-mini-status" ng-style="{'color': getUnitStatusColor(u.status)}">{{u.statusText}}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div ng-show="!filteredSites.length" class="md20-empty-msg">
+                אין אתרים להצגה
+            </div>
+        </div>
+
+        <!-- HEATMAP VIEW -->
+        <div ng-show="viewMode==='heatmap'" class="md20-heatmap-grid">
+            <div ng-repeat="site in filteredSites track by $index"
+                 class="md20-heat-cell"
+                 ng-style="{'background': getHeatColor(site.loadPct)}"
+                 title="{{site.name}}: {{site.totalMW | number:0}} MW">
+                <div class="md20-heat-name">{{site.name}}</div>
+                <div class="md20-heat-val">{{site.totalMW | number:0}}</div>
+                <div class="md20-heat-label">MW | {{site.loadPct | number:0}}%</div>
+            </div>
+        </div>
+
+        <!-- TABLE VIEW -->
+        <table ng-show="viewMode==='table'" class="md20-table">
+            <thead>
+                <tr>
+                    <th ng-click="sortBy('name')">אתר</th>
+                    <th ng-click="sortBy('totalMW')">ייצור MW</th>
+                    <th ng-click="sortBy('maxMW')">קיבולת MW</th>
+                    <th ng-click="sortBy('loadPct')">עומס %</th>
+                    <th ng-click="sortBy('avgEfficiency')">נצילות %</th>
+                    <th ng-click="sortBy('avgStress')">עומס</th>
+                    <th ng-click="sortBy('co2Total')">CO2 t/h</th>
+                    <th ng-click="sortBy('activeCount')">פעילות</th>
+                    <th>מצב</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr ng-repeat="site in filteredSites track by $index">
+                    <td style="font-weight:600;">{{site.name}}</td>
+                    <td style="color:var(--md20-accent,#5BC0EB);">{{site.totalMW | number:1}}</td>
+                    <td>{{site.maxMW | number:0}}</td>
+                    <td ng-style="{'color': site.loadPct > 90 ? 'var(--md20-crit,#e74c3c)' : site.loadPct > 70 ? 'var(--md20-warn,#f39c12)' : 'var(--md20-text2,#D0E4F5)'}">{{site.loadPct | number:1}}%</td>
+                    <td>{{site.avgEfficiency | number:1}}%</td>
+                    <td ng-style="{'color': site.avgStress > 80 ? 'var(--md20-crit,#e74c3c)' : 'var(--md20-text2,#D0E4F5)'}">{{site.avgStress | number:0}}%</td>
+                    <td>{{site.co2Total | number:1}}</td>
+                    <td>{{site.activeCount}}/{{site.unitCount}}</td>
+                    <td ng-style="{'color': getSiteStatusColor(site.status)}">{{getSiteStatusText(site.status)}}</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Alerts Panel -->
+    <div class="md20-alerts-panel" ng-show="config.showAlerts && alerts.length">
+        <div style="font-size:11px;font-weight:600;color:var(--md20-text3,#8BACC4);margin-bottom:4px;">
+            &#9888; התראות ({{alerts.length}})
+        </div>
+        <div ng-repeat="a in alerts track by $index" class="md20-alert-item">
+            <span class="md20-alert-icon" ng-style="{'color': a.color}">{{a.icon || '\⚠'}}</span>
+            <span class="md20-alert-time">{{a.timeText}}</span>
+            <span class="md20-alert-text">{{a.text}}</span>
+        </div>
+    </div>
+
+    <!-- Trend Mini Chart (FIX: guard empty SVG paths) -->
+    <div class="md20-trend-area" ng-show="config.showTrend && trendData.length">
+        <svg class="md20-trend-svg" ng-attr-viewBox="0 0 {{trendViewWidth}} 60" preserveAspectRatio="none">
+            <path ng-if="trendProductionArea" class="md20-trend-area-fill" ng-attr-d="{{trendProductionArea}}" fill="var(--md20-accent,#5BC0EB)"/>
+            <path ng-if="trendProductionLine" class="md20-trend-line" ng-attr-d="{{trendProductionLine}}" stroke="var(--md20-accent,#5BC0EB)"/>
+            <path ng-if="trendDemandLine" class="md20-trend-line" ng-attr-d="{{trendDemandLine}}" stroke="var(--md20-warn,#f39c12)"/>
+        </svg>
+        <div class="md20-trend-legend">
+            <span><span class="md20-trend-legend-dot" style="background:var(--md20-accent,#5BC0EB);"></span> ייצור</span>
+            <span><span class="md20-trend-legend-dot" style="background:var(--md20-warn,#f39c12);"></span> ביקוש</span>
+        </div>
+    </div>
+
+    <!-- Side Panel -->
+    <div class="md20-side-panel" ng-class="{open: panelOpen}">
+        <div class="md20-panel-header">
+            <span style="color:var(--md20-accent,#5BC0EB);font-weight:600;">לוח ראשי</span>
+            <button class="md20-panel-close" ng-click="closePanel()">&#10005;</button>
+        </div>
+        <div class="md20-panel-body">
+            <div style="font-size:10px;color:#6B8FA8;margin-bottom:6px;">
+                אתרים: <span style="color:var(--md20-text1,#D0E4F5);">{{sites.length}}</span>
+            </div>
+            <div style="font-size:10px;color:#6B8FA8;margin-bottom:6px;">
+                יחידות: <span style="color:var(--md20-text1,#D0E4F5);">{{totalUnits}}</span> ({{activeUnits}} פעילות)
+            </div>
+            <div style="font-size:10px;color:#6B8FA8;margin-bottom:6px;">
+                התראות: <span style="color:var(--md20-crit,#e74c3c);">{{alerts.length}}</span>
+            </div>
+            <div style="font-size:10px;color:#6B8FA8;margin-bottom:6px;">
+                ייצור כולל: <span style="color:var(--md20-accent,#5BC0EB);">{{totalProduction | number:0}} MW</span>
+            </div>
+            <div style="font-size:10px;color:#6B8FA8;margin-bottom:6px;">
+                רזרבה: <span ng-style="{'color': reservePct < 10 ? 'var(--md20-crit,#e74c3c)' : 'var(--md20-good,#2ecc71)'}">{{reserve | number:0}} MW ({{reservePct | number:1}}%)</span>
+            </div>
+
+            <div class="md20-panel-section">
+                <div class="md20-ps-title">הגדרות מתקדמות</div>
+                <div style="margin-bottom:6px;">
+                    <label style="font-size:10px;color:#8BACC4"><input type="checkbox" ng-model="config.DemoMode" ng-change="toggleDemo()"> מצב דמו</label>
+                </div>
+                <div style="display:flex;gap:4px;">
+                    <button class="md20-action-btn" ng-click="exportConfig()">&#8681; ייצוא</button>
+                    <button class="md20-action-btn" ng-click="importConfig()">&#8679; ייבוא</button>
+                </div>
+            </div>
+
+            <button class="md20-action-btn" ng-click="showDocs()" style="margin-top:12px;width:100%;">
+                תיעוד
+            </button>
+        </div>
+    </div>
+
+    <!-- Keyboard hints -->
+    <div class="md20-kbd-hints" ng-show="panelOpen">
+        <span>1 רשת</span> <span>2 חום</span> <span>3 טבלה</span> <span>Esc סגירה</span>
+    </div>
+
+</div>

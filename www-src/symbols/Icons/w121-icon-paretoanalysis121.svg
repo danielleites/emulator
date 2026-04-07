@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48">
+  <rect width="48" height="48" rx="8" fill="#4A90D9"/>
+  <rect x="4" y="4" width="40" height="40" rx="6" fill="#1E3A5F" opacity="0.5"/>
+  <text x="24" y="29" font-family="Arial,sans-serif" font-size="11" font-weight="bold"
+        fill="white" text-anchor="middle">PAR</text>
+  <text x="24" y="40" font-family="Arial,sans-serif" font-size="7"
+        fill="rgba(255,255,255,0.7)" text-anchor="middle">W121</text>
+</svg>

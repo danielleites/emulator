@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <!-- Hydro Dispatch Optimizer icon -->
+  <rect width="64" height="64" rx="10" fill="#060C1A"/>
+  <!-- Dam shape -->
+  <path d="M8 48 L24 20 L40 20 L56 48 Z" fill="none" stroke="#4F86C6" stroke-width="2" stroke-linejoin="round"/>
+  <path d="M8 48 L24 20" stroke="#4F86C6" stroke-width="2"/>
+  <!-- Water behind dam (blue fill) -->
+  <path d="M10 46 L25 22 L40 22 L40 22 Q38 26 38 30 Q40 34 36 36 Q28 38 22 34 Q14 30 14 44 Z" fill="#0077B6" opacity="0.5"/>
+  <!-- Power output lightning bolt -->
+  <polygon points="38,10 32,30 40,30 34,54 48,26 38,26" fill="#F39C12" opacity="0.9"/>
+  <!-- Flow arrows from turbine -->
+  <path d="M10 52 Q14 50 18 52 Q22 54 26 52" fill="none" stroke="#4F86C6" stroke-width="1.5" stroke-linecap="round"/>
+  <!-- MW label -->
+  <text x="14" y="60" font-family="Segoe UI, sans-serif" font-size="7" fill="#BDD8F5" font-weight="600">MW</text>
+</svg>

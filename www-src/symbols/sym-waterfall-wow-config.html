@@ -1,0 +1,146 @@
+<!-- ═══════════════════════════════════════════════════════
+     Executive Kinetic Waterfall — Config Panel
+     WOW Waterfall v100 — wc20 Pattern + Collapsible <details>
+     ═══════════════════════════════════════════════════════ -->
+
+<div class="wc20-config-panel" style="direction:rtl; font-family:'Segoe UI',Arial,sans-serif;">
+
+    <!-- ── General (open by default) ── -->
+    <details class="wc20-section" open>
+        <summary class="wc20-section-title">כללי</summary>
+
+        <div class="wc20-field">
+            <label class="wc20-label">כותרת</label>
+            <input type="text" class="wc20-input"
+                   ng-model="config.Title"
+                   placeholder="Executive Kinetic Waterfall">
+        </div>
+
+        <div class="wc20-field">
+            <label class="wc20-label">מצב הדגמה (Demo)</label>
+            <input type="checkbox" class="wc20-checkbox"
+                   ng-model="config.DemoMode">
+            <span class="wc20-hint">תחנת כוח: ייצור ברוטו → הפסדים → ייצור נטו</span>
+        </div>
+    </details>
+
+    <!-- ── Display (open by default) ── -->
+    <details class="wc20-section" open>
+        <summary class="wc20-section-title">תצוגה</summary>
+
+        <div class="wc20-field">
+            <label class="wc20-label">הצג ערכים מעל עמודות</label>
+            <input type="checkbox" class="wc20-checkbox"
+                   ng-model="config.ShowValues">
+        </div>
+
+        <div class="wc20-field">
+            <label class="wc20-label">הצג אחוז מהעוגן (Delta %)</label>
+            <input type="checkbox" class="wc20-checkbox"
+                   ng-model="config.ShowDelta">
+            <span class="wc20-hint">הפסד = X% מהסך הראשוני → הבנה מיידית</span>
+        </div>
+
+        <div class="wc20-field">
+            <label class="wc20-label">הצג קווי רשת</label>
+            <input type="checkbox" class="wc20-checkbox"
+                   ng-model="config.ShowGrid">
+        </div>
+
+        <div class="wc20-field">
+            <label class="wc20-label">עשרוניות</label>
+            <select class="wc20-select" ng-model="config.Decimals"
+                    ng-options="v as v for v in [0, 1, 2, 3]">
+            </select>
+        </div>
+    </details>
+
+    <!-- ── Totals ── -->
+    <details class="wc20-section">
+        <summary class="wc20-section-title">עמודות סך-הכל</summary>
+
+        <div class="wc20-field">
+            <label class="wc20-label">זיהוי אוטומטי (ראשון + אחרון)</label>
+            <input type="checkbox" class="wc20-checkbox"
+                   ng-model="config.AutoTotals">
+            <span class="wc20-hint">עמודות עוגן מצוירות מציר האפס (כחול)</span>
+        </div>
+
+        <div class="wc20-field">
+            <label class="wc20-label">אינדקסים ידניים (Total Indices)</label>
+            <input type="text" class="wc20-input"
+                   ng-model="config.TotalIndices"
+                   placeholder="0, 6">
+            <span class="wc20-hint">מופרדים בפסיק, למשל: 0, 3, 6 — נוסף על AutoTotals</span>
+        </div>
+    </details>
+
+    <!-- ── Theme ── -->
+    <details class="wc20-section">
+        <summary class="wc20-section-title">ערכת נושא</summary>
+
+        <div class="wc20-field">
+            <label class="wc20-label">גופן</label>
+            <select class="wc20-select" ng-model="config.fontFamily">
+                <option value="Segoe UI">Segoe UI</option>
+                <option value="Arial">Arial</option>
+                <option value="Tahoma">Tahoma</option>
+                <option value="Consolas">Consolas (Mono)</option>
+            </select>
+        </div>
+
+        <div class="wc20-field">
+            <label class="wc20-label">גודל גופן (px)</label>
+            <input type="number" class="wc20-input wc20-input-sm"
+                   ng-model="config.fontSize"
+                   ng-model-options="{ debounce: 500 }"
+                   min="8" max="16" step="1">
+        </div>
+    </details>
+
+    <!-- ── Info ── -->
+    <details class="wc20-section">
+        <summary class="wc20-section-title">מידע טכני</summary>
+
+        <div class="wc20-field wc20-readonly">
+            <span class="wc20-badge wc20-badge-blue">DataShape</span>
+            <span>Table (Label + Value Rows, Pre-Sorted)</span>
+        </div>
+
+        <div class="wc20-field wc20-readonly">
+            <span class="wc20-badge wc20-badge-green">Algorithm</span>
+            <span>Single Pass Running Total — O(n) Reduce</span>
+        </div>
+
+        <div class="wc20-field wc20-readonly">
+            <span class="wc20-badge wc20-badge-green">Animation</span>
+            <span>Cascading Flow — lineDashOffset on GPU</span>
+        </div>
+
+        <div class="wc20-field wc20-readonly">
+            <span class="wc20-badge wc20-badge-orange">Highlight</span>
+            <span>Biggest Loser — shadowBlur Red Glow</span>
+        </div>
+
+        <div class="wc20-field wc20-readonly">
+            <span class="wc20-badge wc20-badge-blue">Delta</span>
+            <span>Contextual % of Anchor Per Step</span>
+        </div>
+
+        <div class="wc20-field wc20-readonly">
+            <span class="wc20-badge wc20-badge-purple">Performance</span>
+            <span>0 SVG · 0 DOM cells · &lt;1ms draw</span>
+        </div>
+
+        <div class="wc20-field wc20-readonly">
+            <span class="wc20-badge wc20-badge-blue">Rendering</span>
+            <span>Vanilla Canvas 2D — 0 Dependencies</span>
+        </div>
+
+        <div class="wc20-field wc20-readonly" style="margin-top:8px;">
+            <span class="wc20-badge">WOW Waterfall v100</span>
+            <span style="color:#8899AA;">Executive Kinetic Waterfall</span>
+        </div>
+    </details>
+
+</div>

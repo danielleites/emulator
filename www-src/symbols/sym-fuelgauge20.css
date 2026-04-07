@@ -1,0 +1,64 @@
+/* ================================================================
+   sym-fuelgauge20.css — Fuel Inventory Monitor v20
+   ================================================================ */
+.fg20-root {
+    --fg20-bg: #060C18; --fg20-surface: #0B1D33; --fg20-border: rgba(46,139,192,0.15);
+    --fg20-accent: #5BC0EB; --fg20-text1: #FFFFFF; --fg20-text2: #C0D0E0; --fg20-text3: #8BACC4;
+    position: relative; width: 100%; height: 100%; background: var(--fg20-bg);
+    color: var(--fg20-text2); font-family: 'Segoe UI', Arial, sans-serif; font-size: 12px;
+    direction: rtl; overflow: hidden; display: flex; flex-direction: column;
+}
+.fg20-hdr {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 6px 10px; background: var(--fg20-surface); border-bottom: 1px solid var(--fg20-border); flex-shrink: 0;
+}
+.fg20-ttl { font-size: 14px; font-weight: 600; color: var(--fg20-text1); }
+.fg20-btn {
+    background: rgba(91,192,235,0.08); border: 1px solid var(--fg20-border);
+    color: var(--fg20-text3); border-radius: 4px; padding: 4px 8px; font-size: 11px; cursor: pointer;
+}
+.fg20-btn:hover, .fg20-btn.active { background: rgba(91,192,235,0.2); color: var(--fg20-accent); }
+.fg20-views { display: flex; gap: 2px; }
+.fg20-live { font-size: 11px; color: var(--fg20-text3); display: flex; align-items: center; gap: 4px; }
+.fg20-live-dot { width: 6px; height: 6px; border-radius: 50%; background: #2ecc71; animation: fg20-pulse 2s infinite; }
+@keyframes fg20-pulse { 0%,100% { opacity:1 } 50% { opacity:0.4 } }
+
+.fg20-summary { display: flex; gap: 12px; padding: 4px 10px; background: rgba(11,29,51,0.6); border-bottom: 1px solid var(--fg20-border); font-size: 11px; color: var(--fg20-text3); flex-shrink: 0; flex-wrap: wrap; }
+.fg20-sum-item { white-space: nowrap; }
+
+.fg20-body { flex: 1; overflow-y: auto; overflow-x: hidden; }
+.fg20-empty { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 200px; color: var(--fg20-text3); }
+
+/* Tanks view */
+.fg20-tanks-wrap { display: flex; flex-wrap: wrap; gap: 16px; padding: 12px; justify-content: center; align-items: flex-end; }
+.fg20-tank-item { display: flex; flex-direction: column; align-items: center; }
+
+/* Table */
+.fg20-tbl-row { display: flex; padding: 4px 8px; border-bottom: 1px solid var(--fg20-border); font-size: 11px; }
+.fg20-tbl-hdr { font-weight: 600; color: var(--fg20-text3); }
+.fg20-tbl-row:not(.fg20-tbl-hdr):hover { background: rgba(91,192,235,0.06); }
+.fg20-tbl-c { flex: 1; padding: 0 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fg20-color-swatch { display: inline-block; width: 10px; height: 10px; border-radius: 2px; vertical-align: middle; margin-left: 4px; }
+
+/* Cards view */
+.fg20-cards { display: flex; flex-wrap: wrap; gap: 8px; padding: 12px; }
+.fg20-card {
+    background: var(--fg20-surface); border-right: 3px solid var(--fg20-accent);
+    border-radius: 4px; padding: 8px 12px; min-width: 100px;
+}
+.fg20-card-name { color: var(--fg20-text1); font-weight: 600; font-size: 12px; }
+.fg20-card-type { color: var(--fg20-text3); font-size: 10px; }
+.fg20-card-pct { font-size: 20px; font-weight: 700; margin: 4px 0; }
+.fg20-card-hours { color: var(--fg20-text3); font-size: 11px; }
+
+/* Side panel */
+.fg20-panel { position: absolute; top: 0; left: -280px; width: 270px; height: 100%; background: var(--fg20-surface); border-right: 1px solid var(--fg20-border); transition: left 0.3s; z-index: 100; overflow-y: auto; padding: 0 10px 10px; }
+.fg20-panel.open { left: 0; box-shadow: 4px 0 20px rgba(0,0,0,0.4); }
+.fg20-phd { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; }
+.fg20-phd h3 { margin: 0; font-size: 13px; color: var(--fg20-accent); }
+.fg20-pcl { background: none; border: none; color: var(--fg20-text3); font-size: 16px; cursor: pointer; }
+.fg20-ps { margin-bottom: 8px; }
+.fg20-ps label { display: block; font-size: 11px; color: var(--fg20-text3); margin-bottom: 3px; }
+.fg20-ps input[type=text], .fg20-ps input[type=number], .fg20-ps select { width: 100%; background: var(--fg20-bg); border: 1px solid var(--fg20-border); border-radius: 4px; padding: 5px 8px; color: var(--fg20-text1); font-size: 12px; }
+
+.fg20-ftr { padding: 3px 10px; font-size: 10px; color: rgba(139,172,196,0.4); text-align: center; border-top: 1px solid var(--fg20-border); flex-shrink: 0; }

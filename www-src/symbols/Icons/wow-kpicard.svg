@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none">
+  <rect x="2" y="2" width="28" height="28" rx="4" fill="#1a1f2e"/>
+  <!-- KPI card -->
+  <rect x="5" y="5" width="22" height="22" rx="2" fill="#1e293b" stroke="#334155" stroke-width="0.5"/>
+  <!-- Value -->
+  <rect x="8" y="8" width="12" height="3" rx="1" fill="#60a5fa"/>
+  <!-- Sparkline -->
+  <polyline points="8,17 11,15 14,16 17,13 20,14 23,11 25,12"
+            stroke="#34d399" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+  <!-- Delta indicator -->
+  <polygon points="22,8 24,8 23,6" fill="#34d399"/>
+  <!-- Label -->
+  <rect x="8" y="21" width="8" height="2" rx="0.5" fill="#475569"/>
+</svg>

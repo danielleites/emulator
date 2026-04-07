@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <rect width="32" height="32" rx="5" fill="#0A1628"/>
+  <path d="M16 3 L28 8 L28 18 Q28 25 16 30 Q4 25 4 18 L4 8 Z" fill="none" stroke="#2ECC71" stroke-width="1.5"/>
+  <path d="M16 7 L25 11 L25 18 Q25 23 16 27 Q7 23 7 18 L7 11 Z" fill="#2ECC71" opacity="0.1"/>
+  <text x="12" y="20" font-size="10" fill="#2ECC71" font-family="Arial" font-weight="bold">✓</text>
+  <text x="4" y="29" font-size="3.5" fill="#8BACC4" font-family="Arial">SECURITY STATE</text>
+</svg>

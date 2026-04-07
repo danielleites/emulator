@@ -1,0 +1,246 @@
+/**
+ * sym-navbar20.css -- Navigation Sidebar v20 Styles
+ * ==================================================
+ * Sidebar navigation with KPI dashboard, favorites, recent items,
+ * search, edit mode, and clock banner.
+ * Extracted from v10 inline CSS, all classes prefixed nv20-.
+ *
+ * CSS custom properties: --nv20-*
+ * Flat CSS (no nesting)
+ */
+
+/* ── Root & Custom Properties ── */
+:host, .nv20-root {
+    --nv20-bg-deep: #060C18;
+    --nv20-bg-primary: #0A1628;
+    --nv20-bg-secondary: #0D1F35;
+    --nv20-bg-card: #0F2940;
+    --nv20-bg-card-hover: #153858;
+    --nv20-bg-input: rgba(255,255,255,0.08);
+    --nv20-accent: #1E5A8A;
+    --nv20-accent-light: #2E8BC0;
+    --nv20-cyan: #5BC0EB;
+    --nv20-ok: #2ECC71;
+    --nv20-warn: #F39C12;
+    --nv20-crit: #E74C3C;
+    --nv20-off: #607D8B;
+    --nv20-text: #FFF;
+    --nv20-text2: #8BACC4;
+    --nv20-text3: #5A7A94;
+    --nv20-border: rgba(46,139,192,0.2);
+    --nv20-border-active: rgba(91,192,235,0.45);
+    --nv20-shadow: 0 4px 24px rgba(0,0,0,0.4);
+    --nv20-radius: 10px;
+    --nv20-radius-sm: 6px;
+    --nv20-font: 'Segoe UI','Arial',sans-serif;
+    --nv20-transition: all 0.25s cubic-bezier(0.4,0,0.2,1);
+}
+
+/* ── Root Container ── */
+.nv20-root {
+    background: linear-gradient(160deg, var(--nv20-bg-deep), var(--nv20-bg-primary), var(--nv20-bg-secondary));
+    color: var(--nv20-text);
+    display: flex;
+    flex-direction: column;
+    width: 100%; height: 100%;
+    position: relative;
+    overflow: hidden;
+    font-family: var(--nv20-font);
+    direction: rtl;
+}
+.nv20-root * { box-sizing: border-box; margin: 0; padding: 0; }
+
+/* ── Scrollbar ── */
+.nv20-root ::-webkit-scrollbar { width: 6px; height: 6px; }
+.nv20-root ::-webkit-scrollbar-track { background: var(--nv20-bg-deep); }
+.nv20-root ::-webkit-scrollbar-thumb { background: var(--nv20-accent); border-radius: 3px; }
+
+/* ── Toast ── */
+.nv20-toast-container {
+    position: absolute; top: 12px; left: 50%; transform: translateX(-50%);
+    z-index: 9999; display: flex; flex-direction: column; gap: 8px; pointer-events: none;
+}
+.nv20-toast {
+    background: var(--nv20-bg-card); border: 1px solid var(--nv20-border-active);
+    border-radius: var(--nv20-radius-sm); padding: 10px 20px;
+    color: var(--nv20-cyan); font-size: 13px; font-family: var(--nv20-font);
+    box-shadow: var(--nv20-shadow); animation: nv20ti .35s ease; pointer-events: auto;
+}
+.nv20-toast.out { animation: nv20to .3s ease forwards; }
+@keyframes nv20ti { from { opacity: 0; transform: translateY(-16px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes nv20to { to { opacity: 0; transform: translateY(-16px); } }
+
+/* ── Live Indicator ── */
+.nv20-live { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--nv20-text3); }
+.nv20-live-dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--nv20-ok); box-shadow: 0 0 8px var(--nv20-ok);
+    animation: nv20p 2s infinite;
+}
+@keyframes nv20p { 0%,100% { opacity: 1; } 50% { opacity: .4; } }
+
+/* ── Header ── */
+.nv20-hdr {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 10px 16px;
+    background: linear-gradient(135deg, var(--nv20-bg-secondary), var(--nv20-bg-card));
+    border-bottom: 1px solid var(--nv20-border); flex-shrink: 0;
+}
+.nv20-ttl { font-size: 15px; font-weight: 600; color: var(--nv20-cyan); }
+.nv20-toolbar { display: flex; gap: 6px; align-items: center; }
+
+/* ── Buttons ── */
+.nv20-btn {
+    padding: 5px 12px; border-radius: var(--nv20-radius-sm);
+    border: 1px solid var(--nv20-border);
+    background: rgba(15,41,64,0.6); color: inherit; cursor: pointer;
+    font-size: 11px; font-family: var(--nv20-font);
+    transition: var(--nv20-transition);
+}
+.nv20-btn:hover { background: rgba(46,139,192,0.25); border-color: var(--nv20-border-active); }
+.nv20-btn.danger { background: rgba(231,76,60,0.2); border-color: rgba(231,76,60,0.3); }
+.nv20-btn.danger:hover { background: rgba(231,76,60,0.35); }
+
+/* ── Clock Banner ── */
+.nv20-clock {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 10px 16px;
+    background: linear-gradient(135deg, rgba(30,90,138,0.3), rgba(91,192,235,0.1));
+    border-bottom: 1px solid var(--nv20-border); flex-shrink: 0;
+}
+.nv20-clock-time {
+    font-size: 22px; font-weight: 700; color: var(--nv20-cyan);
+    font-variant-numeric: tabular-nums; letter-spacing: 1px;
+}
+.nv20-clock-date { font-size: 12px; color: var(--nv20-text2); text-align: left; }
+
+/* ── KPI Dashboard ── */
+.nv20-kpi { border-bottom: 1px solid var(--nv20-border); padding: 8px; flex-shrink: 0; }
+.nv20-kpi-hdr { display: flex; justify-content: space-between; align-items: center; padding: 2px 8px 6px; }
+.nv20-kpi-title { font-size: 11px; color: var(--nv20-text3); text-transform: uppercase; letter-spacing: 0.5px; }
+.nv20-kpi-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-bottom: 8px; padding: 0 4px; }
+.nv20-kpi-stat {
+    display: flex; flex-direction: column; align-items: center;
+    padding: 8px 4px; background: var(--nv20-bg-card);
+    border-radius: var(--nv20-radius-sm); border: 1px solid var(--nv20-border);
+    transition: var(--nv20-transition);
+}
+.nv20-kpi-stat:hover { border-color: var(--nv20-border-active); }
+.nv20-kpi-stat-val { font-size: 18px; font-weight: 700; font-variant-numeric: tabular-nums; }
+.nv20-kpi-stat-lbl { font-size: 9px; color: var(--nv20-text3); text-transform: uppercase; margin-top: 2px; }
+.nv20-kpi-mw {
+    padding: 8px; display: flex; align-items: center; justify-content: center; gap: 8px;
+    background: linear-gradient(135deg, rgba(46,204,113,0.08), rgba(91,192,235,0.08));
+    border-radius: var(--nv20-radius-sm); margin: 0 4px 6px;
+}
+.nv20-kpi-mw-val { font-size: 24px; font-weight: 700; color: var(--nv20-cyan); font-variant-numeric: tabular-nums; }
+.nv20-kpi-mw-lbl { font-size: 11px; color: var(--nv20-text3); }
+.nv20-kpi-items { display: flex; flex-direction: column; gap: 3px; max-height: 200px; overflow-y: auto; padding: 0 4px; }
+.nv20-kpi-item {
+    display: flex; align-items: center; gap: 8px; padding: 6px 10px;
+    background: var(--nv20-bg-card); border-radius: var(--nv20-radius-sm);
+    cursor: pointer; transition: var(--nv20-transition);
+    border: 1px solid transparent;
+}
+.nv20-kpi-item:hover { background: var(--nv20-bg-card-hover); border-color: var(--nv20-border); }
+.nv20-kpi-item.selected { border-color: var(--nv20-cyan); box-shadow: 0 0 0 2px rgba(91,192,235,0.15); }
+.nv20-kpi-item-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.nv20-kpi-item-name { flex: 1; font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.nv20-kpi-item-val { font-size: 13px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.nv20-kpi-item-unit { font-size: 10px; color: var(--nv20-text3); }
+.nv20-kpi-item-stale { font-size: 9px; color: var(--nv20-warn); margin-right: 4px; }
+
+/* ── Search Bar ── */
+.nv20-search-bar { padding: 8px 12px; border-bottom: 1px solid var(--nv20-border); flex-shrink: 0; }
+.nv20-search {
+    width: 100%; background: var(--nv20-bg-input); border: 1px solid var(--nv20-border);
+    color: var(--nv20-text); padding: 7px 12px; border-radius: var(--nv20-radius-sm);
+    font-size: 12px; font-family: var(--nv20-font); direction: rtl; outline: none;
+}
+.nv20-search:focus { border-color: var(--nv20-cyan); box-shadow: 0 0 0 3px rgba(91,192,235,0.15); }
+
+/* ── Navigation Body ── */
+.nv20-body { flex: 1; overflow-y: auto; padding: 8px; }
+.nv20-section-title {
+    font-size: 11px; color: var(--nv20-text3); text-transform: uppercase;
+    letter-spacing: 0.5px; padding: 8px 12px 4px;
+}
+.nv20-divider { height: 1px; background: var(--nv20-border); margin: 4px 12px; }
+
+/* ── Nav Item ── */
+.nv20-item {
+    display: flex; align-items: center; gap: 10px; padding: 10px 14px;
+    border-radius: var(--nv20-radius); cursor: pointer;
+    transition: var(--nv20-transition); margin-bottom: 2px; position: relative;
+}
+.nv20-item:hover { background: var(--nv20-bg-card-hover); }
+.nv20-item-icon { font-size: 18px; width: 28px; text-align: center; flex-shrink: 0; }
+.nv20-item-text { flex: 1; overflow: hidden; }
+.nv20-item-label { font-size: 13px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.nv20-item-sublabel { font-size: 10px; color: var(--nv20-text3); }
+.nv20-item-actions { display: flex; gap: 4px; opacity: 0; transition: opacity 0.2s; }
+.nv20-item:hover .nv20-item-actions { opacity: 1; }
+.nv20-item-action {
+    background: none; border: none; color: var(--nv20-text3); cursor: pointer;
+    font-size: 12px; padding: 2px 4px; border-radius: 3px;
+    transition: var(--nv20-transition);
+}
+.nv20-item-action:hover { color: var(--nv20-text); background: var(--nv20-bg-card); }
+.nv20-item-action.fav { color: var(--nv20-warn); }
+
+/* ── Edit Mode Item ── */
+.nv20-edit-item {
+    background: var(--nv20-bg-card); border: 1px solid var(--nv20-border);
+    border-radius: var(--nv20-radius); padding: 12px; margin-bottom: 4px;
+}
+.nv20-edit-row { display: flex; gap: 6px; margin-bottom: 6px; }
+.nv20-edit-input {
+    background: var(--nv20-bg-input); border: 1px solid var(--nv20-border);
+    color: var(--nv20-text); padding: 5px 8px; border-radius: 4px;
+    font-size: 11px; flex: 1; outline: none; font-family: var(--nv20-font);
+}
+.nv20-edit-input:focus { border-color: var(--nv20-cyan); }
+
+/* ── Side Panel ── */
+.nv20-panel {
+    position: absolute; top: 0; left: 0; width: 280px; height: 100%;
+    background: var(--nv20-bg-primary); border-right: 1px solid var(--nv20-border-active);
+    z-index: 100; transform: translateX(-100%); transition: transform .3s ease;
+    overflow-y: auto; direction: rtl;
+}
+.nv20-panel.open { transform: translateX(0); }
+.nv20-phd {
+    padding: 14px 16px; border-bottom: 1px solid var(--nv20-border);
+    display: flex; align-items: center; justify-content: space-between;
+}
+.nv20-phd h3 { font-size: 14px; color: var(--nv20-cyan); font-weight: 600; }
+.nv20-pcl { background: none; border: none; color: var(--nv20-text3); cursor: pointer; font-size: 18px; }
+.nv20-ps { padding: 12px 16px; border-bottom: 1px solid rgba(255,255,255,.04); }
+.nv20-ps label { display: block; font-size: 11px; color: var(--nv20-text3); margin-bottom: 4px; }
+
+/* ── Empty State ── */
+.nv20-empty {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 40px; color: var(--nv20-text3); font-size: 14px; gap: 12px;
+}
+
+/* ── AF Connection Badge ── */
+.nv20-af-badge { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 10px; font-size: 11px; }
+.nv20-af-good { background: rgba(76,175,80,.15); color: #4caf50; }
+.nv20-af-warn { background: rgba(255,193,7,.15); color: #ffc107; }
+.nv20-af-bad  { background: rgba(244,67,54,.15); color: #f44336; }
+.nv20-af-dot  { width: 6px; height: 6px; border-radius: 50%; display: inline-block; }
+.nv20-af-good .nv20-af-dot { background: #4caf50; box-shadow: 0 0 4px #4caf50; }
+.nv20-af-warn .nv20-af-dot { background: #ffc107; box-shadow: 0 0 4px #ffc107; }
+.nv20-af-bad  .nv20-af-dot { background: #f44336; box-shadow: 0 0 4px #f44336; }
+
+/* ── Footer ── */
+.nv20-ftr {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 6px 16px; font-size: 10px; color: var(--nv20-text3);
+    border-top: 1px solid var(--nv20-border); flex-shrink: 0;
+}
+
+/* ── Animations ── */
+@keyframes nv20-fade-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+.nv20-animate-in { animation: nv20-fade-in 0.3s ease both; }

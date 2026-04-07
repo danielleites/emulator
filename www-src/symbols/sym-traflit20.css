@@ -1,0 +1,425 @@
+/**
+ * ================================================================
+ *  sym-trafficlight20.css  --  Traffic Light v20 Stylesheet
+ * ================================================================
+ *  External CSS for the Traffic Light state indicator.
+ *  All classes prefixed tl20-, custom properties prefixed --tl20-.
+ *
+ *  Flat CSS (no nesting, no :is/:where)
+ *  RTL-first layout (dir="rtl" on root container)
+ * ================================================================
+ */
+
+/* ── Custom Properties ── */
+.tl20-root {
+    --tl20-bg-deep: #060C18;
+    --tl20-bg1: #0A1628;
+    --tl20-bg2: #0D1F35;
+    --tl20-bg-card: #0F2940;
+    --tl20-bg-card-hover: #153858;
+    --tl20-bg-input: #0B1D33;
+    --tl20-accent: #1E5A8A;
+    --tl20-accent-lt: #2E8BC0;
+    --tl20-cyan: #5BC0EB;
+    --tl20-glow: #3DA5D9;
+    --tl20-ok: #2ECC71;
+    --tl20-ok-dim: rgba(46,204,113,0.15);
+    --tl20-warn: #F39C12;
+    --tl20-warn-dim: rgba(243,156,18,0.15);
+    --tl20-crit: #E74C3C;
+    --tl20-crit-dim: rgba(231,76,60,0.15);
+    --tl20-off: #607D8B;
+    --tl20-text: #FFFFFF;
+    --tl20-text2: #8BACC4;
+    --tl20-text3: #5A7A94;
+    --tl20-border: rgba(46,139,192,0.2);
+    --tl20-border-active: rgba(91,192,235,0.45);
+    --tl20-shadow: 0 4px 24px rgba(0,0,0,0.4);
+    --tl20-shadow-lg: 0 8px 40px rgba(0,0,0,0.5);
+    --tl20-glass-bg: rgba(10,22,40,0.7);
+    --tl20-glass-border: rgba(91,192,235,0.12);
+    --tl20-radius: 10px;
+    --tl20-radius-sm: 6px;
+    --tl20-font: 'Segoe UI','Arial',sans-serif;
+    --tl20-ease: all 0.25s cubic-bezier(0.4,0,0.2,1);
+}
+
+/* ── Root Container ── */
+.tl20-root {
+    background: linear-gradient(160deg, var(--tl20-bg-deep), var(--tl20-bg1), var(--tl20-bg2));
+    color: var(--tl20-text);
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    position: relative;
+    overflow: hidden;
+    font-family: var(--tl20-font);
+}
+
+.tl20-root * { box-sizing: border-box; margin: 0; padding: 0; }
+.tl20-root ::-webkit-scrollbar { width: 6px; height: 6px; }
+.tl20-root ::-webkit-scrollbar-track { background: var(--tl20-bg-deep); border-radius: 3px; }
+.tl20-root ::-webkit-scrollbar-thumb { background: var(--tl20-accent); border-radius: 3px; }
+.tl20-root ::-webkit-scrollbar-thumb:hover { background: var(--tl20-cyan); }
+
+
+/* ── Header ── */
+.tl20-hdr {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    background: linear-gradient(135deg, var(--tl20-bg2), var(--tl20-bg-card));
+    border-bottom: 1px solid var(--tl20-border);
+    flex-shrink: 0;
+}
+
+.tl20-ttl { font-size: 15px; font-weight: 600; color: var(--tl20-text); }
+.tl20-sub { font-size: 11px; color: var(--tl20-text3); }
+
+.tl20-toolbar { display: flex; gap: 6px; align-items: center; }
+
+.tl20-btn {
+    background: var(--tl20-bg-card);
+    border: 1px solid var(--tl20-border);
+    color: var(--tl20-text2);
+    padding: 5px 10px;
+    border-radius: var(--tl20-radius-sm);
+    cursor: pointer;
+    font-size: 12px;
+    font-family: var(--tl20-font);
+    transition: var(--tl20-ease);
+}
+.tl20-btn:hover { border-color: var(--tl20-border-active); background: var(--tl20-bg-card-hover); color: var(--tl20-text); }
+.tl20-btn.active { border-color: var(--tl20-cyan); color: var(--tl20-cyan); }
+.tl20-btn.danger { background: linear-gradient(135deg, #c0392b, #e74c3c); border-color: transparent; color: #fff; }
+
+.tl20-live {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    color: var(--tl20-text3);
+}
+.tl20-live-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--tl20-ok);
+    box-shadow: 0 0 8px var(--tl20-ok);
+    animation: tl20-pulse 2s infinite;
+}
+@keyframes tl20-pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+
+/* ── AF Connection Badge ── */
+.tl20-af-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 11px;
+}
+.tl20-af-good { background: rgba(46,204,113,0.15); color: var(--tl20-ok); }
+.tl20-af-warn { background: rgba(243,156,18,0.15); color: var(--tl20-warn); }
+.tl20-af-bad  { background: rgba(231,76,60,0.15);  color: var(--tl20-crit); }
+.tl20-af-dot  { width: 6px; height: 6px; border-radius: 50%; background: currentColor; box-shadow: 0 0 4px currentColor; }
+
+
+/* ── Toast ── */
+.tl20-toast-container {
+    position: absolute;
+    top: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    pointer-events: none;
+}
+.tl20-toast {
+    background: var(--tl20-bg-card);
+    border: 1px solid var(--tl20-border-active);
+    border-radius: var(--tl20-radius-sm);
+    padding: 10px 20px;
+    color: var(--tl20-cyan);
+    font-size: 13px;
+    font-family: var(--tl20-font);
+    box-shadow: var(--tl20-shadow-lg);
+    backdrop-filter: blur(12px);
+    animation: tl20-toast-in 0.35s ease;
+    pointer-events: auto;
+}
+.tl20-toast.out { animation: tl20-toast-out 0.3s ease forwards; }
+@keyframes tl20-toast-in  { from { opacity: 0; transform: translateY(-16px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes tl20-toast-out { to   { opacity: 0; transform: translateY(-16px); } }
+
+
+/* ── Traffic Light Body ── */
+.tl20-body {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    padding: 16px;
+}
+
+.tl20-display { display: flex; align-items: center; gap: 16px; }
+.tl20-display.vertical   { flex-direction: column; }
+.tl20-display.horizontal { flex-direction: row; }
+
+
+/* ── Traffic Light Housing ── */
+.tl20-housing {
+    background: linear-gradient(180deg, #1a2a3e, #0d1928);
+    border-radius: 30px;
+    padding: 14px 12px;
+    display: flex;
+    gap: 10px;
+    border: 1px solid var(--tl20-border);
+    box-shadow: var(--tl20-shadow-lg), inset 0 1px 0 rgba(255,255,255,0.05);
+}
+.tl20-housing.vertical   { flex-direction: column; }
+.tl20-housing.horizontal { flex-direction: row; }
+
+
+/* ── Individual Lights ── */
+.tl20-light {
+    width: 48px; height: 48px;
+    border-radius: 50%;
+    transition: all 0.5s ease;
+    position: relative;
+    opacity: 0.2;
+    border: 2px solid rgba(255,255,255,0.05);
+}
+.tl20-light.active {
+    opacity: 1;
+    box-shadow: 0 0 20px currentColor, 0 0 40px currentColor, inset 0 -4px 8px rgba(0,0,0,0.3);
+}
+.tl20-light.active.crit { animation: tl20-blink 1s infinite; }
+
+.tl20-light.red    { background: radial-gradient(circle at 35% 35%, #ff6b6b, #e74c3c 60%, #c0392b); color: var(--tl20-crit); }
+.tl20-light.yellow { background: radial-gradient(circle at 35% 35%, #ffd93d, #f39c12 60%, #e67e22); color: var(--tl20-warn); }
+.tl20-light.green  { background: radial-gradient(circle at 35% 35%, #6bff9b, #2ecc71 60%, #27ae60); color: var(--tl20-ok); }
+
+/* Glass highlight on each light */
+.tl20-light::after {
+    content: '';
+    position: absolute;
+    top: 6px; left: 12px;
+    width: 18px; height: 10px;
+    background: radial-gradient(ellipse, rgba(255,255,255,0.35), transparent);
+    border-radius: 50%;
+}
+
+@keyframes tl20-blink { 0%,100% { opacity: 1; } 50% { opacity: 0.5; } }
+
+
+/* ── ISA-101 Shape Indicator ── */
+.tl20-shape {
+    text-align: center;
+    margin-top: 6px;
+    font-size: 18px;
+    opacity: 0.8;
+    letter-spacing: 2px;
+}
+.tl20-shape-label {
+    font-size: 10px;
+    color: rgba(255,255,255,0.5);
+    margin-right: 4px;
+}
+
+
+/* ── Info Panel (value + state + tag) ── */
+.tl20-info {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    min-width: 140px;
+}
+.tl20-value {
+    font-size: 36px;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    transition: color 0.5s;
+}
+.tl20-state-label {
+    font-size: 14px;
+    font-weight: 600;
+    padding: 4px 14px;
+    border-radius: 12px;
+    transition: all 0.5s;
+}
+.tl20-state-label.ok   { background: var(--tl20-ok-dim);   color: var(--tl20-ok); }
+.tl20-state-label.warn { background: var(--tl20-warn-dim); color: var(--tl20-warn); }
+.tl20-state-label.crit { background: var(--tl20-crit-dim); color: var(--tl20-crit); }
+.tl20-state-label.off  { background: rgba(96,125,139,0.15); color: var(--tl20-off); }
+
+.tl20-tag-label {
+    font-size: 11px;
+    color: var(--tl20-text3);
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    text-align: center;
+}
+
+
+/* ── Adaptive Threshold Badge ── */
+.tl20-adaptive-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 10px;
+    background: rgba(91,192,235,0.12);
+    color: var(--tl20-cyan);
+}
+
+
+/* ── History View ── */
+.tl20-history {
+    flex: 1;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+.tl20-history-actions {
+    display: flex;
+    gap: 8px;
+    padding: 8px 16px;
+    align-items: center;
+}
+.tl20-history-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 8px 16px;
+}
+.tl20-history-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 10px;
+    border-radius: var(--tl20-radius-sm);
+    margin-bottom: 4px;
+    font-size: 12px;
+    transition: background 0.2s;
+}
+.tl20-history-item:hover { background: var(--tl20-bg-card-hover); }
+
+
+/* ── Badges ── */
+.tl20-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 10px;
+    font-weight: 600;
+}
+.tl20-badge.ok   { background: var(--tl20-ok-dim);   color: var(--tl20-ok); }
+.tl20-badge.warn { background: var(--tl20-warn-dim); color: var(--tl20-warn); }
+.tl20-badge.crit { background: var(--tl20-crit-dim); color: var(--tl20-crit); }
+.tl20-badge.off  { background: rgba(96,125,139,0.15); color: var(--tl20-off); }
+
+
+/* ── Side Panel ── */
+.tl20-panel {
+    position: absolute;
+    top: 0; left: 0;
+    width: 280px; height: 100%;
+    background: var(--tl20-glass-bg);
+    backdrop-filter: blur(16px);
+    border-right: 1px solid var(--tl20-glass-border);
+    z-index: 100;
+    transform: translateX(-100%);
+    transition: transform 0.35s cubic-bezier(0.4,0,0.2,1);
+    overflow-y: auto;
+}
+.tl20-panel.open { transform: translateX(0); }
+
+.tl20-phd {
+    padding: 16px;
+    border-bottom: 1px solid var(--tl20-border);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.tl20-phd h3 { font-size: 15px; font-weight: 600; color: var(--tl20-cyan); margin: 0; }
+
+.tl20-pcl {
+    background: none;
+    border: none;
+    color: var(--tl20-text3);
+    font-size: 18px;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: var(--tl20-ease);
+}
+.tl20-pcl:hover { background: var(--tl20-bg-card); color: var(--tl20-text); }
+
+.tl20-ps {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--tl20-border);
+}
+.tl20-ps label {
+    display: block;
+    font-size: 11px;
+    color: var(--tl20-text3);
+    margin-bottom: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+.tl20-ps-row {
+    display: flex;
+    gap: 6px;
+    margin-top: 4px;
+}
+
+
+/* ── Empty State ── */
+.tl20-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+    color: var(--tl20-text3);
+    font-size: 14px;
+    gap: 12px;
+}
+
+
+/* ── Footer ── */
+.tl20-ftr {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 16px;
+    background: var(--tl20-bg-deep);
+    border-top: 1px solid var(--tl20-border);
+    font-size: 11px;
+    color: var(--tl20-text3);
+    flex-shrink: 0;
+}
+.tl20-ftr-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-left: 4px;
+}
+.tl20-ftr-dot.ok   { background: var(--tl20-ok);   box-shadow: 0 0 4px var(--tl20-ok); }
+.tl20-ftr-dot.warn { background: var(--tl20-warn); box-shadow: 0 0 4px var(--tl20-warn); }
+.tl20-ftr-dot.crit { background: var(--tl20-crit); box-shadow: 0 0 4px var(--tl20-crit); }
+
+
+/* ── Animation helpers ── */
+@keyframes tl20-fade-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+.tl20-anim-in { animation: tl20-fade-in 0.3s ease both; }

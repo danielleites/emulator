@@ -1,0 +1,8 @@
+/* sym-paramctrl20.css — Parameter Control Symbol */
+.paramctrl20-host {
+  box-sizing: border-box;
+}
+.paramctrl20-host .piv20-paramctrl {
+  width: 100%;
+  height: 100%;
+}

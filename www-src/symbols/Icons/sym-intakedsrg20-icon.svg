@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <!-- Intake/Discharge Monitor icon -->
+  <rect width="64" height="64" rx="10" fill="#071520"/>
+  <!-- Intake arrow (down into system) -->
+  <line x1="20" y1="8" x2="20" y2="36" stroke="#2ecc71" stroke-width="3" stroke-linecap="round"/>
+  <polygon points="20,42 14,30 26,30" fill="#2ecc71"/>
+  <!-- Discharge arrow (up out of system) -->
+  <line x1="44" y1="56" x2="44" y2="28" stroke="#e74c3c" stroke-width="3" stroke-linecap="round"/>
+  <polygon points="44,22 38,34 50,34" fill="#e74c3c"/>
+  <!-- Central balance indicator -->
+  <circle cx="32" cy="38" r="10" fill="none" stroke="#20A8D8" stroke-width="1.5"/>
+  <text x="32" y="42" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="10" font-weight="bold" fill="#C8E8F5">Δ</text>
+  <!-- IN / OUT labels -->
+  <text x="20" y="58" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="7" fill="#2ecc71">IN</text>
+  <text x="44" y="8" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="7" fill="#e74c3c">OUT</text>
+  <!-- Horizontal connector -->
+  <line x1="20" y1="38" x2="22" y2="38" stroke="#20A8D8" stroke-width="1" opacity="0.5"/>
+  <line x1="42" y1="38" x2="44" y2="38" stroke="#20A8D8" stroke-width="1" opacity="0.5"/>
+</svg>

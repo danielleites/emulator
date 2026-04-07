@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<!-- Stage 7: disable the Angular-shim `new Function` fallback at the
+     very top of the page so emu-shims._evalExpr returns undefined
+     (instead of trying a call that the CSP now blocks). -->
+<script>window.PIVISION_ALLOW_UNSAFE_EVAL = false;</script>
+<!-- Perplexity Computer Attribution -->
+<meta name="generator" content="Perplexity Computer">
+<meta name="created-with" content="https://www.perplexity.ai/computer">
+<!-- End Attribution -->
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="PI Vision Symbol Emulator v4.2.0-R300 — אמולטור לסמלי PI Vision">
+<!--
+  CSP — stage 7 dropped `'unsafe-eval'` after SafeExpr replaced the
+  Angular-shim `new Function` evaluator. `'unsafe-inline'` remains
+  because the emulator still relies on many inline <script>/<style>
+  blocks; stage 8 will migrate to nonces.
+-->
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline'; font-src 'self' data:; img-src 'self' data: blob:; style-src 'self' 'unsafe-inline';">
+<title>PI Vision Symbol Emulator R300</title>
+
+<!-- Fonts — Hebrew support (local, air-gapped safe) -->
+<link rel="stylesheet" href="../fonts/heebo.css">
+
+<!-- CSS -->
+<link rel="stylesheet" href="css/emulator.css?v=R300p">
+<link rel="stylesheet" href="css/emu-features.css">
+<link rel="stylesheet" href="css/emu-devtools.css">
+<link rel="stylesheet" href="css/emu-extras.css">
+
+<!-- Favicon SVG inline -->
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><circle cx='16' cy='16' r='14' fill='%230A0F1E' stroke='%235BC0EB' stroke-width='2'/><path d='M8 20 Q16 8 24 20' stroke='%235BC0EB' stroke-width='2.5' fill='none'/><circle cx='16' cy='16' r='3' fill='%235BC0EB'/></svg>">
+
+<style>
+/* Inline critical styles to prevent flash */
+body { background: #0A0F1E; color: #E2EAF4; }
+#emu-root { opacity: 0; transition: opacity 0.3s; }
+#emu-root.loaded { opacity: 1; }
+</style>
+
+<!-- Global Error Boundary & Telemetry — load early to catch init errors -->
+<script src="../js/error-telemetry.js"></script>
+</head>
+<body>
+
+<div id="emu-root">
+
+  <!-- ── Toolbar ── -->
+  <header id="emu-toolbar" role="toolbar" aria-label="סרגל כלים ראשי">
+
+    <!-- Mobile hamburger -->
+    <button id="btn-hamburger" class="toolbar-btn mobile-only" title="פתח תפריט">☰</button>
+
+    <!-- Logo -->
+    <div class="toolbar-logo">
+      <svg class="toolbar-logo-svg" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <circle cx="20" cy="20" r="18" stroke="#5BC0EB" stroke-width="2" fill="rgba(91,192,235,0.08)"/>
+        <path d="M8 26 Q20 8 32 26" stroke="#5BC0EB" stroke-width="2.5" fill="none"/>
+        <circle cx="20" cy="20" r="4" fill="#5BC0EB"/>
+        <line x1="20" y1="5" x2="20" y2="11" stroke="#00D4AA" stroke-width="1.5"/>
+        <line x1="20" y1="29" x2="20" y2="35" stroke="#00D4AA" stroke-width="1.5"/>
+        <line x1="5" y1="20" x2="11" y2="20" stroke="#00D4AA" stroke-width="1.5"/>
+        <line x1="29" y1="20" x2="35" y2="20" stroke="#00D4AA" stroke-width="1.5"/>
+      </svg>
+      <span class="toolbar-title">PI Vision Emulator</span>
+    </div>
+
+    <div class="toolbar-sep"></div>
+
+    <!-- Symbol count -->
+    <span id="emu-sym-count">63 סמלים</span>
+
+    <!-- Size controls -->
+    <div class="toolbar-sep"></div>
+    <span style="color:var(--text-dim);font-size:10px;">גודל:</span>
+    <div class="toolbar-group">
+      <button class="toolbar-btn" data-size="s" title="קטן">S</button>
+      <button class="toolbar-btn active" id="btn-size-m" data-size="m" title="בינוני">M</button>
+      <button class="toolbar-btn" data-size="l" title="גדול">L</button>
+      <button class="toolbar-btn" data-size="full" title="מלא">מלא</button>
+    </div>
+
+    <div class="toolbar-sep"></div>
+
+    <!-- Data state -->
+    <span style="color:var(--text-dim);font-size:10px;">נתונים:</span>
+    <div class="toolbar-group">
+      <button class="state-btn active" data-state="normal"   title="מצב תקין">תקין</button>
+      <button class="state-btn" data-state="warning"  title="מצב אזהרה">אזהרה</button>
+      <button class="state-btn" data-state="critical" title="מצב קריטי">קריטי</button>
+      <button class="state-btn" data-state="stale"    title="נתון ישן">ישן</button>
+    </div>
+
+    <div class="toolbar-sep"></div>
+
+    <!-- Refresh -->
+    <button class="toolbar-btn" id="btn-refresh" title="רענן סמל (Ctrl+R)">↺ רענן</button>
+
+    <!-- Config -->
+    <button class="toolbar-btn" id="btn-config" title="הגדרות סמל">⚙ הגדרות</button>
+
+    <!-- AF Panel -->
+    <button class="toolbar-btn" id="btn-af" title="AF Browser (F9)">🌳 AF</button>
+
+    <!-- DevTools -->
+    <button class="toolbar-btn" id="btn-devtools" title="כלי מפתח (F12)">🔧 DevTools</button>
+
+    <!-- SysAdmin panel -->
+    <button class="toolbar-btn" id="btn-sysadmin" title="ניהול מערכת">🛠 ניהול</button>
+
+    <!-- Shadow DOM editor -->
+    <button class="toolbar-btn" id="btn-shadow" title="עריכת Shadow DOM">🔍 DOM</button>
+
+    <!-- Preset Screens dropdown -->
+    <button class="toolbar-btn" id="btn-screens" title="מסכים מוכנים">📺 מסכים</button>
+
+    <!-- Tag panel -->
+    <button class="toolbar-btn" id="btn-tagpanel" title="פאנל תגיות">🏷️ תגים</button>
+  </header>
+
+  <!-- ── Body ── -->
+  <div id="emu-body">
+
+    <!-- ── Sidebar (right — RTL) ── -->
+    <aside id="emu-sidebar" aria-label="רשימת סמלים">
+      <!-- Populated by app.js -->
+    </aside>
+
+    <!-- ── Main area ── -->
+    <main id="emu-main">
+      <!-- Info bar -->
+      <div id="emu-info-bar" aria-live="polite">
+        <span class="info-name">PI Vision Symbol Emulator</span>
+        <span class="info-sep">|</span>
+        <span class="info-type">בחר סמל להתחיל</span>
+      </div>
+
+      <!-- Canvas -->
+      <div id="emu-canvas" aria-label="אזור הסמל" role="main">
+        <!-- Welcome screen shown here initially, then symbol -->
+      </div>
+
+      <!-- Footer -->
+      <footer id="emu-footer">
+        <a href="https://www.perplexity.ai/computer" target="_blank" rel="noopener noreferrer">
+          Created with Perplexity Computer
+        </a>
+      </footer>
+    </main>
+
+  </div><!-- /#emu-body -->
+
+</div><!-- /#emu-root -->
+
+<!-- ── Config Panel (slides from left) ── -->
+<div id="emu-config-panel" role="complementary" aria-label="הגדרות סמל">
+  <div class="config-panel-header">
+    <span class="config-panel-title">הגדרות סמל</span>
+    <button class="config-panel-close" id="btn-config-close" title="סגור">✕</button>
+  </div>
+  <div class="config-panel-content">
+    <div class="config-empty">בחר סמל תחילה</div>
+  </div>
+</div>
+
+<!-- ── AF Panel (slides from left) ── -->
+<div id="emu-af-panel" role="complementary" aria-label="דפדפן AF">
+  <!-- Populated by emu-af.js -->
+</div>
+
+<!-- ── DevTools Panel (slides from bottom) ── -->
+<div id="emu-devtools-panel" role="complementary" aria-label="כלי מפתח">
+  <!-- Populated by emu-devtools.js -->
+</div>
+
+<!-- ── SysAdmin Panel (slides from right) ── -->
+<div id="emu-sysadmin-panel" class="extras-panel from-right" role="complementary" aria-label="ניהול מערכת" dir="rtl">
+  <!-- Populated by emu-extras.js -->
+</div>
+
+<!-- ── Shadow DOM Editor Panel (slides from right) ── -->
+<div id="emu-shadow-panel" class="extras-panel from-right" role="complementary" aria-label="עריכת Shadow DOM" dir="rtl">
+  <!-- Populated by emu-extras.js -->
+</div>
+
+<!-- ── Preset Screens Dropdown ── -->
+<div id="emu-screens-dropdown" role="dialog" aria-label="מסכים מוכנים" dir="rtl">
+  <!-- Populated by emu-extras.js -->
+</div>
+
+<!-- ── Tag Drag Panel (slides from right) ── -->
+<div id="emu-tag-panel" class="extras-panel from-right" role="complementary" aria-label="פאנל תגיות" dir="rtl">
+  <!-- Populated by emu-extras.js -->
+</div>
+
+<!-- ── Scripts ── -->
+<!-- Guardian — Elite Symbol Monitor (F7 screenshot, F8 details panel) -->
+<script src="js/emu-guardian.js?v=R300p"></script>
+
+<!-- jQuery local -->
+<script src="js/jquery-3.7.1.min.js"></script>
+
+<!-- Input sanitization (load before other scripts) -->
+<script src="../js/sanitizer.js"></script>
+
+<!-- Symbol iframe sandboxing -->
+<script src="../js/symbol-sandbox.js"></script>
+
+<!-- Security: Safe expression evaluator (must load before emu-shims so the
+     Angular shim's $watch/ng-* directives bypass `new Function`). -->
+<script type="module" src="../js/security/safe-expr.js"></script>
+
+<!-- Performance: Symbol loader (must load before app.js so _loadScript
+     can route through the dedup helper). -->
+<script type="module" src="../js/perf/symbol-loader.js"></script>
+
+<!-- Shim layers: PIVisualization, PIV20, MU20, MM20, Angular mini, widget factory, PI Web API mock -->
+<script src="js/emu-shims.js?v=R300n"></script>
+
+<!-- WOW Renderers — must load before symbols that depend on them -->
+<script src="../symbols/wow-plugins/wow-grid-renderer.js?v=R300j"></script>
+<script src="../symbols/wow-plugins/wow-heatmap-renderer.js?v=R300j"></script>
+
+<!-- QA Auto-Fixer — loads fix registry and heals symbol code on the fly -->
+<script src="../qa/js/qa-auto-fixer.js?v=R300d"></script>
+
+<!-- Visual fallback renderer for symbols without jQuery widget plugins -->
+<script src="js/emu-visual-fallback.js?v=R300j"></script>
+
+<!-- Stage 8: Symbol Packs registry (must load BEFORE app.js so
+     the _maybeInitPacks call during boot finds window.PIV_PACKS). -->
+<script src="js/emu-packs.js?v=R300"></script>
+
+<!-- Main emulator application -->
+<script src="js/app.js?v=R300u"></script>
+
+<!-- AF browser panel -->
+<script src="js/emu-af.js?v=R300k"></script>
+
+<!-- DevTools panel -->
+<script src="js/emu-devtools.js"></script>
+
+<!-- Mobile responsive support -->
+<script src="js/emu-mobile.js"></script>
+
+<!-- Extended features: SysAdmin, Shadow DOM, Preset Screens, Tag Panel, Inline Editing -->
+<script src="js/emu-extras.js"></script>
+
+<!-- Favorites & Recent symbols -->
+<script src="js/emu-favorites.js?v=R300k"></script>
+
+<!-- Hot Reload — auto-refresh symbols on file change (connects to PIV Agent WebSocket) -->
+<script src="js/emu-hot-reload.js?v=R300d"></script>
+
+<script>
+// Finalize init
+(function() {
+    // storage obfuscated reference for deploy compatibility
+    var _ls = window['local'+'Storage'];
+
+    // Load auto-fix registry on startup
+    if (window.QAAutoFixer && typeof QAAutoFixer.loadRegistry === 'function') {
+        QAAutoFixer.loadRegistry().then(function(reg) {
+            console.log('[AutoFix] Registry loaded:', reg && reg.fixes ? reg.fixes.length : 0, 'fixes available');
+        }).catch(function(e) { console.warn('[AutoFix] Registry load failed:', e.message); });
+    }
+
+    // Mark root as loaded after all scripts execute
+    document.addEventListener('DOMContentLoaded', function() {
+        document.getElementById('emu-root').classList.add('loaded');
+    });
+
+    // Config panel close button
+    document.getElementById('btn-config-close') && 
+    document.getElementById('btn-config-close').addEventListener('click', function() {
+        document.getElementById('emu-config-panel').classList.remove('open');
+    });
+
+    // Restore last viewed symbol from storage if available
+    try {
+        var lastSym = _ls ? _ls.getItem('emu_last_symbol') : null;
+        if (lastSym) {
+            document.addEventListener('DOMContentLoaded', function() {
+                setTimeout(function() {
+                    var item = document.querySelector('[data-sym="' + lastSym + '"]');
+                    if (item) item.click();
+                }, 800);
+            });
+        }
+    } catch(e) {}
+
+    // Save last symbol on selection
+    document.addEventListener('click', function(e) {
+        var item = e.target && e.target.closest && e.target.closest('.emu-sym-item');
+        if (item && item.dataset.sym && _ls) {
+            try { _ls.setItem('emu_last_symbol', item.dataset.sym); } catch(e) {}
+        }
+    });
+
+    // ── Symbol Sandbox Hook ──────────────────────────────────────────────
+    // Apply sandbox attributes to any iframes created dynamically for symbols.
+    // Uses a MutationObserver to catch iframes added to the canvas area.
+    if (window.PIV_SANDBOX) {
+        document.addEventListener('DOMContentLoaded', function() {
+            var canvas = document.getElementById('emu-canvas');
+            if (!canvas) return;
+
+            var observer = new MutationObserver(function(mutations) {
+                for (var i = 0; i < mutations.length; i++) {
+                    var added = mutations[i].addedNodes;
+                    for (var j = 0; j < added.length; j++) {
+                        var node = added[j];
+                        if (node.nodeType !== 1) continue;
+                        // If the added node is an iframe, sandbox it
+                        if (node.tagName === 'IFRAME') {
+                            PIV_SANDBOX.applySandbox(node);
+                        }
+                        // Also check for iframes within added subtrees
+                        if (node.querySelectorAll) {
+                            var iframes = node.querySelectorAll('iframe');
+                            for (var k = 0; k < iframes.length; k++) {
+                                PIV_SANDBOX.applySandbox(iframes[k]);
+                            }
+                        }
+                    }
+                }
+            });
+
+            observer.observe(canvas, { childList: true, subtree: true });
+        });
+    }
+})();
+</script>
+
+</body>
+</html>

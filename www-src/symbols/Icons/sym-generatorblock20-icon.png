@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+  <rect width="32" height="32" rx="4" fill="#E65100" opacity="0.15"/>
+  <rect x="1" y="1" width="30" height="30" rx="3" fill="none" stroke="#E65100" stroke-width="1.5"/>
+  <rect x="6" y="7" width="20" height="12" rx="2" fill="none" stroke="#E65100" stroke-width="1.5"/><text x="16" y="16" text-anchor="middle" font-family="Arial" font-size="8" fill="#E65100" font-weight="bold">G</text>
+  <text x="16" y="28" text-anchor="middle" font-family="Arial,sans-serif" font-size="6" fill="#E65100" font-weight="bold">GEN</text>
+</svg>

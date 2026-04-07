@@ -1,0 +1,181 @@
+/**
+ * ================================================================
+ *  sym-comparison20.css  --  Comparison v20 Stylesheet
+ * ================================================================
+ *  External CSS for bar comparison & statistical analysis.
+ *  All classes prefixed cp20-, custom properties prefixed --cp20-.
+ *  Flat CSS | RTL-first layout
+ * ================================================================
+ */
+
+/* ── Custom Properties ── */
+.cp20-root {
+    --cp20-bg-deep: #060C18;
+    --cp20-bg1: #0A1628;
+    --cp20-bg2: #0D1F35;
+    --cp20-bg-card: #0F2940;
+    --cp20-bg-card-hover: #153858;
+    --cp20-bg-input: #0B1D33;
+    --cp20-accent: #1E5A8A;
+    --cp20-accent-lt: #2E8BC0;
+    --cp20-cyan: #5BC0EB;
+    --cp20-ok: #2ECC71;
+    --cp20-ok-dim: rgba(46,204,113,0.15);
+    --cp20-warn: #F39C12;
+    --cp20-warn-dim: rgba(243,156,18,0.15);
+    --cp20-crit: #E74C3C;
+    --cp20-crit-dim: rgba(231,76,60,0.15);
+    --cp20-text: #FFFFFF;
+    --cp20-text2: #8BACC4;
+    --cp20-text3: #5A7A94;
+    --cp20-border: rgba(46,139,192,0.2);
+    --cp20-border-active: rgba(91,192,235,0.45);
+    --cp20-shadow: 0 4px 24px rgba(0,0,0,0.4);
+    --cp20-shadow-lg: 0 8px 40px rgba(0,0,0,0.5);
+    --cp20-glass-bg: rgba(10,22,40,0.7);
+    --cp20-glass-border: rgba(91,192,235,0.12);
+    --cp20-radius: 10px;
+    --cp20-radius-sm: 6px;
+    --cp20-font: 'Segoe UI','Arial',sans-serif;
+    --cp20-ease: all 0.25s cubic-bezier(0.4,0,0.2,1);
+}
+
+/* ── Root ── */
+.cp20-root {
+    background: linear-gradient(160deg, var(--cp20-bg-deep), var(--cp20-bg1), var(--cp20-bg2));
+    color: var(--cp20-text);
+    display: flex;
+    flex-direction: column;
+    width: 100%; height: 100%;
+    position: relative;
+    overflow: hidden;
+    font-family: var(--cp20-font);
+}
+.cp20-root * { box-sizing: border-box; margin: 0; padding: 0; }
+.cp20-root ::-webkit-scrollbar { width: 6px; }
+.cp20-root ::-webkit-scrollbar-track { background: var(--cp20-bg-deep); }
+.cp20-root ::-webkit-scrollbar-thumb { background: var(--cp20-accent); border-radius: 3px; }
+
+/* ── Header ── */
+.cp20-hdr {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 10px 16px;
+    background: linear-gradient(135deg, var(--cp20-bg2), var(--cp20-bg-card));
+    border-bottom: 1px solid var(--cp20-border);
+    flex-shrink: 0;
+}
+.cp20-ttl { font-size: 15px; font-weight: 700; }
+.cp20-toolbar { display: flex; gap: 6px; align-items: center; }
+.cp20-btn {
+    background: var(--cp20-bg-card);
+    border: 1px solid var(--cp20-border);
+    color: var(--cp20-text2);
+    padding: 4px 10px; border-radius: var(--cp20-radius-sm);
+    cursor: pointer; font-size: 11px; font-family: var(--cp20-font);
+    transition: var(--cp20-ease);
+}
+.cp20-btn:hover { border-color: var(--cp20-border-active); background: var(--cp20-bg-card-hover); color: var(--cp20-text); }
+.cp20-btn.active { background: rgba(91,192,235,0.25); border-color: rgba(91,192,235,0.5); color: var(--cp20-cyan); }
+
+/* ── AF Badge ── */
+.cp20-af-badge { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 10px; font-size: 11px; }
+.cp20-af-good { background: var(--cp20-ok-dim); color: var(--cp20-ok); }
+.cp20-af-warn { background: var(--cp20-warn-dim); color: var(--cp20-warn); }
+.cp20-af-bad  { background: var(--cp20-crit-dim); color: var(--cp20-crit); }
+.cp20-af-dot  { width: 6px; height: 6px; border-radius: 50%; background: currentColor; box-shadow: 0 0 4px currentColor; }
+
+/* ── Live indicator ── */
+.cp20-live { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--cp20-text3); }
+.cp20-live-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--cp20-ok); box-shadow: 0 0 8px var(--cp20-ok); animation: cp20-pulse 2s infinite; }
+@keyframes cp20-pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+/* ── Toast ── */
+.cp20-toast-container { position: absolute; top: 12px; left: 50%; transform: translateX(-50%); z-index: 9999; display: flex; flex-direction: column; gap: 8px; pointer-events: none; }
+.cp20-toast { background: var(--cp20-bg-card); border: 1px solid var(--cp20-border-active); border-radius: var(--cp20-radius-sm); padding: 10px 20px; color: var(--cp20-cyan); font-size: 13px; box-shadow: var(--cp20-shadow-lg); animation: cp20-tin 0.35s ease; pointer-events: auto; }
+.cp20-toast.out { animation: cp20-tout 0.3s ease forwards; }
+@keyframes cp20-tin  { from { opacity: 0; transform: translateY(-16px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes cp20-tout { to   { opacity: 0; transform: translateY(-16px); } }
+
+/* ── Controls ── */
+.cp20-controls {
+    display: flex; align-items: center; gap: 8px;
+    padding: 6px 16px;
+    border-bottom: 1px solid var(--cp20-border);
+    flex-wrap: wrap;
+}
+.cp20-baseline-label { font-size: 11px; color: var(--cp20-text3); }
+
+/* ── Stats Summary ── */
+.cp20-stats {
+    display: flex; gap: 16px; padding: 6px 16px;
+    border-bottom: 1px solid var(--cp20-border);
+    font-size: 11px; color: var(--cp20-text2);
+    flex-wrap: wrap;
+}
+.cp20-stat-item { display: flex; align-items: center; gap: 4px; }
+.cp20-stat-val { color: var(--cp20-cyan); font-weight: 600; }
+
+/* ── Body ── */
+.cp20-body { overflow-y: auto; flex: 1; padding: 12px 16px; }
+
+/* ── Bar View ── */
+.cp20-bar-item { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+.cp20-bar-label { min-width: 100px; max-width: 140px; font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-align: left; }
+.cp20-bar-wrap { flex: 1; height: 28px; background: var(--cp20-bg-deep); border-radius: 14px; overflow: hidden; position: relative; }
+.cp20-bar-fill { height: 100%; border-radius: 14px; transition: width 0.6s cubic-bezier(0.4,0,0.2,1); display: flex; align-items: center; justify-content: flex-start; padding: 0 10px; min-width: 40px; }
+.cp20-bar-value { font-size: 11px; font-weight: 600; color: #fff; white-space: nowrap; }
+.cp20-bar-diff { min-width: 70px; text-align: left; font-size: 11px; font-variant-numeric: tabular-nums; }
+.cp20-bar-diff.positive { color: var(--cp20-ok); }
+.cp20-bar-diff.negative { color: var(--cp20-crit); }
+.cp20-bar-diff.zero { color: var(--cp20-text3); }
+.cp20-bar-outlier { position: relative; }
+.cp20-bar-outlier::after { content: '\u26A0'; position: absolute; top: -2px; right: -16px; font-size: 10px; color: var(--cp20-warn); }
+
+/* ── Table View ── */
+.cp20-table { width: 100%; border-collapse: separate; border-spacing: 0 3px; }
+.cp20-table th { position: sticky; top: 0; background: var(--cp20-bg1); padding: 8px 10px; text-align: right; font-size: 11px; color: var(--cp20-text3); text-transform: uppercase; border-bottom: 1px solid var(--cp20-border); cursor: pointer; z-index: 5; }
+.cp20-table th:hover { color: var(--cp20-cyan); }
+.cp20-table td { padding: 8px 10px; font-size: 12px; background: var(--cp20-bg-card); }
+.cp20-table tr:hover td { background: var(--cp20-bg-card-hover); }
+.cp20-table tr td:first-child { border-radius: 0 var(--cp20-radius-sm) var(--cp20-radius-sm) 0; }
+.cp20-table tr td:last-child { border-radius: var(--cp20-radius-sm) 0 0 var(--cp20-radius-sm); }
+.cp20-table .positive { color: var(--cp20-ok); }
+.cp20-table .negative { color: var(--cp20-crit); }
+.cp20-table .outlier { background: var(--cp20-warn-dim); }
+
+/* ── Side Panel ── */
+.cp20-panel {
+    position: absolute; left: 0; top: 0;
+    width: 300px; height: 100%;
+    background: var(--cp20-glass-bg);
+    backdrop-filter: blur(16px);
+    border-right: 1px solid var(--cp20-glass-border);
+    z-index: 100;
+    transform: translateX(-100%);
+    transition: transform 0.35s cubic-bezier(0.4,0,0.2,1);
+    overflow-y: auto;
+}
+.cp20-panel.open { transform: translateX(0); }
+.cp20-phd { padding: 16px; border-bottom: 1px solid var(--cp20-border); display: flex; justify-content: space-between; align-items: center; }
+.cp20-phd h3 { font-size: 15px; font-weight: 600; color: var(--cp20-cyan); margin: 0; }
+.cp20-pcl { background: none; border: none; color: var(--cp20-text3); font-size: 18px; cursor: pointer; padding: 4px 8px; border-radius: 4px; transition: var(--cp20-ease); }
+.cp20-pcl:hover { background: var(--cp20-bg-card); color: var(--cp20-text); }
+.cp20-ps { padding: 12px 16px; border-bottom: 1px solid var(--cp20-border); }
+.cp20-ps label { display: block; font-size: 11px; color: var(--cp20-text3); margin-bottom: 4px; }
+
+/* ── Empty ── */
+.cp20-empty { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px; color: var(--cp20-text3); font-size: 13px; gap: 8px; }
+
+/* ── Footer ── */
+.cp20-ftr {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 6px 16px;
+    background: var(--cp20-bg-deep);
+    border-top: 1px solid var(--cp20-border);
+    font-size: 10px; color: var(--cp20-text3);
+    flex-shrink: 0;
+}
+
+/* ── Animation ── */
+@keyframes cp20-fade-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+.cp20-anim-in { animation: cp20-fade-in 0.3s ease both; }

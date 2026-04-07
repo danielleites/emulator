@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <rect width="32" height="32" rx="6" fill="#0A0C10"/>
+  <!-- Thermometer body -->
+  <rect x="13" y="4" width="6" height="17" rx="3" fill="none" stroke="#3498DB" stroke-width="1.6"/>
+  <!-- Mercury fill -->
+  <rect x="14.5" y="12" width="3" height="9" rx="1.5" fill="#E67E22"/>
+  <!-- Bulb -->
+  <circle cx="16" cy="24" r="4" fill="#E74C3C" stroke="#0A0C10" stroke-width="0.5"/>
+  <!-- Tick marks -->
+  <line x1="20" y1="8"  x2="22" y2="8"  stroke="#8898B8" stroke-width="1.2"/>
+  <line x1="20" y1="12" x2="22" y2="12" stroke="#8898B8" stroke-width="1.2"/>
+  <line x1="20" y1="16" x2="22" y2="16" stroke="#8898B8" stroke-width="1.2"/>
+</svg>

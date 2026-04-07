@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+  <rect width="32" height="32" rx="4" fill="#0277BD" opacity="0.15"/>
+  <rect x="1" y="1" width="30" height="30" rx="3" fill="none" stroke="#0277BD" stroke-width="1.5"/>
+  <path d="M10 7 L10 22 M10 10 L20 10 M10 15 L18 15 M10 20 L22 20" fill="none" stroke="#0277BD" stroke-width="1.5"/>
+  <text x="16" y="28" text-anchor="middle" font-family="Arial,sans-serif" font-size="6" fill="#0277BD" font-weight="bold">AF</text>
+</svg>

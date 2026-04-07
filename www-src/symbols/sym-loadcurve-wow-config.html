@@ -1,0 +1,163 @@
+<!-- ═══════════════════════════════════════════════════════
+     Executive Load Curve — Config Panel
+     WOW LC v100 — wc20 Pattern + Collapsible <details>
+     ═══════════════════════════════════════════════════════ -->
+
+<div class="wc20-config-panel" style="direction:rtl; font-family:'Segoe UI',Arial,sans-serif;">
+
+    <!-- ── General (open by default) ── -->
+    <details class="wc20-section" open>
+        <summary class="wc20-section-title">כללי</summary>
+
+        <div class="wc20-field">
+            <label class="wc20-label">כותרת</label>
+            <input type="text" class="wc20-input"
+                   ng-model="config.Title">
+        </div>
+
+        <div class="wc20-field">
+            <label class="wc20-label">מצב הדגמה (Demo)</label>
+            <input type="checkbox" class="wc20-checkbox"
+                   ng-model="config.DemoMode">
+        </div>
+
+        <div class="wc20-field">
+            <label class="wc20-label">נקודות עשרוניות</label>
+            <input type="number" class="wc20-input wc20-input-sm"
+                   ng-model="config.Decimals"
+                   ng-model-options="{ debounce: 500 }"
+                   min="0" max="3" step="1">
+        </div>
+    </details>
+
+    <!-- ── Time Range (open by default) ── -->
+    <details class="wc20-section" open>
+        <summary class="wc20-section-title">טווח זמן</summary>
+
+        <div class="wc20-field">
+            <label class="wc20-label">שעות אחורה</label>
+            <input type="number" class="wc20-input wc20-input-sm"
+                   ng-model="config.HoursBack"
+                   ng-model-options="{ debounce: 500 }"
+                   min="1" max="168" step="1">
+        </div>
+
+        <div class="wc20-field">
+            <label class="wc20-label">שעות קדימה</label>
+            <input type="number" class="wc20-input wc20-input-sm"
+                   ng-model="config.HoursForward"
+                   ng-model-options="{ debounce: 500 }"
+                   min="0" max="168" step="1">
+        </div>
+
+        <span class="wc20-hint">התחזית מוצגת כקו מקוקו מימין לקו ה"עכשיו"</span>
+    </details>
+
+    <!-- ── Capacity & Thresholds ── -->
+    <details class="wc20-section">
+        <summary class="wc20-section-title">קיבולת וספים</summary>
+
+        <div class="wc20-field">
+            <label class="wc20-label">קיבולת מקס (MW)</label>
+            <input type="number" class="wc20-input wc20-input-sm"
+                   ng-model="config.MaxLimit"
+                   ng-model-options="{ debounce: 500 }"
+                   min="1" step="10">
+        </div>
+
+        <div class="wc20-field">
+            <label class="wc20-label">סף אזהרה (%)</label>
+            <input type="number" class="wc20-input wc20-input-sm"
+                   ng-model="config.WarningPct"
+                   ng-model-options="{ debounce: 500 }"
+                   min="0" max="100" step="5">
+        </div>
+
+        <div class="wc20-field">
+            <label class="wc20-label">סף קריטי (%)</label>
+            <input type="number" class="wc20-input wc20-input-sm"
+                   ng-model="config.CriticalPct"
+                   ng-model-options="{ debounce: 500 }"
+                   min="0" max="100" step="5">
+        </div>
+
+        <span class="wc20-hint">מגדיר את אזור הסיכון המוצל וקווי הסף</span>
+    </details>
+
+    <!-- ── Display ── -->
+    <details class="wc20-section">
+        <summary class="wc20-section-title">תצוגה</summary>
+
+        <div class="wc20-field">
+            <label class="wc20-label">הצג קו תחזית</label>
+            <input type="checkbox" class="wc20-checkbox"
+                   ng-model="config.ShowForecast">
+        </div>
+
+        <div class="wc20-field">
+            <label class="wc20-label">הצג אזור סיכון</label>
+            <input type="checkbox" class="wc20-checkbox"
+                   ng-model="config.ShowRiskZone">
+        </div>
+    </details>
+
+    <!-- ── Theme ── -->
+    <details class="wc20-section">
+        <summary class="wc20-section-title">ערכת נושא</summary>
+
+        <div class="wc20-field">
+            <label class="wc20-label">גופן</label>
+            <select class="wc20-select" ng-model="config.fontFamily">
+                <option value="Segoe UI">Segoe UI</option>
+                <option value="Arial">Arial</option>
+                <option value="Rubik">Rubik</option>
+                <option value="Heebo">Heebo</option>
+                <option value="Consolas">Consolas (Mono)</option>
+            </select>
+        </div>
+
+        <div class="wc20-field">
+            <label class="wc20-label">גודל גופן (px)</label>
+            <input type="number" class="wc20-input wc20-input-sm"
+                   ng-model="config.fontSize"
+                   ng-model-options="{ debounce: 500 }"
+                   min="8" max="20" step="1">
+        </div>
+    </details>
+
+    <!-- ── Info ── -->
+    <details class="wc20-section">
+        <summary class="wc20-section-title">מידע טכני</summary>
+
+        <div class="wc20-field wc20-readonly">
+            <span class="wc20-badge wc20-badge-blue">DataShape</span>
+            <span>TimeSeries</span>
+        </div>
+
+        <div class="wc20-field wc20-readonly">
+            <span class="wc20-badge wc20-badge-green">Rendering</span>
+            <span>Canvas Path2D (GPU)</span>
+        </div>
+
+        <div class="wc20-field wc20-readonly">
+            <span class="wc20-badge wc20-badge-green">Architecture</span>
+            <span>Shadow DOM + rAF Batching</span>
+        </div>
+
+        <div class="wc20-field wc20-readonly">
+            <span class="wc20-badge wc20-badge-blue">Hit Testing</span>
+            <span>O(log n) Binary Search</span>
+        </div>
+
+        <div class="wc20-field wc20-readonly">
+            <span class="wc20-badge wc20-badge-blue">DOM Reflow</span>
+            <span>0ms — Canvas Only</span>
+        </div>
+
+        <div class="wc20-field wc20-readonly" style="margin-top:8px;">
+            <span class="wc20-badge">WOW LC v100</span>
+            <span style="color:#8899AA;">Executive Load Curve</span>
+        </div>
+    </details>
+
+</div>

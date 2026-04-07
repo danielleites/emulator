@@ -1,0 +1,65 @@
+<!-- ═══════════════════════════════════════════════════════
+     Mugbalot Ultimate Monitor (MU20) — Display Template
+     Version: ULT.1.7
+
+     Architecture:
+       mu20-core.js  → shared infrastructure (bus, shield, API, etc.)
+       mu20-plugins/  → 14 ES5 plugin constructors + Web Worker (ES6)
+       sym-mugult20.js → orchestrator (Shadow DOM, bus, plugin mount)
+
+     Load order matters: core FIRST, then plugins, then orchestrator.
+
+     QA17-FIX3: Replaced document.write() with sequential appendChild
+     to prevent page wipe in SPA navigation.
+     ═══════════════════════════════════════════════════════ -->
+
+<!-- ── QA17-FIX3: SPA-safe dynamic script loader ── -->
+<script type="text/javascript">
+(function () {
+    'use strict';
+    // Detect PI Vision base path from current URL.
+    // Handles: /PIVision/, /PIVision2019/, /MyPIV/, etc.
+    var match = window.location.pathname.match(/^(\/[^\/]+)\//);
+    var base  = (match ? match[1] : '/PIVision') + '/Scripts/app/editor/symbols/ext/sym-mugult20/';
+    window.__MU20_BASE = base;
+
+    // Scripts to load in strict order (core first, then plugins)
+    var scripts = [
+        'mu20-plugins/mu20-core.js',
+        'mu20-plugins/mu20-siteGrid.js',
+        'mu20-plugins/mu20-heatmap.js',
+        'mu20-plugins/mu20-reports.js',
+        'mu20-plugins/mu20-alerts.js',
+        'mu20-plugins/mu20-log.js',
+        'mu20-plugins/mu20-tags.js',
+        'mu20-plugins/mu20-afbuild.js',
+        'mu20-plugins/mu20-forecast.js',
+        'mu20-plugins/mu20-dispatch.js',
+        'mu20-plugins/mu20-tagAnalysis.js',
+        'mu20-plugins/mu20-tagWarehouse.js',
+        'mu20-plugins/mu20-tagExplorer.js',
+        'mu20-plugins/mu20-event-frames.js',
+        'mu20-plugins/mu20-layout.js'
+    ];
+
+    // Sequential loader: load scripts one by one via appendChild,
+    // safe for SPA navigation (avoids page-wiping side effects)
+    var idx = 0;
+    function loadNext() {
+        if (idx >= scripts.length) return;
+        var s = document.createElement('script');
+        s.type = 'text/javascript';
+        s.src = base + scripts[idx];
+        s.onload = function () { idx++; loadNext(); };
+        s.onerror = function () {
+            if (window.console) console.error('[MU20] Failed to load: ' + scripts[idx]);
+            idx++; loadNext();
+        };
+        document.head.appendChild(s);
+    }
+    loadNext();
+})();
+</script>
+
+<!-- ── Shadow DOM Mount Point ── -->
+<div class="mu20-root" style="width:100%;height:100%;"></div>

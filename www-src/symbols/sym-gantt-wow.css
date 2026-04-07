@@ -1,0 +1,452 @@
+/**
+ * ═══════════════════════════════════════════════════════
+ *  sym-gantt-wow.css  —  Executive Canvas Gantt Styles
+ * ═══════════════════════════════════════════════════════
+ *  Hybrid layout: DOM labels (sticky) + Canvas blocks.
+ *  Crosshair & tooltip via CSS, blocks via Canvas GPU.
+ *  Ghost loading shimmer, Sync/Unsync button states.
+ *
+ *  Version : WOW GT 100.0
+ *  Prefix  : wow-gt-
+ * ═══════════════════════════════════════════════════════
+ */
+
+
+/* ═══ CSS Custom Properties ═══ */
+
+:host {
+    --wow-gt-bg-start:     #060C18;
+    --wow-gt-bg-end:       #0D1F35;
+    --wow-gt-surface:      #0F2940;
+    --wow-gt-accent:       #5BC0EB;
+    --wow-gt-accent-glow:  rgba(91, 192, 235, 0.3);
+    --wow-gt-ok:           #00F5D4;
+    --wow-gt-warn:         #FFCC00;
+    --wow-gt-crit:         #FF3B30;
+    --wow-gt-text:         #ECF0F1;
+    --wow-gt-text-muted:   #8899AA;
+    --wow-gt-border:       #1A3A5C;
+    --wow-gt-glass-bg:     rgba(15, 41, 64, 0.92);
+    --wow-gt-glass-border: rgba(91, 192, 235, 0.15);
+    --wow-gt-font:         'Segoe UI', Arial, sans-serif;
+    --wow-gt-font-size:    12px;
+    --wow-gt-radius:       8px;
+    --wow-gt-transition:   0.2s ease-out;
+    --wow-gt-row-height:   32px;
+    --wow-gt-header-height: 32px;
+    --wow-gt-label-width:  140px;
+}
+
+
+/* ═══ Safe Reset ═══ */
+
+.wow-gt-root { box-sizing: border-box; }
+.wow-gt-root *, .wow-gt-root *::before, .wow-gt-root *::after {
+    box-sizing: border-box;
+}
+
+
+/* ═══ Root Layout ═══ */
+
+.wow-gt-root {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    background: linear-gradient(180deg, var(--wow-gt-bg-start), var(--wow-gt-bg-end));
+    font-family: var(--wow-gt-font);
+    font-size: var(--wow-gt-font-size);
+    color: var(--wow-gt-text);
+    direction: rtl;
+    overflow: hidden;
+    border-radius: var(--wow-gt-radius);
+}
+
+
+/* ═══ Toolbar ═══ */
+
+.wow-gt-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 14px;
+    min-height: 40px;
+    flex-shrink: 0;
+    border-bottom: 1px solid var(--wow-gt-border);
+    background: rgba(6, 12, 24, 0.6);
+}
+
+.wow-gt-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--wow-gt-text);
+    letter-spacing: 0.3px;
+    text-shadow: 0 0 12px var(--wow-gt-accent-glow);
+}
+
+.wow-gt-toolbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    direction: ltr;
+}
+
+
+/* ── Buttons ── */
+
+.wow-gt-btn {
+    padding: 5px 12px;
+    border: 1px solid var(--wow-gt-border);
+    border-radius: 6px;
+    background: rgba(91, 192, 235, 0.08);
+    color: var(--wow-gt-accent);
+    font-size: 11px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all var(--wow-gt-transition);
+    white-space: nowrap;
+}
+
+.wow-gt-btn:hover {
+    background: rgba(91, 192, 235, 0.18);
+    border-color: var(--wow-gt-accent);
+}
+
+
+/* ── Sync/Unsync Toggle ── */
+
+.wow-gt-btn-sync.wow-gt-synced {
+    background: rgba(0, 245, 212, 0.12);
+    color: var(--wow-gt-ok);
+    border-color: rgba(0, 245, 212, 0.3);
+}
+
+.wow-gt-btn-sync.wow-gt-synced:hover {
+    background: rgba(0, 245, 212, 0.22);
+    border-color: var(--wow-gt-ok);
+}
+
+.wow-gt-btn-sync.wow-gt-unsynced {
+    background: rgba(255, 204, 0, 0.12);
+    color: var(--wow-gt-warn);
+    border-color: rgba(255, 204, 0, 0.3);
+    animation: wowGtPulseUnsync 2s ease-in-out infinite;
+}
+
+.wow-gt-btn-sync.wow-gt-unsynced:hover {
+    background: rgba(255, 204, 0, 0.22);
+    border-color: var(--wow-gt-warn);
+}
+
+@keyframes wowGtPulseUnsync {
+    0%, 100% { box-shadow: none; }
+    50%      { box-shadow: 0 0 8px rgba(255, 204, 0, 0.3); }
+}
+
+
+/* ═══ Main Area (Labels + Canvas) ═══ */
+
+.wow-gt-main {
+    flex: 1;
+    display: flex;
+    overflow: hidden;
+    position: relative;
+}
+
+
+/* ── Row Labels (DOM — Sticky Right) ── */
+
+.wow-gt-labels {
+    width: var(--wow-gt-label-width);
+    flex-shrink: 0;
+    overflow-y: hidden;
+    background: rgba(6, 12, 24, 0.8);
+    border-left: 1px solid var(--wow-gt-border);
+    z-index: 5;
+    box-shadow: -3px 0 8px rgba(0, 0, 0, 0.3);
+}
+
+.wow-gt-label-header {
+    height: var(--wow-gt-header-height);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    color: var(--wow-gt-accent);
+    letter-spacing: 0.8px;
+    border-bottom: 1px solid var(--wow-gt-accent);
+    background: var(--wow-gt-surface);
+}
+
+.wow-gt-label {
+    display: flex;
+    align-items: center;
+    padding: 0 10px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--wow-gt-text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    border-bottom: 1px solid rgba(26, 58, 92, 0.15);
+    transition: background 0.15s ease-out;
+}
+
+.wow-gt-label:nth-child(even) {
+    background: rgba(91, 192, 235, 0.03);
+}
+
+.wow-gt-label:hover {
+    background: rgba(91, 192, 235, 0.08);
+}
+
+
+/* ═══ Canvas Wrapper ═══ */
+
+.wow-gt-canvas-wrap {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+}
+
+.wow-gt-canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+    cursor: crosshair;
+}
+
+
+/* ═══ Crosshair (CSS Overlay) ═══ */
+
+.wow-gt-crosshair {
+    position: absolute;
+    width: 1px;
+    pointer-events: none;
+    z-index: 4;
+    display: none;
+    background: rgba(91, 192, 235, 0.4);
+    /* GPU-composited for smooth tracking */
+    will-change: left;
+}
+
+.wow-gt-crosshair::before {
+    content: '';
+    position: absolute;
+    top: -4px;
+    left: -3px;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--wow-gt-accent);
+    box-shadow: 0 0 6px var(--wow-gt-accent-glow);
+}
+
+
+/* ═══ Tooltip (Glassmorphism) ═══ */
+
+.wow-gt-tooltip {
+    position: absolute;
+    z-index: 20;
+    padding: 10px 14px;
+    min-width: 160px;
+    background: var(--wow-gt-glass-bg);
+    border: 1px solid var(--wow-gt-glass-border);
+    border-radius: 8px;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    pointer-events: none;
+    direction: rtl;
+    font-family: var(--wow-gt-font);
+    /* Smooth follow */
+    will-change: left, top;
+}
+
+.wow-gt-tt-time {
+    font-size: 10px;
+    color: var(--wow-gt-accent);
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+}
+
+.wow-gt-tt-asset {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--wow-gt-text);
+    margin-bottom: 4px;
+}
+
+.wow-gt-tt-status {
+    font-size: 11px;
+    font-weight: 600;
+}
+
+
+/* ═══ Footer ═══ */
+
+.wow-gt-footer {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    padding: 4px 14px;
+    font-size: 9px;
+    color: var(--wow-gt-text-muted);
+    border-top: 1px solid var(--wow-gt-border);
+}
+
+.wow-gt-footer span {
+    white-space: nowrap;
+}
+
+
+/* ═══ Empty State ═══ */
+
+.wow-gt-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 200px;
+    color: var(--wow-gt-text-muted);
+    font-size: 14px;
+    gap: 8px;
+}
+
+.wow-gt-empty-icon {
+    font-size: 32px;
+    opacity: 0.5;
+}
+
+
+/* ═══ Now-Line Pulse (Composited) ═══ */
+
+.wow-gt-now-indicator {
+    position: absolute;
+    top: 0;
+    width: 2px;
+    height: 100%;
+    background: #FFFFFF;
+    pointer-events: none;
+    z-index: 3;
+    animation: wowGtNowPulse 2s ease-in-out infinite;
+    will-change: opacity;
+}
+
+@keyframes wowGtNowPulse {
+    0%, 100% { opacity: 0.4; }
+    50%      { opacity: 0.8; }
+}
+
+
+/* ═══ Skeleton / Ghost Loading ═══ */
+
+.wow-gt-skeleton {
+    position: absolute;
+    inset: 0;
+    z-index: 50;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--wow-gt-bg-start);
+}
+
+.wow-gt-skeleton::after {
+    content: '';
+    width: 60%;
+    height: 3px;
+    border-radius: 2px;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        var(--wow-gt-accent),
+        transparent
+    );
+    animation: wowGtShimmer 1.5s ease-in-out infinite;
+}
+
+@keyframes wowGtShimmer {
+    0%   { transform: translateX(-100%); opacity: 0.3; }
+    50%  { opacity: 1; }
+    100% { transform: translateX(100%); opacity: 0.3; }
+}
+
+
+/* ═══ Responsive ═══ */
+
+@container (max-width: 500px) {
+    .wow-gt-toolbar {
+        flex-direction: column;
+        gap: 6px;
+        align-items: stretch;
+    }
+    .wow-gt-toolbar-actions {
+        justify-content: center;
+    }
+    .wow-gt-labels {
+        width: 100px;
+    }
+    .wow-gt-label {
+        font-size: 10px;
+    }
+}
+
+
+/* ═══ Print Media ═══ */
+
+@media print {
+    .wow-gt-root {
+        background: #FFFFFF !important;
+        color: #333 !important;
+        border: 1px solid #DDD;
+    }
+
+    .wow-gt-toolbar {
+        background: #F5F5F5 !important;
+        border-color: #DDD !important;
+    }
+
+    .wow-gt-toolbar-actions {
+        display: none !important;
+    }
+
+    .wow-gt-title {
+        color: #000 !important;
+        text-shadow: none !important;
+    }
+
+    .wow-gt-labels {
+        background: #F9F9F9 !important;
+        border-color: #DDD !important;
+        box-shadow: none !important;
+    }
+
+    .wow-gt-label-header {
+        background: #E8E8E8 !important;
+        color: #333 !important;
+        border-color: #999 !important;
+    }
+
+    .wow-gt-label {
+        color: #333 !important;
+        border-color: #EEE !important;
+    }
+
+    .wow-gt-crosshair,
+    .wow-gt-tooltip,
+    .wow-gt-now-indicator {
+        display: none !important;
+    }
+
+    .wow-gt-footer {
+        color: #666 !important;
+        border-color: #DDD !important;
+    }
+}

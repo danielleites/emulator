@@ -1,0 +1,181 @@
+name: CI
+
+on:
+  push:
+    branches: [main, claude/**]
+  pull_request:
+    branches: [main]
+
+# Cancel in-progress runs on the same ref so a fast-typing developer
+# only pays for the latest commit's run.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  # ─────────────────────────────────────────────────────────────────
+  # Lint + typecheck + unit tests + build
+  # ─────────────────────────────────────────────────────────────────
+  build:
+    name: Lint / typecheck / test / build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci --no-audit --no-fund
+
+      - name: Format check
+        run: npm run format:check
+        continue-on-error: true # phased rollout — drop in stage 6
+
+      - name: Lint
+        run: npm run lint
+        continue-on-error: true # phased rollout — drop in stage 6
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Unit tests
+        run: npm run test -- --run --reporter=verbose
+
+      - name: Build
+        run: npm run build
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+          retention-days: 7
+
+  # ─────────────────────────────────────────────────────────────────
+  # Playwright e2e (depends on the build artifact)
+  # ─────────────────────────────────────────────────────────────────
+  e2e:
+    name: E2E (Playwright)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: build
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci --no-audit --no-fund
+
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Run Playwright tests
+        run: npm run test:e2e
+
+      - name: Upload Playwright report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 14
+
+  # ─────────────────────────────────────────────────────────────────
+  # Security audit
+  # ─────────────────────────────────────────────────────────────────
+  security:
+    name: Security audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci --no-audit --no-fund
+
+      - name: npm audit (high severity only)
+        run: npm audit --audit-level=high
+        continue-on-error: true # advisories happen — track but don't block
+
+      - name: Check for known dangerous patterns in source
+        run: |
+          set -e
+          echo "::group::Checking for new eval() / new Function() across www-src/"
+          # Allow-listed files (legacy emulator devtools, Angular shim,
+          # cordova bridge, vendored libraries, jQuery, and minified
+          # bundles which we deliberately do not lint).
+          ALLOWED='emu-devtools\.js|emu-shims\.js|cordova\.js|/vendor/|jquery-[0-9.]+\.min\.js|\.min\.js$'
+          # Scan every JS source file under www-src (HTML, TS, and
+          # symbols included) so additions outside js/ also fail CI.
+          if grep -RIn --include='*.js' --include='*.ts' --include='*.html' \
+                 -E '\beval\s*\(|new Function\s*\(' www-src/ \
+               | grep -vE "$ALLOWED" \
+               | grep -v 'eslint-disable' \
+               | grep -v 'eslint-disable-next-line'; then
+            echo "::error::eval() or new Function() found outside allow-list"
+            exit 1
+          fi
+          echo "::endgroup::"
+
+          echo "::group::Checking that stage-7 migrated files stay free of raw innerHTML writes"
+          # These five files went through the stage-7 rounds 2-5
+          # innerHTML → SafeDOM migration. Any new raw
+          # `*.innerHTML = ...` write in them is a regression.
+          #
+          # Each file has a single eslint-disable-next-line exception
+          # for the `el.innerHTML = html` line *inside* its own
+          # setSafeInner / _setSafeInner fallback — that's filtered
+          # out below.
+          MIGRATED_FILES=(
+            www-src/js/ai-chat.js
+            www-src/js/af-browser-ui.js
+            www-src/js/mobile-app.js
+            www-src/js/collab-ui.js
+            www-src/js/visual-builder.js
+          )
+          FAIL=0
+          for f in "${MIGRATED_FILES[@]}"; do
+            # Match assignment form: `<expr>.innerHTML = ` or
+            # `.innerHTML =` at end of line. Exclude the helper
+            # fallback lines (annotated with eslint-disable) and
+            # read-only references (`= foo.innerHTML` on the RHS).
+            MATCHES=$(grep -nE '\.innerHTML\s*=[^=]' "$f" \
+                      | grep -v 'eslint-disable' \
+                      | grep -vE '=\s*[A-Za-z_$][A-Za-z0-9_$.]*\.innerHTML\s*$' \
+                      || true)
+            if [ -n "$MATCHES" ]; then
+              echo "::error file=$f::raw innerHTML write detected in a stage-7 migrated file — use setSafeInner() / _setSafeInner() instead"
+              echo "$MATCHES"
+              FAIL=1
+            fi
+          done
+          if [ "$FAIL" -ne 0 ]; then exit 1; fi
+          echo "::endgroup::"

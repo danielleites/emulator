@@ -1,0 +1,327 @@
+/**
+ * ═══════════════════════════════════════════════════════
+ *  sym-liquidgauge-wow.css — Executive Liquid Gauge Styles
+ * ═══════════════════════════════════════════════════════
+ *  Lightweight CSS — Canvas handles all wave rendering,
+ *  gradients, clipping, and container ring.  CSS only
+ *  styles the toolbar, stats, value overlay (glassmorphism
+ *  text centered over the liquid), skeleton, and footer.
+ *
+ *  Version : WOW Liquid Gauge v100
+ *  Prefix  : wow-lg-
+ * ═══════════════════════════════════════════════════════
+ */
+
+
+/* ═══ CSS Custom Properties ═══ */
+
+:host {
+    --wow-lg-bg-start:     #0A0F1C;
+    --wow-lg-bg-end:       #111B2E;
+    --wow-lg-surface:      #0F2940;
+    --wow-lg-accent:       #5BC0EB;
+    --wow-lg-accent-glow:  rgba(91, 192, 235, 0.3);
+    --wow-lg-ok:           #00F5D4;
+    --wow-lg-warn:         #FFCC00;
+    --wow-lg-crit:         #FF3B30;
+    --wow-lg-text:         #ECF0F1;
+    --wow-lg-text-muted:   #8899AA;
+    --wow-lg-border:       #1A3A5C;
+    --wow-lg-font:         'Segoe UI', Arial, sans-serif;
+    --wow-lg-font-size:    12px;
+    --wow-lg-radius:       8px;
+    --wow-lg-transition:   0.2s ease-out;
+}
+
+
+/* ═══ Safe Reset ═══ */
+
+.wow-lg-root { box-sizing: border-box; }
+.wow-lg-root *, .wow-lg-root *::before, .wow-lg-root *::after {
+    box-sizing: border-box;
+}
+
+
+/* ═══ Root Layout ═══ */
+
+.wow-lg-root {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    background: linear-gradient(180deg, var(--wow-lg-bg-start), var(--wow-lg-bg-end));
+    font-family: var(--wow-lg-font);
+    font-size: var(--wow-lg-font-size);
+    color: var(--wow-lg-text);
+    direction: rtl;
+    overflow: hidden;
+    border-radius: var(--wow-lg-radius);
+}
+
+
+/* ═══ Toolbar ═══ */
+
+.wow-lg-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 14px;
+    min-height: 40px;
+    flex-shrink: 0;
+    border-bottom: 1px solid var(--wow-lg-border);
+    background: rgba(10, 15, 28, 0.6);
+}
+
+.wow-lg-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--wow-lg-text);
+    letter-spacing: 0.3px;
+    text-shadow: 0 0 12px var(--wow-lg-accent-glow);
+}
+
+.wow-lg-toolbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    direction: ltr;
+}
+
+.wow-lg-btn {
+    padding: 5px 12px;
+    border: 1px solid var(--wow-lg-border);
+    border-radius: 6px;
+    background: rgba(91, 192, 235, 0.08);
+    color: var(--wow-lg-accent);
+    font-size: 11px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all var(--wow-lg-transition);
+    white-space: nowrap;
+}
+
+.wow-lg-btn:hover {
+    background: rgba(91, 192, 235, 0.18);
+    border-color: var(--wow-lg-accent);
+}
+
+
+/* ═══ Stats Bar ═══ */
+
+.wow-lg-stats {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 4px 14px;
+    flex-shrink: 0;
+    font-size: 10px;
+    color: var(--wow-lg-text-muted);
+    border-bottom: 1px solid rgba(26, 58, 92, 0.5);
+    direction: rtl;
+}
+
+.wow-lg-stat {
+    white-space: nowrap;
+}
+
+.wow-lg-stat b {
+    color: var(--wow-lg-text);
+    font-weight: 600;
+}
+
+
+/* ═══ Canvas Container ═══ */
+
+.wow-lg-canvas-outer {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.wow-lg-canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+
+/* ═══════════════════════════════════════════════════
+ *  Value Overlay (Glassmorphism)
+ *
+ *  Centered over the liquid canvas.  Semi-transparent
+ *  backdrop-blur so the waves shimmer through the text.
+ *  Large percentage = instant read, raw value below.
+ * ═══════════════════════════════════════════════════ */
+
+.wow-lg-value-overlay {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 12px 20px;
+    border-radius: 12px;
+    background: rgba(10, 15, 28, 0.55);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    pointer-events: none;
+    text-align: center;
+    min-width: 80px;
+}
+
+.wow-lg-value-pct {
+    font-size: 32px;
+    font-weight: 800;
+    color: var(--wow-lg-text);
+    line-height: 1.1;
+    font-variant-numeric: tabular-nums;
+    text-shadow: 0 2px 12px rgba(0, 0, 0, 0.5);
+    transition: color 0.3s ease;
+}
+
+.wow-lg-value-raw {
+    font-size: 12px;
+    color: var(--wow-lg-text-muted);
+    margin-top: 2px;
+    font-variant-numeric: tabular-nums;
+}
+
+.wow-lg-value-rate {
+    font-size: 16px;
+    margin-top: 4px;
+}
+
+
+/* ── Level Colors on Percentage Text ── */
+
+.wow-lg-level-ok {
+    color: var(--wow-lg-ok) !important;
+    text-shadow: 0 0 16px rgba(0, 245, 212, 0.4) !important;
+}
+
+.wow-lg-level-warn {
+    color: var(--wow-lg-warn) !important;
+    text-shadow: 0 0 16px rgba(255, 204, 0, 0.4) !important;
+}
+
+.wow-lg-level-crit {
+    color: var(--wow-lg-crit) !important;
+    text-shadow: 0 0 16px rgba(255, 59, 48, 0.5) !important;
+}
+
+
+/* ═══ Skeleton / Ghost Loading ═══ */
+
+.wow-lg-skeleton {
+    position: absolute;
+    inset: 0;
+    z-index: 50;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--wow-lg-bg-start);
+}
+
+.wow-lg-skeleton::after {
+    content: '';
+    width: 50%;
+    height: 3px;
+    border-radius: 2px;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        var(--wow-lg-accent),
+        transparent
+    );
+    animation: wowLgShimmer 1.5s ease-in-out infinite;
+}
+
+@keyframes wowLgShimmer {
+    0%   { transform: translateX(-100%); opacity: 0.3; }
+    50%  { opacity: 1; }
+    100% { transform: translateX(100%); opacity: 0.3; }
+}
+
+
+/* ═══ Footer ═══ */
+
+.wow-lg-footer {
+    flex-shrink: 0;
+    padding: 4px 14px;
+    font-size: 9px;
+    color: var(--wow-lg-text-muted);
+    text-align: center;
+    border-top: 1px solid var(--wow-lg-border);
+}
+
+
+/* ═══ Responsive ═══ */
+
+@container (max-width: 250px) {
+    .wow-lg-value-pct {
+        font-size: 22px;
+    }
+    .wow-lg-value-overlay {
+        padding: 8px 12px;
+    }
+    .wow-lg-stats {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+}
+
+
+/* ═══ Print Media ═══ */
+
+@media print {
+    .wow-lg-root {
+        background: #FFFFFF !important;
+        color: #333 !important;
+        border: 1px solid #DDD;
+    }
+
+    .wow-lg-toolbar {
+        background: #F5F5F5 !important;
+        border-color: #DDD !important;
+    }
+
+    .wow-lg-toolbar-actions {
+        display: none !important;
+    }
+
+    .wow-lg-title {
+        color: #000 !important;
+        text-shadow: none !important;
+    }
+
+    .wow-lg-value-overlay {
+        background: rgba(255, 255, 255, 0.7) !important;
+        backdrop-filter: none !important;
+    }
+
+    .wow-lg-value-pct {
+        text-shadow: none !important;
+    }
+
+    .wow-lg-canvas {
+        cursor: default;
+    }
+
+    .wow-lg-stats,
+    .wow-lg-footer {
+        color: #666 !important;
+        border-color: #DDD !important;
+    }
+
+    .wow-lg-stat b {
+        color: #000 !important;
+    }
+}

@@ -1,0 +1,296 @@
+/**
+ * ═══════════════════════════════════════════════════════
+ *  sym-donut-wow.css — Executive Smart Donut Styles
+ * ═══════════════════════════════════════════════════════
+ *  Lightweight CSS — Canvas handles all arc rendering,
+ *  gradients, hit-testing, and Smart Center text.  CSS
+ *  only styles the toolbar, stats, tooltip (glassmorphism),
+ *  skeleton, and footer.
+ *
+ *  Version : WOW Smart Donut v100
+ *  Prefix  : wow-dn-
+ * ═══════════════════════════════════════════════════════
+ */
+
+
+/* ═══ CSS Custom Properties ═══ */
+
+:host {
+    --wow-dn-bg-start:     #0A0F1C;
+    --wow-dn-bg-end:       #111B2E;
+    --wow-dn-surface:      #0F2940;
+    --wow-dn-accent:       #5BC0EB;
+    --wow-dn-accent-glow:  rgba(91, 192, 235, 0.3);
+    --wow-dn-ok:           #00F5D4;
+    --wow-dn-warn:         #FFCC00;
+    --wow-dn-crit:         #FF3B30;
+    --wow-dn-text:         #ECF0F1;
+    --wow-dn-text-muted:   #8899AA;
+    --wow-dn-border:       #1A3A5C;
+    --wow-dn-font:         'Segoe UI', Arial, sans-serif;
+    --wow-dn-font-size:    12px;
+    --wow-dn-radius:       8px;
+    --wow-dn-transition:   0.2s ease-out;
+}
+
+
+/* ═══ Safe Reset ═══ */
+
+.wow-dn-root { box-sizing: border-box; }
+.wow-dn-root *, .wow-dn-root *::before, .wow-dn-root *::after {
+    box-sizing: border-box;
+}
+
+
+/* ═══ Root Layout ═══ */
+
+.wow-dn-root {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    background: linear-gradient(180deg, var(--wow-dn-bg-start), var(--wow-dn-bg-end));
+    font-family: var(--wow-dn-font);
+    font-size: var(--wow-dn-font-size);
+    color: var(--wow-dn-text);
+    direction: rtl;
+    overflow: hidden;
+    border-radius: var(--wow-dn-radius);
+}
+
+
+/* ═══ Toolbar ═══ */
+
+.wow-dn-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 14px;
+    min-height: 40px;
+    flex-shrink: 0;
+    border-bottom: 1px solid var(--wow-dn-border);
+    background: rgba(10, 15, 28, 0.6);
+}
+
+.wow-dn-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--wow-dn-text);
+    letter-spacing: 0.3px;
+    text-shadow: 0 0 12px var(--wow-dn-accent-glow);
+}
+
+.wow-dn-toolbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    direction: ltr;
+}
+
+.wow-dn-btn {
+    padding: 5px 12px;
+    border: 1px solid var(--wow-dn-border);
+    border-radius: 6px;
+    background: rgba(91, 192, 235, 0.08);
+    color: var(--wow-dn-accent);
+    font-size: 11px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all var(--wow-dn-transition);
+    white-space: nowrap;
+}
+
+.wow-dn-btn:hover {
+    background: rgba(91, 192, 235, 0.18);
+    border-color: var(--wow-dn-accent);
+}
+
+
+/* ═══ Stats Bar ═══ */
+
+.wow-dn-stats {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 4px 14px;
+    flex-shrink: 0;
+    font-size: 10px;
+    color: var(--wow-dn-text-muted);
+    border-bottom: 1px solid rgba(26, 58, 92, 0.5);
+    direction: rtl;
+}
+
+.wow-dn-stat {
+    white-space: nowrap;
+}
+
+.wow-dn-stat b {
+    color: var(--wow-dn-text);
+    font-weight: 600;
+}
+
+
+/* ═══ Canvas Container ═══ */
+
+.wow-dn-canvas-outer {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.wow-dn-canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+
+/* ═══════════════════════════════════════════════════
+ *  Tooltip (Glassmorphism)
+ *
+ *  Appears near the cursor on slice hover.  Semi-
+ *  transparent backdrop with blur for executive feel.
+ * ═══════════════════════════════════════════════════ */
+
+.wow-dn-tooltip {
+    position: absolute;
+    z-index: 20;
+    padding: 8px 14px;
+    border-radius: 8px;
+    background: rgba(10, 15, 28, 0.88);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid var(--wow-dn-border);
+    pointer-events: none;
+    font-size: 11px;
+    min-width: 100px;
+    direction: rtl;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+}
+
+.wow-dn-tt-label {
+    font-weight: 700;
+    color: var(--wow-dn-text);
+    margin-bottom: 2px;
+}
+
+.wow-dn-tt-value {
+    color: var(--wow-dn-accent);
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+}
+
+.wow-dn-tt-pct {
+    color: var(--wow-dn-text-muted);
+    font-size: 10px;
+    margin-top: 1px;
+    font-variant-numeric: tabular-nums;
+}
+
+
+/* ═══ Skeleton / Ghost Loading ═══ */
+
+.wow-dn-skeleton {
+    position: absolute;
+    inset: 0;
+    z-index: 50;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--wow-dn-bg-start);
+}
+
+.wow-dn-skeleton::after {
+    content: '';
+    width: 50%;
+    height: 3px;
+    border-radius: 2px;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        var(--wow-dn-accent),
+        transparent
+    );
+    animation: wowDnShimmer 1.5s ease-in-out infinite;
+}
+
+@keyframes wowDnShimmer {
+    0%   { transform: translateX(-100%); opacity: 0.3; }
+    50%  { opacity: 1; }
+    100% { transform: translateX(100%); opacity: 0.3; }
+}
+
+
+/* ═══ Footer ═══ */
+
+.wow-dn-footer {
+    flex-shrink: 0;
+    padding: 4px 14px;
+    font-size: 9px;
+    color: var(--wow-dn-text-muted);
+    text-align: center;
+    border-top: 1px solid var(--wow-dn-border);
+}
+
+
+/* ═══ Responsive ═══ */
+
+@container (max-width: 250px) {
+    .wow-dn-tooltip {
+        font-size: 10px;
+        padding: 6px 10px;
+        min-width: 80px;
+    }
+    .wow-dn-stats {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+}
+
+
+/* ═══ Print Media ═══ */
+
+@media print {
+    .wow-dn-root {
+        background: #FFFFFF !important;
+        color: #333 !important;
+        border: 1px solid #DDD;
+    }
+
+    .wow-dn-toolbar {
+        background: #F5F5F5 !important;
+        border-color: #DDD !important;
+    }
+
+    .wow-dn-toolbar-actions {
+        display: none !important;
+    }
+
+    .wow-dn-title {
+        color: #000 !important;
+        text-shadow: none !important;
+    }
+
+    .wow-dn-tooltip {
+        display: none !important;
+    }
+
+    .wow-dn-canvas {
+        cursor: default;
+    }
+
+    .wow-dn-stats,
+    .wow-dn-footer {
+        color: #666 !important;
+        border-color: #DDD !important;
+    }
+
+    .wow-dn-stat b {
+        color: #000 !important;
+    }
+}

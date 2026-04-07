@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none">
+  <!-- Warning triangle -->
+  <path d="M16 4 L28 26 H4 Z" fill="#200A0A" stroke="#E74C3C" stroke-width="1.5" stroke-linejoin="round"/>
+  <!-- Exclamation -->
+  <line x1="16" y1="12" x2="16" y2="19" stroke="#FF6B6B" stroke-width="2.2" stroke-linecap="round"/>
+  <circle cx="16" cy="22.5" r="1.2" fill="#FF6B6B"/>
+  <!-- PCS label area -->
+  <rect x="8" y="27" width="16" height="3" rx="1" fill="#281010"/>
+</svg>

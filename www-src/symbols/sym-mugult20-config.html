@@ -1,0 +1,733 @@
+<!-- ═══════════════════════════════════════════════════════
+     Mugbalot Ultimate Monitor (MU20) — Config Panel
+     Version: ULT.1.6
+     QA18: Config panel visual upgrade
+       - Range sliders with live value badges
+       - Font family dropdown (8 web-safe fonts)
+       - Color swatches & gradient preview
+       - New Tags config section (section 9)
+       - Polished card styling with animations
+
+     11 collapsible sections covering all 9 tabs + system + tags.
+     Pattern: MM20 <details>/<summary> convention.
+     ═══════════════════════════════════════════════════════ -->
+<style>
+/* ── Base Panel ── */
+.mu20-cfg-panel { padding:8px; font-family:'Segoe UI',Arial,sans-serif; font-size:12px; max-height:75vh; overflow-y:auto; scroll-behavior:smooth; }
+.mu20-cfg-panel::-webkit-scrollbar { width:5px; }
+.mu20-cfg-panel::-webkit-scrollbar-track { background:#0d1117; }
+.mu20-cfg-panel::-webkit-scrollbar-thumb { background:#30363d; border-radius:3px; }
+.mu20-cfg-panel::-webkit-scrollbar-thumb:hover { background:#484f58; }
+
+/* ── Section Cards ── */
+.mu20-cfg-panel details { margin-bottom:6px; border:1px solid #30363d; border-radius:8px; overflow:hidden; transition:border-color .2s ease, box-shadow .2s ease; }
+.mu20-cfg-panel details[open] { border-color:#58a6ff; box-shadow:0 0 0 1px rgba(88,166,255,.15), 0 2px 8px rgba(0,0,0,.2); }
+
+/* ── Summary Headers ── */
+.mu20-cfg-panel summary.mm20Summary { padding:10px 14px; cursor:pointer; font-weight:600; font-size:12px; background:#161b22; color:#e6edf3; user-select:none; border-right:3px solid transparent; transition:background .15s, border-color .15s; list-style:none; display:flex; align-items:center; gap:6px; }
+.mu20-cfg-panel summary.mm20Summary::-webkit-details-marker { display:none; }
+.mu20-cfg-panel summary.mm20Summary::before { content:''; display:inline-block; width:0; height:0; border-top:5px solid transparent; border-bottom:5px solid transparent; border-right:6px solid #8b949e; transition:transform .2s ease; flex-shrink:0; }
+.mu20-cfg-panel details[open] > summary.mm20Summary::before { transform:rotate(-90deg); border-right-color:#58a6ff; }
+.mu20-cfg-panel summary.mm20Summary:hover { background:#1c2333; }
+.mu20-cfg-panel details[open] > summary.mm20Summary { border-right-color:#58a6ff; }
+
+/* ── Panel Content ── */
+.mu20-cfg-panel .mm20Panel { padding:10px 14px 14px; animation:mu20-cfgFadeIn .15s ease-out; }
+.mu20-guard-locked { opacity:0.5; pointer-events:none; }
+@keyframes mu20-cfgFadeIn { from { opacity:0; transform:translateY(-4px); } to { opacity:1; transform:translateY(0); } }
+
+/* ── Config Rows ── */
+.mu20-cfg-panel .configStyles { display:flex; align-items:center; gap:8px; margin-bottom:6px; min-height:28px; border-radius:4px; padding:2px 4px; transition:background .15s; }
+.mu20-cfg-panel .configStyles:hover { background:rgba(88,166,255,.03); }
+.mu20-cfg-panel .configLabelStyles { flex:0 0 110px; font-size:11px; color:#8b949e; text-align:right; line-height:1.3; }
+.mu20-cfg-panel .configInputStyles { flex:1; height:26px; padding:2px 8px; background:#0d1117; border:1px solid #30363d; border-radius:4px; color:#e6edf3; font-size:12px; transition:border-color .15s; }
+.mu20-cfg-panel .configInputStyles:focus { border-color:#58a6ff; outline:none; box-shadow:0 0 0 2px rgba(88,166,255,.15); }
+.mu20-cfg-panel select.configInputStyles { appearance:auto; }
+.mu20-cfg-panel input[type="checkbox"] { width:16px; height:16px; accent-color:#58a6ff; cursor:pointer; }
+.mu20-cfg-panel input[type="color"] { width:32px; height:26px; padding:2px; border:1px solid #30363d; border-radius:4px; background:#0d1117; cursor:pointer; }
+.mu20-cfg-panel input[type="file"] { font-size:11px; color:#8b949e; }
+
+/* ── Range Sliders ── */
+.mu20-cfg-slider-row { display:flex; align-items:center; gap:8px; flex:1; direction:ltr; }
+.mu20-cfg-slider { -webkit-appearance:none; appearance:none; flex:1; height:4px; background:#30363d; border-radius:2px; outline:none; cursor:pointer; direction:ltr; }
+.mu20-cfg-slider::-webkit-slider-thumb { -webkit-appearance:none; width:16px; height:16px; border-radius:50%; background:#58a6ff; border:2px solid #0d1117; cursor:pointer; box-shadow:0 1px 3px rgba(0,0,0,.3); transition:box-shadow .15s; }
+.mu20-cfg-slider::-webkit-slider-thumb:hover { box-shadow:0 0 0 4px rgba(88,166,255,.25); }
+.mu20-cfg-slider::-moz-range-thumb { width:16px; height:16px; border-radius:50%; background:#58a6ff; border:2px solid #0d1117; cursor:pointer; }
+.mu20-cfg-slider::-moz-range-track { height:4px; background:#30363d; border-radius:2px; }
+.mu20-cfg-slider::-moz-range-progress { background:#58a6ff; height:4px; border-radius:2px; }
+/* legacy guard */
+.mu20-cfg-slider::-ms-track { height:4px; background:transparent; border-color:transparent; color:transparent; }
+.mu20-cfg-slider::-ms-fill-lower { background:#58a6ff; border-radius:2px; }
+.mu20-cfg-slider::-ms-fill-upper { background:#30363d; border-radius:2px; }
+.mu20-cfg-slider::-ms-thumb { width:16px; height:16px; border-radius:50%; background:#58a6ff; border:2px solid #0d1117; cursor:pointer; margin-top:0; }
+.mu20-cfg-slider-val { min-width:36px; text-align:center; font-size:11px; font-weight:600; color:#58a6ff; background:rgba(88,166,255,.1); border-radius:4px; padding:2px 6px; white-space:nowrap; }
+
+/* ── Color Swatches ── */
+.mu20-cfg-swatch { display:inline-block; width:24px; height:24px; border-radius:4px; border:1px solid #30363d; vertical-align:middle; flex-shrink:0; }
+.mu20-cfg-gradient-preview { height:20px; border-radius:4px; margin-top:4px; border:1px solid #30363d; }
+.mu20-cfg-color-row { display:flex; align-items:center; gap:6px; margin-bottom:6px; padding:2px 4px; border-radius:4px; transition:background .15s; }
+.mu20-cfg-color-row:hover { background:rgba(88,166,255,.03); }
+.mu20-cfg-color-label { font-size:11px; color:#8b949e; min-width:60px; text-align:right; }
+
+/* ── Sub-section Headers ── */
+.mu20-cfg-subsection { font-size:11px; font-weight:600; color:#58a6ff; margin:10px 0 6px; padding-bottom:4px; border-bottom:1px solid rgba(88,166,255,.15); }
+.mu20-cfg-divider { height:1px; background:linear-gradient(to left, transparent, #30363d, transparent); margin:10px 0; }
+
+/* ── Info Text ── */
+.mu20-cfg-info { font-size:10px; color:#8b949e; line-height:1.4; margin-top:6px; }
+.mu20-cfg-info code { color:#58a6ff; font-size:10px; background:rgba(88,166,255,.08); padding:1px 4px; border-radius:3px; }
+</style>
+<div dir="rtl" class="mu20-cfg-panel">
+
+    <!-- ═══ 1. General ═══ -->
+    <details open>
+        <summary class="mm20Summary">כללי</summary>
+        <div class="mm20Panel" ng-class="{'mu20-guard-locked': isGuardLocked()}">
+            <div class="configStyles">
+                <span class="configLabelStyles">כותרת</span>
+                <input class="configInputStyles" type="text" ng-model="config.Title" />
+            </div>
+            <div class="configStyles">
+                <span class="configLabelStyles">כותרת משנה</span>
+                <input class="configInputStyles" type="text" ng-model="config.Subtitle" />
+            </div>
+            <div class="configStyles">
+                <span class="configLabelStyles">מצב דמו</span>
+                <input type="checkbox" ng-model="config.DemoMode" />
+            </div>
+            <div class="configStyles" style="opacity:0.5;" title="&#x2139; תכונה עתידית — טרם מחוברת">
+                <span class="configLabelStyles">רענון אוטומטי</span>
+                <input type="checkbox" ng-model="config.EnableAutoRefresh" disabled />
+            </div>
+            <div class="configStyles">
+                <span class="configLabelStyles">מרווח רענון (ms)</span>
+                <input class="configInputStyles" type="number" ng-model="config.DataUpdateInterval"
+                       min="5000" max="300000" step="1000" style="width:80px;" />
+            </div>
+            <div class="configStyles">
+                <span class="configLabelStyles">עשרוניות</span>
+                <input class="configInputStyles" type="number" ng-model="config.Decimals"
+                       min="0" max="4" style="width:50px;" />
+            </div>
+            <div class="configStyles">
+                <span class="configLabelStyles">מפריד אלפים</span>
+                <input type="checkbox" ng-model="config.UseThousandsSep" />
+            </div>
+            <div class="configStyles">
+                <span class="configLabelStyles">הצג תחתית</span>
+                <input type="checkbox" ng-model="config.ShowFooter" />
+            </div>
+            <div class="configStyles" ng-show="config.ShowFooter">
+                <span class="configLabelStyles">טקסט תחתית</span>
+                <input class="configInputStyles" type="text" ng-model="config.FooterText" />
+            </div>
+            <div class="configStyles">
+                <span class="configLabelStyles">לוגו URL</span>
+                <input class="configInputStyles" type="text" ng-model="config.LogoUrl"
+                       placeholder="https://..." />
+            </div>
+            <div class="configStyles">
+                <span class="configLabelStyles">לשונית התחלה</span>
+                <select class="configInputStyles" ng-model="config.ActiveTab" style="width:120px;">
+                    <option value="realtime">מוניטור</option>
+                    <option value="heatmap">מפת חום</option>
+                    <option value="reports">דוחות</option>
+                    <option value="alerts">התראות</option>
+                    <option value="log">לוג</option>
+                    <option value="tags">תגים</option>
+                    <option value="afbuild">AF Builder</option>
+                    <option value="forecast">תחזית</option>
+                    <option value="dispatch">שיגור</option>
+                </select>
+            </div>
+        </div>
+    </details>
+
+    <!-- ═══ 2. Thresholds ═══ -->
+    <details>
+        <summary class="mm20Summary">ספים</summary>
+        <div class="mm20Panel" ng-class="{'mu20-guard-locked': isGuardLocked()}">
+            <div class="configStyles">
+                <span class="configLabelStyles">הצג מכסה</span>
+                <input type="checkbox" ng-model="config.ShowQuota" />
+            </div>
+            <div class="configStyles">
+                <span class="configLabelStyles">% אזהרה</span>
+                <div class="mu20-cfg-slider-row">
+                    <input type="range" class="mu20-cfg-slider" min="0" max="100" step="1"
+                           ng-model="config.WarnThreshold" />
+                    <span class="mu20-cfg-slider-val">{{config.WarnThreshold}}%</span>
+                </div>
+            </div>
+            <div class="configStyles">
+                <span class="configLabelStyles">% קריטי</span>
+                <div class="mu20-cfg-slider-row">
+                    <input type="range" class="mu20-cfg-slider" min="0" max="100" step="1"
+                           ng-model="config.CritThreshold" />
+                    <span class="mu20-cfg-slider-val">{{config.CritThreshold}}%</span>
+                </div>
+            </div>
+            <div class="configStyles">
+                <span class="configLabelStyles">הדגש חריגה</span>
+                <input type="checkbox" ng-model="config.HighlightOverQuota" />
+            </div>
+        </div>
+    </details>
+
+    <!-- ═══ 3. Display ═══ -->
+    <details>
+        <summary class="mm20Summary">תצוגה</summary>
+        <div class="mm20Panel" ng-class="{'mu20-guard-locked': isGuardLocked()}">
+            <div class="configStyles">
+                <span class="configLabelStyles">מיון לפי</span>
+                <select class="configInputStyles" ng-model="config.SortOrder" style="width:100px;">
+                    <option value="name">שם</option>
+                    <option value="pct">% ניצול</option>
+                    <option value="hours">שעות</option>
+                    <option value="tte">TTE</option>
+                    <option value="status">סטטוס</option>
+                </select>
+            </div>
+            <div class="configStyles">
+                <span class="configLabelStyles">הצג ספרקליין</span>
+                <input type="checkbox" ng-model="config.ShowSparklines" />
+            </div>
+            <div class="configStyles">
+                <span class="configLabelStyles">מועדפים</span>
+                <input type="checkbox" ng-model="config.FavoritesEnabled" />
+            </div>
+            <div class="configStyles" style="opacity:0.5;" title="&#x2139; תכונה עתידית — טרם מחוברת">
+                <span class="configLabelStyles">כיווץ אוטומטי</span>
+                <input type="checkbox" ng-model="config.AutoCollapse" disabled />
+            </div>
+            <div class="configStyles">
+                <span class="configLabelStyles">TTE</span>
+                <input type="checkbox" ng-model="config.TTEEnabled" />
+            </div>
+            <div class="configStyles" ng-show="config.TTEEnabled" style="opacity:0.5;" title="&#x2139; תכונה עתידית — טרם מחוברת">
+                <span class="configLabelStyles">אופק TTE (ימים)</span>
+                <input class="configInputStyles" type="number" ng-model="config.TTEHorizonDays"
+                       min="1" max="365" style="width:60px;" disabled />
+            </div>
+            <div class="configStyles" style="opacity:0.5;" title="&#x2139; תכונה עתידית — טרם מחוברת">
+                <span class="configLabelStyles">מצב חריגים</span>
+                <input type="checkbox" ng-model="config.ExceptionMode" disabled />
+            </div>
+        </div>
+    </details>
+
+    <!-- ═══ 4. Heatmap ═══ -->
+    <details>
+        <summary class="mm20Summary">מפת חום</summary>
+        <div class="mm20Panel" ng-class="{'mu20-guard-locked': isGuardLocked()}">
+            <div class="configStyles">
+                <span class="configLabelStyles">מדד</span>
+                <select class="configInputStyles" ng-model="config.HeatmapMetric" style="width:100px;">
+                    <option value="hours">שעות</option>
+                    <option value="quota">מכסה</option>
+                    <option value="pct">% ניצול</option>
+                </select>
+            </div>
+            <div class="configStyles">
+                <span class="configLabelStyles">סינון אתר</span>
+                <input class="configInputStyles" type="text" ng-model="config.HeatmapSite"
+                       placeholder="הכל (ריק)" />
+            </div>
+        </div>
+    </details>
+
+    <!-- ═══ 5. Alerts ═══ -->
+    <details>
+        <summary class="mm20Summary">התראות</summary>
+        <div class="mm20Panel" ng-class="{'mu20-guard-locked': isGuardLocked()}">
+            <div class="configStyles">
+                <span class="configLabelStyles">% מכסה להתראה</span>
+                <div class="mu20-cfg-slider-row">
+                    <input type="range" class="mu20-cfg-slider" min="0" max="100" step="1"
+                           ng-model="config.AlertQuotaPct" />
+                    <span class="mu20-cfg-slider-val">{{config.AlertQuotaPct}}%</span>
+                </div>
+            </div>
+            <div class="configStyles">
+                <span class="configLabelStyles">שעות מקסימום</span>
+                <input class="configInputStyles" type="number" ng-model="config.AlertHoursMax"
+                       min="0" style="width:70px;" />
+            </div>
+            <div class="configStyles">
+                <span class="configLabelStyles">סף Stale (שניות)</span>
+                <input class="configInputStyles" type="number" ng-model="config.AlertStaleSec"
+                       min="0" style="width:70px;" />
+            </div>
+            <div class="configStyles">
+                <span class="configLabelStyles">צליל התראה</span>
+                <input type="checkbox" ng-model="config.AlertSoundEnabled" />
+            </div>
+            <div class="configStyles">
+                <span class="configLabelStyles">התראות Push</span>
+                <input type="checkbox" ng-model="config.PushNotificationsEnabled" />
+            </div>
+        </div>
+    </details>
+
+    <!-- ═══ 6. Forecast ═══ -->
+    <details>
+        <summary class="mm20Summary">תחזית</summary>
+        <div class="mm20Panel" ng-class="{'mu20-guard-locked': isGuardLocked()}">
+            <div class="configStyles" title="&#x2139; שולט בהגדרות משנה. הלשונית תמיד מוצגת">
+                <span class="configLabelStyles">הפעל תחזית</span>
+                <input type="checkbox" ng-model="config.ForecastEnabled" />
+            </div>
+            <div class="configStyles" ng-show="config.ForecastEnabled">
+                <span class="configLabelStyles">סף קריטי (ימים)</span>
+                <div class="mu20-cfg-slider-row">
+                    <input type="range" class="mu20-cfg-slider" min="1" max="90" step="1"
+                           ng-model="config.ForecastCritDays" />
+                    <span class="mu20-cfg-slider-val">{{config.ForecastCritDays}}</span>
+                </div>
+            </div>
+            <div class="configStyles" ng-show="config.ForecastEnabled">
+                <span class="configLabelStyles">סף אזהרה (ימים)</span>
+                <div class="mu20-cfg-slider-row">
+                    <input type="range" class="mu20-cfg-slider" min="1" max="180" step="1"
+                           ng-model="config.ForecastWarnDays" />
+                    <span class="mu20-cfg-slider-val">{{config.ForecastWarnDays}}</span>
+                </div>
+            </div>
+            <div class="configStyles" ng-show="config.ForecastEnabled">
+                <span class="configLabelStyles">הפעל זיהוי חריגה</span>
+                <input type="checkbox" ng-model="config.AnomalyEnabled" />
+            </div>
+            <div class="configStyles" ng-show="config.ForecastEnabled && config.AnomalyEnabled">
+                <span class="configLabelStyles">סף חריגה קריטי</span>
+                <div class="mu20-cfg-slider-row">
+                    <input type="range" class="mu20-cfg-slider" min="1.1" max="3" step="0.1"
+                           ng-model="config.AnomalyCritRatio" />
+                    <span class="mu20-cfg-slider-val">{{config.AnomalyCritRatio}}x</span>
+                </div>
+            </div>
+            <div class="configStyles" ng-show="config.ForecastEnabled && config.AnomalyEnabled">
+                <span class="configLabelStyles">סף חריגה אזהרה</span>
+                <div class="mu20-cfg-slider-row">
+                    <input type="range" class="mu20-cfg-slider" min="1.1" max="3" step="0.1"
+                           ng-model="config.AnomalyWarnRatio" />
+                    <span class="mu20-cfg-slider-val">{{config.AnomalyWarnRatio}}x</span>
+                </div>
+            </div>
+            <div class="configStyles" ng-show="config.ForecastEnabled">
+                <span class="configLabelStyles">הצג ספירת TTE</span>
+                <input type="checkbox" ng-model="config.ShowTTECountdown" />
+            </div>
+        </div>
+    </details>
+
+    <!-- ═══ 7. Dispatch ═══ -->
+    <details>
+        <summary class="mm20Summary">שיגור</summary>
+        <div class="mm20Panel" ng-class="{'mu20-guard-locked': isGuardLocked()}">
+            <div class="configStyles" title="&#x2139; שולט בהגדרות משנה. הלשונית תמיד מוצגת">
+                <span class="configLabelStyles">הפעל טבלת שיגור</span>
+                <input type="checkbox" ng-model="config.DispatchEnabled" />
+            </div>
+            <div class="configStyles" ng-show="config.DispatchEnabled">
+                <span class="configLabelStyles">סף MW מינימלי</span>
+                <input class="configInputStyles" type="number" ng-model="config.DispatchMinMW"
+                       min="0" style="width:70px;" />
+            </div>
+            <div class="configStyles" ng-show="config.DispatchEnabled">
+                <span class="configLabelStyles">משקל ניקוד MW</span>
+                <input class="configInputStyles" type="number" ng-model="config.DispatchMWCap"
+                       min="100" max="2000" style="width:70px;" />
+            </div>
+            <div class="configStyles" ng-show="config.DispatchEnabled">
+                <span class="configLabelStyles">הסתר תקלה/תחזוקה</span>
+                <input type="checkbox" ng-model="config.DispatchExcludeFltMnt" />
+            </div>
+        </div>
+    </details>
+
+    <!-- ═══ 8. Theme ═══ -->
+    <details>
+        <summary class="mm20Summary">ערכת נושא</summary>
+        <div class="mm20Panel" ng-class="{'mu20-guard-locked': isGuardLocked()}">
+
+            <!-- ── Font ── -->
+            <div class="mu20-cfg-subsection">גופנים</div>
+            <div class="configStyles">
+                <span class="configLabelStyles">משפחת גופן</span>
+                <select class="configInputStyles" ng-model="config.fontFamily">
+                    <option value="Segoe UI, Arial, sans-serif">Segoe UI</option>
+                    <option value="Arial, Helvetica, sans-serif">Arial</option>
+                    <option value="Tahoma, Geneva, sans-serif">Tahoma</option>
+                    <option value="Verdana, Geneva, sans-serif">Verdana</option>
+                    <option value="Trebuchet MS, Helvetica, sans-serif">Trebuchet MS</option>
+                    <option value="Georgia, serif">Georgia</option>
+                    <option value="Consolas, monospace">Consolas</option>
+                    <option value="Courier New, monospace">Courier New</option>
+                </select>
+            </div>
+            <div class="configStyles">
+                <span class="configLabelStyles">גודל גופן</span>
+                <div class="mu20-cfg-slider-row">
+                    <input type="range" class="mu20-cfg-slider" min="8" max="24" step="1"
+                           ng-model="config.fontSize" />
+                    <span class="mu20-cfg-slider-val">{{config.fontSize}}px</span>
+                </div>
+            </div>
+            <div class="configStyles">
+                <span class="configLabelStyles">גודל כותרת</span>
+                <div class="mu20-cfg-slider-row">
+                    <input type="range" class="mu20-cfg-slider" min="10" max="32" step="1"
+                           ng-model="config.headerFontSize" />
+                    <span class="mu20-cfg-slider-val">{{config.headerFontSize}}px</span>
+                </div>
+            </div>
+
+            <!-- ── Background Colors ── -->
+            <div class="mu20-cfg-subsection">רקע</div>
+            <div class="mu20-cfg-color-row">
+                <span class="mu20-cfg-color-label">עליון</span>
+                <input type="color" ng-model="config.gradientStart" />
+                <span class="mu20-cfg-swatch" ng-style="{'background-color': config.gradientStart}"></span>
+                <span style="color:#484f58; margin:0 4px;">→</span>
+                <span class="mu20-cfg-color-label" style="min-width:auto;">תחתון</span>
+                <input type="color" ng-model="config.gradientEnd" />
+                <span class="mu20-cfg-swatch" ng-style="{'background-color': config.gradientEnd}"></span>
+            </div>
+            <div class="mu20-cfg-gradient-preview"
+                 ng-style="{'background': 'linear-gradient(to left, ' + config.gradientStart + ', ' + config.gradientEnd + ')'}">
+            </div>
+            <div class="mu20-cfg-color-row" style="margin-top:8px;">
+                <span class="mu20-cfg-color-label">כרטיס</span>
+                <input type="color" ng-model="config.cardBg" />
+                <span class="mu20-cfg-swatch" ng-style="{'background-color': config.cardBg}"></span>
+            </div>
+
+            <!-- ── Status & Accent Colors ── -->
+            <div class="mu20-cfg-subsection">צבעי מצב</div>
+            <div class="mu20-cfg-color-row">
+                <span class="mu20-cfg-color-label">אקסנט</span>
+                <input type="color" ng-model="config.accentColor" />
+                <span class="mu20-cfg-swatch" ng-style="{'background-color': config.accentColor}"></span>
+            </div>
+            <div class="mu20-cfg-color-row">
+                <span class="mu20-cfg-color-label">תקין</span>
+                <input type="color" ng-model="config.okColor" />
+                <span class="mu20-cfg-swatch" ng-style="{'background-color': config.okColor}"></span>
+                <span style="width:12px;"></span>
+                <span class="mu20-cfg-color-label" style="min-width:auto;">אזהרה</span>
+                <input type="color" ng-model="config.warnColor" />
+                <span class="mu20-cfg-swatch" ng-style="{'background-color': config.warnColor}"></span>
+                <span style="width:12px;"></span>
+                <span class="mu20-cfg-color-label" style="min-width:auto;">קריטי</span>
+                <input type="color" ng-model="config.critColor" />
+                <span class="mu20-cfg-swatch" ng-style="{'background-color': config.critColor}"></span>
+            </div>
+        </div>
+    </details>
+
+    <!-- ═══ 9. Tags (NEW — QA18) ═══ -->
+    <details>
+        <summary class="mm20Summary">תגים</summary>
+        <div class="mm20Panel" ng-class="{'mu20-guard-locked': isGuardLocked()}">
+            <div class="configStyles">
+                <span class="configLabelStyles">סף Stale (שניות)</span>
+                <div class="mu20-cfg-slider-row">
+                    <input type="range" class="mu20-cfg-slider" min="30" max="1800" step="30"
+                           ng-model="config.TagStaleSec"
+                           ng-init="config.TagStaleSec = config.TagStaleSec || 300" />
+                    <span class="mu20-cfg-slider-val">{{config.TagStaleSec}}s</span>
+                </div>
+            </div>
+            <div class="configStyles">
+                <span class="configLabelStyles">מיון ברירת מחדל</span>
+                <select class="configInputStyles" ng-model="config.TagSortCol"
+                        ng-init="config.TagSortCol = config.TagSortCol || 'site'" style="width:100px;">
+                    <option value="site">אתר</option>
+                    <option value="unit">יחידה</option>
+                    <option value="attr">מאפיין</option>
+                    <option value="value">ערך</option>
+                    <option value="status">סטטוס</option>
+                    <option value="path">נתיב AF</option>
+                </select>
+            </div>
+            <div class="configStyles">
+                <span class="configLabelStyles">סדר מיון</span>
+                <select class="configInputStyles" ng-model="config.TagSortAsc"
+                        ng-init="config.TagSortAsc = config.TagSortAsc === undefined ? true : config.TagSortAsc"
+                        style="width:80px;">
+                    <option ng-value="true">עולה</option>
+                    <option ng-value="false">יורד</option>
+                </select>
+            </div>
+            <div class="mu20-cfg-divider"></div>
+            <div class="mu20-cfg-info">
+                נעיצת תגים נשמרת אוטומטית ב-storage.<br/>
+                מפתח: <code>mu20_pinned_tags</code>
+            </div>
+        </div>
+    </details>
+
+    <!-- ═══ 10. Tag Warehouse ═══ -->
+    <details>
+        <summary class="mm20Summary">מחסן תגים</summary>
+        <div class="mm20Panel" ng-class="{'mu20-guard-locked': isGuardLocked()}">
+            <div class="configStyles">
+                <span class="configLabelStyles">הפעל מחסן תגים</span>
+                <input type="checkbox" ng-model="config.EnableTagWarehouse"
+                       ng-init="config.EnableTagWarehouse = config.EnableTagWarehouse !== false" />
+            </div>
+            <div class="configStyles" ng-show="config.EnableTagWarehouse">
+                <span class="configLabelStyles">אפשר שינוי משתמש</span>
+                <input type="checkbox" ng-model="config.AllowUserTagRebinding"
+                       ng-init="config.AllowUserTagRebinding = config.AllowUserTagRebinding !== false" />
+            </div>
+            <div class="mu20-cfg-divider"></div>
+            <div class="mu20-cfg-info">
+                מחסן התגים מנהל קישורי תפקיד→תג לכל יחידה.<br/>
+                <code>DefaultTagBindings</code> נקבע ע&quot;י המפתח בתבנית הנתונים.
+            </div>
+        </div>
+    </details>
+
+    <!-- ═══ 11. Tag Explorer ═══ -->
+    <details>
+        <summary class="mm20Summary">חוקר תגים</summary>
+        <div class="mm20Panel" ng-class="{'mu20-guard-locked': isGuardLocked()}">
+            <div class="configStyles">
+                <span class="configLabelStyles">הפעל חוקר תגים</span>
+                <input type="checkbox" ng-model="config.EnableTagExplorer"
+                       ng-init="config.EnableTagExplorer = config.EnableTagExplorer !== false" />
+            </div>
+            <div class="configStyles" ng-show="config.EnableTagExplorer">
+                <span class="configLabelStyles">תרשים ברירת מחדל</span>
+                <select class="configInputStyles" ng-model="config.DefaultExplorerChart"
+                        ng-init="config.DefaultExplorerChart = config.DefaultExplorerChart || 'trend'"
+                        style="width:110px;">
+                    <option value="trend">מגמה</option>
+                    <option value="scatter">פיזור</option>
+                    <option value="table">טבלה</option>
+                    <option value="heatmap">מפת חום</option>
+                </select>
+            </div>
+            <div class="configStyles" ng-show="config.EnableTagExplorer">
+                <span class="configLabelStyles">מקסימום תגים</span>
+                <div class="mu20-cfg-slider-row">
+                    <input type="range" class="mu20-cfg-slider" min="2" max="16" step="1"
+                           ng-model="config.MaxExplorerTags"
+                           ng-init="config.MaxExplorerTags = config.MaxExplorerTags || 8" />
+                    <span class="mu20-cfg-slider-val">{{config.MaxExplorerTags}}</span>
+                </div>
+            </div>
+        </div>
+    </details>
+
+    <!-- ═══ 12. System ═══ -->
+    <details>
+        <summary class="mm20Summary">מערכת</summary>
+        <div class="mm20Panel" ng-class="{'mu20-guard-locked': isGuardLocked()}">
+            <div class="configStyles">
+                <span class="configLabelStyles">לוג מערכת</span>
+                <input type="checkbox" ng-model="config.EnableSystemLog" />
+            </div>
+            <div class="configStyles">
+                <span class="configLabelStyles">מקסימום שורות לוג</span>
+                <div class="mu20-cfg-slider-row">
+                    <input type="range" class="mu20-cfg-slider" min="50" max="5000" step="50"
+                           ng-model="config.MaxLogEntries" />
+                    <span class="mu20-cfg-slider-val">{{config.MaxLogEntries}}</span>
+                </div>
+            </div>
+            <div class="configStyles">
+                <span class="configLabelStyles">נתיב AF</span>
+                <input class="configInputStyles" type="text" ng-model="config.AFBasePath"
+                       placeholder="\\AF\Server\DB" style="width:200px;" />
+            </div>
+            <!-- StaleThreshold slider moved to Data Integrity section -->
+            <div class="configStyles">
+                <span class="configLabelStyles">מגבלה יומית (שעות)</span>
+                <input class="configInputStyles" type="number" ng-model="config.limitHoursDaily"
+                       min="0" style="width:70px;" />
+            </div>
+            <div class="configStyles">
+                <span class="configLabelStyles">מגבלה חודשית (שעות)</span>
+                <input class="configInputStyles" type="number" ng-model="config.limitHoursMonthly"
+                       min="0" style="width:70px;" />
+            </div>
+            <!-- TDD subsection -->
+            <hr style="border:0;border-top:1px solid rgba(255,255,255,0.1);margin:8px 0;" />
+            <div style="font-size:11px;color:#888;margin-bottom:4px;">גילוי תבניות (TDD)</div>
+            <div class="configStyles">
+                <span class="configLabelStyles">הפעל גילוי תבניות</span>
+                <input type="checkbox" ng-model="config.TDDEnabled" />
+            </div>
+            <div class="configStyles">
+                <span class="configLabelStyles">שם תבנית AF</span>
+                <input class="configInputStyles" type="text" ng-model="config.TDDTemplateName"
+                       placeholder="Mugbalot" style="width:150px;" />
+            </div>
+            <!-- Time Sync subsection -->
+            <hr style="border:0;border-top:1px solid rgba(255,255,255,0.1);margin:8px 0;" />
+            <div style="font-size:11px;color:#888;margin-bottom:4px;">סנכרון זמן PI Vision</div>
+            <div class="configStyles">
+                <span class="configLabelStyles">סנכרון עם ציר הזמן</span>
+                <input type="checkbox" ng-model="config.SyncReportsWithDisplayTime" />
+            </div>
+            <div class="configStyles">
+                <span class="configLabelStyles">סנכרון בחירת טווח</span>
+                <input type="checkbox" ng-model="config.SyncReportsSelection" />
+            </div>
+        </div>
+    </details>
+
+    <!-- ═══ בעלות וסינון ═══ -->
+    <details>
+        <summary class="mm20Summary">בעלות וסינון</summary>
+        <div class="mm20Panel" ng-class="{'mu20-guard-locked': isGuardLocked()}">
+            <div class="configStyles">
+                <span class="configLabelStyles">סינון ברירת מחדל</span>
+                <select class="configInputStyles" ng-model="config.OwnerFilter" style="width:100px;">
+                    <option value="all">הכל</option>
+                    <option value="HHI">חח"י</option>
+                    <option value="PRIVATE">פרטי</option>
+                </select>
+            </div>
+            <div class="configStyles">
+                <span class="configLabelStyles">מיפוי בעלות ידני (JSON)</span>
+                <textarea ng-model="config.OwnerMapJson" rows="3" class="configInputStyles"
+                    style="height:auto;"
+                    placeholder='{"אורות רבין":"HHI","אלון תבור":"PRIVATE"}'></textarea>
+            </div>
+            <div class="mu20-cfg-info">השאר ריק לשימוש בברירת מחדל</div>
+        </div>
+    </details>
+
+    <!-- ═══ אירועים (Event Frames) ═══ -->
+    <details>
+        <summary class="mm20Summary">אירועים (Event Frames)</summary>
+        <div class="mm20Panel" ng-class="{'mu20-guard-locked': isGuardLocked()}">
+            <div class="configStyles">
+                <span class="configLabelStyles">ימים אחורה</span>
+                <div class="mu20-cfg-slider-row">
+                    <input type="range" class="mu20-cfg-slider" min="7" max="365" step="1"
+                           ng-model="config.EventFrameDays" />
+                    <span class="mu20-cfg-slider-val">{{config.EventFrameDays}} ימים</span>
+                </div>
+            </div>
+            <div class="configStyles">
+                <span class="configLabelStyles">תדירות עדכון (שניות)</span>
+                <div class="mu20-cfg-slider-row">
+                    <input type="range" class="mu20-cfg-slider" min="60" max="900" step="30"
+                           ng-model="config.EventFramePollSec" />
+                    <span class="mu20-cfg-slider-val">{{config.EventFramePollSec}} שנ׳</span>
+                </div>
+            </div>
+            <div class="configStyles">
+                <span class="configLabelStyles">הפעל קישור אירועים ליחידות</span>
+                <input type="checkbox" ng-model="config.EnableUnitEvents" />
+            </div>
+            <div ng-if="config.EnableUnitEvents" style="margin-top:6px;">
+                <div style="font-size:11px;color:#888;margin-bottom:4px;">קישורי AF ליחידות</div>
+                <div ng-repeat="site in config.CustomSites || []" style="margin-bottom:4px;">
+                    <div style="font-weight:600;font-size:11px;color:#58a6ff;">{{site.name}}</div>
+                    <div ng-repeat="unit in site.units track by $index" class="configStyles" style="padding-right:12px;">
+                        <span class="configLabelStyles" style="min-width:60px;">{{unit}}</span>
+                        <input class="configInputStyles" type="text" style="width:220px;direction:ltr;font-size:10px;"
+                               ng-model="ensureUeBinding(site.id, $index).eventElementPath"
+                               placeholder="\\PI-AF2\fuel\Mugbalot\..." />
+                    </div>
+                </div>
+            </div>
+        </div>
+    </details>
+
+    <!-- ═══ תקינות נתונים ═══ -->
+    <details>
+        <summary class="mm20Summary">תקינות נתונים</summary>
+        <div class="mm20Panel" ng-class="{'mu20-guard-locked': isGuardLocked()}">
+            <div class="configStyles">
+                <span class="configLabelStyles">סף נתון ישן — real-time (שניות)</span>
+                <div class="mu20-cfg-slider-row">
+                    <input type="range" class="mu20-cfg-slider" min="60" max="1800" step="30"
+                           ng-model="config.StaleThreshold" />
+                    <span class="mu20-cfg-slider-val">{{config.StaleThreshold}} שנ׳</span>
+                </div>
+            </div>
+            <div class="configStyles">
+                <span class="configLabelStyles">סף נתון ישן — periodic (שניות)</span>
+                <div class="mu20-cfg-slider-row">
+                    <input type="range" class="mu20-cfg-slider" min="3600" max="43200" step="900"
+                           ng-model="config.AlertStaleSecSlow" />
+                    <span class="mu20-cfg-slider-val">{{config.AlertStaleSecSlow / 3600 | number:1}} שעות</span>
+                </div>
+            </div>
+        </div>
+    </details>
+
+    <!-- ═══ Layout Manager ═══ -->
+    <details>
+        <summary class="mm20Summary">פריסת טאבים</summary>
+        <div class="mm20Panel" ng-class="{'mu20-guard-locked': isGuardLocked()}">
+            <div class="configStyles">
+                <button class="configInputStyles" style="cursor:pointer;padding:4px 12px;border-color:#58a6ff;color:#58a6ff;"
+                        ng-click="layoutToggleEdit()">
+                    {{layoutEditMode() ? 'סיים עריכה' : 'ערוך פריסה'}}
+                </button>
+            </div>
+            <div class="configStyles">
+                <button class="configInputStyles" style="cursor:pointer;padding:4px 12px;border-color:#3fb950;color:#3fb950;"
+                        ng-click="layoutSave()">שמור פריסה</button>
+            </div>
+            <div class="configStyles">
+                <button class="configInputStyles" style="cursor:pointer;padding:4px 12px;border-color:#f85149;color:#f85149;"
+                        ng-click="layoutReset()">איפוס פריסה</button>
+            </div>
+            <div style="font-size:10px;color:#484f58;margin-top:4px;">
+                במצב עריכה: גרור טאבים לסידור מחדש
+            </div>
+        </div>
+    </details>
+
+    <!-- ═══ Display Guard ═══ -->
+    <details>
+        <summary class="mm20Summary">נעילת תצוגה</summary>
+        <div class="mm20Panel">
+            <div class="configStyles">
+                <span class="configLabelStyles">הפעל נעילת הגדרות</span>
+                <input type="checkbox" ng-model="config.DisplayGuardEnabled" />
+            </div>
+            <div class="configStyles">
+                <span class="configLabelStyles">משתמשים מורשים (מופרד בפסיקים)</span>
+                <input class="configInputStyles" type="text" ng-model="config.AllowedEditors"
+                       placeholder="user1, user2" style="width:200px;" dir="ltr" />
+            </div>
+            <div ng-if="config.DisplayGuardEnabled" style="margin-top:6px; padding:6px; border-radius:4px; font-size:11px;"
+                 ng-style="{'background': isGuardLocked() ? 'rgba(231,76,60,0.15)' : 'rgba(46,204,113,0.15)',
+                            'color': isGuardLocked() ? '#E74C3C' : '#2ECC71'}">
+                <span ng-if="isGuardLocked()">&#x1F512; נעול — משתמש: {{guardCurrentUser || 'לא זוהה'}}</span>
+                <span ng-if="!isGuardLocked()">&#x1F513; פתוח — משתמש: {{guardCurrentUser}}</span>
+            </div>
+        </div>
+    </details>
+
+    <!-- ═══ 11. Import / Export ═══ -->
+    <details>
+        <summary class="mm20Summary">ייבוא / ייצוא</summary>
+        <div class="mm20Panel">
+            <div class="configStyles">
+                <button class="configInputStyles" style="cursor:pointer; padding:4px 12px; border-color:#58a6ff; color:#58a6ff;"
+                        ng-click="exportConfig()">יצא תצורה (JSON)</button>
+            </div>
+            <div class="configStyles">
+                <span class="configLabelStyles">ייבא תצורה</span>
+                <input type="file" accept=".json"
+                       onchange="var s=(window.MU20&&window.MU20._activeConfigScope)||angular.element(this).scope();if(s)s.importConfigFile(this.files[0])" />
+            </div>
+            <div class="mu20-cfg-divider"></div>
+            <div style="text-align:center; padding:4px 0;">
+                <span style="font-size:10px; color:#484f58;">Mugbalot Ultimate Monitor</span><br/>
+                <span style="font-size:11px; font-weight:600; color:#58a6ff;">v.ULT.1.6</span>
+            </div>
+        </div>
+    </details>
+
+</div>

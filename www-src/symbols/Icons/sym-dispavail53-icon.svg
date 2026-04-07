@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" fill="none">
+  <!-- Radial availability gauge -->
+  <circle cx="16" cy="16" r="11" fill="none" stroke="rgba(52,211,153,0.15)" stroke-width="4"/>
+  <path d="M16 5 A11 11 0 0 1 25.78 22" fill="none" stroke="#2ECC71" stroke-width="4" stroke-linecap="round"/>
+  <!-- Center dispatch arrow -->
+  <polygon points="16,12 20,20 16,18 12,20" fill="#34D399" opacity="0.8"/>
+  <!-- Check mark -->
+  <path d="M11 16 l3 3 l7 -7" stroke="#34D399" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

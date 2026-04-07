@@ -1,0 +1,374 @@
+/**
+ * ═══════════════════════════════════════════════════════
+ *  sym-powerflow-wow.css  —  GPU-Accelerated Flow Styles
+ * ═══════════════════════════════════════════════════════
+ *  THE GEM: stroke-dashoffset animation runs entirely on
+ *  the browser's Compositor Thread (GPU). Zero CPU cost.
+ *  JS only sets CSS Variables when new PI data arrives.
+ *
+ *  Animation chain:
+ *    JS → --flow-color, --flow-duration, --flow-direction, --flow-width
+ *    CSS → @keyframes wowFlowAnim → stroke-dashoffset
+ *    GPU → 60fps rendering, zero main-thread work
+ *
+ *  Version : WOW PF 100.0
+ *  Prefix  : wow-pf-
+ * ═══════════════════════════════════════════════════════
+ */
+
+/* ═══ CSS Custom Properties ═══ */
+
+:host {
+    --wow-pf-bg-start:     #060C18;
+    --wow-pf-bg-end:       #0D1F35;
+    --wow-pf-surface:      #0F2940;
+    --wow-pf-accent:       #5BC0EB;
+    --wow-pf-accent-glow:  rgba(91, 192, 235, 0.3);
+    --wow-pf-ok:           #00F5D4;
+    --wow-pf-warn:         #FFCC00;
+    --wow-pf-crit:         #FF3B30;
+    --wow-pf-text:         #ECF0F1;
+    --wow-pf-text-muted:   #8899AA;
+    --wow-pf-border:       #1A3A5C;
+    --wow-pf-glass-bg:     rgba(15, 41, 64, 0.9);
+    --wow-pf-glass-border: rgba(91, 192, 235, 0.15);
+    --wow-pf-font:         'Segoe UI', Arial, sans-serif;
+    --wow-pf-font-size:    12px;
+    --wow-pf-radius:       8px;
+    --wow-pf-transition:   0.3s ease-out;
+}
+
+
+/* ═══ Safe Reset ═══ */
+
+.wow-pf-root { box-sizing: border-box; }
+.wow-pf-root *, .wow-pf-root *::before, .wow-pf-root *::after { box-sizing: border-box; }
+
+
+/* ═══ Root Layout ═══ */
+
+.wow-pf-root {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    direction: rtl;
+    overflow: hidden;
+    background: linear-gradient(180deg, var(--wow-pf-bg-start), var(--wow-pf-bg-end));
+    color: var(--wow-pf-text);
+    font-family: var(--wow-pf-font);
+    font-size: var(--wow-pf-font-size);
+    position: relative;
+    -webkit-font-smoothing: antialiased;
+}
+
+
+/* ═══ HEADER ═══ */
+
+.wow-pf-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 14px;
+    background: var(--wow-pf-surface);
+    border-bottom: 1px solid var(--wow-pf-border);
+    flex-shrink: 0;
+}
+
+.wow-pf-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--wow-pf-text);
+}
+
+.wow-pf-live {
+    font-size: 11px;
+    color: var(--wow-pf-text-muted);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.wow-pf-live-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--wow-pf-ok);
+    animation: wow_pf_pulse 2s ease-in-out infinite;
+    box-shadow: 0 0 6px var(--wow-pf-ok);
+}
+
+
+/* ═══ AGGREGATE BAR ═══ */
+
+.wow-pf-agg {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 4px 14px;
+    background: rgba(15, 41, 64, 0.5);
+    border-bottom: 1px solid var(--wow-pf-border);
+    flex-shrink: 0;
+    font-size: 11px;
+    color: var(--wow-pf-text-muted);
+}
+
+.wow-pf-agg-item b {
+    color: var(--wow-pf-text);
+    font-weight: 700;
+}
+
+.wow-pf-agg-gen b  { color: var(--wow-pf-ok); }
+.wow-pf-agg-max b  { color: var(--wow-pf-warn); }
+
+
+/* ═══ SVG CONTAINER ═══ */
+
+.wow-pf-svg-wrap {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+    min-height: 0;
+}
+
+.wow-pf-svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+
+/* ═══════════════════════════════════════
+   THE GEM: GPU-POWERED FLOW ANIMATION
+   ═══════════════════════════════════════ */
+
+/* Background track (dim, static) */
+.wow-pf-flow-bg {
+    fill: none;
+    stroke: rgba(91, 192, 235, 0.08);
+    stroke-width: 12px;
+    stroke-linecap: round;
+}
+
+/* Animated flow path — ALL animation on GPU! */
+.wow-pf-flow {
+    fill: none;
+    stroke: var(--flow-color, #00F5D4);
+    stroke-width: var(--flow-width, 3px);
+    stroke-dasharray: 12, 8;
+    stroke-linecap: round;
+
+    /* THE KEY: CSS animation → GPU Compositor Thread */
+    animation: wowFlowAnim var(--flow-duration, 2s) linear infinite;
+    animation-direction: var(--flow-direction, normal);
+
+    /* Hardware acceleration hint */
+    will-change: stroke-dashoffset;
+
+    /* Smooth property transitions */
+    transition: stroke 0.5s ease-out,
+                stroke-width 0.5s ease-out;
+
+    /* Pointer events for tooltip */
+    pointer-events: stroke;
+    cursor: pointer;
+}
+
+/* Neon glow effect (GPU-rendered via SVG filter) */
+.wow-pf-neon .wow-pf-flow {
+    filter: url(#wow-pf-glow);
+}
+
+/* CSS drop-shadow alternative (lighter, for weaker GPUs) */
+.wow-pf-flow:hover {
+    filter: drop-shadow(0 0 8px var(--flow-color, #00F5D4));
+    stroke-width: calc(var(--flow-width, 3px) + 2px);
+}
+
+/* THE KEYFRAME: moves dash pattern along the path */
+@keyframes wowFlowAnim {
+    to {
+        stroke-dashoffset: -20;
+    }
+}
+
+
+/* ═══ NODES ═══ */
+
+.wow-pf-node-shape {
+    fill: rgba(15, 41, 64, 0.8);
+    stroke: var(--wow-pf-accent);
+    stroke-width: 2px;
+    transition: all var(--wow-pf-transition);
+}
+
+.wow-pf-node:hover .wow-pf-node-shape {
+    fill: rgba(91, 192, 235, 0.15);
+    stroke-width: 3px;
+    filter: drop-shadow(0 0 10px var(--wow-pf-accent-glow));
+}
+
+/* Neon mode: glowing nodes */
+.wow-pf-neon .wow-pf-node-shape {
+    filter: drop-shadow(0 0 4px rgba(91, 192, 235, 0.3));
+}
+
+.wow-pf-node-label {
+    fill: var(--wow-pf-text-muted);
+    font-size: 11px;
+    font-family: var(--wow-pf-font);
+}
+
+.wow-pf-node-value {
+    fill: var(--wow-pf-text);
+    font-size: 13px;
+    font-weight: 700;
+    font-family: var(--wow-pf-font);
+}
+
+
+/* ═══ FLOW VALUE LABELS ═══ */
+
+.wow-pf-flow-value {
+    fill: var(--wow-pf-text);
+    font-size: 12px;
+    font-weight: 600;
+    font-family: var(--wow-pf-font);
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8);
+    pointer-events: none;
+    transition: fill 0.5s ease-out;
+}
+
+/* Background pill for readability */
+.wow-pf-flow-value::before {
+    content: '';
+    background: rgba(6, 12, 24, 0.7);
+    border-radius: 4px;
+    padding: 2px 6px;
+}
+
+
+/* ═══ TOOLTIP (Glassmorphism) ═══ */
+
+.wow-pf-tooltip {
+    position: absolute;
+    padding: 8px 14px;
+    background: var(--wow-pf-glass-bg);
+    border: 1px solid var(--wow-pf-glass-border);
+    border-radius: var(--wow-pf-radius);
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    color: var(--wow-pf-text);
+    font-size: 12px;
+    line-height: 1.6;
+    z-index: 50;
+    pointer-events: none;
+    max-width: 220px;
+    opacity: 0;
+    transition: opacity 0.15s ease-out;
+    direction: rtl;
+    text-align: right;
+}
+
+.wow-pf-tooltip--visible {
+    opacity: 1;
+}
+
+.wow-pf-tooltip-title {
+    font-weight: 600;
+    color: var(--wow-pf-accent);
+    margin-bottom: 2px;
+}
+
+.wow-pf-tooltip-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.wow-pf-tooltip-row b {
+    color: var(--wow-pf-text);
+    font-weight: 700;
+}
+
+
+/* ═══ ANIMATIONS ═══ */
+
+@keyframes wow_pf_pulse {
+    0%, 100% { opacity: 1; box-shadow: 0 0 6px var(--wow-pf-ok); }
+    50%      { opacity: 0.4; box-shadow: 0 0 2px var(--wow-pf-ok); }
+}
+
+@keyframes wow_pf_fadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+
+/* ═══ RESPONSIVE ═══ */
+
+@media (max-width: 600px) {
+    .wow-pf-header {
+        padding: 4px 8px;
+    }
+    .wow-pf-agg {
+        gap: 8px;
+        font-size: 10px;
+    }
+    .wow-pf-flow-value {
+        font-size: 10px;
+    }
+    .wow-pf-node-label {
+        font-size: 9px;
+    }
+}
+
+
+/* ═══ PRINT ═══ */
+
+@media print {
+    .wow-pf-root {
+        background: #fff !important;
+        color: #333 !important;
+    }
+    .wow-pf-header {
+        background: #f5f5f5 !important;
+        border-bottom: 1px solid #ddd;
+    }
+    .wow-pf-title {
+        color: #333 !important;
+    }
+    .wow-pf-tooltip {
+        display: none !important;
+    }
+    .wow-pf-live-dot {
+        animation: none !important;
+        background: #999 !important;
+    }
+
+    /* Freeze animation for print */
+    .wow-pf-flow {
+        animation: none !important;
+        stroke-dasharray: none !important;
+        print-color-adjust: exact;
+        -webkit-print-color-adjust: exact;
+    }
+    .wow-pf-node-shape {
+        print-color-adjust: exact;
+        -webkit-print-color-adjust: exact;
+    }
+    .wow-pf-flow-bg {
+        stroke: #ddd !important;
+    }
+    .wow-pf-node-shape {
+        fill: #f0f0f0 !important;
+        stroke: #666 !important;
+    }
+    .wow-pf-node-label {
+        fill: #333 !important;
+    }
+    .wow-pf-flow-value {
+        fill: #333 !important;
+    }
+}
