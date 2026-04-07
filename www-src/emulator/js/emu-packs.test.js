@@ -69,7 +69,7 @@ describe('emu-packs: validateManifest', () => {
 
   it('rejects missing id', () => {
     expect(
-      pkgs.validateManifest({ displayName: 'x', version: '1', symbols: [] })
+      pkgs.validateManifest({ displayName: 'x', version: '1.0.0', symbols: [] })
     ).toMatch(/missing string `id`/);
   });
 
@@ -78,7 +78,7 @@ describe('emu-packs: validateManifest', () => {
       pkgs.validateManifest({
         id: 'MyPack',
         displayName: 'x',
-        version: '1',
+        version: '1.0.0',
         symbols: [],
       })
     ).toMatch(/kebab-case/);
@@ -86,7 +86,7 @@ describe('emu-packs: validateManifest', () => {
       pkgs.validateManifest({
         id: 'my_pack',
         displayName: 'x',
-        version: '1',
+        version: '1.0.0',
         symbols: [],
       })
     ).toMatch(/kebab-case/);
@@ -94,7 +94,7 @@ describe('emu-packs: validateManifest', () => {
       pkgs.validateManifest({
         id: '-leading-dash',
         displayName: 'x',
-        version: '1',
+        version: '1.0.0',
         symbols: [],
       })
     ).toMatch(/kebab-case/);
@@ -102,13 +102,13 @@ describe('emu-packs: validateManifest', () => {
 
   it('rejects missing required top-level fields', () => {
     expect(
-      pkgs.validateManifest({ id: 'p', version: '1', symbols: [] })
+      pkgs.validateManifest({ id: 'p', version: '1.0.0', symbols: [] })
     ).toMatch(/displayName/);
     expect(
       pkgs.validateManifest({ id: 'p', displayName: 'P', symbols: [] })
     ).toMatch(/version/);
     expect(
-      pkgs.validateManifest({ id: 'p', displayName: 'P', version: '1' })
+      pkgs.validateManifest({ id: 'p', displayName: 'P', version: '1.0.0' })
     ).toMatch(/symbols/);
   });
 
@@ -117,7 +117,7 @@ describe('emu-packs: validateManifest', () => {
       pkgs.validateManifest({
         id: 'p',
         displayName: 'P',
-        version: '1',
+        version: '1.0.0',
         core: 'core/base.js',
         symbols: [],
       })
@@ -128,7 +128,7 @@ describe('emu-packs: validateManifest', () => {
     const base = {
       id: 'p',
       displayName: 'P',
-      version: '1',
+      version: '1.0.0',
       symbols: [{}],
     };
     expect(pkgs.validateManifest(base)).toMatch(/name/);
@@ -168,7 +168,7 @@ describe('emu-packs: validateManifest', () => {
     const err = pkgs.validateManifest({
       id: 'p',
       displayName: 'P',
-      version: '1',
+      version: '1.0.0',
       symbols: [
         {
           name: 'has space',
@@ -185,7 +185,7 @@ describe('emu-packs: validateManifest', () => {
     const err = pkgs.validateManifest({
       id: 'p',
       displayName: 'P',
-      version: '1',
+      version: '1.0.0',
       symbols: [
         {
           name: 'x',
@@ -285,6 +285,332 @@ describe('emu-packs: _registerPack + getSymbols + getSymbol', () => {
     expect(list.length).toBe(3);
     expect(pkgs.getSymbol('hello').packId).toBe('demo');
     expect(pkgs.getSymbol('new-one').packId).toBe('other');
+  });
+});
+
+describe('emu-packs: semver validation', () => {
+  let pkgs;
+  beforeEach(() => {
+    pkgs = loadEmuPacks();
+  });
+
+  const mkManifest = (version) => ({
+    id: 'p',
+    displayName: 'P',
+    version,
+    symbols: [],
+  });
+
+  it.each(['1.0.0', '0.0.1', '10.20.30', '1.2.3-alpha', '1.0.0-rc.1', '2.0.0-beta.3'])(
+    'accepts valid semver: %s',
+    (v) => {
+      expect(pkgs.validateManifest(mkManifest(v))).toBeNull();
+    }
+  );
+
+  it.each(['1', '1.0', 'v1.0.0', '1.0.0.0', 'not-a-version', '', '1.x.0'])(
+    'rejects invalid version: %s',
+    (v) => {
+      const err = pkgs.validateManifest(mkManifest(v));
+      // Empty string is caught by the earlier "missing string `version`" check.
+      if (v === '') {
+        expect(err).toMatch(/missing string `version`/);
+      } else {
+        expect(err).toMatch(/MAJOR\.MINOR\.PATCH/);
+      }
+    }
+  );
+});
+
+describe('emu-packs: isSafeRelativePath', () => {
+  let pkgs;
+  beforeEach(() => {
+    pkgs = loadEmuPacks();
+  });
+
+  it.each([
+    'symbols/sym-hello.js',
+    'libs/chart.js',
+    'core/base.js',
+    'a.js',
+    'deep/nested/path/file.js',
+  ])('accepts safe path: %s', (p) => {
+    expect(pkgs.isSafeRelativePath(p)).toBe(true);
+  });
+
+  it.each([
+    '',
+    '/absolute/path.js',
+    '../parent.js',
+    'deep/../escape.js',
+    '..',
+    'http://evil.com/a.js',
+    'https://cdn.example.com/lib.js',
+    'data:text/javascript,alert(1)',
+    'blob:abc',
+    'javascript:alert(1)',
+    'file:///etc/passwd',
+  ])('rejects unsafe path: %s', (p) => {
+    expect(pkgs.isSafeRelativePath(p)).toBe(false);
+  });
+
+  it('rejects non-string input', () => {
+    expect(pkgs.isSafeRelativePath(null)).toBe(false);
+    expect(pkgs.isSafeRelativePath(undefined)).toBe(false);
+    expect(pkgs.isSafeRelativePath(123)).toBe(false);
+    expect(pkgs.isSafeRelativePath({})).toBe(false);
+  });
+});
+
+describe('emu-packs: path-traversal protection in validateManifest', () => {
+  let pkgs;
+  beforeEach(() => {
+    pkgs = loadEmuPacks();
+  });
+
+  const base = {
+    id: 'p',
+    displayName: 'P',
+    version: '1.0.0',
+  };
+
+  it('rejects core entry with ../', () => {
+    const err = pkgs.validateManifest({
+      ...base,
+      core: ['core/base.js', '../../emulator/js/app.js'],
+      symbols: [],
+    });
+    expect(err).toMatch(/core\[1\]/);
+    expect(err).toMatch(/safe relative path/);
+  });
+
+  it('rejects symbol js with absolute path', () => {
+    const err = pkgs.validateManifest({
+      ...base,
+      symbols: [
+        {
+          name: 'x',
+          category: 'c',
+          dataShape: 'Value',
+          files: { js: '/etc/passwd' },
+        },
+      ],
+    });
+    expect(err).toMatch(/files\.js/);
+    expect(err).toMatch(/safe relative path/);
+  });
+
+  it('rejects symbol template with http:// scheme', () => {
+    const err = pkgs.validateManifest({
+      ...base,
+      symbols: [
+        {
+          name: 'x',
+          category: 'c',
+          dataShape: 'Value',
+          files: {
+            js: 'symbols/sym-x.js',
+            template: 'http://evil.com/template.html',
+          },
+        },
+      ],
+    });
+    expect(err).toMatch(/files\.template/);
+  });
+
+  it('rejects symbol config with ../', () => {
+    const err = pkgs.validateManifest({
+      ...base,
+      symbols: [
+        {
+          name: 'x',
+          category: 'c',
+          dataShape: 'Value',
+          files: {
+            js: 'symbols/sym-x.js',
+            config: '../../config.html',
+          },
+        },
+      ],
+    });
+    expect(err).toMatch(/files\.config/);
+  });
+
+  it('rejects symbol requires with ../', () => {
+    const err = pkgs.validateManifest({
+      ...base,
+      symbols: [
+        {
+          name: 'x',
+          category: 'c',
+          dataShape: 'Value',
+          files: { js: 'symbols/sym-x.js' },
+          requires: ['libs/ok.js', '../escape.js'],
+        },
+      ],
+    });
+    expect(err).toMatch(/requires\[1\]/);
+  });
+
+  it('accepts a fully-safe manifest', () => {
+    const err = pkgs.validateManifest({
+      ...base,
+      core: ['core/base.js', 'core/directives.js'],
+      symbols: [
+        {
+          name: 'x',
+          category: 'c',
+          dataShape: 'Value',
+          files: {
+            js: 'symbols/sym-x.js',
+            template: 'symbols/sym-x-template.html',
+            config: 'symbols/sym-x-config.html',
+          },
+          requires: ['libs/chart.js', 'libs/util.js'],
+        },
+      ],
+    });
+    expect(err).toBeNull();
+  });
+});
+
+describe('emu-packs: init() fetch flow', () => {
+  let pkgs;
+  /** @type {Array<{url: string, status: number, body: any}>} */
+  let fetchLog;
+
+  beforeEach(() => {
+    pkgs = loadEmuPacks();
+    fetchLog = [];
+    // Install a minimal fake fetch that routes URLs to canned
+    // responses. Each test assembles its own routing table.
+    /** @type {Record<string, { status?: number, body?: any }>} */
+    const routes = {};
+    /** @type {any} */ (globalThis).__routes = routes;
+    /** @type {any} */ (globalThis).window.fetch = async (url) => {
+      fetchLog.push({ url, status: 0, body: null });
+      const r = routes[url];
+      if (!r) {
+        return { ok: false, status: 404, json: async () => null, text: async () => '' };
+      }
+      const status = r.status ?? 200;
+      return {
+        ok: status >= 200 && status < 300,
+        status,
+        json: async () => r.body,
+        text: async () => (typeof r.body === 'string' ? r.body : JSON.stringify(r.body)),
+      };
+    };
+  });
+
+  /** @param {string} url @param {any} body @param {number} [status] */
+  function route(url, body, status) {
+    /** @type {any} */ (globalThis).__routes[url] = { body, status };
+  }
+
+  it('returns empty result when packs-index.json is absent', async () => {
+    // No routes installed → every fetch 404s
+    const result = await pkgs.init();
+    expect(result.loaded).toEqual([]);
+    expect(result.errors).toEqual([]);
+    expect(pkgs.isInitialized()).toBe(true);
+  });
+
+  it('returns empty result when packs-index.json has an empty packs array', async () => {
+    route('../symbols/packs/packs-index.json', { packs: [] });
+    const result = await pkgs.init();
+    expect(result.loaded).toEqual([]);
+    expect(result.errors).toEqual([]);
+  });
+
+  it('loads a single valid pack', async () => {
+    route('../symbols/packs/packs-index.json', { packs: ['demo'] });
+    route('../symbols/packs/demo/pack.json', {
+      id: 'demo',
+      displayName: 'Demo',
+      version: '1.0.0',
+      symbols: [
+        {
+          name: 'hello',
+          category: 'Examples',
+          dataShape: 'Value',
+          files: { js: 'symbols/sym-hello.js' },
+        },
+      ],
+    });
+
+    const result = await pkgs.init();
+    expect(result.loaded).toEqual(['demo']);
+    expect(result.errors).toEqual([]);
+    expect(pkgs.getSymbols()).toHaveLength(1);
+    expect(pkgs.getSymbol('hello').packId).toBe('demo');
+  });
+
+  it('reports a missing pack.json', async () => {
+    route('../symbols/packs/packs-index.json', { packs: ['ghost'] });
+    // ghost/pack.json not routed → 404
+    const result = await pkgs.init();
+    expect(result.loaded).toEqual([]);
+    expect(result.errors).toHaveLength(1);
+    expect(result.errors[0].packId).toBe('ghost');
+    expect(result.errors[0].reason).toMatch(/not found/);
+  });
+
+  it('reports a schema-invalid pack.json', async () => {
+    route('../symbols/packs/packs-index.json', { packs: ['broken'] });
+    route('../symbols/packs/broken/pack.json', {
+      id: 'broken',
+      displayName: 'Broken',
+      version: 'not-a-semver',
+      symbols: [],
+    });
+    const result = await pkgs.init();
+    expect(result.loaded).toEqual([]);
+    expect(result.errors[0].reason).toMatch(/MAJOR\.MINOR\.PATCH/);
+  });
+
+  it('reports id/directory mismatch', async () => {
+    route('../symbols/packs/packs-index.json', { packs: ['alpha'] });
+    route('../symbols/packs/alpha/pack.json', {
+      id: 'beta', // mismatch
+      displayName: 'Mismatch',
+      version: '1.0.0',
+      symbols: [],
+    });
+    const result = await pkgs.init();
+    expect(result.errors[0].reason).toMatch(/does not match directory/);
+  });
+
+  it('loads multiple packs and merges symbols', async () => {
+    route('../symbols/packs/packs-index.json', { packs: ['a', 'b'] });
+    route('../symbols/packs/a/pack.json', {
+      id: 'a',
+      displayName: 'A',
+      version: '1.0.0',
+      symbols: [
+        { name: 'sym_a', category: 'x', dataShape: 'Value', files: { js: 's.js' } },
+      ],
+    });
+    route('../symbols/packs/b/pack.json', {
+      id: 'b',
+      displayName: 'B',
+      version: '2.1.0',
+      symbols: [
+        { name: 'sym_b', category: 'x', dataShape: 'Value', files: { js: 's.js' } },
+      ],
+    });
+
+    const result = await pkgs.init();
+    expect(result.loaded.sort()).toEqual(['a', 'b']);
+    expect(pkgs.getSymbols()).toHaveLength(2);
+  });
+
+  it('init() is idempotent (returns the same promise on re-entry)', async () => {
+    route('../symbols/packs/packs-index.json', { packs: [] });
+    const p1 = pkgs.init();
+    const p2 = pkgs.init();
+    expect(p1).toBe(p2);
+    await p1;
   });
 });
 

@@ -86,6 +86,43 @@
   // ──────────────────────────────────────────────────────────────────────
 
   /**
+   * Minimal semver check. We accept `MAJOR.MINOR.PATCH` plus an
+   * optional `-prerelease` tail. This is intentionally strict
+   * enough to reject accidental non-versions (empty string, "1",
+   * "v1.0"), not strict enough to be a full semver parser.
+   *
+   * @param {string} v
+   */
+  var SEMVER_RE = /^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/;
+
+  /**
+   * Reject any pack-declared file path that could escape the
+   * pack's own directory. Packs are sandboxed by convention to
+   * their subdirectory under `symbols/packs/<id>/`, and the
+   * loader builds URLs by concatenation: `packBase + relPath`. A
+   * malicious or careless path like `../../emulator/js/app.js`
+   * would silently overwrite an unrelated file. These checks are
+   * purely cautionary — the pack author is trusted — but they
+   * make the trust boundary explicit.
+   *
+   * Rules:
+   *   - must be a non-empty string
+   *   - must not contain `..` segments
+   *   - must not start with `/` (absolute)
+   *   - must not contain a scheme (`://`, `data:`, `blob:`, etc.)
+   *
+   * @param {any} path
+   * @returns {boolean}
+   */
+  function isSafeRelativePath(path) {
+    if (typeof path !== 'string' || !path) return false;
+    if (path.indexOf('..') !== -1) return false;
+    if (path.charAt(0) === '/') return false;
+    if (/^[a-z][a-z0-9+.-]*:/i.test(path)) return false;
+    return true;
+  }
+
+  /**
    * Validate a pack manifest against the minimal schema. Returns
    * `null` on success or an error string on failure. Loud failures
    * are the right call here: a broken pack should fail loudly at
@@ -110,11 +147,21 @@
     if (typeof manifest.version !== 'string' || !manifest.version) {
       return 'missing string `version`';
     }
+    if (!SEMVER_RE.test(manifest.version)) {
+      return 'version must be MAJOR.MINOR.PATCH (optional -prerelease)';
+    }
     if (!Array.isArray(manifest.symbols)) {
       return 'missing `symbols` array';
     }
-    if (manifest.core !== undefined && !Array.isArray(manifest.core)) {
-      return '`core` must be an array if present';
+    if (manifest.core !== undefined) {
+      if (!Array.isArray(manifest.core)) {
+        return '`core` must be an array if present';
+      }
+      for (var c = 0; c < manifest.core.length; c++) {
+        if (!isSafeRelativePath(manifest.core[c])) {
+          return 'core[' + c + '] is not a safe relative path';
+        }
+      }
     }
     for (var i = 0; i < manifest.symbols.length; i++) {
       var s = manifest.symbols[i];
@@ -139,8 +186,24 @@
       if (typeof s.files.js !== 'string') {
         return 'symbols[' + i + '].files.js must be a string';
       }
-      if (s.requires !== undefined && !Array.isArray(s.requires)) {
-        return 'symbols[' + i + '].requires must be an array if present';
+      if (!isSafeRelativePath(s.files.js)) {
+        return 'symbols[' + i + '].files.js is not a safe relative path';
+      }
+      if (s.files.template !== undefined && !isSafeRelativePath(s.files.template)) {
+        return 'symbols[' + i + '].files.template is not a safe relative path';
+      }
+      if (s.files.config !== undefined && !isSafeRelativePath(s.files.config)) {
+        return 'symbols[' + i + '].files.config is not a safe relative path';
+      }
+      if (s.requires !== undefined) {
+        if (!Array.isArray(s.requires)) {
+          return 'symbols[' + i + '].requires must be an array if present';
+        }
+        for (var r = 0; r < s.requires.length; r++) {
+          if (!isSafeRelativePath(s.requires[r])) {
+            return 'symbols[' + i + '].requires[' + r + '] is not a safe relative path';
+          }
+        }
       }
     }
     return null;
@@ -427,6 +490,7 @@
     loadSymbol: loadSymbol,
     isInitialized: isInitialized,
     validateManifest: validateManifest,
+    isSafeRelativePath: isSafeRelativePath,
     _registerPack: _registerPack,
     _reset: _reset,
     _testReset: true, // flag so a test re-import can replace the global
