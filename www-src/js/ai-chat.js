@@ -27,6 +27,24 @@
   const STORAGE_KEY = 'piv_ai_history';
   const MAX_STORED_MESSAGES = 50;
 
+  // ─── Stage 7 round 2: SafeDOM helper for innerHTML migration ───
+  // Routes through window.SafeDOM (loaded as a module from
+  // js/security/safe-dom.js) when available, so AI-generated content
+  // and user-supplied tab labels can never inject script tags or
+  // event handlers via the chat widget. The legacy raw-innerHTML
+  // path is preserved as a fallback only for runtimes that strip
+  // the SafeDOM script tag — production entry HTMLs always include
+  // it before this file loads.
+  function setSafeInner(el, html) {
+    if (!el) return;
+    if (window.SafeDOM && typeof window.SafeDOM.setSafeHTML === 'function') {
+      window.SafeDOM.setSafeHTML(el, html);
+      return;
+    }
+    // eslint-disable-next-line no-restricted-properties
+    el.innerHTML = html;
+  }
+
   let chatOpen = false;
   let isStreaming = false;
   let alertQueue = [];
@@ -282,14 +300,14 @@
     toggle.className = 'ai-chat-toggle';
     toggle.id = 'ai-chat-toggle';
     toggle.setAttribute('aria-label', 'פתח עוזר AI');
-    toggle.innerHTML = `
+    setSafeInner(toggle, `
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <path d="M12 2a7 7 0 0 1 7 7c0 3-1.5 5-3 6.5V18a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1v-2.5C6.5 14 5 12 5 9a7 7 0 0 1 7-7z"/>
         <line x1="9" y1="22" x2="15" y2="22"/>
         <line x1="10" y1="2" x2="10" y2="5" opacity="0.4"/>
         <line x1="14" y1="2" x2="14" y2="4" opacity="0.4"/>
       </svg>
-      <div class="ai-toggle-tooltip" id="ai-toggle-tooltip">עוזר AI (Ctrl+Shift+I)</div>`;
+      <div class="ai-toggle-tooltip" id="ai-toggle-tooltip">עוזר AI (Ctrl+Shift+I)</div>`);
     toggle.addEventListener('click', toggleChat);
 
     // Update tooltip on hover
@@ -301,7 +319,7 @@
     const panel = document.createElement('div');
     panel.className = 'ai-chat-panel';
     panel.id = 'ai-chat-panel';
-    panel.innerHTML = `
+    setSafeInner(panel, `
       <div class="ai-chat-header">
         <div class="ai-chat-header-right">
           <div class="ai-chat-avatar">
@@ -377,21 +395,21 @@
             <polygon points="22 2 15 22 11 13 2 9 22 2"/>
           </svg>
         </button>
-      </div>`;
+      </div>`);
     document.body.appendChild(panel);
 
     // Alert toast container
     const toast = document.createElement('div');
     toast.className = 'ai-alert-toast';
     toast.id = 'ai-alert-toast';
-    toast.innerHTML = `
+    setSafeInner(toast, `
       <span class="ai-alert-toast-icon">🚨</span>
       <div class="ai-alert-toast-content">
         <div class="ai-alert-toast-title"></div>
         <div class="ai-alert-toast-msg"></div>
       </div>
       <button class="ai-alert-toast-btn" id="ai-toast-analyze">נתח עם AI</button>
-      <button class="ai-alert-toast-close" id="ai-toast-close">✕</button>`;
+      <button class="ai-alert-toast-close" id="ai-toast-close">✕</button>`);
     document.body.appendChild(toast);
 
     // ── Bind events ──
@@ -528,7 +546,7 @@
   // ─── Clear chat history ───────────────────────────────────
   function clearChat() {
     const msgs = document.getElementById('ai-chat-messages');
-    msgs.innerHTML = `
+    setSafeInner(msgs, `
       <div class="ai-chat-welcome">
         <div class="ai-chat-welcome-icon">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--teal, #00d4ff)" stroke-width="2" stroke-linecap="round">
@@ -538,7 +556,7 @@
         </div>
         <h3>שיחה חדשה</h3>
         <p>השיחה נוקתה. שאל שאלה חדשה.</p>
-      </div>`;
+      </div>`);
     messageHistory = [];
     alertQueue = [];
     lastUserMessage = '';
@@ -643,7 +661,9 @@
                   msgEl = addMessage('assistant', aiText, true);
                 } else {
                   const bubble = msgEl.querySelector('.ai-msg-bubble');
-                  bubble.innerHTML = formatAIResponse(aiText);
+                  // ⚠️ AI-generated content — must go through SafeDOM to
+                  // strip any <script>/onerror smuggled past formatAIResponse.
+                  setSafeInner(bubble, formatAIResponse(aiText));
                   scrollToBottom();
                 }
               }
@@ -693,7 +713,7 @@
     const container = document.createElement('div');
     container.id = 'ai-retry-btn-container';
     container.className = 'ai-retry-container';
-    container.innerHTML = `<button class="ai-retry-btn" id="ai-retry-btn">↺ נסה שוב</button>`;
+    setSafeInner(container, `<button class="ai-retry-btn" id="ai-retry-btn">↺ נסה שוב</button>`);
     msgs.appendChild(container);
     scrollToBottom();
 
@@ -715,9 +735,11 @@
     const bubbleContent = role === 'assistant'
       ? formatAIResponse(text)
       : escapeHtml(text).replace(/\n/g, '<br>');
-    el.innerHTML = `
+    // ⚠️ Assistant role embeds AI-generated content; user role embeds
+    // user-typed text. Both are sanitized via SafeDOM.
+    setSafeInner(el, `
       <div class="ai-msg-avatar">${avatar}</div>
-      <div class="ai-msg-bubble">${bubbleContent}</div>`;
+      <div class="ai-msg-bubble">${bubbleContent}</div>`);
     return el;
   }
 
@@ -739,13 +761,13 @@
     const msgs = document.getElementById('ai-chat-messages');
     const el = document.createElement('div');
     el.className = 'ai-msg assistant';
-    el.innerHTML = `
+    setSafeInner(el, `
       <div class="ai-msg-avatar">🤖</div>
       <div class="ai-typing">
         <div class="ai-typing-dot"></div>
         <div class="ai-typing-dot"></div>
         <div class="ai-typing-dot"></div>
-      </div>`;
+      </div>`);
     msgs.appendChild(el);
     scrollToBottom();
     return el;
@@ -795,17 +817,17 @@
     if (!bar) return;
     if (alertQueue.length === 0) {
       bar.classList.remove('has-alerts');
-      bar.innerHTML = '';
+      bar.replaceChildren();
       return;
     }
 
     bar.classList.add('has-alerts');
-    bar.innerHTML = alertQueue.slice(-5).map((alert, i) => `
+    setSafeInner(bar, alertQueue.slice(-5).map((alert, i) => `
       <div class="ai-alert-item ${alert.type === 'warning' ? 'warning' : ''}">
         <span class="ai-alert-icon">${alert.type === 'error' ? '❌' : '⚠️'}</span>
         <span class="ai-alert-text">${escapeHtml(alert.message.substring(0, 100))}</span>
         <button class="ai-alert-action" data-idx="${i}">נתח</button>
-      </div>`).join('');
+      </div>`).join(''));
 
     bar.querySelectorAll('.ai-alert-action').forEach(btn => {
       btn.addEventListener('click', () => {
@@ -938,13 +960,15 @@
   function _renderTabs() {
     const list = document.getElementById('ai-tabs-list');
     if (!list) return;
-    list.innerHTML = '';
+    list.replaceChildren();
     chatTabs.forEach(function(tab) {
       const el = document.createElement('div');
       el.className = 'ai-tab-item' + (tab.id === activeTabId ? ' active' : '');
       el.dataset.tabId = tab.id;
-      el.innerHTML = '<span class="ai-tab-label">' + tab.label + '</span>'
-        + (chatTabs.length > 1 ? '<button class="ai-tab-close">\xd7</button>' : '');
+      // tab.label is user-controlled (rename input) — escape to keep
+      // it from injecting markup into the tab list.
+      setSafeInner(el, '<span class="ai-tab-label">' + escapeHtml(tab.label) + '</span>'
+        + (chatTabs.length > 1 ? '<button class="ai-tab-close">\xd7</button>' : ''));
       el.querySelector('.ai-tab-label').addEventListener('click', function() { _switchTab(tab.id); });
       const cb = el.querySelector('.ai-tab-close');
       if (cb) cb.addEventListener('click', function(e) { e.stopPropagation(); _closeTab(tab.id); });
@@ -973,9 +997,12 @@
     const msgs = document.getElementById('ai-chat-messages');
     if (msgs) {
       if (tab.messagesHTML) {
-        msgs.innerHTML = tab.messagesHTML;
+        // Cached HTML from a previous render of AI/user messages —
+        // sanitize on rehydration as defense in depth in case the
+        // tab was saved before this migration landed.
+        setSafeInner(msgs, tab.messagesHTML);
         msgs.querySelectorAll('.ai-msg.assistant').forEach(function(el) { bindCopyButtons(el); });
-      } else { msgs.innerHTML = _welcomeHTML(); _bindWelcomeButtons(); }
+      } else { setSafeInner(msgs, _welcomeHTML()); _bindWelcomeButtons(); }
       scrollToBottom();
     }
     updateAlertsBar();
@@ -990,7 +1017,7 @@
     activeTabId = tabCounter;
     messageHistory = []; alertQueue = []; lastUserMessage = '';
     const msgs = document.getElementById('ai-chat-messages');
-    if (msgs) { msgs.innerHTML = _welcomeHTML(); _bindWelcomeButtons(); }
+    if (msgs) { setSafeInner(msgs, _welcomeHTML()); _bindWelcomeButtons(); }
     updateAlertsBar(); _renderTabs();
   }
 
@@ -1007,9 +1034,9 @@
       const msgs = document.getElementById('ai-chat-messages');
       if (msgs) {
         if (tab.messagesHTML) {
-          msgs.innerHTML = tab.messagesHTML;
+          setSafeInner(msgs, tab.messagesHTML);
           msgs.querySelectorAll('.ai-msg.assistant').forEach(function(el) { bindCopyButtons(el); });
-        } else { msgs.innerHTML = _welcomeHTML(); _bindWelcomeButtons(); }
+        } else { setSafeInner(msgs, _welcomeHTML()); _bindWelcomeButtons(); }
         scrollToBottom();
       }
       updateAlertsBar();
