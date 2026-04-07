@@ -7,7 +7,6 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
-    "build:analyze": "ANALYZE=1 vite build",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
     "lint": "eslint www-src --ext .js,.ts,.html",
@@ -32,7 +31,6 @@
     "eslint-plugin-html": "^8.1.2",
     "jsdom": "^25.0.1",
     "prettier": "^3.3.3",
-    "rollup-plugin-visualizer": "^5.12.0",
     "typescript": "^5.6.3",
     "vite": "^5.4.11",
     "vite-plugin-pwa": "^0.21.0",

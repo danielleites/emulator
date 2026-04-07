@@ -10,7 +10,11 @@
 import './security/safe-dom.js';
 import './security/safe-expr.js';
 
-const DESKTOP_BUNDLES = [
+// Typed as `string[]` (not `as const`) so TypeScript treats each
+// dynamic `import(p)` as `Promise<any>` and skips the static module
+// resolution that would otherwise complain about the legacy IIFE
+// bundles having no ES exports.
+const DESKTOP_BUNDLES: string[] = [
   './pi-connector.js',
   './visual-builder.js',
   './af-data-layer.js',
@@ -28,7 +32,7 @@ const DESKTOP_BUNDLES = [
   './accessibility.js',
   './ai-agent-panel.js',
   './ai-chat.js',
-] as const;
+];
 
 async function bootDesktop(): Promise<void> {
   // Sequential to preserve legacy global-init order.

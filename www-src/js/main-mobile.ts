@@ -20,13 +20,16 @@
 import './security/safe-dom.js';
 import './security/safe-expr.js';
 
+// Paths are stored in a `string[]` (rather than a literal-typed
+// `as const` tuple) so TypeScript treats `import(p)` as `Promise<any>`
+// and does not try to statically resolve the legacy IIFE bundles
+// (which have no ES exports).
+const MOBILE_BUNDLES: string[] = ['./mobile-sync.js', './mobile-app.js'];
+
 async function bootMobile(): Promise<void> {
   // Lazy-load the heavy legacy bundles. These dynamic imports become
   // separate chunks in the Vite build.
-  await Promise.all([
-    import(/* @vite-ignore */ './mobile-sync.js'),
-    import(/* @vite-ignore */ './mobile-app.js'),
-  ]);
+  await Promise.all(MOBILE_BUNDLES.map((p) => import(/* @vite-ignore */ p)));
 
   // Notify any listeners that the shell is ready.
   if (typeof window !== 'undefined') {
