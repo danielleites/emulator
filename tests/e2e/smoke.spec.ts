@@ -320,6 +320,94 @@ test.describe('emulator entry (emulator/index.html)', () => {
 // page having SafeExpr already wired in)
 // ──────────────────────────────────────────────────────────────────────────
 
+// ──────────────────────────────────────────────────────────────────────────
+// Symbol Packs — end-to-end verification that the stage-8 extension
+// point actually works. The `example-hello` pack ships enabled in
+// `www-src/symbols/packs/packs-index.json`; these tests exercise the
+// boot flow from `emu-packs.init()` all the way through symbol
+// registration in `PIVisualization.symbolCatalog`.
+// ──────────────────────────────────────────────────────────────────────────
+
+test.describe('Symbol Packs (stage 8)', () => {
+  test('packs-index.json lists example-hello', async ({ page }) => {
+    await page.goto('/symbols/packs/packs-index.json');
+    const body = await page.textContent('body');
+    expect(body).toContain('example-hello');
+  });
+
+  test('example-hello pack.json validates against the schema', async ({ page }) => {
+    await page.goto('/emulator/index.html');
+    // Wait for PIV_PACKS to be installed by emu-packs.js
+    await page.waitForFunction(
+      () => typeof (window as any).PIV_PACKS?.validateManifest === 'function'
+    );
+    const result = await page.evaluate(async () => {
+      const res = await fetch('../symbols/packs/example-hello/pack.json');
+      const manifest = await res.json();
+      const err = (window as any).PIV_PACKS.validateManifest(manifest);
+      return { manifest, err };
+    });
+    expect(result.err).toBeNull();
+    expect(result.manifest.id).toBe('example-hello');
+    expect(result.manifest.symbols).toHaveLength(1);
+    expect(result.manifest.symbols[0].name).toBe('hello');
+  });
+
+  test('PIV_PACKS.init() loads example-hello and exposes the hello symbol', async ({ page }) => {
+    await page.goto('/emulator/index.html');
+    await page.waitForFunction(
+      () => typeof (window as any).PIV_PACKS?.init === 'function'
+    );
+    const result = await page.evaluate(async () => {
+      const initRes = await (window as any).PIV_PACKS.init();
+      const symbols = (window as any).PIV_PACKS.getSymbols();
+      const hello = (window as any).PIV_PACKS.getSymbol('hello');
+      return { initRes, symbols, hello };
+    });
+    expect(result.initRes.errors).toEqual([]);
+    expect(result.initRes.loaded).toContain('example-hello');
+    expect(result.symbols.length).toBeGreaterThan(0);
+    expect(result.symbols.some((s: any) => s.name === 'hello')).toBe(true);
+    expect(result.hello).not.toBeNull();
+    expect(result.hello.packId).toBe('example-hello');
+  });
+
+  test('PIV_PACKS.loadSymbol() fetches the hello files and returns a def', async ({ page }) => {
+    await page.goto('/emulator/index.html');
+    // Give the emulator bootstrap a moment to load shims + register
+    // PIVisualization.symbolCatalog before we lazy-load the pack symbol.
+    await page.waitForFunction(
+      () => !!(window as any).PIVisualization?.symbolCatalog
+    );
+    const result = await page.evaluate(async () => {
+      await (window as any).PIV_PACKS.init();
+      const loaded = await (window as any).PIV_PACKS.loadSymbol('hello');
+      const registered = (window as any).PIVisualization.symbolCatalog.getSymbol('hello');
+      return {
+        hasDef: loaded?.def != null,
+        template: loaded?.template || '',
+        registered: registered
+          ? { typeName: registered.typeName, hasGetDefaultConfig: typeof registered.getDefaultConfig === 'function' }
+          : null,
+      };
+    });
+    expect(result.hasDef).toBe(true);
+    expect(result.template).toContain('sym-hello-root');
+    expect(result.registered).not.toBeNull();
+    expect(result.registered.typeName).toBe('hello');
+    expect(result.registered.hasGetDefaultConfig).toBe(true);
+  });
+
+  test('loading the pack does NOT fire CSP violations', async ({ page }) => {
+    await installCspViolationCollector(page);
+    await page.goto('/emulator/index.html');
+    // Emulator + pack init is async; wait a beat.
+    await page.waitForTimeout(1500);
+    const violations = await getCspViolations(page);
+    expect(violations, formatCspViolations(violations)).toEqual([]);
+  });
+});
+
 test.describe('SafeExpr (in-page eval replacement)', () => {
   test('evaluates safe Angular-style expressions', async ({ page }) => {
     await page.goto('/index.html');
