@@ -894,14 +894,20 @@ window.addEventListener('load', function() {
   set('JavaScript ✓ · בודק תאימות...');
 
   // Catch any uncaught JS errors and display them on the boot screen.
+  // "React up" = the static fallback inside #root has been replaced; firstChild
+  // is no longer a reliable signal now that the fallback ships pre-rendered.
+  function reactMounted() {
+    var r = document.getElementById('root');
+    return !!(r && !r.querySelector('[data-fallback]'));
+  }
   window.addEventListener('error', function(ev) {
-    if (document.getElementById('root').firstChild) return; // React already running, ignore.
+    if (reactMounted()) return;
     var msg = (ev && ev.message) || 'unknown error';
     var src = (ev && ev.filename) ? ' @ ' + ev.filename.split('/').pop() + ':' + ev.lineno : '';
     showErr('⚠️ <b>שגיאת סקריפט</b><br><br>' + msg + src + '<br><br>סביר להניח שיש בעיית תאימות. רענן ונסה ב-Safari.');
   });
   window.addEventListener('unhandledrejection', function(ev) {
-    if (document.getElementById('root').firstChild) return;
+    if (reactMounted()) return;
     var msg = (ev && ev.reason && (ev.reason.message || ev.reason)) || 'unknown promise rejection';
     showErr('⚠️ <b>שגיאה אסינכרונית</b><br><br>' + msg);
   });
@@ -939,7 +945,7 @@ window.addEventListener('load', function() {
   // Reduced from 8s — most boot delays are due to wrong-context, not slow CPU.
   setTimeout(function() {
     var root = document.getElementById('root');
-    if (root && !root.firstChild) {
+    if (root && root.querySelector('[data-fallback]')) {
       set('React לא הגיב תוך 6 שניות');
       showHint();
     }
@@ -948,7 +954,7 @@ window.addEventListener('load', function() {
   // Hard fallback: 12s later, if still nothing, show full error.
   setTimeout(function() {
     var root = document.getElementById('root');
-    if (root && !root.firstChild) {
+    if (root && root.querySelector('[data-fallback]')) {
       showErr(
         '📡 React לא נטען<br><br>' +
         'הקובץ דורש שכל הסקריפט יתפרש ויתבצע. אם זה לא קורה:<br><br>' +
