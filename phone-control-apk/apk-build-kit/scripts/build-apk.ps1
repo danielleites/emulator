@@ -161,7 +161,7 @@ MYAPP_RELEASE_KEY_PASSWORD=$KEY_PASSWORD
     Ok "TS files copied"
     
     Push-Location $PROJECT_DIR
-    & node (Join-Path $SPRINT_PATCHES_DIR "scripts\merge-package-json.js")
+    & node (Join-Path $SPRINT_PATCHES_DIR "scripts\merge-package-json.cjs")
     Pop-Location
     Ok "package.json updated"
 }

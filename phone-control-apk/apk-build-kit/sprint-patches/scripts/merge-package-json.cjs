@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 /**
- * merge-package-json.js
+ * merge-package-json.cjs
  * מוסיף תלויות נדרשות ל-package.json של RN skeleton
+ * (.cjs כדי לאכוף CommonJS גם אם package.json של ה-repo מגדיר "type":"module")
  * (react-native-webview, async-storage)
  */
 const fs = require('fs');

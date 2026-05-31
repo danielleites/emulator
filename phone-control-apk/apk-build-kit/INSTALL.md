@@ -14,7 +14,7 @@
 | `sprint-patches/ts/App.tsx` | קוד React Native משולב (WebView+Bridge+Listener) |
 | `sprint-patches/manifest/AndroidManifest.xml` | Manifest מלא עם כל ההרשאות |
 | `sprint-patches/gradle/app-build.gradle` | build.gradle עם signing config |
-| `sprint-patches/scripts/merge-package-json.js` | מוסיף react-native-webview |
+| `sprint-patches/scripts/merge-package-json.cjs` | מוסיף react-native-webview |
 
 ---
 

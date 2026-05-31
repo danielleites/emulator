@@ -195,7 +195,7 @@ EOF
 
   # package.json — תלויות נוספות
   cd "$PROJECT_DIR"
-  node "$SPRINT_PATCHES_DIR/scripts/merge-package-json.js"
+  node "$SPRINT_PATCHES_DIR/scripts/merge-package-json.cjs"
   ok "package.json updated with react-native-webview"
 }
 
