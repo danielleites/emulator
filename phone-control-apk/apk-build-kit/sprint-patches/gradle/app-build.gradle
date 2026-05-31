@@ -3,7 +3,9 @@ apply plugin: "org.jetbrains.kotlin.android"
 apply plugin: "com.facebook.react"
 
 react {
-    autolinkLibrariesWithApp()
+    // RN 0.74.x: autolinking is wired via settings.gradle + the
+    // native_modules.gradle apply at the bottom of this file.
+    // (autolinkLibrariesWithApp() only exists on RN 0.75+.)
 }
 
 def enableProguardInReleaseBuilds = false
@@ -62,3 +64,6 @@ dependencies {
         implementation jscFlavor
     }
 }
+
+// RN 0.74.x app-side autolinking (links react-native-webview, async-storage, etc.)
+apply from: file("../../node_modules/@react-native-community/cli-platform-android/native_modules.gradle"); applyNativeModulesAppBuildGradle(project)
