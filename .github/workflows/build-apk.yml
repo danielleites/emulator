@@ -14,7 +14,39 @@ permissions:
   contents: read
 
 jobs:
+  # שלב אבחון מהיר: בודק שה-runner מצליח להגיע ל-Google Maven / Android SDK.
+  # בנייה של אנדרואיד מחייבת את ה-hosts האלה. אם הם חסומים — ה-job ייכשל מפורשות
+  # וכך נדע שצריך runner עם גישה ל-Google (ולא נבזבז זמן על build שייכשל ממילא).
+  preflight-network:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check connectivity to required hosts
+        run: |
+          set -e
+          fail=0
+          check() {
+            local name="$1" url="$2"
+            local code
+            code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 20 "$url" || echo 000)
+            echo "[$name] HTTP $code  ($url)"
+            case "$code" in
+              2*|3*) : ;;  # reachable
+              *) echo "  ^ UNREACHABLE/BLOCKED"; fail=1 ;;
+            esac
+          }
+          check "npm-registry"  "https://registry.npmjs.org/react-native"
+          check "maven-central" "https://repo1.maven.org/maven2/"
+          check "google-maven"  "https://maven.google.com/com/android/tools/build/gradle/8.5.0/gradle-8.5.0.pom"
+          check "dl-google-sdk" "https://dl.google.com/dl/android/maven2/com/android/tools/build/gradle/8.5.0/gradle-8.5.0.pom"
+          if [ "$fail" -ne 0 ]; then
+            echo "::error::This runner cannot reach Google's Maven/SDK endpoints. An Android build is impossible here."
+            exit 1
+          fi
+          echo "All required hosts reachable."
+
   build-apk:
+    needs: preflight-network
     runs-on: ubuntu-latest
     timeout-minutes: 60
 
