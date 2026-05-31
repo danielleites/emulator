@@ -1,0 +1,92 @@
+name: Build Phone Control APK
+
+# בונה את ה-APK של Phone Control בענן (GitHub Actions) ומעלה אותו כ-artifact להורדה.
+# הפעלה ידנית מה-Actions tab (workflow_dispatch), או אוטומטית כשמשנים את ערכת הבנייה.
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'phone-control-apk/**'
+      - '.github/workflows/build-apk.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  # שלב אבחון מהיר: בודק שה-runner מצליח להגיע ל-Google Maven / Android SDK.
+  # בנייה של אנדרואיד מחייבת את ה-hosts האלה. אם הם חסומים — ה-job ייכשל מפורשות
+  # וכך נדע שצריך runner עם גישה ל-Google (ולא נבזבז זמן על build שייכשל ממילא).
+  preflight-network:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check connectivity to required hosts
+        run: |
+          set -e
+          fail=0
+          check() {
+            local name="$1" url="$2"
+            local code
+            code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 20 "$url" || echo 000)
+            echo "[$name] HTTP $code  ($url)"
+            case "$code" in
+              2*|3*) : ;;  # reachable
+              *) echo "  ^ UNREACHABLE/BLOCKED"; fail=1 ;;
+            esac
+          }
+          check "npm-registry"  "https://registry.npmjs.org/react-native"
+          check "maven-central" "https://repo1.maven.org/maven2/"
+          check "google-maven"  "https://maven.google.com/com/android/tools/build/gradle/8.5.0/gradle-8.5.0.pom"
+          check "dl-google-sdk" "https://dl.google.com/dl/android/maven2/com/android/tools/build/gradle/8.5.0/gradle-8.5.0.pom"
+          if [ "$fail" -ne 0 ]; then
+            echo "::error::This runner cannot reach Google's Maven/SDK endpoints. An Android build is impossible here."
+            exit 1
+          fi
+          echo "All required hosts reachable."
+
+  build-apk:
+    needs: preflight-network
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install required Android SDK packages
+        run: |
+          yes | sdkmanager --licenses >/dev/null 2>&1 || true
+          sdkmanager \
+            "platforms;android-34" \
+            "build-tools;34.0.0" \
+            "ndk;26.1.10909125" \
+            "cmake;3.22.1"
+
+      - name: Build signed release APK
+        working-directory: phone-control-apk/apk-build-kit
+        run: |
+          chmod +x scripts/build-apk.sh
+          ./scripts/build-apk.sh
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: phonecontrol-apk
+          path: phone-control-apk/apk-build-kit/output/*.apk
+          if-no-files-found: error
+          retention-days: 30
