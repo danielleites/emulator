@@ -1,0 +1,26 @@
+<!--
+  sym-__SYMBOL_NAME__-config.html — configuration panel
+  Rendered by the emulator's side panel when the user clicks the
+  gear icon on a selected symbol. ng-model bindings write back
+  into scope.config, which triggers the $watch handlers in
+  sym-__SYMBOL_NAME__.js.
+-->
+<div class="sym-__SYMBOL_NAME__-config"
+     style="padding:12px;font-family:system-ui,sans-serif;direction:rtl;color:#e6f1ff">
+  <div style="margin-bottom:12px">
+    <label for="sym-__SYMBOL_NAME__-title"
+           style="display:block;font-size:12px;margin-bottom:4px;opacity:0.7">כותרת</label>
+    <input id="sym-__SYMBOL_NAME__-title" type="text" ng-model="config.Title"
+           style="width:100%;padding:6px 8px;background:#0a0f1e;border:1px solid #00b4d8;color:#e6f1ff;border-radius:4px">
+  </div>
+  <div style="margin-bottom:12px">
+    <label for="sym-__SYMBOL_NAME__-value"
+           style="display:block;font-size:12px;margin-bottom:4px;opacity:0.7">ערך ברירת מחדל</label>
+    <input id="sym-__SYMBOL_NAME__-value" type="text" ng-model="config.Value"
+           style="width:100%;padding:6px 8px;background:#0a0f1e;border:1px solid #00b4d8;color:#e6f1ff;border-radius:4px">
+  </div>
+  <div style="font-size:11px;opacity:0.55;margin-top:16px">
+    Edit the defaults above, or add more fields to
+    sym-__SYMBOL_NAME__-config.html as your symbol grows.
+  </div>
+</div>

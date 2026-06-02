@@ -283,6 +283,148 @@ the emulator:
 pack that ships enabled in `packs-index.json`. It's the minimal
 working example; start there, copy it, and rename.
 
+## Pack Dev Kit (`scripts/pack-*.mjs`)
+
+Four zero-dependency Node scripts that automate the full pack
+authoring workflow. They live under `scripts/` and are exposed as
+npm tasks. Use them in this order when you start a new pack.
+
+### `npm run pack:new` — scaffold a pack
+
+```bash
+npm run pack:new my-pack
+npm run pack:new my-pack --display "My Pack" --version 0.1.0
+```
+
+Creates `www-src/symbols/packs/my-pack/` with a valid (but empty)
+`pack.json`, makes a `symbols/` subdirectory, and adds the pack id
+to `packs-index.json`. Validates `id` (kebab-case) and `version`
+(semver) using the same rules `emu-packs.js` enforces at runtime,
+so anything that gets past `pack:new` is guaranteed to load.
+
+### `npm run pack:add-symbol` — scaffold a symbol
+
+```bash
+npm run pack:add-symbol my-pack temperature
+npm run pack:add-symbol my-pack pie-chart \
+  --display "Pie Chart" \
+  --category Charts \
+  --data-shape Table
+```
+
+Generates the triplet (`sym-temperature.js` /
+`-template.html` / `-config.html`) inside the pack's `symbols/`
+folder from the templates in `scripts/templates/`. Appends a new
+entry to `pack.json` with the chosen `category` (default
+"Custom") and `dataShape` (default "Value"). Refuses to overwrite
+existing files and refuses to register a duplicate symbol name.
+
+The generated `sym-<name>.js` is intentionally compatible with
+**both** real PI Vision server (drop into
+`/Scripts/app/editor/symbols/ext/`) **and** this emulator (via
+Symbol Packs). It uses `createElement` + `textContent` everywhere
+(no `innerHTML` sinks) and registers via the standard
+`PV.symbolCatalog.register({...})` API. Three `$watch` callbacks
+are pre-wired so the symbol reacts to config edits and live data
+out of the box.
+
+### `npm run pack:dev` — watch server with auto-reload
+
+```bash
+npm run pack:dev                       # default port 5173
+npm run pack:dev -- --port 4000        # custom port
+npm run pack:dev -- --no-open          # skip the URL banner
+```
+
+Starts a static HTTP server over `www-src/` (no bundling, no
+transforms — files served byte-for-byte) and watches
+`www-src/symbols/packs/` for changes. Every HTML response is
+rewritten on the fly to inject a tiny client snippet that
+subscribes to a Server-Sent Events stream at
+`/__pack-dev__/events`. When you save a file inside any pack
+directory, the server fires a `reload` event, the client calls
+`location.reload()`, and the open browser tab refreshes to show
+your edit. ~200 ms debounce collapses the bursts most editors
+produce per save.
+
+Open one of these URLs after the server starts:
+
+- `http://localhost:5173/emulator/index.html` — full emulator
+- `http://localhost:5173/index.html` — mobile shell
+- `http://localhost:5173/desktop.html` — desktop shell
+- `http://localhost:5173/qa/qa-app.html` — QA tool
+
+Zero external dependencies — only Node built-ins (`http`,
+`fs/promises`, `path`).
+
+### `npm run pack:lint` — static validator
+
+```bash
+npm run pack:lint                  # every enabled pack
+npm run pack:lint -- --strict      # warnings become errors
+npm run pack:lint -- --json        # machine-readable output
+npm run pack:lint -- my-pack       # lint a single pack
+```
+
+Pre-commit / CI-friendly linter. Re-runs the same `pack.json`
+schema validator the emulator uses at runtime, then statically
+analyzes every referenced source file for the patterns most
+likely to break the symbol in production:
+
+| Severity | Rule | Where | Why |
+|----------|------|-------|-----|
+| error | `no-eval` | symbol `.js` | CSP forbids `unsafe-eval` |
+| error | `no-new-function` | symbol `.js` | same |
+| error | `no-document-write` | symbol `.js` | SPA-unsafe; dropped in stage 7 |
+| warning | `no-raw-inner-html` | symbol `.js` | use `createElement` or `window.SafeDOM.setSafeHTML` |
+| warning | `no-inline-event-handler` | `-template.html` / `-config.html` | inline `onXxx=` blocked by production CSP; use `ng-*` directives |
+
+Comment lines and lines tagged `eslint-disable` are skipped to
+avoid false positives. The linter also catches missing files,
+stale references in `core[]` / `requires[]`, and `id` /
+directory mismatches.
+
+Exit codes:
+
+- `0` — no errors (warnings allowed in default mode)
+- `1` — at least one error, OR warnings with `--strict`
+- `2` — invalid CLI arguments
+
+### Recommended dev loop
+
+```bash
+# One-time
+npm run pack:new my-pack
+
+# Each new symbol
+npm run pack:add-symbol my-pack <name>
+
+# Iterate
+npm run pack:dev          # leave running in one terminal
+# edit www-src/symbols/packs/my-pack/symbols/sym-<name>.js
+# save → browser auto-reloads → see the result
+
+# Before commit
+npm run pack:lint
+# fix any errors / warnings, repeat until clean
+
+# (optional) stricter CI gate
+npm run pack:lint -- --strict
+```
+
+### Optional: wire `pack:lint` into CI
+
+Add a step to the existing `security` job in `.github/workflows/ci.yml`:
+
+```yaml
+- name: Lint installed Symbol Packs
+  run: npm run pack:lint -- --strict
+```
+
+This runs after the eval/Function grep guard already there, so
+both the main source tree and any installed pack are gated by the
+same defensive rules.
+
 ## Security migration plan
 
 ### Stage 1 — done
